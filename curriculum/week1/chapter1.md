@@ -68,20 +68,16 @@ But this is still too simplistic.
 
 A production AI application typically contains several interacting layers:
 
-```text
-+-----------------------------------------+
-|              Application                |
-+-----------------------------------------+
-|       Agent / Workflow / Harness        |
-+-----------------------------------------+
-| Prompting | Tools | Memory | Policies   |
-+-----------------------------------------+
-|       Model API / Inference Runtime     |
-+-----------------------------------------+
-|       Foundation Model / Weights        |
-+-----------------------------------------+
-| GPU / TPU / NPU / Apple Silicon / etc.  |
-+-----------------------------------------+
+```mermaid
+graph TD
+    subgraph AI_Stack [AI Application Stack]
+        direction TB
+        Application[Application] --> Agent[Agent / Workflow / Harness]
+        Agent --> Prompting["Prompting | Tools | Memory | Policies"]
+        Prompting --> ModelAPI[Model API / Inference Runtime]
+        ModelAPI --> FoundationModel[Foundation Model / Weights]
+        FoundationModel --> Accelerator[GPU / TPU / NPU / Apple Silicon / etc.]
+    end
 ```
 
 The model is only one component.
@@ -164,18 +160,11 @@ The first architectural decision is often whether inference happens remotely or 
 
 With an API-based architecture:
 
-```text
-Application
-    |
-    | HTTPS
-    v
-Model Provider
-    |
-    v
-Accelerator Cluster
-    |
-    v
-Model
+```mermaid
+graph TD
+    Application -- HTTPS --> ModelProvider[Model Provider]
+    ModelProvider --> AcceleratorCluster[Accelerator Cluster]
+    AcceleratorCluster --> Model
 ```
 
 The provider manages:
@@ -196,17 +185,11 @@ This is operationally attractive, particularly during prototyping.
 
 With local inference:
 
-```text
-Application
-    |
-    v
-Inference Runtime
-    |
-    v
-Local Model
-    |
-    v
-GPU / NPU / CPU
+```mermaid
+graph TD
+    Application --> InferenceRuntime[Inference Runtime]
+    InferenceRuntime --> LocalModel[Local Model]
+    LocalModel --> Hardware[GPU / NPU / CPU]
 ```
 
 The application gains greater control over:
@@ -380,16 +363,12 @@ An application needs something more precise:
 
 Now the model can participate in a conventional software pipeline:
 
-```text
-User
-  ↓
-LLM
-  ↓
-Structured output
-  ↓
-Schema validation
-  ↓
-Application logic
+```mermaid
+graph TD
+    User --> LLM
+    LLM --> StructuredOutput[Structured output]
+    StructuredOutput --> SchemaValidation[Schema validation]
+    SchemaValidation --> ApplicationLogic[Application logic]
 ```
 
 The critical distinction is between **generation** and **validation**.
@@ -721,26 +700,24 @@ Build a Python application that treats different LLMs as interchangeable computa
 
 The application should support:
 
-```text
-                +---------------+
-                | Model Config  |
-                +-------+-------+
-                        |
-          +-------------+-------------+
-          v             v             v
-       Model A       Model B       Model C
-          |             |             |
-          +-------------+-------------+
-                        v
-                 Evaluation Layer
-                        |
-          +-------------+-------------+
-          v             v             v
-       Latency        Tokens         Cost
-          |             |             |
-          +-------------+-------------+
-                        v
-                  Comparison
+```mermaid
+graph TD
+    Config[Model Config]
+    Config --> ModelA[Model A]
+    Config --> ModelB[Model B]
+    Config --> ModelC[Model C]
+
+    ModelA --> Eval[Evaluation Layer]
+    ModelB --> Eval
+    ModelC --> Eval
+
+    Eval --> Latency[Latency]
+    Eval --> Tokens[Tokens]
+    Eval --> Cost[Cost]
+
+    Latency --> Comparison[Comparison]
+    Tokens --> Comparison
+    Cost --> Comparison
 ```
 
 The goal is not to build a polished UI.
@@ -914,14 +891,15 @@ Human inspection is useful for early experimentation, but it does not scale.
 
 Eventually you need:
 
-```text
-Dataset
-   ↓
-Model A --+
-Model B --|--→ Evaluation
-Model C --+
-              ↓
-        Metrics / Judgments
+```mermaid
+graph TD
+    Dataset --> ModelA[Model A]
+    Dataset --> ModelB[Model B]
+    Dataset  --> ModelC[Model C]
+    ModelA --> Evaluation
+    ModelB --> Evaluation
+    ModelC --> Evaluation
+    Evaluation --> Metrics[Metrics / Judgments]
 ```
 
 The playground is therefore the beginning of an evaluation harness.
@@ -944,30 +922,22 @@ For example:
 
 The engineering pipeline should be:
 
-```text
-Prompt
-  ↓
-Model
-  ↓
-Raw output
-  ↓
-JSON parsing
-  ↓
-Schema validation
-  ↓
-Typed application object
+```mermaid
+graph TD
+    Prompt --> Model
+    Model --> RawOutput[Raw output]
+    RawOutput --> JSONParsing[JSON parsing]
+    JSONParsing --> SchemaValidation[Schema validation]
+    SchemaValidation --> TypedObject[Typed application object]
 ```
 
 If parsing fails:
 
-```text
-Model
-  ↓
-Invalid output
-  ↓
-Validation failure
-  ↓
-Retry / fallback / error
+```mermaid
+graph TD
+    Model --> InvalidOutput[Invalid output]
+    InvalidOutput --> ValidationFailure[Validation failure]
+    ValidationFailure --> Retry[Retry / fallback / error]
 ```
 
 This is the beginning of a **reliability boundary**.
@@ -1059,22 +1029,34 @@ Traditional software supplies what models are poor at guaranteeing:
 
 A robust AI application deliberately separates these responsibilities.
 
-```text
-                 AI Application
-                       |
-          +------------+------------+
-          |                         |
-   Probabilistic Layer       Deterministic Layer
-          |                         |
-       Models                    Code
-       Prompts                  Schemas
-       Reasoning                Policies
-       Perception               Validation
-       Generation               State
-          |                     Tools
-          +------------+------------+
-                       |
-                  Reliable System
+```mermaid
+graph TD
+    subgraph AI_App [AI Application]
+        direction TB
+        
+        subgraph Prob_Layer [Probabilistic Layer]
+            direction TB
+            Models[Models]
+            Prompts[Prompts]
+            Reasoning[Reasoning]
+            Perception[Perception]
+            Generation[Generation]
+        end
+
+        subgraph Det_Layer [Deterministic Layer]
+            direction TB
+            Code[Code]
+            Schemas[Schemas]
+            Policies[Policies]
+            Validation[Validation]
+            State[State]
+            Tools[Tools]
+        end
+
+        Prob_Layer --- Det_Layer
+    end
+
+    AI_App --> Reliable_System[Reliable System]
 ```
 
 The mistake is to ask the model to provide guarantees it was never designed to provide.
