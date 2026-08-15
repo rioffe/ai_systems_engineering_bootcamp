@@ -69,19 +69,19 @@ But this is still too simplistic.
 A production AI application typically contains several interacting layers:
 
 ```text
-┌─────────────────────────────────────────┐
-│              Application                │
-├─────────────────────────────────────────┤
-│       Agent / Workflow / Harness        │
-├─────────────────────────────────────────┤
-│ Prompting │ Tools │ Memory │ Policies   │
-├─────────────────────────────────────────┤
-│       Model API / Inference Runtime     │
-├─────────────────────────────────────────┤
-│       Foundation Model / Weights        │
-├─────────────────────────────────────────┤
-│ GPU / TPU / NPU / Apple Silicon / etc. │
-└─────────────────────────────────────────┘
++-----------------------------------------+
+|              Application                |
++-----------------------------------------+
+|       Agent / Workflow / Harness        |
++-----------------------------------------+
+| Prompting | Tools | Memory | Policies   |
++-----------------------------------------+
+|       Model API / Inference Runtime     |
++-----------------------------------------+
+|       Foundation Model / Weights        |
++-----------------------------------------+
+| GPU / TPU / NPU / Apple Silicon / etc.  |
++-----------------------------------------+
 ```
 
 The model is only one component.
@@ -166,15 +166,15 @@ With an API-based architecture:
 
 ```text
 Application
-    │
-    │ HTTPS
-    ▼
+    |
+    | HTTPS
+    v
 Model Provider
-    │
-    ▼
+    |
+    v
 Accelerator Cluster
-    │
-    ▼
+    |
+    v
 Model
 ```
 
@@ -198,14 +198,14 @@ With local inference:
 
 ```text
 Application
-    │
-    ▼
+    |
+    v
 Inference Runtime
-    │
-    ▼
+    |
+    v
 Local Model
-    │
-    ▼
+    |
+    v
 GPU / NPU / CPU
 ```
 
@@ -415,9 +415,9 @@ $$
 For example, a JSON Schema might enforce:
 
 ```text
-category ∈ {billing, technical, account}
-priority ∈ {low, medium, high}
-confidence $\in [0,1]$
+category in {billing, technical, account}
+priority in {low, medium, high}
+confidence in [0,1]
 ```
 
 This creates an explicit interface between probabilistic and deterministic software.
@@ -722,24 +722,24 @@ Build a Python application that treats different LLMs as interchangeable computa
 The application should support:
 
 ```text
-                ┌───────────────┐
-                │ Model Config  │
-                └───────┬───────┘
-                        │
-          ┌─────────────┼─────────────┐
-          ▼             ▼             ▼
+                +---------------+
+                | Model Config  |
+                +-------+-------+
+                        |
+          +-------------+-------------+
+          v             v             v
        Model A       Model B       Model C
-          │             │             │
-          └─────────────┼─────────────┘
-                        ▼
+          |             |             |
+          +-------------+-------------+
+                        v
                  Evaluation Layer
-                        │
-          ┌─────────────┼─────────────┐
-          ▼             ▼             ▼
+                        |
+          +-------------+-------------+
+          v             v             v
        Latency        Tokens         Cost
-          │             │             │
-          └─────────────┼─────────────┘
-                        ▼
+          |             |             |
+          +-------------+-------------+
+                        v
                   Comparison
 ```
 
@@ -917,9 +917,9 @@ Eventually you need:
 ```text
 Dataset
    ↓
-Model A ──┐
-Model B ──┼──→ Evaluation
-Model C ──┘
+Model A --+
+Model B --|--→ Evaluation
+Model C --+
               ↓
         Metrics / Judgments
 ```
@@ -1061,19 +1061,19 @@ A robust AI application deliberately separates these responsibilities.
 
 ```text
                  AI Application
-                       │
-          ┌────────────┴────────────┐
-          │                         │
+                       |
+          +------------+------------+
+          |                         |
    Probabilistic Layer       Deterministic Layer
-          │                         │
+          |                         |
        Models                    Code
        Prompts                  Schemas
        Reasoning                Policies
        Perception               Validation
        Generation               State
-          │                     Tools
-          └────────────┬────────────┘
-                       │
+          |                     Tools
+          +------------+------------+
+                       |
                   Reliable System
 ```
 
