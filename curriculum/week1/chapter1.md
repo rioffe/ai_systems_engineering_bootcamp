@@ -6,19 +6,19 @@ Traditional software engineering is built around deterministic abstractions.
 
 A function takes an input and, barring bugs or undefined behavior, produces a predictable output:
 
-[
+$$
 y = f(x)
-]
+$$
 
 If the function is called twice with the same input and the same state, the engineer generally expects the same result.
 
 Large language models are fundamentally different. An LLM computes a probability distribution over possible continuations:
 
-[
+$$
 P(y \mid x, \theta)
-]
+$$
 
-where (x) is the input context, (y) is a possible output sequence, and (\theta) represents the model parameters.
+where $x$ is the input context, $y$ is a possible output sequence, and $\theta$ represents the model parameters.
 
 The system does not inherently know that your application requires valid JSON, correct SQL, a particular API call, or a response that satisfies a business invariant. It generates a statistically likely continuation.
 
@@ -42,7 +42,7 @@ This chapter establishes the conceptual foundation for building such systems.
 
 The conventional software stack might look roughly like:
 
-[
+$$
 \text{Application}
 \rightarrow
 \text{Libraries}
@@ -50,11 +50,11 @@ The conventional software stack might look roughly like:
 \text{Operating System}
 \rightarrow
 \text{Hardware}
-]
+$$
 
 AI applications introduce a new computational layer:
 
-[
+$$
 \text{Application}
 \rightarrow
 \text{AI Runtime / Harness}
@@ -62,7 +62,7 @@ AI applications introduce a new computational layer:
 \text{Model}
 \rightarrow
 \text{Accelerator}
-]
+$$
 
 But this is still too simplistic.
 
@@ -112,28 +112,28 @@ A foundation model is a pretrained model capable of performing many downstream t
 
 For language models, the basic interface is conceptually:
 
-[
-\text{tokens}*{1:n}
+$$
+\text{tokens}_{1:n}
 \rightarrow
-P(\text{next token}\mid\text{tokens}*{1:n})
-]
+P(\text{next token}\mid\text{tokens}_{1:n})
+$$
 
 Generation proceeds autoregressively. Given a sequence of tokens, the model predicts a distribution for the next token:
 
-[
-P(x_{n+1}\mid x_1,\ldots,x_n)
-]
+$$
+P(x_{n+1}\mid x_1,\dots,x_n)
+$$
 
 The selected token is appended to the context, and the process repeats.
 
 Thus:
 
-[
-x_1,\ldots,x_n
+$$
+x_1,\dots,x_n
 \rightarrow x_{n+1}
 \rightarrow x_{n+2}
 \rightarrow \cdots
-]
+$$
 
 This deceptively simple interface gives rise to remarkably general behavior.
 
@@ -249,9 +249,9 @@ They process **tokens**.
 
 A tokenizer maps text into a sequence:
 
-[
-T: \text{text} \rightarrow (t_1,t_2,\ldots,t_n)
-]
+$$
+T: \text{text} \rightarrow (t_1,t_2,\dots,t_n)
+$$
 
 For example, a phrase such as:
 
@@ -269,11 +269,11 @@ This matters because tokens affect nearly every operational property of an LLM s
 
 The model operates over a finite context:
 
-[
-C = [x_1,x_2,\ldots,x_n]
-]
+$$
+C = [x_1,x_2,\dots,x_n]
+$$
 
-where (n) cannot exceed the model's context limit.
+where $n$ cannot exceed the model's context limit.
 
 The effective context may contain:
 
@@ -320,9 +320,9 @@ A prompt establishes the computational environment in which the model generates 
 
 A simplified representation is:
 
-[
+$$
 y \sim P_\theta(y \mid x_{\text{system}},x_{\text{user}},x_{\text{tools}},x_{\text{history}})
-]
+$$
 
 Changing any component changes the output distribution.
 
@@ -396,13 +396,13 @@ The critical distinction is between **generation** and **validation**.
 
 Never assume:
 
-[
-\text{valid-looking output} \Rightarrow \text{valid output}
-]
+$$
+\text{valid-looking output} \implies \text{valid output}
+$$
 
 Instead:
 
-[
+$$
 \text{LLM output}
 \rightarrow
 \text{parse}
@@ -410,14 +410,14 @@ Instead:
 \text{validate}
 \rightarrow
 \text{accept/reject}
-]
+$$
 
 For example, a JSON Schema might enforce:
 
 ```text
 category ∈ {billing, technical, account}
 priority ∈ {low, medium, high}
-confidence ∈ [0,1]
+confidence $\in [0,1]$
 ```
 
 This creates an explicit interface between probabilistic and deterministic software.
@@ -508,17 +508,17 @@ Modern foundation models increasingly operate over multiple modalities.
 
 Instead of:
 
-[
+$$
 \text{text} \rightarrow \text{text}
-]
+$$
 
 we can have:
 
-[
+$$
 (\text{text},\text{image},\text{audio},\text{video})
 \rightarrow
 (\text{text},\text{structured data},\text{actions})
-]
+$$
 
 This fundamentally changes application architecture.
 
@@ -550,13 +550,13 @@ Video understanding can be incomplete.
 
 A multimodal model remains a probabilistic component and therefore requires the same engineering discipline:
 
-[
+$$
 \text{Inference}
 \rightarrow
 \text{Validation}
 \rightarrow
 \text{Decision}
-]
+$$
 
 ---
 
@@ -566,23 +566,23 @@ Model behavior depends not only on the model weights but also on inference confi
 
 A simplified generation process samples from:
 
-[
+$$
 P_\theta(x_{t+1}\mid x_{\leq t})
-]
+$$
 
 Temperature modifies the distribution before sampling.
 
-If logits are (z_i), temperature (T) produces:
+If logits are $z_i$, temperature $T$ produces:
 
-[
+$$
 P_i =
 \frac{\exp(z_i/T)}
 {\sum_j \exp(z_j/T)}
-]
+$$
 
-As (T) decreases, the distribution becomes more concentrated.
+As $T decreases, the distribution becomes more concentrated.
 
-As (T) increases, it becomes flatter.
+As $T increases, it becomes flatter.
 
 Other inference parameters can influence:
 
@@ -626,12 +626,9 @@ Model selection is therefore an optimization problem.
 
 One useful abstraction is:
 
-[
-\text{Utility}
-==============
-
-f(Q,L,C,R)
-]
+$$
+\text{Utility} = f(Q,L,C,R)
+$$
 
 where:
 
@@ -656,13 +653,13 @@ The correct model is therefore the **best model for the workload**, not necessar
 
 AI systems expose an unusually explicit three-way tradeoff:
 
-[
+$$
 \text{Quality}
 \leftrightarrow
 \text{Latency}
 \leftrightarrow
 \text{Cost}
-]
+$$
 
 Improving one dimension often affects the others.
 
@@ -678,11 +675,8 @@ Latency itself should be decomposed.
 
 For an API request:
 
-[
-L_{\text{total}}
-================
-
-L_{\text{network}}
+$$
+L_{\text{total}} = L_{\text{network}}
 +
 L_{\text{queue}}
 +
@@ -691,7 +685,7 @@ L_{\text{prefill}}
 L_{\text{decode}}
 +
 L_{\text{postprocess}}
-]
+$$
 
 This decomposition is important.
 
@@ -704,16 +698,16 @@ A model may have excellent token-generation throughput while still producing poo
 
 For streaming applications, another useful metric is **time to first token**:
 
-[
+$$
 TTFT = t_{\text{first token}} - t_{\text{request}}
-]
+$$
 
 while generation throughput can be measured as:
 
-[
+$$
 TPS = \frac{\text{generated tokens}}
 {\text{generation time}}
-]
+$$
 
 A production AI engineer should understand both.
 
@@ -807,21 +801,21 @@ But it introduces additional engineering complexity.
 
 The system must distinguish:
 
-[
+$$
 TTFT
-]
+$$
 
 from:
 
-[
+$$
 T_{\text{complete}}
-]
+$$
 
 and:
 
-[
+$$
 TPS
-]
+$$
 
 It must also handle partial responses and failures occurring midway through generation.
 
@@ -847,12 +841,11 @@ These numbers enable cost and performance analysis.
 
 For a simple pricing model:
 
-[
-C =
-N_{\text{input}}P_{\text{input}}
+$$
+C = N_{\text{input}}P_{\text{input}}
 +
 N_{\text{output}}P_{\text{output}}
-]
+$$
 
 where (P) represents price per token.
 
@@ -860,15 +853,11 @@ This quickly becomes important.
 
 Suppose a request uses:
 
-[
-10,000
-]
+$10,000$
 
 input tokens and produces:
 
-[
-1,000
-]
+$1,000$
 
 output tokens.
 
@@ -876,9 +865,7 @@ A system processing one request is trivial.
 
 A system processing:
 
-[
-1,000,000
-]
+$1,000,000$
 
 such requests is not.
 
@@ -886,15 +873,15 @@ AI engineering therefore requires thinking about **unit economics at the inferen
 
 A useful production metric is:
 
-[
+$$
 \text{Cost per successful task}
-]
+$$
 
 rather than merely:
 
-[
+$$
 \text{Cost per API call}
-]
+$$
 
 because retries, failures, tool calls, and multi-step reasoning all contribute to the actual cost of accomplishing useful work.
 
@@ -906,10 +893,10 @@ A model playground should make side-by-side comparison easy.
 
 Given:
 
-[
+$$
 x \rightarrow
-{M_1(x),M_2(x),M_3(x)}
-]
+\{M_1(x),M_2(x),M_3(x)\}
+$$
 
 you should be able to inspect:
 
@@ -1044,16 +1031,11 @@ These are much more important questions than simply learning an SDK.
 
 The most important idea from this first week can be summarized as:
 
-[
+$$
 \boxed{
-\text{AI Application}
-=====================
-
-\text{Probabilistic Components}
-+
-\text{Deterministic Systems}
+\text{AI Application} = \text{Probabilistic Components} + \text{Deterministic Systems}
 }
-]
+$$
 
 The model supplies capabilities that are difficult to implement conventionally:
 
