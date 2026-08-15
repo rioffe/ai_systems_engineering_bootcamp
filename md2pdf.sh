@@ -5,12 +5,17 @@
 set -e
 
 TOC_FLAG=""
-INPUT_FILE=""
+MERMAID_FLAG=""
 
 while [[ $# -gt 0 ]]; do
+  echo "Arg: $1"
   case $1 in
     --toc)
       TOC_FLAG="--toc"
+      shift
+      ;;
+    --mermaid)
+      MERMAID_FLAG="--filter mermaid-filter"
       shift
       ;;
     *)
@@ -20,8 +25,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+
 if [[ -z "$INPUT_FILE" ]]; then
-    echo "Usage: $0 [--toc] <input_file.md>"
+    echo "Usage: $0 [--toc] [--mermaid] <input_file.md>"
     exit 1
 fi
 
@@ -35,17 +41,20 @@ TEMP_FILE=$(mktemp /tmp/md2pdf.XXXXXX.md)
 
 echo "Processing '$INPUT_FILE'..."
 
-# Copy the input file to the temp file
-cp "$INPUT_FILE" "$TEMP_FILE"
+# Pre-process to convert [ ... ] math blocks to $$ ... $$
+# We use a more robust regex to handle potential whitespace
+sed -e 's/^[[:space:]]*\[[[:space:]]*$/$$\n/' \
+    -e 's/^[[:space:]]*\][[:space:]]*$/\n$$/' \
+    "$INPUT_FILE" > "$TEMP_FILE"
 
-echo "Converting to PDF via pandoc (using xelatex) with $TOC_FLAG..."
+echo "Converting to PDF via pandoc (using xelatex) with $TOC_FLAG $MERMAID_FLAG..."
 
-if pandoc "$TEMP_FILE" $TOC_FLAG --pdf-engine=xelatex -o "$OUTPUT_FILE"; then
+if pandoc "$TEMP_FILE" $TOC_FLAG $MERMAID_FLAG --pdf-engine=xelatex -o "$OUTPUT_FILE"; then
     echo "Success! Created '$OUTPUT_FILE'."
 else
-    # Fallback to default engine if xelatx fails
+    # Fallback to default engine if xelatex fails
     echo "xelatex failed or not found. Retrying with default engine..."
-    if pandoc "$TEMP_FILE" $TOC_FLAG -o "$OUTPUT_FILE"; then
+    if pandoc "$TEMP_FILE" $TOC_FLAG $MERMAID_FLAG -o "$OUTPUT_FILE"; then
         echo "Success! Created '$OUTPUT_FILE' (using default engine)."
     else
         echo "Error: Conversion failed."
