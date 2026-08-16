@@ -559,9 +559,9 @@ P_i =
 {\sum_j \exp(z_j/T)}
 $$
 
-As $T decreases, the distribution becomes more concentrated.
+As $T$ decreases, the distribution becomes more concentrated.
 
-As $T increases, it becomes flatter.
+As $T$ increases, it becomes flatter.
 
 Other inference parameters can influence:
 
@@ -611,10 +611,10 @@ $$
 
 where:
 
-* (Q) = quality,
-* (L) = latency,
-* (C) = cost,
-* (R) = reliability.
+* $Q$ = quality,
+* $L$ = latency,
+* $C$ = cost,
+* $R$ = reliability.
 
 The weights depend on the application.
 
@@ -824,27 +824,15 @@ C = N_{\text{input}}P_{\text{input}}
 N_{\text{output}}P_{\text{output}}
 $$
 
-where (P) represents price per token.
+where $P$ represents price per token.
 
 This quickly becomes important.
 
-Suppose a request uses:
-
-$10,000$
-
-input tokens and produces:
-
-$1,000$
-
-output tokens.
+Suppose a request uses $10,000$ input tokens and produces $1,000$ output tokens.
 
 A system processing one request is trivial.
 
-A system processing:
-
-$1,000,000$
-
-such requests is not.
+A system processing $1,000,000$ such requests is not.
 
 AI engineering therefore requires thinking about **unit economics at the inference level**.
 
