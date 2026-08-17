@@ -24,9 +24,20 @@ cd curriculum/week1
 bash ../../md2pdf.sh --toc chapter4.md     # --toc builds a table of contents
 ```
 
-A clean run prints `Success! Created 'chapter4.pdf'` and nothing else. Treat any
-extra output as a warning or error to fix. The `--mermaid` flag adds
+A clean run ends with `Success! Created 'chapter4.pdf'`. Treat any extra output
+*after the banner* as a warning or error to fix. The `--mermaid` flag adds
 `--filter mermaid-filter` when the chapter uses mermaid diagrams.
+
+Note: `md2pdf.sh` prints banner lines on *every* run -- `Arg: ...`,
+`Processing '...'...`, and `Converting ...`. Those are not warnings. To see only
+the signal, filter them out:
+
+```bash
+bash ../../md2pdf.sh --toc chapter4.md 2>&1 | grep -viE '^Arg: |^Processing|^Converting' || echo "no output -- clean"
+```
+
+The end state -- only that banner/Success and nothing more -- means the chapter
+converted without pandoc/xelatex complaints.
 
 After a change, re-verify with the checks below before committing both the `.md`
 and the regenerated `.pdf` together (they must not drift).
@@ -102,6 +113,16 @@ the `[`/`]` convention).
   `\text{HallucinationRate} = \frac{2}{10}`, `f(x) \in \mathcal{Y}_{\text{acceptable}}`.
 - **Inline math uses `$ … $`**, e.g. `Change $k$.`, `$P$ = precision`.
 - `\boxed{ … }` works for the key-takeaway equation.
+- **Prose `\(var\)` is NOT math.** A drafted chapter may denote a variable as
+  gloss-parenthesized `(...)`, e.g. `where (x) is the prompt, (f_\theta) is the
+  model`. Pandoc (default extensions) only treats `$…$`/`$$…$$` as math, so a
+  bare `(f_\theta)` renders the literal characters `\theta` -- garbled output that
+  compiles with **no warning**. Convert every prose `\(var\)` whose token carries
+  math (subscripts, `\_`, `\theta`, Greek letters) to inline `$…$`. (Ordinary
+  English parentheticals and code function calls like `F(s_t)` are not offenders.)
+
+      `` where (x) is the prompt, (f_\theta) is the model `` =>
+      `` where $x$ is the prompt, $f_\theta$ is the model ``
 
 ### Fixing garbled math blocks
 
@@ -154,12 +175,17 @@ Diagrams in this project live in ` ```text ` fences and must render under xelate
   ```
 
 - **Arrows: Unicode `↓` and `→` are fine** (xelatex supports them; the chapters
-  use them throughout). Use them for flow between boxes.
+  use them throughout). Use them for flow between boxes. The large **triangle
+  arrows `▲` `▼` are NOT in the font** -- use ASCII `^`/`v` (`▲` => `^`, `▼` => `v`;
+  `↑` is unreliable too, so prefer `^` for a generic up-arrow).
 - **Avoid characters the monospace font (`lmmono`) lacks** inside ` ```text ` /
-  ` ```json ` code blocks. `∈` is the known offender: it triggers
-  `Missing character: There is no ∈ (U+2208) in font [lmmono10-regular]`.
-  Use the word `in` inside code fences (`currency in allowed currencies`);
-  `∈` is fine **inside `$$ … $$` math**, where the math font provides it.
+    ` ```json ` code blocks. Fenced code uses a monospace font that has no glyph for
+   math symbols, so treat any such glyph placed in a code fence as risky and use a
+   plain-ASCII equivalent instead. Known offenders:
+      `∈` (U+2208, triggers `Missing character: ... in font [lmmono10-regular]`),
+    `×` (U+00D7, as in `3× performance`), `≤`/`≥` (=> `<=`/`>=`), `≈` (=> `~`).
+   Example: `currency in allowed currencies`, `3x performance`.
+   These symbols are fine inside `$$ ... $$` math, where the math font provides them.
 
 ## Verification workflow
 
@@ -190,13 +216,19 @@ for c,n in sorted(collections.Counter(x for x in s if ord(x)>127).items()):
 PY
 ```
 
-Expected non-ASCII in these chapters: `— – “ ” ’ § ↓ → ∈` (the last only inside
-`$$` math) and the `ï` in "naïve". Anything outside that set -- especially
-`┌┐└┘│┬┴─` -- is a bug.
+Expected non-ASCII in these chapters: `— – “ ” ’ § ↓ →` and the `ï` in "naïve"
+(`∈` may appear but only inside `$$` math). Anything outside that set -- box
+characters `┌┐└┘│┬┴─`, triangle arrows `▲▼`, or `×`/`≈`/`≤`/`≥` inside a code fence --
+is a bug to fix.
 
 ## Common mistakes checklist
 
 - [ ] JSON arrays don't leave `]` (or a nested `{ … } ]`) on its own line
+   (an empty array on one line, `[]`, is **safe** -- it matches neither the
+   open-`[` nor close-`]` sed rule, so don't "fix" it)
+- [ ] Prose `\(var\)` / `\(f_\theta\)` math notation converted to inline `$…$`
+- [ ] No triangle arrows `▲ ▼` (or `↑`) in ` ```text ` diagrams -- use `^` / `v`
+- [ ] No `×` / `≈` / `≤` / `≥` / `∈` glyphs inside ` ```text ` / ` ```json ` fences
 - [ ] Percent signs escaped as `\%` inside math
 - [ ] `$` escaped as `\$` inside display math
 - [ ] Coefficient–label pairs use `\,` and `\text{}`
