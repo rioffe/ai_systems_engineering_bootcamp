@@ -702,8 +702,7 @@ A sophisticated implementation may represent the answer as claims:
       "text": "Business class is allowed for flights over 8 hours.",
       "source": "policy-17",
       "section": "4.2"
-    }
-  ]
+    } ]
 }
 ```
 
