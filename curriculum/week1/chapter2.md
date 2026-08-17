@@ -368,11 +368,15 @@ An excellent generator cannot fully compensate for a broken retriever.
 
 Retrieval introduces a fundamental tradeoff.
 
+Suppose the correct answer requires three documents:
+
 $D_2,D_{17},D_{84}$
 
 Your retriever returns:
 
 $D_2,D_{17},D_{84}$
+
+Excellent!
 
 Now suppose it returns:
 
