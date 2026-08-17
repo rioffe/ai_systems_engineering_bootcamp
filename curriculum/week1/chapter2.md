@@ -1017,7 +1017,21 @@ This is where context engineering begins to become interesting.
 
 # 18. Retrieval Metrics
 
-For a known set of relevant documents, measure retrieval quality explicitly.
+For a known set of relevant documents, measure retrieval quality explicitly using three fundamental metrics:
+
+* **True Positives (TP)**: Relevant documents that were successfully retrieved.
+* **False Positives (FP)**: Retrieved documents that are actually irrelevant (noise/pollution).
+* **False Negatives (FN)**: Relevant documents that the retriever missed.
+
+From these, we derive:
+
+$$
+\text{Precision} = \frac{TP}{TP + FP}
+$$
+
+$$
+\text{Recall} = \frac{TP}{TP + FN}
+$$
 
 Suppose:
 
@@ -1027,30 +1041,21 @@ $D_3, D_{17}, D_{42}$
 Retrieved:
 $D_3, D_{17}, D_{88}, D_{91}$
 
-Then:
-
-$$
-TP = 2
-$$
-
-$$
-FP = 2
-$$
-
-$$
-FN = 1
-$$
+In this case:
+* $TP = 2$ (Documents $D_3$ and $D_{17}$ were found)
+* $FP = 2$ (Documents $D_{88}$ and $D_{91}$ were noise)
+* $FN = 1$ (Document $D_{42}$ was missed)
 
 Therefore:
 
 $$
-Precision = \frac{2}{4} = 0.50
+\text{Precision} = \frac{2}{2 + 2} = 0.50
 $$
 
 and:
 
 $$
-Recall = \frac{2}{3} \approx 0.67
+\text{Recall} = \frac{2}{2 + 1} \approx 0.67
 $$
 
 This gives you a concrete diagnosis.
