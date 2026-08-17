@@ -37,11 +37,11 @@ Authentication
 Rate Limits
   ↓
 AI Orchestration
-  ├── Model
-  ├── Retrieval
-  ├── Tools
-  ├── State
-  └── Policies
+  +-- Model
+  +-- Retrieval
+  +-- Tools
+  +-- State
+  +-- Policies
   ↓
 Validation
   ↓
@@ -107,28 +107,28 @@ A useful high-level architecture is:
                   +-------------+
                   |    User     |
                   +------+------+
-                         │
-                         ▼
+                         |
+                         ↓
                   +-------------+
                   |     API     |
                   +------+------+
-                         │
-                         ▼
+                         |
+                         ↓
                +-------------------+
                | AI Orchestration  |
                +--------+----------+
-                        │
+                        |
           +-------------+-------------+
-          │             │             │
-          ▼             ▼             ▼
+          |             |             |
+          ↓             ↓             ↓
        Model          RAG           Tools
-          │             │             │
+          |             |             |
           +-------------+-------------+
-                        │
-                        ▼
+                        |
+                        ↓
                      Evals
-                        │
-                        ▼
+                        |
+                        ↓
                  Observability
 ```
 
@@ -137,44 +137,44 @@ This diagram should not be interpreted as a simple linear pipeline.
 Production systems are generally closer to:
 
 ```text
-                           ┌───────────────┐
-                           │     User      │
-                           └───────┬───────┘
-                                   │
-                                   ▼
-                         ┌─────────────────┐
-                         │ API Gateway     │
-                         └────────┬────────┘
-                                  │
-                    ┌─────────────┴─────────────┐
-                    │                           │
-                    ▼                           ▼
+                           +---------------+
+                           |     User      |
+                           +-------+-------+
+                                   |
+                                   ↓
+                         +-----------------+
+                         | API Gateway     |
+                         +--------+--------+
+                                  |
+                    +-------------+-------------+
+                    |                           |
+                    ↓                           ↓
              Authentication               Rate Limiting
-                    │                           │
-                    └─────────────┬─────────────┘
-                                  ▼
-                       ┌────────────────────┐
-                       │ AI Orchestrator    │
-                       └─────────┬──────────┘
-                                 │
-              ┌──────────────────┼──────────────────┐
-              │                  │                  │
-              ▼                  ▼                  ▼
+                    |                           |
+                    +-------------+-------------+
+                                  ↓
+                       +--------------------+
+                       | AI Orchestrator    |
+                       +---------+----------+
+                                 |
+              +------------------+------------------+
+              |                  |                  |
+              ↓                  ↓                  ↓
            Model               RAG               Tools
-              │                  │                  │
-              └──────────────────┼──────────────────┘
-                                 ▼
+              |                  |                  |
+              +------------------+------------------+
+                                 ↓
                          Validation / Policy
-                                 │
-                                 ▼
+                                 |
+                                 ↓
                            Final Response
-                                 │
-                  ┌──────────────┴──────────────┐
-                  ▼                             ▼
+                                 |
+                  +--------------+--------------+
+                  ↓                             ↓
              Evaluation                  Observability
-                                                │
-                                  ┌─────────────┼─────────────┐
-                                  ▼             ▼             ▼
+                                                |
+                                  +-------------+-------------+
+                                  ↓             ↓             ↓
                                Logs          Metrics        Traces
 ```
 
@@ -544,15 +544,15 @@ Possible cache layers include:
 
 ```text
                     Request
-                       │
-                       ▼
+                       |
+                       ↓
                   Response Cache
-                       │
-                ┌──────┴──────┐
-                │             │
+                       |
+                +------+------+
+                |             |
               HIT            MISS
-                │             │
-                ▼             ▼
+                |             |
+                ↓             ↓
              Response        LLM
 ```
 
@@ -694,10 +694,10 @@ User Data
 Classification
    ↓
 Policy
-   ├── allowed
-   ├── redact
-   ├── anonymize
-   └── reject
+   +-- allowed
+   +-- redact
+   +-- anonymize
+   +-- reject
 ```
 
 Privacy cannot be bolted onto the system after deployment.
@@ -722,16 +722,16 @@ Every component should propagate it:
 
 ```text
 API
- │ request_id=8f31a2
+ | request_id=8f31a2
  ↓
 Orchestrator
- │ request_id=8f31a2
+ | request_id=8f31a2
  ↓
 RAG
- │ request_id=8f31a2
+ | request_id=8f31a2
  ↓
 Model
- │ request_id=8f31a2
+ | request_id=8f31a2
  ↓
 Tool
 ```
@@ -833,25 +833,25 @@ Consider a single request:
 
 ```text
 Request
-  │
-  ├── Authentication      4 ms
-  │
-  ├── Retrieval          120 ms
-  │    ├── Embedding      20 ms
-  │    └── Vector DB      90 ms
-  │
-  ├── Model Call         2.1 s
-  │
-  ├── Tool Call           400 ms
-  │
-  └── Model Call         1.8 s
+  |
+  +-- Authentication      4 ms
+  |
+  +-- Retrieval          120 ms
+  |    +-- Embedding      20 ms
+  |    +-- Vector DB      90 ms
+  |
+  +-- Model Call         2.1 s
+  |
+  +-- Tool Call           400 ms
+  |
+  +-- Model Call         1.8 s
 ```
 
 The trace immediately explains why total latency is approximately:
 
-[
-4 + 120 + 2100 + 400 + 1800 \approx 4424\text{ ms}
-]
+$$
+4 + 120 + 2100 + 400 + 1800 \approx 4424\,\text{ms}
+$$
 
 For an agentic system, tracing becomes even more important.
 
@@ -859,24 +859,24 @@ A trace might show:
 
 ```text
 Agent Run
-│
-├── LLM Decision
-│
-├── Search
-│
-├── LLM Decision
-│
-├── Retrieve
-│
-├── LLM Decision
-│
-├── Search
-│
-├── Search
-│
-├── LLM Decision
-│
-└── Final Answer
+|
++-- LLM Decision
+|
++-- Search
+|
++-- LLM Decision
+|
++-- Retrieve
+|
++-- LLM Decision
+|
++-- Search
+|
++-- Search
+|
++-- LLM Decision
+|
++-- Final Answer
 ```
 
 This can reveal pathological behavior such as unnecessary searches or repeated tool calls.
@@ -1102,11 +1102,11 @@ Agent
 Code
  ↓
 Sandbox
- ├── restricted filesystem
- ├── restricted network
- ├── CPU limit
- ├── memory limit
- └── time limit
+ +-- restricted filesystem
+ +-- restricted network
+ +-- CPU limit
+ +-- memory limit
+ +-- time limit
 ```
 
 This principle generalizes beyond code execution.
@@ -1149,16 +1149,15 @@ The cost becomes a function of behavior.
 
 A useful approximation is:
 
-[
+$$
 C_{\text{request}}
-==================
-
+=
 \sum_i C_{\text{model},i}
 +
 \sum_j C_{\text{tool},j}
 +
 C_{\text{infrastructure}}
-]
+$$
 
 Production systems should therefore enforce:
 
@@ -1248,10 +1247,10 @@ The architecture from earlier days therefore becomes:
                       ↓
                Orchestration
                       ↓
-             ┌────────┼────────┐
+             +--------+--------+
              ↓        ↓        ↓
            Model     RAG      Tools
-             └────────┼────────┘
+             +--------+--------+
                       ↓
                    Response
                       ↓
@@ -1527,31 +1526,31 @@ A realistic deployment might look like:
 
 ```text
                          Internet
-                            │
-                            ▼
-                    ┌──────────────┐
-                    │ Load Balancer│
-                    └──────┬───────┘
-                           │
-             ┌─────────────┼─────────────┐
-             ▼             ▼             ▼
+                            |
+                            ↓
+                    +--------------+
+                    | Load Balancer|
+                    +------+-------+
+                           |
+             +-------------+-------------+
+             ↓             ↓             ↓
           API #1         API #2         API #3
-             │             │             │
-             └─────────────┼─────────────┘
-                           ▼
+             |             |             |
+             +-------------+-------------+
+                           ↓
                     Orchestration
-                           │
-          ┌────────────────┼────────────────┐
-          ▼                ▼                ▼
+                           |
+          +----------------+----------------+
+          ↓                ↓                ↓
        Model API         RAG              Tools
-          │                │                │
-          │           Vector DB          Services
-          │                │                │
-          └────────────────┼────────────────┘
-                           ▼
+          |                |                |
+          |           Vector DB          Services
+          |                |                |
+          +----------------+----------------+
+                           ↓
                        Evaluation
-                           │
-                           ▼
+                           |
+                           ↓
                      Observability
 ```
 
@@ -2034,9 +2033,9 @@ Agentic systems can dynamically increase their own computational cost.
 
 Therefore:
 
-[
+$$
 \text{Cost} = f(\text{model calls}, \text{tokens}, \text{tools}, \text{runtime})
-]
+$$
 
 Cost controls belong in the execution path, not merely in the finance dashboard.
 
@@ -2048,36 +2047,36 @@ The central architecture of the first week can now be summarized as:
 
 ```text
                     User
-                      │
-                      ▼
+                      |
+                      ↓
                     API
-                      │
+                      |
               Authentication
-                      │
+                      |
               Authorization
-                      │
+                      |
               Rate Limiting
-                      │
-                      ▼
+                      |
+                      ↓
              AI Orchestration
-                      │
-        ┌─────────────┼─────────────┐
-        ▼             ▼             ▼
+                      |
+        +-------------+-------------+
+        ↓             ↓             ↓
       Model          RAG           Tools
-        │             │             │
-        └─────────────┼─────────────┘
-                      │
+        |             |             |
+        +-------------+-------------+
+                      |
                Policy / Validation
-                      │
-                      ▼
+                      |
+                      ↓
                    Response
-                      │
-              ┌───────┴───────┐
-              ▼               ▼
+                      |
+              +-------+-------+
+              ↓               ↓
            Evals        Observability
-                              │
-                    ┌─────────┼─────────┐
-                    ▼         ▼         ▼
+                              |
+                    +---------+---------+
+                    ↓         ↓         ↓
                   Logs      Metrics    Traces
 ```
 
