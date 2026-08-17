@@ -14,11 +14,11 @@ Traditional software engineering gives us a powerful development loop:
 Code
   ↓
 Tests
-  ↓
+   ↓
 Failure
-  ↓
+   ↓
 Fix
-  ↓
+   ↓
 Tests
 ```
 
@@ -32,9 +32,9 @@ The difference is that many of their outputs are not deterministic.
 
 A traditional function might have a contract:
 
-[
+$$
 f(2,3)=5
-]
+$$
 
 An LLM application might instead produce several acceptable outputs:
 
@@ -56,15 +56,15 @@ The fundamental development loop therefore becomes:
 
 ```text
 Application
-    ↓
+     ↓
 Evaluation
-    ↓
+     ↓
 Metrics
-    ↓
+     ↓
 Failure analysis
-    ↓
+     ↓
 Application change
-    ↓
+     ↓
 Evaluation
 ```
 
@@ -78,9 +78,9 @@ Consider an AI assistant that answers questions over company documentation.
 
 Version 1 achieves:
 
-[
-Accuracy = 87%
-]
+$$
+\text{Accuracy} = 87\%
+$$
 
 An engineer changes:
 
@@ -96,9 +96,9 @@ But what is the actual accuracy?
 
 Perhaps:
 
-[
-Accuracy = 81%
-]
+$$
+\text{Accuracy} = 81\%
+$$
 
 The engineer has accidentally introduced a regression.
 
@@ -130,30 +130,35 @@ This is why evaluation must be treated as a first-class engineering subsystem.
 The basic architecture is:
 
 ```text
-                 ┌──────────────┐
-                 │   Dataset    │
-                 └──────┬───────┘
-                        ↓
-                 ┌──────────────┐
-                 │ Application  │
-                 └──────┬───────┘
-                        ↓
-                 ┌──────────────┐
-                 │   Outputs    │
-                 └──────┬───────┘
-                        ↓
-                 ┌──────────────┐
-                 │  Evaluator   │
-                 └──────┬───────┘
-                        ↓
-                 ┌──────────────┐
-                 │   Metrics    │
-                 └──────┬───────┘
-                        ↓
-                 ┌──────────────┐
-                 │  Regression  │
-                 │    Report    │
-                 └──────────────┘
+             +--------------+
+             |    Dataset   |
+             +------+-------+
+                    |
+                    ↓
+             +--------------+
+             |  Application |
+             +------+-------+
+                    |
+                    ↓
+             +--------------+
+             |    Outputs   |
+             +------+-------+
+                    |
+                    ↓
+             +--------------+
+             |   Evaluator  |
+             +------+-------+
+                    |
+                    ↓
+             +--------------+
+             |    Metrics   |
+             +------+-------+
+                    |
+                    ↓
+             +--------------+
+             |   Regression |
+             |    Report    |
+             +--------------+
 ```
 
 This should be treated as infrastructure.
@@ -170,7 +175,7 @@ and answer:
 
 > What changed?
 
-That is fundamentally different from manually trying the application and deciding whether it “seems better.”
+That is fundamentally different from manually trying the application and deciding whether it "seems better."
 
 ---
 
@@ -184,11 +189,9 @@ For a simple question-answering application:
 
 ```json
 {
-  "input": "What is the maximum hotel reimbursement?",
-  "expected_answer": "$350 per night",
-  "required_sources": [
-    "travel-policy-2026"
-  ]
+    "input": "What is the maximum hotel reimbursement?",
+    "expected_answer": "$350 per night",
+    "required_sources": ["travel-policy-2026"]
 }
 ```
 
@@ -196,8 +199,8 @@ For a classification system:
 
 ```json
 {
-  "input": "I was charged twice for my subscription.",
-  "expected_class": "billing_duplicate_charge"
+   "input": "I was charged twice for my subscription.",
+   "expected_class": "billing_duplicate_charge"
 }
 ```
 
@@ -205,11 +208,8 @@ For an agent:
 
 ```json
 {
-  "input": "Find my last three invoices and summarize the largest charge.",
-  "expected_tools": [
-    "list_invoices",
-    "get_invoice"
-  ]
+    "input": "Find my last three invoices and summarize the largest charge.",
+    "expected_tools": ["list_invoices", "get_invoice"]
 }
 ```
 
@@ -281,13 +281,13 @@ Every important production failure should ideally become a permanent evaluation 
 
 This creates a powerful loop:
 
-[
+$$
 \text{Production Failure}
 \rightarrow
 \text{Evaluation Case}
 \rightarrow
 \text{Regression Protection}
-]
+$$
 
 The system becomes progressively harder to break in the same way twice.
 
@@ -303,9 +303,9 @@ Suppose the model returns:
 
 ```json
 {
-  "customer_id": "12345",
-  "amount": 450.25,
-  "currency": "USD"
+   "customer_id": "12345",
+   "amount": 450.25,
+   "currency": "USD"
 }
 ```
 
@@ -314,7 +314,7 @@ You can test deterministically:
 ```text
 customer_id exists
 amount >= 0
-currency ∈ allowed currencies
+currency in allowed currencies
 JSON schema valid
 ```
 
@@ -386,9 +386,9 @@ and return:
 
 ```json
 {
-  "correct": 1,
-  "grounded": 1,
-  "complete": 0.8
+   "correct": 1,
+   "grounded": 1,
+   "complete": 0.8
 }
 ```
 
@@ -446,11 +446,11 @@ This motivates a hierarchy:
 
 ```text
 Deterministic tests
-        ↓
+         ↓
 Automated metrics
-        ↓
+         ↓
 LLM evaluation
-        ↓
+         ↓
 Human evaluation
 ```
 
@@ -462,13 +462,13 @@ Use the cheapest reliable evaluation method available for each property.
 
 Sometimes asking:
 
-> “Is this answer good?”
+> "Is this answer good?"
 
 is difficult.
 
 A simpler question is:
 
-> “Which answer is better?”
+> "Which answer is better?"
 
 Suppose we have:
 
@@ -485,8 +485,8 @@ A judge can compare them directly:
 
 ```json
 {
-  "winner": "B",
-  "reason": "B is more precise and cites the relevant condition."
+   "winner": "B",
+   "reason": "B is more precise and cites the relevant condition."
 }
 ```
 
@@ -503,15 +503,15 @@ It also avoids some difficulties associated with absolute scoring.
 
 Instead of asking for:
 
-[
-Quality(A)=8.3
-]
+$$
+\text{Quality}(A)=8.3
+$$
 
 we ask:
 
-[
-A > B?
-]
+$$
+A > B\ ?
+$$
 
 This is often a more stable judgment.
 
@@ -525,35 +525,35 @@ For example:
 
 ### Answer Quality Rubric
 
-| Dimension    | 0                 | 1                       | 2               |
-| ------------ | ----------------- | ----------------------- | --------------- |
-| Correctness  | Incorrect         | Partially correct       | Correct         |
-| Groundedness | Unsupported       | Partially supported     | Fully supported |
-| Completeness | Missing key facts | Some omissions          | Complete        |
-| Relevance    | Off-topic         | Some irrelevant content | Direct          |
-| Citation     | Missing           | Partial                 | Complete        |
+| Dimension    | 0                  | 1                        | 2                |
+| ------------ | ------------------ | ------------------------ | ---------------- |
+| Correctness  | Incorrect          | Partially correct        | Correct          |
+| Groundedness | Unsupported        | Partially supported      | Fully supported  |
+| Completeness | Missing key facts  | Some omissions           | Complete         |
+| Relevance    | Off-topic          | Some irrelevant content  | Direct           |
+| Citation     | Missing            | Partial                  | Complete         |
 
 The evaluator can then produce:
 
 ```json
 {
-  "correctness": 2,
-  "groundedness": 2,
-  "completeness": 1,
-  "relevance": 2,
-  "citation": 2
+   "correctness": 2,
+   "groundedness": 2,
+   "completeness": 1,
+   "relevance": 2,
+   "citation": 2
 }
 ```
 
-The advantage is that a single “quality score” is decomposed into actionable dimensions.
+The advantage is that a single "quality score" is decomposed into actionable dimensions.
 
 Instead of:
 
-> “The model got worse.”
+> "The model got worse."
 
 you can discover:
 
-> “Correctness remained stable, but completeness dropped 18%.”
+> "Correctness remained stable, but completeness dropped 18%."
 
 That tells the engineer where to investigate.
 
@@ -565,11 +565,12 @@ Accuracy is the most intuitive metric.
 
 For classification:
 
-[
-Accuracy =
+$$
+\text{Accuracy}
+=
 \frac{\text{correct predictions}}
 {\text{total predictions}}
-]
+$$
 
 Suppose:
 
@@ -580,9 +581,9 @@ Suppose:
 
 Then:
 
-[
-Accuracy = 93%
-]
+$$
+\text{Accuracy} = 93\%
+$$
 
 Accuracy is excellent when classes and error costs are relatively balanced.
 
@@ -595,11 +596,11 @@ Suppose:
 10 critical cases
 ```
 
-A system that always predicts “normal” achieves:
+A system that always predicts "normal" achieves:
 
-[
-Accuracy = 99%
-]
+$$
+\text{Accuracy} = 99\%
+$$
 
 while completely failing the critical cases.
 
@@ -611,15 +612,17 @@ This is why evaluation metrics must match the application.
 
 For retrieval and classification, precision and recall are often more informative.
 
-[
-Precision =
+$$
+\text{Precision}
+=
 \frac{TP}{TP+FP}
-]
+$$
 
-[
-Recall =
+$$
+\text{Recall}
+=
 \frac{TP}{TP+FN}
-]
+$$
 
 Consider a security classifier.
 
@@ -667,11 +670,12 @@ It is not grounded.
 
 A useful conceptual metric is:
 
-[
-Groundedness =
+$$
+\text{Groundedness}
+=
 \frac{\text{supported claims}}
 {\text{total factual claims}}
-]
+$$
 
 Groundedness is especially important because LLMs are optimized to produce plausible language, not necessarily evidentially constrained language.
 
@@ -683,11 +687,11 @@ A response can be factually correct but still be a poor answer.
 
 Question:
 
-> “What is the maximum hotel reimbursement?”
+> "What is the maximum hotel reimbursement?"
 
 Response:
 
-> “The company has offices in Portland, Seattle, and Austin. The travel department was established in 2018. Hotel reimbursement is $350.”
+> "The company has offices in Portland, Seattle, and Austin. The travel department was established in 2018. Hotel reimbursement is $350."
 
 The answer contains the correct information.
 
@@ -709,7 +713,7 @@ Completeness asks:
 
 Consider:
 
-> “What are the requirements for business-class reimbursement?”
+> "What are the requirements for business-class reimbursement?"
 
 Reference:
 
@@ -729,15 +733,15 @@ But it omits the approval requirement.
 
 Therefore:
 
-[
-Correctness = high
-]
+$$
+\text{Correctness} = \text{high}
+$$
 
 while:
 
-[
-Completeness = low
-]
+$$
+\text{Completeness} = \text{low}
+$$
 
 This distinction is important.
 
@@ -757,13 +761,13 @@ Two are not.
 
 Then a simple conceptual metric is:
 
-[
-HallucinationRate =
+$$
+\text{HallucinationRate}
+=
 \frac{2}{10}
-============
-
-20%
-]
+=
+20\%
+$$
 
 The exact implementation can be more sophisticated, but the key is to make hallucination measurable rather than treating it as a vague subjective property.
 
@@ -800,11 +804,12 @@ Therefore evaluate the trajectory.
 
 For example:
 
-[
-ToolSuccess =
+$$
+\text{ToolSuccess}
+=
 \frac{\text{correct tool calls}}
 {\text{required tool calls}}
-]
+$$
 
 Also measure:
 
@@ -852,9 +857,9 @@ Total latency
 
 Useful statistics include:
 
-[
+$$
 P50,\quad P90,\quad P95,\quad P99
-]
+$$
 
 Average latency alone can hide severe tail behavior.
 
@@ -872,15 +877,15 @@ Whether that is a good trade depends on the application.
 
 Track:
 
-[
+$$
 Cost_{\text{request}}
-]
+$$
 
 and:
 
-[
+$$
 Cost_{\text{successful task}}
-]
+$$
 
 The second metric can be particularly useful.
 
@@ -898,25 +903,23 @@ Success rate = 95%
 
 Then:
 
-[
+$$
 Cost_{\text{success,A}}
-=======================
-
-# \frac{0.02}{0.80}
-
-$0.025
-]
+=
+\frac{\$0.02}{0.80}
+=
+\$0.025
+$$
 
 while:
 
-[
+$$
 Cost_{\text{success,B}}
-=======================
-
-\frac{0.04}{0.95}
+=
+\frac{\$0.04}{0.95}
 \approx
-$0.042
-]
+\$0.042
+$$
 
 System B is more capable but substantially more expensive per successful task.
 
@@ -928,58 +931,49 @@ Evaluation therefore becomes a multidimensional optimization problem.
 
 Instead of thinking about application quality as one number, think of it as a vector:
 
-[
-Q =
-(
-A,
-P,
-R,
-G,
-C,
-H,
-T,
-L,
-K
-)
-]
+$$
+\mathbf{Q}
+=
+(A, P, R, G, C, H, T, L, K)
+$$
 
 where:
 
-* (A) = accuracy
-* (P) = precision
-* (R) = recall
-* (G) = groundedness
-* (C) = completeness
-* (H) = hallucination rate
-* (T) = tool-call success
-* (L) = latency
-* (K) = cost
+* $A$ = accuracy
+* $P$ = precision
+* $R$ = recall
+* $G$ = groundedness
+* $C$ = completeness
+* $H$ = hallucination rate
+* $T$ = tool-call success
+* $L$ = latency
+* $K$ = cost
 
 Different applications assign different importance to each dimension.
 
 A search assistant may prioritize:
 
-[
-Recall,\ Precision,\ Relevance
-]
+$$
+\text{Recall},\ \text{Precision},\ \text{Relevance}
+$$
 
 A financial assistant may prioritize:
 
-[
-Accuracy,\ Groundedness,\ Citation\ Quality
-]
+$$
+\text{Accuracy},\ \text{Groundedness},\ \text{Citation Quality}
+$$
 
 An autonomous agent may prioritize:
 
-[
-Task\ Success,\ Tool\ Reliability,\ Safety
-]
+$$
+\text{Task Success},\ \text{Tool Reliability},\ \text{Safety}
+$$
 
 A consumer chatbot may prioritize:
 
-[
-Helpfulness,\ Latency,\ Cost
-]
+$$
+\text{Helpfulness},\ \text{Latency},\ \text{Cost}
+$$
 
 There is no universal leaderboard.
 
@@ -1005,9 +999,9 @@ and:
 
 Your system can achieve:
 
-[
-Accuracy = 99%
-]
+$$
+\text{Accuracy} = 99\%
+$$
 
 while failing every important edge case.
 
@@ -1016,12 +1010,12 @@ The dataset therefore needs to represent the **distribution of real-world diffic
 A useful evaluation corpus might be divided into:
 
 ```text
-Common cases             50%
-Difficult cases          20%
-Multi-step cases         10%
-Adversarial cases        10%
-Boundary cases            5%
-Historical regressions    5%
+Common cases              50%
+Difficult cases           20%
+Multi-step cases          10%
+Adversarial cases         10%
+Boundary cases             5%
+Historical regressions     5%
 ```
 
 The exact distribution depends on the application.
@@ -1038,17 +1032,17 @@ Aggregate metrics can hide important failures.
 
 Suppose overall accuracy is:
 
-[
-94%
-]
+$$
+94\%
+$$
 
 Break it down:
 
 ```text
-Simple questions:       98%
-Multi-document:         91%
-Long-context:           83%
-Adversarial:            72%
+Simple questions:        98%
+Multi-document:          91%
+Long-context:            83%
+Adversarial:             72%
 ```
 
 The aggregate number is now much less comforting.
@@ -1084,11 +1078,11 @@ Version 1
 Run the evaluation suite:
 
 ```text
-Accuracy:       88.4%
-Groundedness:   93.1%
-Recall@10:      91.7%
-Latency P95:    2.8s
-Cost/request:   $0.018
+Accuracy:        88.4%
+Groundedness:    93.1%
+Recall@10:       91.7%
+Latency P95:     2.8s
+Cost/request:    $0.018
 ```
 
 Now change the system.
@@ -1108,11 +1102,11 @@ You might get:
 
 ```text
 Version 2
-Accuracy:       90.1%
-Groundedness:   94.0%
-Recall@10:      95.2%
-Latency P95:    5.4s
-Cost/request:   $0.043
+Accuracy:        90.1%
+Groundedness:    94.0%
+Recall@10:       95.2%
+Latency P95:     5.4s
+Cost/request:    $0.043
 ```
 
 The new system is better on quality.
@@ -1135,24 +1129,24 @@ A useful regression report might look like:
 ```text
                     V1        V2        Δ
 ------------------------------------------------
-Accuracy           88.4%     90.1%    +1.7%
-Groundedness       93.1%     94.0%    +0.9%
-Recall@10          91.7%     95.2%    +3.5%
-Hallucination       4.2%      3.1%    -1.1%
-Tool success       96.8%     97.1%    +0.3%
-Latency P95         2.8s      5.4s    +2.6s
-Cost/request      $0.018    $0.043   +139%
+Accuracy            88.4%     90.1%     +1.7%
+Groundedness        93.1%     94.0%     +0.9%
+Recall@10           91.7%     95.2%     +3.5%
+Hallucination        4.2%      3.1%     -1.1%
+Tool success        96.8%     97.1%     +0.3%
+Latency P95          2.8s      5.4s     +2.6s
+Cost/request       $0.018    $0.043    +139%
 ```
 
 Now the engineering discussion becomes concrete.
 
 Instead of:
 
-> “The new system feels better.”
+> "The new system feels better."
 
 you can say:
 
-> “The new retriever improves recall by 3.5 percentage points and reduces hallucination by 1.1 points, at the cost of 139% higher inference cost and 2.6 seconds of P95 latency.”
+> "The new retriever improves recall by 3.5 percentage points and reduces hallucination by 1.1 points, at the cost of 139% higher inference cost and 2.6 seconds of P95 latency."
 
 That is a meaningful engineering tradeoff.
 
@@ -1166,20 +1160,21 @@ For example:
 
 ```text
 Pull Request
-     ↓
+      ↓
 Run evaluation suite
-     ↓
+      ↓
 Compare against baseline
-     ↓
- ┌───────────────┐
- │ Regression?   │
- └───────┬───────┘
-         │
-    ┌────┴────┐
-    ↓         ↓
-   Yes        No
-    ↓         ↓
-  Reject     Merge
+      ↓
+ +---------------+
+ |  Regression?  |
+ +------+--------+
+          |
+     +----+----+
+     |         |
+     ↓         ↓
+   Yes       No
+     ↓         ↓
+  Reject    Merge
 ```
 
 You might define policies such as:
@@ -1201,18 +1196,19 @@ The important idea is that **AI changes can become testable deployment artifacts
 
 There is a temptation to create one giant score:
 
-[
-Score =
-0.3Accuracy
+$$
+\text{Score}
+=
+0.3\,\text{Accuracy}
 +
-0.2Groundedness
+0.2\,\text{Groundedness}
 +
-0.2Relevance
+0.2\,\text{Relevance}
 +
-0.1Latency
+0.1\,\text{Latency}
 +
-0.2Cost
-]
+0.2\,\text{Cost}
+$$
 
 This can be useful for ranking experiments.
 
@@ -1223,11 +1219,11 @@ A weighted score may hide catastrophic failures.
 Suppose:
 
 ```text
-Accuracy       95%
-Groundedness   95%
-Latency        excellent
-Cost           excellent
-Safety         terrible
+Accuracy        95%
+Groundedness    95%
+Latency         excellent
+Cost            excellent
+Safety          terrible
 ```
 
 A weighted average could still look impressive.
@@ -1236,9 +1232,9 @@ For high-consequence properties, use **hard constraints** rather than averages.
 
 For example:
 
-[
-HallucinationRate < 2%
-]
+$$
+\text{HallucinationRate} < 2\%
+$$
 
 must be satisfied regardless of other improvements.
 
@@ -1269,11 +1265,11 @@ For example:
 
 ```text
 100 examples
-    ↓
+     ↓
 Human evaluation
-    ↓
+     ↓
 LLM evaluation
-    ↓
+     ↓
 Compare judgments
 ```
 
@@ -1308,27 +1304,28 @@ Run both on the same evaluation dataset.
 For every example:
 
 ```text
-Question
-   ↓
- ┌───────┬───────┐
- ↓       ↓
- A       B
- └───┬───┘
-     ↓
- Judge
-     ↓
-Winner
+   Question
+       ↓
+  +----+----+
+  |         |
+  ↓         ↓
+  A         B
+  +----+----+
+      |
+      ↓
+    Judge
+      ↓
+   Winner
 ```
 
 Then calculate:
 
-[
-WinRate(A)
-==========
-
+$$
+\text{WinRate}(A)
+=
 \frac{\text{A wins}}
 {\text{comparisons}}
-]
+$$
 
 This can be more informative than comparing independent numerical scores.
 
@@ -1356,17 +1353,17 @@ A useful architecture is:
 
 ```text
 Production Request
-       ↓
+        ↓
 Application
-       ↓
+        ↓
 Response
-       ↓
+        ↓
 Telemetry
-       ↓
+        ↓
 Sampled Evaluation
-       ↓
+        ↓
 Failure Analysis
-       ↓
+        ↓
 New Golden Case
 ```
 
@@ -1374,7 +1371,7 @@ A production failure should ideally become a permanent offline test.
 
 This creates a continuous learning loop:
 
-[
+$$
 \text{Production}
 \rightarrow
 \text{Failure}
@@ -1384,7 +1381,7 @@ This creates a continuous learning loop:
 \text{Regression Test}
 \rightarrow
 \text{Improved System}
-]
+$$
 
 The evaluation dataset becomes a living representation of the system's known failure modes.
 
@@ -1396,13 +1393,13 @@ Without evaluations, an engineer tends to optimize through intuition:
 
 ```text
 Try prompt
-   ↓
+    ↓
 Looks better
-   ↓
+    ↓
 Try another prompt
-   ↓
+    ↓
 Looks better
-   ↓
+    ↓
 Ship
 ```
 
@@ -1410,15 +1407,15 @@ With evaluations:
 
 ```text
 Hypothesis
-   ↓
+    ↓
 Change
-   ↓
+    ↓
 Run benchmark
-   ↓
+    ↓
 Analyze metrics
-   ↓
+    ↓
 Inspect failures
-   ↓
+    ↓
 Accept / reject hypothesis
 ```
 
@@ -1473,13 +1470,13 @@ Traditional software engineering has several layers:
 
 ```text
 Requirements
-     ↓
+      ↓
 Implementation
-     ↓
+      ↓
 Tests
-     ↓
+      ↓
 Deployment
-     ↓
+      ↓
 Monitoring
 ```
 
@@ -1487,15 +1484,15 @@ AI engineering needs a corresponding structure:
 
 ```text
 Behavioral requirements
-        ↓
+         ↓
 Context + model + tools
-        ↓
+         ↓
 Evaluation suite
-        ↓
+         ↓
 Deployment
-        ↓
+         ↓
 Production telemetry
-        ↓
+         ↓
 New evaluation cases
 ```
 
@@ -1515,10 +1512,10 @@ Each case should contain:
 
 ```json
 {
-  "question": "...",
-  "reference_answer": "...",
-  "relevant_documents": ["doc-17", "doc-42"],
-  "category": "multi_document"
+   "question": "...",
+   "reference_answer": "...",
+   "relevant_documents": ["doc-17", "doc-42"],
+   "category": "multi_document"
 }
 ```
 
@@ -1526,15 +1523,15 @@ Run:
 
 ```text
 Dataset
-   ↓
+    ↓
 RAG application
-   ↓
+    ↓
 Retrieved documents
-   ↓
+    ↓
 Generated answer
-   ↓
+    ↓
 Evaluator
-   ↓
+    ↓
 Metrics
 ```
 
@@ -1565,7 +1562,7 @@ Remove reranking.
 
 ### Experiment 3
 
-Change (k).
+Change $k$.
 
 ### Experiment 4
 
@@ -1609,12 +1606,12 @@ top_k = 30
 You may observe:
 
 ```text
-Recall@30       ↑
-Precision@30    ↓
-Context size    ↑
-Latency         ↑
-Groundedness    ↓
-Answer quality  ↓
+Recall@30        ↑
+Precision@30     ↓
+Context size     ↑
+Latency          ↑
+Groundedness     ↓
+Answer quality   ↓
 ```
 
 Now the evaluation suite has demonstrated something important:
@@ -1712,32 +1709,40 @@ We began with:
 
 ```text
 User
-  ↓
+   ↓
 LLM
-  ↓
+   ↓
 Answer
 ```
 
 We now have:
 
 ```text
-                    ┌─────────────────┐
-                    │ Evaluation Data │
-                    └────────┬────────┘
-                             ↓
+                     +---------------+
+                     |  Evaluation   |
+                     |    Data       |
+                     +------+--------+
+                            |
+                            ↓
 User → Intent → Retrieval → Context
-                             ↓
-                            LLM
-                             ↓
-                    Structured Output
-                             ↓
+                              |
+                              ↓
+                             LLM
+                              |
+                              ↓
+                     Structured Output
+                              |
+                              ↓
                          Evaluator
-                             ↓
-                    ┌────────┴────────┐
-                    ↓                 ↓
-                 Metrics          Regression
-                    ↓                 ↓
-                    └───────┬─────────┘
+                              |
+                              ↓
+                     +------+-------+
+                     |              |
+                     ↓              ↓
+                 Metrics      Regression
+                     |              |
+                     +------+-------+
+                            |
                             ↓
                      System Changes
 ```
@@ -1762,17 +1767,17 @@ The distinction between testing and evaluation reflects the probabilistic nature
 
 Traditional tests often establish:
 
-[
+$$
 f(x)=y
-]
+$$
 
 AI evaluations often establish:
 
-[
-f(x)\in\mathcal{Y}_{acceptable}
-]
+$$
+f(x)\in\mathcal{Y}_{\text{acceptable}}
+$$
 
-where (\mathcal{Y}_{acceptable}) is a set of outputs satisfying the behavioral requirements.
+where $\mathcal{Y}_{\text{acceptable}}$ is a set of outputs satisfying the behavioral requirements.
 
 This is the appropriate abstraction for probabilistic software.
 
@@ -1806,11 +1811,11 @@ By the end of Day 4, you should understand:
 
 Most importantly, you should be able to answer:
 
-> **What does “good” mean for this AI application, and how do we measure whether a change made it better or worse?**
+> **What does "good" mean for this AI application, and how do we measure whether a change made it better or worse?**
 
 If the answer is subjective—
 
-> “It feels better”—
+> "It feels better"—
 
 the system is not yet ready for serious engineering.
 
@@ -1828,7 +1833,7 @@ the system is not yet ready for serious engineering.
 
 5. **Human evaluation remains important.** Especially for subjective, complex, or high-consequence behavior.
 
-6. **Pairwise evaluation is often easier than absolute scoring.** “Which is better?” can be more reliable than “How good is this?”
+6. **Pairwise evaluation is often easier than absolute scoring.** "Which is better?" can be more reliable than "How good is this?"
 
 7. **Rubrics make evaluation actionable.** Correctness, groundedness, completeness, and relevance should be measured separately when they represent different failure modes.
 
@@ -1844,22 +1849,20 @@ the system is not yet ready for serious engineering.
 
 The central equation for Day 4 is therefore:
 
-[
+$$
 \boxed{
 \text{AI Engineering}
-=====================
-
+=
 \text{Application}
 +
 \text{Evaluation}
 +
 \text{Feedback Loop}
 }
-]
+$$
 
 And the most important mental model is:
 
 > **An AI application is not engineered when it works. It is engineered when you can measure its behavior, detect regressions, explain failures, and improve it systematically.**
 
 That is the point where the probabilistic nature of LLMs stops being an excuse for unpredictability and becomes an engineering property that can be managed.
-
