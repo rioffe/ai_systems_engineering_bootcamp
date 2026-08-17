@@ -42,11 +42,11 @@ That distinction becomes fundamental as AI systems become more capable.
 
 A useful mental model is:
 
-[
+$$
 \text{Application Quality}
 \approx
 f(\text{Model},\text{Instructions},\text{Context},\text{Tools},\text{State},\text{Evaluation})
-]
+$$
 
 The model is only one component.
 
@@ -58,9 +58,9 @@ The rest of the system determines what the model actually sees.
 
 Traditional software executes an explicitly defined program:
 
-[
+$$
 y = f(x)
-]
+$$
 
 The programmer determines the control flow, data structures, and inputs.
 
@@ -68,17 +68,17 @@ An LLM application is different.
 
 A useful abstraction is:
 
-[
+$$
 y \sim P(y \mid C)
-]
+$$
 
-where (C) is the context supplied to the model.
+where $C$ is the context supplied to the model.
 
 The output is probabilistic, but more importantly, **the context is constructed by the application**.
 
 This gives us a different engineering pipeline:
 
-[
+$$
 \text{World}
 \rightarrow
 \text{Application State}
@@ -88,7 +88,7 @@ This gives us a different engineering pipeline:
 \text{LLM}
 \rightarrow
 \text{Output}
-]
+$$
 
 The LLM cannot reason over information that it does not receive.
 
@@ -113,7 +113,7 @@ A production system typically constructs context from several sources.
 
 A simplified representation is:
 
-[
+$$
 C =
 C_{\text{system}}
 \oplus
@@ -126,9 +126,9 @@ C_{\text{retrieval}}
 C_{\text{tools}}
 \oplus
 C_{\text{state}}
-]
+$$
 
-where (\oplus) represents some application-specific composition operation.
+where $\oplus$ represents some application-specific composition operation.
 
 These components are not interchangeable.
 
@@ -207,7 +207,7 @@ The tool result becomes new context for the model.
 
 A capable agent therefore operates a loop:
 
-[
+$$
 \text{Context}
 \rightarrow
 \text{Model}
@@ -217,7 +217,7 @@ A capable agent therefore operates a loop:
 \text{Observation}
 \rightarrow
 \text{Context}'
-]
+$$
 
 The context changes as the agent interacts with the world.
 
@@ -229,11 +229,11 @@ Every model has a finite context capacity.
 
 Conceptually:
 
-[
+$$
 |C| \leq W
-]
+$$
 
-where (W) is the context window measured in tokens.
+where $W$ is the context window measured in tokens.
 
 Modern models may support very large contexts, but this does **not** mean that unlimited context is free or equally useful.
 
@@ -322,9 +322,9 @@ This distinction becomes particularly important for **prompt injection**.
 
 Suppose an organization has:
 
-[
+$$
 N = 1,000,000
-]
+$$
 
 documents.
 
@@ -338,11 +338,11 @@ That is impossible or economically absurd.
 
 Instead:
 
-[
+$$
 D_1,\ldots,D_N
 \xrightarrow{\text{retrieval}}
 D_{i_1},\ldots,D_{i_k}
-]
+$$
 
 The retrieval system selects a small subset of potentially relevant information.
 
@@ -352,13 +352,13 @@ The LLM may be extremely good at reasoning over the retrieved documents, but if 
 
 This leads to a critical decomposition:
 
-[
+$$
 P(\text{correct answer})
 \approx
 P(\text{retrieve relevant information})
 \times
 P(\text{correctly use information}\mid\text{relevant information})
-]
+$$
 
 An excellent generator cannot fully compensate for a broken retriever.
 
@@ -368,25 +368,17 @@ An excellent generator cannot fully compensate for a broken retriever.
 
 Retrieval introduces a fundamental tradeoff.
 
-Suppose the correct answer requires three documents:
-
-[
-D_2,D_{17},D_{84}
-]
+$D_2,D_{17},D_{84}$
 
 Your retriever returns:
 
-[
-D_2,D_{17},D_{84}
-]
-
-Excellent.
+$D_2,D_{17},D_{84}$
 
 Now suppose it returns:
 
-[
+$$
 D_2,D_{17},D_{84},D_{105},D_{204},\ldots,D_{500}
-]
+$$
 
 You have increased completeness, but potentially decreased usability.
 
@@ -400,25 +392,17 @@ The retrieval problem therefore has two competing objectives:
 
 Did we retrieve the information necessary to answer the question?
 
-[
-\text{Recall}
-=============
-
-\frac{\text{relevant items retrieved}}
-{\text{all relevant items}}
-]
+$$
+Recall = \frac{\text{relevant items retrieved}}{\text{all relevant items}}
+$$
 
 ### Precision
 
 How much of what we retrieved was actually relevant?
 
-[
-\text{Precision}
-================
-
-\frac{\text{relevant items retrieved}}
-{\text{all items retrieved}}
-]
+$$
+Precision = \frac{\text{relevant items retrieved}}{\text{all items retrieved}}
+$$
 
 High recall reduces the risk of missing necessary information.
 
@@ -528,19 +512,19 @@ As conversations and agent trajectories grow, the system eventually needs to com
 
 Suppose an agent has accumulated:
 
-[
+$$
 C_1,C_2,\ldots,C_{100}
-]
+$$
 
 Passing all 100 turns indefinitely is expensive and increasingly noisy.
 
 Instead, the application can construct a compressed representation:
 
-[
+$$
 S = f(C_1,\ldots,C_{100})
-]
+$$
 
-where (S) preserves the information expected to remain useful.
+where $S$ preserves the information expected to remain useful.
 
 For example:
 
@@ -558,15 +542,15 @@ But compression is lossy.
 
 If:
 
-[
+$$
 C' = f(C)
-]
+$$
 
 then generally:
 
-[
+$$
 C' \neq C
-]
+$$
 
 The engineering question becomes:
 
@@ -640,15 +624,15 @@ The next request can then retrieve that state and inject the relevant portion in
 
 This gives us:
 
-[
+$$
 \text{State} \rightarrow \text{Context}
-]
+$$
 
 rather than:
 
-[
+$$
 \text{History} \rightarrow \text{Everything}
-]
+$$
 
 The latter is a common architectural anti-pattern.
 
@@ -663,18 +647,18 @@ Memory is essentially a structured mechanism for deciding what information shoul
 A useful architecture is:
 
 ```text
-                    ┌──────────────┐
-                    │   Long-term  │
-                    │    memory    │
-                    └──────┬───────┘
-                           │
+                    +--------------+
+                    |   Long-term  |
+                    |    memory    |
+                    +------+-------+
+                           |
                            ↓
 User → Current request → Context builder → LLM
                            ↑
-                           │
-                    ┌──────┴───────┐
-                    │   Retrieval  │
-                    └──────────────┘
+                           |
+                    +------+-------+
+                    |   Retrieval  |
+                    +--------------+
 ```
 
 Memory should not be thought of as “the model remembering everything.”
@@ -831,8 +815,7 @@ For example:
   "confidence": 0.91,
   "sources": [
     "aws-billing-2026-07",
-    "cloud-cost-policy"
-  ]
+    "cloud-cost-policy"]
 }
 ```
 
@@ -851,14 +834,14 @@ System instructions:     2,000 tokens
 User request:              500 tokens
 Conversation state:      2,000 tokens
 Retrieved documents:    10,000 tokens
-Tool results:             5,000 tokens
+Tool results:            5,000 tokens
 -------------------------------
-Total:                   19,500 tokens
+Total:                  19,500 tokens
 ```
 
 Rather than allowing context to grow without constraint, the application can enforce:
 
-[
+$$
 B_{\text{system}}
 +
 B_{\text{history}}
@@ -867,7 +850,7 @@ B_{\text{retrieval}}
 +
 B_{\text{tools}}
 \leq B_{\text{total}}
-]
+$$
 
 This makes context a managed resource.
 
@@ -912,13 +895,13 @@ Each document should contain information that can support questions of varying d
 Then construct a pipeline:
 
 ```text
-                 ┌───────────────┐
-                 │    100 docs   │
-                 └───────┬───────┘
-                         │
+                 +---------------+
+                 |    100 docs   |
+                 +-------+-------+
+                         |
                          ↓
 User question → Retrieval → Context → LLM → Answer
-                         │
+                         |
                          ↓
                       Metrics
 ```
@@ -935,8 +918,7 @@ For example:
   "answer": "$5,000",
   "relevant_documents": [
     "policy-17",
-    "travel-03"
-  ]
+    "travel-03"]
 }
 ```
 
@@ -966,21 +948,21 @@ Answer
 
 Measure:
 
-[
+$$
 \text{Retrieval Precision}
-]
+$$
 
-[
+$$
 \text{Retrieval Recall}
-]
+$$
 
-[
+$$
 \text{Answer Accuracy}
-]
+$$
 
-[
+$$
 \text{Hallucination Rate}
-]
+$$
 
 This establishes the baseline.
 
@@ -1035,46 +1017,37 @@ For a known set of relevant documents, measure retrieval quality explicitly.
 
 Suppose:
 
-```text
 Relevant documents:
-{D3, D17, D42}
+$D_3, D_{17}, D_{42}$
 
 Retrieved:
-{D3, D17, D88, D91}
-```
+$D_3, D_{17}, D_{88}, D_{91}$
 
 Then:
 
-[
+$$
 TP = 2
-]
+$$
 
-[
+$$
 FP = 2
-]
+$$
 
-[
+$$
 FN = 1
-]
+$$
 
 Therefore:
 
-[
-Precision =
-\frac{2}{4}
-===========
-
-0.50
-]
+$$
+Precision = \frac{2}{4} = 0.50
+$$
 
 and:
 
-[
-Recall =
-\frac{2}{3}
-\approx
-0.67
-]
+$$
+Recall = \frac{2}{3} \approx 0.67
+$$
 
 This gives you a concrete diagnosis.
 
@@ -1098,11 +1071,11 @@ A system can retrieve the correct documents and still produce the wrong answer.
 
 Therefore evaluate:
 
-[
+$$
 \text{Retrieved Evidence}
 \rightarrow
 \text{Generated Answer}
-]
+$$
 
 Possible evaluation approaches include:
 
@@ -1137,15 +1110,15 @@ Compare the generated answer against a known reference answer and evidence set.
 
 For production systems, it is often useful to evaluate both:
 
-[
+$$
 \text{Answer correctness}
-]
+$$
 
 and:
 
-[
+$$
 \text{Evidence support}
-]
+$$
 
 An answer can be correct for the wrong reason.
 
@@ -1176,13 +1149,9 @@ Contradicted claim
 
 This gives a more useful definition of hallucination:
 
-[
-\text{Hallucination Rate}
-=========================
-
-\frac{\text{unsupported claims}}
-{\text{total factual claims}}
-]
+$$
+Hallucination Rate = \frac{\text{unsupported claims}}{\text{total factual claims}}
+$$
 
 The exact implementation can vary, but the principle is important:
 
@@ -1195,9 +1164,9 @@ The exact implementation can vary, but the principle is important:
 At this point, the architecture becomes:
 
 ```text
-              ┌─────────────────┐
-              │     Dataset     │
-              └────────┬────────┘
+              +-----------------+
+              |     Dataset     |
+              +--------+--------+
                        ↓
                     Questions
                        ↓
@@ -1212,8 +1181,8 @@ At this point, the architecture becomes:
                     Metrics
                        ↓
                 System changes
-                       │
-                       └───────────────┐
+                       |
+                       +---------------+
                                        ↓
                               Context Pipeline
 ```
@@ -1254,34 +1223,15 @@ And it can faithfully produce an incorrect answer when the application construct
 
 Therefore:
 
-[
-\boxed{
-\text{LLM Application}
-\neq
-\text{Prompt} + \text{Model}
-}
-]
+$$
+\text{LLM Application} \neq \text{Prompt} + \text{Model}
+$$
 
 A better abstraction is:
 
-[
-\boxed{
-\text{LLM Application}
-======================
-
-\text{State}
-+
-\text{Retrieval}
-+
-\text{Context Construction}
-+
-\text{Model}
-+
-\text{Tools}
-+
-\text{Evaluation}
-}
-]
+$$
+\text{LLM Application} = \text{State} + \text{Retrieval} + \text{Context Construction} + \text{Model} + \text{Tools} + \text{Evaluation}
+$$
 
 The model remains important.
 
