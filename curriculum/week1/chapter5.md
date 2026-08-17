@@ -31,9 +31,9 @@ Now the model can affect the outside world. It can retrieve a document, execute 
 But the most interesting systems go further:
 
 ```text
-             ┌─────────────────┐
-             │     Planner     │
-             └────────┬────────┘
+             +-----------------+
+             |     Planner     |
+             +--------+--------+
                       ↓
                  Tool Call
                       ↓
@@ -82,11 +82,11 @@ response = llm(prompt)
 
 Conceptually:
 
-[
+$$
 y = f_\theta(x)
-]
+$$
 
-where (x) is the prompt, (f_\theta) is the model, and (y) is the generated output.
+where $x$ is the prompt, $f_\theta$ is the model, and $y$ is the generated output.
 
 This architecture works well when the task can be completed entirely from the information supplied to the model.
 
@@ -203,14 +203,14 @@ The boundary therefore looks like:
 ```text
 Probabilistic
      LLM
-      │
-      │ structured request
-      ▼
+      |
+      | structured request
+      v
 Deterministic
      Tool
-      │
-      │ structured result
-      ▼
+      |
+      | structured result
+      v
 Probabilistic
      LLM
 ```
@@ -251,31 +251,31 @@ This is a **workflow**.
 
 A workflow can be represented as:
 
-[
+$$
 S_0 \rightarrow S_1 \rightarrow S_2 \rightarrow S_3
-]
+$$
 
 The developer determines the control flow.
 
 An agent is different:
 
 ```text
-             ┌───────────────┐
-             │      LLM      │
-             └───────┬───────┘
-                     │
+             +---------------+
+             |      LLM      |
+             +-------+-------+
+                     |
                 choose action
                      ↓
-             ┌───────────────┐
-             │     Tool      │
-             └───────┬───────┘
-                     │
+             +---------------+
+             |     Tool      |
+             +-------+-------+
+                     |
                  observation
                      ↓
-             ┌───────────────┐
-             │      LLM      │
-             └───────┬───────┘
-                     │
+             +---------------+
+             |      LLM      |
+             +-------+-------+
+                     |
               choose next action
                      ↓
                     ...
@@ -285,28 +285,28 @@ The model participates in determining the next transition.
 
 Formally, a workflow has a largely predetermined transition function:
 
-[
+$$
 s_{t+1} = F(s_t)
-]
+$$
 
 An agent introduces model-mediated decision making:
 
-[
+$$
 a_t \sim \pi_\theta(a \mid s_t)
-]
+$$
 
 followed by an environmental transition:
 
-[
+$$
 s_{t+1} = T(s_t, a_t)
-]
+$$
 
 where:
 
-* (s_t) is the current state,
-* (a_t) is an action,
-* (\pi_\theta) is the model's policy,
-* (T) represents the external environment.
+* $s_t$ is the current state,
+* $a_t$ is an action,
+* $\pi_\theta$ is the model's policy,
+* $T$ represents the external environment.
 
 This is much closer to a control system than to a conventional function call.
 
@@ -382,17 +382,17 @@ An agent needs state.
 
 A useful abstraction is:
 
-[
+$$
 S_t = (G, H_t, O_t, M_t, P)
-]
+$$
 
 where:
 
-* (G) = user goal
-* (H_t) = interaction history
-* (O_t) = observations obtained so far
-* (M_t) = intermediate memory
-* (P) = system policies and permissions
+* $G$ = user goal
+* $H_t$ = interaction history
+* $O_t$ = observations obtained so far
+* $M_t$ = intermediate memory
+* $P$ = system policies and permissions
 
 A simple implementation might contain:
 
@@ -415,19 +415,19 @@ A production agent may maintain:
 
 ```text
 Agent State
-├── User goal
-├── Conversation history
-├── Tool results
-├── Retrieved documents
-├── Working memory
-├── Intermediate conclusions
-├── Generated artifacts
-├── Authentication context
-├── Permissions
-├── Cost budget
-├── Time budget
-├── Step count
-└── Failure history
++-- User goal
++-- Conversation history
++-- Tool results
++-- Retrieved documents
++-- Working memory
++-- Intermediate conclusions
++-- Generated artifacts
++-- Authentication context
++-- Permissions
++-- Cost budget
++-- Time budget
++-- Step count
++-- Failure history
 ```
 
 The distinction becomes important as agents become long-running.
@@ -534,10 +534,10 @@ The model first constructs a plan:
 Goal
  ↓
 Plan
- ├── Search for X
- ├── Retrieve Y
- ├── Compare X and Y
- └── Produce report
+ +-- Search for X
+ +-- Retrieve Y
+ +-- Compare X and Y
+ +-- Produce report
 ```
 
 Then the system executes it.
@@ -548,16 +548,16 @@ Complex goals can be decomposed:
 
 ```text
 Research topic
-│
-├── Understand architecture
-│   ├── Find primary source
-│   └── Extract specifications
-│
-├── Evaluate performance
-│   ├── Find benchmarks
-│   └── Normalize results
-│
-└── Produce conclusion
+|
++-- Understand architecture
+|   +-- Find primary source
+|   +-- Extract specifications
+|
++-- Evaluate performance
+|   +-- Find benchmarks
+|   +-- Normalize results
+|
++-- Produce conclusion
 ```
 
 The more autonomous the system becomes, the more important it is to distinguish:
@@ -740,24 +740,24 @@ But retries should distinguish between failure classes.
 
 ```text
 Tool Failure
-│
-├── Transient
-│   └── Retry
-│
-├── Invalid Input
-│   └── Repair request
-│
-├── Authentication
-│   └── Re-authenticate / escalate
-│
-├── Permission
-│   └── Deny
-│
-├── Rate Limit
-│   └── Backoff
-│
-└── Permanent Failure
-    └── Alternative strategy / terminate
+|
++-- Transient
+|   +-- Retry
+|
++-- Invalid Input
+|   +-- Repair request
+|
++-- Authentication
+|   +-- Re-authenticate / escalate
+|
++-- Permission
+|   +-- Deny
+|
++-- Rate Limit
+|   +-- Backoff
+|
++-- Permanent Failure
+    +-- Alternative strategy / terminate
 ```
 
 Blindly retrying every error is dangerous.
@@ -828,8 +828,8 @@ For example:
 
 ```text
                 Research Agent
-                     │
-          ┌──────────┼──────────┐
+                     |
+          +----------+----------+
           ↓          ↓          ↓
      Search Agent  Data Agent  Writing Agent
 ```
@@ -931,8 +931,8 @@ Agent proposes action
         ↓
 Risk assessment
         ↓
-Low risk? ───── Yes ───→ Execute
-        │
+Low risk? ----- Yes ---→ Execute
+        |
         No
         ↓
 Human approval
@@ -965,19 +965,19 @@ The architecture is:
 
 ```text
                   User Question
-                       │
-                       ▼
-                 ┌───────────┐
-                 │    LLM    │
-                 └─────┬─────┘
-                       │
+                       |
+                       v
+                 +-----------+
+                 |    LLM    |
+                 +-----+-----+
+                       |
                  choose tool
-                       │
-          ┌────────────┴────────────┐
+                       |
+          +------------+------------+
           ↓                         ↓
       web_search                retrieve
-          │                         │
-          └────────────┬────────────┘
+          |                         |
+          +------------+------------+
                        ↓
                    Observation
                        ↓
@@ -986,11 +986,11 @@ The architecture is:
                More tool calls?
                   /       \
                 yes        no
-                 │          │
-                 └────┐     ↓
-                      │   Report
-                      │
-                      └──→ loop
+                 |          |
+                 +----+     ↓
+                      |   Report
+                      |
+                      +--→ loop
 ```
 
 A minimal tool interface might be:
@@ -1252,7 +1252,7 @@ Suppose the tool returns:
 
 ```text
 Source:
-"XYZ technology provides a 3× performance improvement."
+"XYZ technology provides a 3x performance improvement."
 ```
 
 but the source is actually low-quality marketing material.
@@ -1399,25 +1399,25 @@ At this point it should be clear why "agent engineering" is substantially more t
 A production agent contains at least these layers:
 
 ```text
-┌───────────────────────────────────────┐
-│              User Interface           │
-├───────────────────────────────────────┤
-│               Agent Policy             │
-├───────────────────────────────────────┤
-│             Agent Runtime              │
-│                                       │
-│   planning / state / loops / budgets  │
-├───────────────────────────────────────┤
-│                LLM                    │
-├───────────────────────────────────────┤
-│            Tool Router                │
-├───────────────────────────────────────┤
-│       Authorization / Policy          │
-├───────────────────────────────────────┤
-│              Tools                   │
-├───────────────────────────────────────┤
-│          External Systems             │
-└───────────────────────────────────────┘
++---------------------------------------+
+|              User Interface           |
++---------------------------------------+
+|               Agent Policy             |
++---------------------------------------+
+|             Agent Runtime              |
+|                                       |
+|   planning / state / loops / budgets  |
++---------------------------------------+
+|                LLM                    |
++---------------------------------------+
+|            Tool Router                |
++---------------------------------------+
+|       Authorization / Policy          |
++---------------------------------------+
+|              Tools                   |
++---------------------------------------+
+|          External Systems             |
++---------------------------------------+
 ```
 
 Each layer has different failure modes.
@@ -1532,23 +1532,23 @@ A useful mental model is:
 ```text
            Probabilistic Core
                  LLM
-                  │
-        ┌─────────┴─────────┐
-        │                   │
+                  |
+        +---------+---------+
+        |                   |
    Decision making     Interpretation
-        │                   │
-────────┴───────────────────┴────────
+        |                   |
+--------+-------------------+--------
         Deterministic Infrastructure
-        │
-        ├── schemas
-        ├── permissions
-        ├── budgets
-        ├── retries
-        ├── state
-        ├── validation
-        ├── logging
-        ├── timeouts
-        └── termination
+        |
+        +-- schemas
+        +-- permissions
+        +-- budgets
+        +-- retries
+        +-- state
+        +-- validation
+        +-- logging
+        +-- timeouts
+        +-- termination
 ```
 
 The closer a component is to controlling external side effects, the more deterministic it should be.
@@ -1643,25 +1643,25 @@ This produces a useful spectrum:
 
 ```text
 More deterministic
-        │
-        ▼
-┌─────────────────────────┐
-│ Single LLM call         │
-├─────────────────────────┤
-│ Structured LLM call     │
-├─────────────────────────┤
-│ LLM + fixed tools       │
-├─────────────────────────┤
-│ Conditional workflow    │
-├─────────────────────────┤
-│ Planner + workflow      │
-├─────────────────────────┤
-│ Agentic loop            │
-├─────────────────────────┤
-│ Multi-agent system      │
-└─────────────────────────┘
-        ▲
-        │
+        |
+        v
++-------------------------+
+| Single LLM call         |
++-------------------------+
+| Structured LLM call     |
++-------------------------+
+| LLM + fixed tools       |
++-------------------------+
+| Conditional workflow    |
++-------------------------+
+| Planner + workflow      |
++-------------------------+
+| Agentic loop            |
++-------------------------+
+| Multi-agent system      |
++-------------------------+
+        ^
+        |
 More autonomous
 ```
 
@@ -1769,31 +1769,31 @@ It represents a fundamental change in the computational model.
 
 A conventional LLM application resembles:
 
-[
+$$
 y = f(x)
-]
+$$
 
 An agent resembles:
 
-[
+$$
 a_t \sim \pi_\theta(s_t)
-]
+$$
 
-[
+$$
 o_t = T(s_t, a_t)
-]
+$$
 
-[
+$$
 s_{t+1} = U(s_t, a_t, o_t)
-]
+$$
 
 until:
 
-[
+$$
 C(s_t) = \text{true}
-]
+$$
 
-where (C) is a termination condition.
+where $C$ is a termination condition.
 
 The system has acquired:
 
