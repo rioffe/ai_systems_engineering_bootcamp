@@ -107,34 +107,34 @@ That distinction is central to trustworthy AI.
 The completed system should contain at least these capabilities:
 
 ```text
-┌─────────────────────────────────────┐
-│       Personal Research Assistant   │
-├─────────────────────────────────────┤
-│                                     │
-│ Document ingestion                   │
-│       ↓                             │
-│ Document processing                  │
-│       ↓                             │
-│ Embedding / indexing                 │
-│       ↓                             │
-│ Retrieval                            │
-│       ↓                             │
-│ LLM reasoning                        │
-│       ↓                             │
-│ Tool calling                         │
-│       ↓                             │
-│ Conversational state                 │
-│       ↓                             │
-│ Structured output                    │
-│       ↓                             │
-│ Citations                            │
-│       ↓                             │
-│ Uncertainty detection                │
-│       ↓                             │
-│ Evaluation                           │
-│       ↓                             │
-│ Observability                        │
-└─────────────────────────────────────┘
++-------------------------------------+
+|       Personal Research Assistant   |
++-------------------------------------+
+|                                     |
+| Document ingestion                   |
+|       ↓                             |
+| Document processing                  |
+|       ↓                             |
+| Embedding / indexing                 |
+|       ↓                             |
+| Retrieval                            |
+|       ↓                             |
+| LLM reasoning                        |
+|       ↓                             |
+| Tool calling                         |
+|       ↓                             |
+| Conversational state                 |
+|       ↓                             |
+| Structured output                    |
+|       ↓                             |
+| Citations                            |
+|       ↓                             |
+| Uncertainty detection                |
+|       ↓                             |
+| Evaluation                           |
+|       ↓                             |
+| Observability                        |
++-------------------------------------+
 ```
 
 This is not merely a chatbot.
@@ -204,13 +204,13 @@ A useful chunk might correspond to:
 
 ```text
 Document
- ├── Abstract
- ├── Introduction
- ├── Section 1
- │    ├── subsection
- │    └── subsection
- ├── Section 2
- └── Conclusion
+ +-- Abstract
+ +-- Introduction
+ +-- Section 1
+ |    +-- subsection
+ |    +-- subsection
+ +-- Section 2
+ +-- Conclusion
 ```
 
 Chunk boundaries should ideally preserve semantic structure.
@@ -257,14 +257,14 @@ Relevant Context
 
 The simplest retrieval system might perform:
 
-[
+$$
 \text{score}(q,d_i)=\cos(E(q),E(d_i))
-]
+$$
 
 where:
 
-* (E(q)) is the query embedding;
-* (E(d_i)) is the document embedding.
+* $E(q)$ is the query embedding;
+* $E(d_i)$ is the document embedding.
 
 But a stronger system may combine:
 
@@ -379,11 +379,11 @@ The agent can then decide:
 Is the user's question answerable
 from the uploaded documents?
 
-       │
-   ┌───┴───┐
-   │       │
+       |
+   +---+---+
+   |       |
   Yes      No
-   │       │
+   |       |
    ↓       ↓
 Answer   Search web
            ↓
@@ -502,8 +502,7 @@ For example:
       "id": "paper_17_042",
       "document": "paper_17.pdf",
       "page": 8
-    }
-  ]
+    } ]
 }
 ```
 
@@ -552,9 +551,9 @@ Claim
   ↓
 Evidence search
   ↓
-┌──────────────┬──────────────┬───────────────┐
-│ Supported    │ Contradicted │ Insufficient  │
-└──────────────┴──────────────┴───────────────┘
++--------------+--------------+---------------+
+| Supported    | Contradicted | Insufficient  |
++--------------+--------------+---------------+
 ```
 
 You can also distinguish:
@@ -583,16 +582,16 @@ The core research loop can be:
                      ↓
               Evaluate evidence
                      ↓
-          ┌──────────┴──────────┐
-          │                     │
+          +----------+----------+
+          |                     |
      Sufficient             Insufficient
-          │                     │
-          │                     ↓
-          │                 Web Search
-          │                     ↓
-          │                 Retrieve
-          │                     ↓
-          └─────────────┬───────┘
+          |                     |
+          |                     ↓
+          |                 Web Search
+          |                     ↓
+          |                 Retrieve
+          |                     ↓
+          +-------------+-------+
                         ↓
                     Reasoning
                         ↓
@@ -780,21 +779,21 @@ A minimal persistent data model might include:
 
 ```text
 User
- └── Conversations
-      └── Messages
-           └── Tool Calls
+ +-- Conversations
+      +-- Messages
+           +-- Tool Calls
 
 Document
- └── Document Versions
-      └── Chunks
-           └── Embeddings
+ +-- Document Versions
+      +-- Chunks
+           +-- Embeddings
 
 Research Session
- ├── Active Documents
- ├── Retrieved Sources
- ├── Claims
- ├── Citations
- └── Evaluation Records
+ +-- Active Documents
+ +-- Retrieved Sources
+ +-- Claims
+ +-- Citations
+ +-- Evaluation Records
 ```
 
 A `Document` might contain:
@@ -978,18 +977,18 @@ The agent might construct:
 
 ```text
 Research Goal
-│
-├── Identify approach A
-│
-├── Identify approach B
-│
-├── Compare methodology
-│
-├── Compare experimental results
-│
-├── Evaluate evidence quality
-│
-└── Identify limitations
+|
++-- Identify approach A
+|
++-- Identify approach B
+|
++-- Compare methodology
+|
++-- Compare experimental results
+|
++-- Evaluate evidence quality
+|
++-- Identify limitations
 ```
 
 Each subtask can produce evidence.
@@ -1329,24 +1328,24 @@ Termination reason
 A useful dashboard might contain:
 
 ```text
-┌───────────────────────────────────────────┐
-│             System Health                 │
-├───────────────────────────────────────────┤
-│ Requests/min            42                │
-│ Error rate              0.7%              │
-│ p95 latency             4.2 s             │
-│ Avg cost/request        $0.08             │
-├───────────────────────────────────────────┤
-│ AI Quality                                 │
-│ Groundedness             0.93             │
-│ Citation accuracy        0.97             │
-│ Task success             0.91             │
-├───────────────────────────────────────────┤
-│ Agent Behavior                             │
-│ Avg steps                3.8              │
-│ Avg tool calls           1.4              │
-│ Loop rate                0.2%             │
-└───────────────────────────────────────────┘
++-------------------------------------------+
+|             System Health                 |
++-------------------------------------------+
+| Requests/min            42                |
+| Error rate              0.7%              |
+| p95 latency             4.2 s             |
+| Avg cost/request        $0.08             |
++-------------------------------------------+
+| AI Quality                                 |
+| Groundedness             0.93             |
+| Citation accuracy        0.97             |
+| Task success             0.91             |
++-------------------------------------------+
+| Agent Behavior                             |
+| Avg steps                3.8              |
+| Avg tool calls           1.4              |
+| Loop rate                0.2%             |
++-------------------------------------------+
 ```
 
 These numbers are illustrative; your application should measure actual values.
@@ -1385,9 +1384,9 @@ allowed_document_ids
 
 Conceptually:
 
-[
-R(q,u)={d \mid similarity(q,d) > \tau \land authorized(u,d)}
-]
+$$
+R(q,u)=\{d \mid \text{similarity}(q,d) > \tau \land \text{authorized}(u,d)\}
+$$
 
 Authorization is therefore part of retrieval correctness.
 
@@ -1757,17 +1756,17 @@ The project has three required deliverables.
 The application must:
 
 ```text
-✓ ingest documents
-✓ retrieve information
-✓ answer questions
-✓ cite sources
-✓ use tools
-✓ maintain conversation state
-✓ detect uncertainty
-✓ produce structured outputs
-✓ expose metrics
-✓ include an evaluation suite
-✓ be deployed
+- ingest documents
+- retrieve information
+- answer questions
+- cite sources
+- use tools
+- maintain conversation state
+- detect uncertainty
+- produce structured outputs
+- expose metrics
+- include an evaluation suite
+- be deployed
 ```
 
 ---
@@ -1784,10 +1783,10 @@ API
 Authentication / Authorization
  ↓
 AI Orchestration
- ├── Model
- ├── RAG
- ├── Tools
- └── State
+ +-- Model
+ +-- RAG
+ +-- Tools
+ +-- State
  ↓
 Validation
  ↓
@@ -1912,31 +1911,31 @@ The goal is to learn how to build an AI system from end to end.
 By the end, you should have encountered the complete engineering loop:
 
 ```text
-             ┌───────────────────┐
-             │       Design      │
-             └─────────┬─────────┘
+             +-------------------+
+             |       Design      |
+             +---------+---------+
                        ↓
-             ┌───────────────────┐
-             │       Build       │
-             └─────────┬─────────┘
+             +-------------------+
+             |       Build       |
+             +---------+---------+
                        ↓
-             ┌───────────────────┐
-             │      Evaluate     │
-             └─────────┬─────────┘
+             +-------------------+
+             |      Evaluate     |
+             +---------+---------+
                        ↓
-             ┌───────────────────┐
-             │     Observe       │
-             └─────────┬─────────┘
+             +-------------------+
+             |     Observe       |
+             +---------+---------+
                        ↓
-             ┌───────────────────┐
-             │ Diagnose failures │
-             └─────────┬─────────┘
+             +-------------------+
+             | Diagnose failures |
+             +---------+---------+
                        ↓
-             ┌───────────────────┐
-             │      Improve      │
-             └─────────┬─────────┘
-                       │
-                       └───────────────┐
+             +-------------------+
+             |      Improve      |
+             +---------+---------+
+                       |
+                       +---------------+
                                        ↓
                                     Evaluate
 ```
@@ -1968,11 +1967,11 @@ At the end of the week, you should be thinking about:
                            ↓
                     AI Orchestrator
                            ↓
-              ┌────────────┼────────────┐
+              +------------+------------+
               ↓            ↓            ↓
             Model         RAG          Tools
-              │            │            │
-              └────────────┼────────────┘
+              |            |            |
+              +------------+------------+
                            ↓
                      State / Memory
                            ↓
@@ -1980,19 +1979,19 @@ At the end of the week, you should be thinking about:
                            ↓
                         Answer
                            ↓
-                ┌──────────┴──────────┐
+                +----------+----------+
                 ↓                     ↓
               Evals             Observability
-                │                     │
-                │             ┌───────┼───────┐
-                │             ↓       ↓       ↓
-                │           Logs    Metrics  Traces
-                │
-                └──────────────┐
+                |                     |
+                |             +-------+-------+
+                |             ↓       ↓       ↓
+                |           Logs    Metrics  Traces
+                |
+                +--------------+
                                ↓
                          Improvement
-                               │
-                               └──────→ System
+                               |
+                               +------→ System
 ```
 
 The difference is profound.
@@ -2142,10 +2141,9 @@ A system is not good merely because its answers are good.
 
 You must consider:
 
-[
+$$
 \text{System Quality}
-=====================
-
+=
 f(
 \text{accuracy},
 \text{groundedness},
@@ -2155,7 +2153,7 @@ f(
 \text{cost},
 \text{usability}
 )
-]
+$$
 
 Optimizing one dimension can degrade another.
 

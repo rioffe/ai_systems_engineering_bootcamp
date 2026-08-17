@@ -63,39 +63,39 @@ At a high level:
                          +----------------+
                          |      User      |
                          +-------+--------+
-                                 │
-                                 ▼
+                                 |
+                                 ↓
                          +---------------+
                          |      API      |
                          +-------+-------+
-                                 │
-                                 ▼
+                                 |
+                                 ↓
                     +--------------------------+
                     |   AI Orchestration       |
                     +------------+-------------+
-                                 │
+                                 |
              +-------------------+-------------------+
-             │                   │                   │
-             ▼                   ▼                   ▼
+             |                   |                   |
+             ↓                   ↓                   ↓
          Conversation          RAG                Tools
-            State               │                   │
-             │                  ▼                   ▼
-             │            Vector / Search       External APIs
-             │                  │                   │
-             └──────────────────┼───────────────────┘
-                                ▼
+            State               |                   |
+             |                  ↓                   ↓
+             |            Vector / Search       External APIs
+             |                  |                   |
+             +------------------+-------------------+
+                                ↓
                               Model
-                                │
-                                ▼
+                                |
+                                ↓
                          Structured Output
-                                │
+                                |
                          +------+------+
-                         │             │
-                         ▼             ▼
+                         |             |
+                         ↓             ↓
                        Evals      Observability
-                         │             │
-                         └──────┬──────┘
-                                ▼
+                         |             |
+                         +------+------+
+                                ↓
                              Metrics
 ```
 
@@ -238,17 +238,17 @@ For example:
 
 ```text
 Document
-│
-├── Introduction
-│
-├── Architecture
-│   ├── CPU
-│   ├── GPU
-│   └── Memory
-│
-├── Performance
-│
-└── Conclusion
+|
++-- Introduction
+|
++-- Architecture
+|   +-- CPU
+|   +-- GPU
+|   +-- Memory
+|
++-- Performance
+|
++-- Conclusion
 ```
 
 The chunking system should attempt to preserve this structure.
@@ -451,7 +451,7 @@ This is an important distinction:
 
 ```text
 Citation presence
-        ≠
+        !=
 Citation correctness
 ```
 
@@ -483,11 +483,11 @@ The system needs conversational state:
 
 ```text
 Conversation
-│
-├── User question 1
-├── Assistant answer 1
-├── User question 2
-└── Current context
+|
++-- User question 1
++-- Assistant answer 1
++-- User question 2
++-- Current context
 ```
 
 However, simply sending the entire conversation to the model forever is not a scalable solution.
@@ -504,12 +504,12 @@ A useful abstraction is:
 
 ```text
 Persistent State
-│
-├── User preferences
-├── Research workspace
-├── Document set
-├── Conversation summary
-└── Active research context
+|
++-- User preferences
++-- Research workspace
++-- Document set
++-- Conversation summary
++-- Active research context
 ```
 
 ---
@@ -565,7 +565,7 @@ For example:
         ↓
 retrieve()
 
-"What is 27 × 42?"
+"What is 27 x 42?"
         ↓
 calculator()
 
@@ -582,13 +582,12 @@ Tool selection should be evaluated explicitly.
 
 A useful metric is:
 
-[
+$$
 \text{Tool Success Rate}
-========================
-
+=
 \frac{\text{correct tool selections}}
 {\text{total tool decisions}}
-]
+$$
 
 But also measure unnecessary tool usage.
 
@@ -628,8 +627,7 @@ A useful structured representation is:
   "confidence": "medium",
   "evidence_quality": "moderate",
   "limitations": [
-    "The source does not provide a controlled comparison."
-  ]
+    "The source does not provide a controlled comparison."]
 }
 ```
 
@@ -691,24 +689,24 @@ Conceptually:
 
 ```text
                          User Question
-                              │
-                              ▼
-                     ┌─────────────────┐
-                     │   Orchestrator  │
-                     └────────┬────────┘
-                              │
-                 ┌────────────┼────────────┐
-                 ▼            ▼            ▼
+                              |
+                              ↓
+                     +-----------------+
+                     |   Orchestrator  |
+                     +--------+--------+
+                              |
+                 +------------+------------+
+                 ↓            ↓            ↓
              Retrieve       Tools        State
-                 │            │            │
-                 └────────────┼────────────┘
-                              ▼
+                 |            |            |
+                 +------------+------------+
+                              ↓
                             Model
-                              │
-                              ▼
+                              |
+                              ↓
                          Validation
-                              │
-                              ▼
+                              |
+                              ↓
                            Response
 ```
 
@@ -824,9 +822,9 @@ Even a "personal" research assistant should be designed with data isolation in m
 
 The fundamental invariant is:
 
-[
+$$
 \text{User A cannot retrieve User B's documents}
-]
+$$
 
 This must be enforced at the data layer.
 
@@ -912,9 +910,9 @@ At minimum, measure:
 
 ### Retrieval
 
-[
-Recall@K
-]
+$$
+\text{Recall@K}
+$$
 
 Did the relevant evidence appear in the top (K) results?
 
@@ -954,15 +952,15 @@ A useful evaluation report might look like:
 
 | Capability      | Metric                 |           Target |
 | --------------- | ---------------------- | ---------------: |
-| Retrieval       | Recall@5               |            > 90% |
-| Answering       | Correctness            |            > 90% |
-| Grounding       | Supported claims       |            > 95% |
-| Citation        | Citation correctness   |            > 95% |
-| Uncertainty     | Calibration            |            > 85% |
-| Tool use        | Correct tool selection |            > 90% |
-| Task completion | Success rate           |            > 90% |
-| Security        | Injection resistance   | 100% on test set |
-| Reliability     | Successful requests    |            > 99% |
+| Retrieval       | Recall@5               |            > 90\% |
+| Answering       | Correctness            |            > 90\% |
+| Grounding       | Supported claims       |            > 95\% |
+| Citation        | Citation correctness   |            > 95\% |
+| Uncertainty     | Calibration            |            > 85\% |
+| Tool use        | Correct tool selection |            > 90\% |
+| Task completion | Success rate           |            > 90\% |
+| Security        | Injection resistance   | 100\% on test set |
+| Reliability     | Successful requests    |            > 99\% |
 
 The exact targets are less important than establishing measurable acceptance criteria.
 
@@ -1008,26 +1006,26 @@ For example:
 RUN 82ac
 
 User Question
-    │
-    ├── Retrieve
-    │     ├── query: "GPU architecture"
-    │     ├── top_k: 10
-    │     └── latency: 132 ms
-    │
-    ├── Rerank
-    │     └── latency: 41 ms
-    │
-    ├── LLM
-    │     ├── model: ...
-    │     ├── input_tokens: 4,921
-    │     └── output_tokens: 832
-    │
-    ├── Tool
-    │     └── search_web()
-    │
-    ├── LLM
-    │
-    └── Final Answer
+    |
+    +-- Retrieve
+    |     +-- query: "GPU architecture"
+    |     +-- top_k: 10
+    |     +-- latency: 132 ms
+    |
+    +-- Rerank
+    |     +-- latency: 41 ms
+    |
+    +-- LLM
+    |     +-- model: ...
+    |     +-- input_tokens: 4,921
+    |     +-- output_tokens: 832
+    |
+    +-- Tool
+    |     +-- search_web()
+    |
+    +-- LLM
+    |
+    +-- Final Answer
 ```
 
 Record:
@@ -1070,16 +1068,16 @@ Task completion rate
 For example:
 
 ```text
-┌─────────────────────────────────────┐
-│ Requests             18,420         │
-│ Success Rate           99.3%        │
-│ p95 Latency             4.8 s       │
-│ Avg Tokens             6,214        │
-│ Avg Cost                $0.07       │
-│ Groundedness             94.8%      │
-│ Citation Accuracy       96.1%       │
-│ Tool Success             92.7%      │
-└─────────────────────────────────────┘
++-------------------------------------+
+| Requests             18,420         |
+| Success Rate           99.3%        |
+| p95 Latency             4.8 s       |
+| Avg Tokens             6,214        |
+| Avg Cost                $0.07       |
+| Groundedness             94.8%      |
+| Citation Accuracy       96.1%       |
+| Tool Success             92.7%      |
++-------------------------------------+
 ```
 
 The exact dashboard technology is not important.
@@ -1181,8 +1179,7 @@ For example:
   "answer": "...",
   "confidence": "low",
   "limitations": [
-    "The document retrieval service was unavailable."
-  ]
+    "The document retrieval service was unavailable."]
 }
 ```
 
@@ -1194,8 +1191,7 @@ Or:
   "answer": null,
   "confidence": "low",
   "limitations": [
-    "No available source supports the requested claim."
-  ]
+    "No available source supports the requested claim."]
 }
 ```
 
@@ -1211,24 +1207,24 @@ A minimal deployment might look like:
 
 ```text
                     Internet
-                       │
-                       ▼
+                       |
+                       ↓
                  Load Balancer
-                       │
-                       ▼
+                       |
+                       ↓
                   API Service
-                       │
-                       ▼
+                       |
+                       ↓
                 AI Orchestrator
                   /    |    \
                  /     |     \
-                ▼      ▼      ▼
+                ↓      ↓      ↓
              Model    RAG    Tools
-                       │
-                       ▼
+                       |
+                       ↓
                    Vector DB
-                       │
-                       ▼
+                       |
+                       ↓
                   Object Store
 ```
 
@@ -1240,8 +1236,8 @@ Supporting infrastructure:
                 Logs    Metrics   Traces
 
                     Evaluation
-                       │
-                       ▼
+                       |
+                       ↓
                  Evaluation DB
 ```
 
@@ -1315,10 +1311,9 @@ Measure the complete request latency.
 
 For a RAG request:
 
-[
+$$
 T_{\text{total}}
-================
-
+=
 T_{\text{API}}
 +
 T_{\text{retrieval}}
@@ -1330,7 +1325,7 @@ T_{\text{model}}
 T_{\text{tools}}
 +
 T_{\text{validation}}
-]
+$$
 
 Do not assume the LLM dominates every workload.
 
@@ -1356,10 +1351,9 @@ Calculate the economics of the application.
 
 For each request:
 
-[
+$$
 C_{\text{request}}
-==================
-
+=
 C_{\text{input}}
 +
 C_{\text{output}}
@@ -1369,27 +1363,25 @@ C_{\text{embedding}}
 C_{\text{retrieval}}
 +
 C_{\text{tool}}
-]
+$$
 
 Then estimate:
 
-[
+$$
 C_{\text{monthly}}
-==================
-
+=
 N_{\text{requests}}
 \times
 C_{\text{request}}
-]
+$$
 
 For agentic workloads, also account for variable execution length:
 
-[
+$$
 E[C]
-====
-
+=
 \sum_{n} P(N=n)C_n
-]
+$$
 
 where (N) is the number of model/tool operations.
 
@@ -1421,16 +1413,16 @@ API
 Authentication / Authorization
  ↓
 Orchestrator
- ├── Conversation State
- ├── Model
- ├── RAG
- │    ├── Parser
- │    ├── Embeddings
- │    ├── Vector DB
- │    └── Reranker
- └── Tools
-      ├── Search
-      └── Other APIs
+ +-- Conversation State
+ +-- Model
+ +-- RAG
+ |    +-- Parser
+ |    +-- Embeddings
+ |    +-- Vector DB
+ |    +-- Reranker
+ +-- Tools
+      +-- Search
+      +-- Other APIs
  ↓
 Validation
  ↓
@@ -1555,11 +1547,11 @@ For example:
 
 | Configuration       | Accuracy | Groundedness |  Cost |
 | ------------------- | -------: | -----------: | ----: |
-| LLM only            |      61% |          42% | $0.03 |
-| + RAG               |      79% |          81% | $0.05 |
-| + Reranking         |      85% |          88% | $0.07 |
-| + Tools             |      89% |          90% | $0.10 |
-| + Structured output |      89% |          91% | $0.10 |
+| LLM only            |      61\% |          42\% | \$0.03 |
+| + RAG               |      79\% |          81\% | \$0.05 |
+| + Reranking         |      85\% |          88\% | \$0.07 |
+| + Tools             |      89\% |          90\% | \$0.10 |
+| + Structured output |      89\% |          91\% | \$0.10 |
 
 The numbers here are illustrative.
 
@@ -1574,20 +1566,20 @@ The project is successful when another engineer can clone the repository, config
 A successful implementation should therefore satisfy:
 
 ```text
-✓ Documents can be ingested
-✓ Documents can be retrieved
-✓ Questions can be answered
-✓ Answers contain citations
-✓ Follow-up questions preserve context
-✓ Tools can be invoked
-✓ Uncertainty is represented
-✓ Outputs follow a schema
-✓ Evaluation suite runs automatically
-✓ Metrics are exposed
-✓ Requests are observable
-✓ Failures are handled
-✓ Security boundaries exist
-✓ The application is deployed
+- Documents can be ingested
+- Documents can be retrieved
+- Questions can be answered
+- Answers contain citations
+- Follow-up questions preserve context
+- Tools can be invoked
+- Uncertainty is represented
+- Outputs follow a schema
+- Evaluation suite runs automatically
+- Metrics are exposed
+- Requests are observable
+- Failures are handled
+- Security boundaries exist
+- The application is deployed
 ```
 
 The final system does not need to be enormous.
@@ -1602,43 +1594,43 @@ A clean repository might look like:
 
 ```text
 research-assistant/
-│
-├── app/
-│   ├── api/
-│   ├── orchestration/
-│   ├── agents/
-│   ├── models/
-│   ├── retrieval/
-│   ├── tools/
-│   ├── state/
-│   ├── security/
-│   └── observability/
-│
-├── ingestion/
-│   ├── parsers/
-│   ├── chunking/
-│   └── indexing/
-│
-├── evals/
-│   ├── datasets/
-│   ├── evaluators/
-│   ├── metrics/
-│   └── reports/
-│
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   ├── security/
-│   └── evals/
-│
-├── deployment/
-│
-├── docs/
-│   └── architecture.md
-│
-├── config/
-│
-└── README.md
+|
++-- app/
+|   +-- api/
+|   +-- orchestration/
+|   +-- agents/
+|   +-- models/
+|   +-- retrieval/
+|   +-- tools/
+|   +-- state/
+|   +-- security/
+|   +-- observability/
+|
++-- ingestion/
+|   +-- parsers/
+|   +-- chunking/
+|   +-- indexing/
+|
++-- evals/
+|   +-- datasets/
+|   +-- evaluators/
+|   +-- metrics/
+|   +-- reports/
+|
++-- tests/
+|   +-- unit/
+|   +-- integration/
+|   +-- security/
+|   +-- evals/
+|
++-- deployment/
+|
++-- docs/
+|   +-- architecture.md
+|
++-- config/
+|
++-- README.md
 ```
 
 The exact structure is not important.
@@ -2064,10 +2056,10 @@ User
 API
  ↓
 Orchestration
- ├── Model
- ├── RAG
- ├── Tools
- └── State
+ +-- Model
+ +-- RAG
+ +-- Tools
+ +-- State
  ↓
 Validation
  ↓
@@ -2104,23 +2096,23 @@ LLM
 It ends with:
 
 ```text
-                         ┌──────────────┐
-                         │     User     │
-                         └──────┬───────┘
+                         +--------------+
+                         |     User     |
+                         +------+-------+
                                 ↓
-                         ┌──────────────┐
-                         │     API      │
-                         └──────┬───────┘
+                         +--------------+
+                         |     API      |
+                         +------+-------+
                                 ↓
-                    ┌──────────────────────┐
-                    │   AI Orchestration   │
-                    └──────────┬───────────┘
+                    +----------------------+
+                    |   AI Orchestration   |
+                    +----------+-----------+
                                ↓
-              ┌────────────────┼────────────────┐
+              +----------------+----------------+
               ↓                ↓                ↓
             Model             RAG             Tools
-              │                │                │
-              └────────────────┼────────────────┘
+              |                |                |
+              +----------------+----------------+
                                ↓
                           State / Policy
                                ↓
