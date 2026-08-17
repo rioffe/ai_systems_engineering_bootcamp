@@ -1042,6 +1042,7 @@ Retrieved:
 $D_3, D_{17}, D_{88}, D_{91}$
 
 In this case:
+
 * $TP = 2$ (Documents $D_3$ and $D_{17}$ were found)
 * $FP = 2$ (Documents $D_{88}$ and $D_{91}$ were noise)
 * $FN = 1$ (Document $D_{42}$ was missed)
