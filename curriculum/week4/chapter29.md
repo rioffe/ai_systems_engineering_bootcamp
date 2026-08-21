@@ -427,7 +427,6 @@ For example:
 $$
 \text{AI System}
 =
-
 {
 \text{Model},
 \text{Context},
@@ -595,7 +594,6 @@ Estimate:
 $$
 C_{\text{request}}
 =
-
 C_{\text{LLM}}
 +
 C_{\text{embedding}}
@@ -618,7 +616,6 @@ and at scale:
 $$
 C_{\text{monthly}}
 =
-
 N_{\text{requests}}
 \times
 C_{\text{request}}
