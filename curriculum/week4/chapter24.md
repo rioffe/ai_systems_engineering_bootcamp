@@ -16,7 +16,7 @@ The output is not a collection of feature ideas.
 
 It is an engineering artifact containing:
 
-[
+$$
 \boxed{
 \text{User}
 +
@@ -34,7 +34,7 @@ It is an engineering artifact containing:
 +
 \text{Scope}
 }
-]
+$$
 
 The final specification should be sufficiently precise that a coding agent—or a human engineering team—can implement the first version without having to rediscover the product.
 
@@ -83,17 +83,17 @@ It does **not** necessarily require:
 
 The correct optimization target is:
 
-[
+$$
 \boxed{
-\minimize\ Cost
+\text{minimize} \, \text{Cost}
 \quad
 \text{subject to}
 \quad
 \text{Hypothesis Testability} \geq \tau
 }
-]
+$$
 
-where (\tau) represents the minimum evidence needed to test the product hypothesis.
+where $\tau$ represents the minimum evidence needed to test the product hypothesis.
 
 ---
 
@@ -207,15 +207,15 @@ For example:
 
 Then define the desired transformation:
 
-[
+$$
 \text{Current State}
 \rightarrow
 \text{Desired State}
-]
+$$
 
 Current:
 
-[
+$$
 \text{Incident}
 \rightarrow
 \text{Manual Investigation}
@@ -225,11 +225,11 @@ Current:
 \text{Evidence Gathering}
 \rightarrow
 \text{Report}
-]
+$$
 
 Desired:
 
-[
+$$
 \text{Incident}
 \rightarrow
 \text{AI Investigation}
@@ -239,7 +239,7 @@ Desired:
 \text{Human Verification}
 \rightarrow
 \text{Report}
-]
+$$
 
 The MVP exists to determine whether the second workflow is materially better.
 
@@ -255,7 +255,7 @@ For example:
 
 This can be formalized as:
 
-[
+$$
 H =
 H_{\text{problem}}
 \land
@@ -264,7 +264,7 @@ H_{\text{solution}}
 H_{\text{adoption}}
 \land
 H_{\text{economics}}
-]
+$$
 
 The MVP should produce evidence about these hypotheses.
 
@@ -278,10 +278,10 @@ The workflow describes what happens from user intent to outcome.
 
 A useful representation is:
 
-[
+$$
 W =
 (s_1,s_2,\ldots,s_n)
-]
+$$
 
 For our example:
 
@@ -330,7 +330,7 @@ The engineer accepts, rejects, or modifies the conclusions.
 
 This produces a complete workflow:
 
-[
+$$
 \boxed{
 \text{Intent}
 \rightarrow
@@ -344,7 +344,7 @@ This produces a complete workflow:
 \rightarrow
 \text{Human Review}
 }
-]
+$$
 
 ---
 
@@ -389,11 +389,11 @@ The system should:
 
 The distinction is important:
 
-[
+$$
 \text{Feature List}
 \neq
 \text{Product Requirements}
-]
+$$
 
 A feature list says:
 
@@ -413,33 +413,33 @@ Only after the workflow and requirements are defined should the architecture be 
 
 A reasonable MVP architecture might be:
 
-[
+$$
 \begin{array}{c}
-\text{Web UI} \
-\downarrow \
-\text{API Layer} \
-\downarrow \
-\text{Agent Orchestrator} \
-\downarrow \
+\text{Web UI} \\
+\downarrow \\
+\text{API Layer} \\
+\downarrow \\
+\text{Agent Orchestrator} \\
+\downarrow \\
 \begin{array}{ccc}
 \text{Incident API} &
 \text{Logs API} &
-\text{Metrics API} \
-\downarrow & \downarrow & \downarrow \
+\text{Metrics API} \\
+\downarrow & \downarrow & \downarrow \\
 \text{Deployment API} &
 \text{Ticket API} &
 \text{Code Repository}
-\end{array}\
-\downarrow\
-\text{Evidence Store}\
-\downarrow\
-\text{LLM}\
-\downarrow\
-\text{Verifier}\
-\downarrow\
+\end{array}\\
+\downarrow\\
+\text{Evidence Store}\\
+\downarrow\\
+\text{LLM}\\
+\downarrow\\
+\text{Verifier}\\
+\downarrow\\
 \text{Structured Report}
 \end{array}
-]
+$$
 
 The architecture should explicitly identify:
 
@@ -454,7 +454,7 @@ The architecture should explicitly identify:
 
 A useful generic architecture is:
 
-[
+$$
 \boxed{
 \text{User}
 \rightarrow
@@ -472,7 +472,7 @@ A useful generic architecture is:
 \rightarrow
 \text{Structured Output}
 }
-]
+$$
 
 This connects directly to the concepts developed earlier in the course.
 
@@ -486,7 +486,7 @@ Context must be constructed deliberately.
 
 Let:
 
-[
+$$
 C =
 C_{\text{system}}
 +
@@ -497,13 +497,13 @@ C_{\text{state}}
 C_{\text{retrieved}}
 +
 C_{\text{tool}}
-]
+$$
 
 The context construction subsystem determines which information enters the model.
 
 For incident investigation, this might include:
 
-[
+$$
 C =
 {
 \text{incident},
@@ -513,7 +513,7 @@ C =
 \text{metrics},
 \text{code changes}
 }
-]
+$$
 
 The engineering problem is therefore not:
 
@@ -555,13 +555,13 @@ The agent should not receive arbitrary access to the environment.
 
 A useful security principle is:
 
-[
+$$
 \boxed{
 \text{Agent Capability}
 \subseteq
 \text{Explicitly Authorized Tools}
 }
-]
+$$
 
 The MVP should also distinguish between:
 
@@ -605,13 +605,13 @@ This gives downstream components a stable interface.
 
 Formally:
 
-[
+$$
 LLM(x)
 \rightarrow
 y \in \mathcal{Y}
-]
+$$
 
-where (\mathcal{Y}) is a constrained output space.
+where $\mathcal{Y}$ is a constrained output space.
 
 Structured outputs improve:
 
@@ -630,13 +630,13 @@ For AI products, generation is only half of the system.
 
 A robust architecture is:
 
-[
+$$
 \text{Generate}
 \rightarrow
 \text{Verify}
 \rightarrow
 \text{Accept/Reject}
-]
+$$
 
 For the incident investigator, verification might check:
 
@@ -666,19 +666,19 @@ Does expressed confidence correspond reasonably to evidence strength?
 
 This creates:
 
-[
+$$
 \text{Agent}
 +
 \text{Verifier}
-]
+$$
 
 rather than:
 
-[
+$$
 \text{Agent}
 \rightarrow
 \text{Trust Whatever It Says}
-]
+$$
 
 ---
 
@@ -701,27 +701,25 @@ Examples:
 
 For example:
 
-[
+$$
 M_{\text{time}}
-===============
-
+=
 \frac{
 T_{\text{manual}}-T_{\text{AI}}
 }{
 T_{\text{manual}}
 }
-]
+$$
 
 If manual investigation takes 60 minutes and AI-assisted investigation takes 20 minutes:
 
-[
+$$
 M_{\text{time}}
-===============
-
-# \frac{60-20}{60}
-
-66.7%
-]
+=
+\frac{60-20}{60}
+=
+66.7\%
+$$
 
 The product has demonstrated a potentially meaningful workflow improvement.
 
@@ -749,13 +747,13 @@ Examples include:
 
 A useful conceptual separation is:
 
-[
+$$
 \boxed{
 \text{Product Metrics}
 \neq
 \text{Model Metrics}
 }
-]
+$$
 
 A system can achieve excellent model metrics while providing little product value.
 
@@ -771,7 +769,7 @@ Create a small **golden dataset** before building the system.
 
 For example:
 
-[
+$$
 D =
 {
 (d_1,y_1),
@@ -779,9 +777,9 @@ D =
 \ldots,
 (d_n,y_n)
 }
-]
+$$
 
-where each (d_i) is an incident and (y_i) contains expected properties such as:
+where each $d_i$ is an incident and $y_i$ contains expected properties such as:
 
 * important evidence,
 * plausible root causes,
@@ -791,19 +789,19 @@ where each (d_i) is an incident and (y_i) contains expected properties such as:
 
 The evaluation harness can then run:
 
-[
+$$
 System(D)
 \rightarrow
 \hat{Y}
-]
+$$
 
 and compare:
 
-[
+$$
 \hat{Y}
 \quad \text{vs.} \quad
 Y
-]
+$$
 
 This creates a regression mechanism for the AI system.
 
@@ -846,17 +844,17 @@ This distinction is essential.
 
 A useful formula is:
 
-[
+$$
 MVP =
 \text{Minimum Complete Workflow}
-]
+$$
 
 not:
 
-[
+$$
 MVP =
 \text{Minimum Feature Count}
-]
+$$
 
 ---
 
@@ -866,7 +864,7 @@ A useful technique is to define the system boundary explicitly.
 
 For example:
 
-[
+$$
 \boxed{
 \text{User}
 \rightarrow
@@ -876,7 +874,7 @@ For example:
 \rightarrow
 \text{Evidence-backed Report}
 }
-]
+$$
 
 Everything outside the boundary is initially treated as an external dependency.
 
@@ -966,39 +964,39 @@ This is an important conceptual shift.
 
 A product specification should function as a contract between:
 
-[
+$$
 \text{Human Intent}
-]
+$$
 
 and
 
-[
+$$
 \text{Implementation System}
-]
+$$
 
 The coding agent receives:
 
-[
+$$
 S =
 {
 R,A,I,E,M,C
 }
-]
+$$
 
 where:
 
-* (R) = requirements,
-* (A) = architecture,
-* (I) = interfaces,
-* (E) = evaluation,
-* (M) = metrics,
-* (C) = constraints.
+* $R$ = requirements,
+* $A$ = architecture,
+* $I$ = interfaces,
+* $E$ = evaluation,
+* $M$ = metrics,
+* $C$ = constraints.
 
 The coding agent then produces:
 
-[
+$$
 Implementation = f(S)
-]
+$$
 
 The better the specification, the smaller the gap between intended and implemented behavior.
 
@@ -1031,11 +1029,11 @@ The agent does not necessarily know:
 
 Therefore:
 
-[
+$$
 \text{More Capable Coding Agent}
 \Rightarrow
 \text{Greater Value of Precise Specifications}
-]
+$$
 
 The coding agent amplifies implementation capability.
 
@@ -1061,21 +1059,21 @@ For every root-cause hypothesis in the golden evaluation dataset, the system mus
 
 This transforms:
 
-[
+$$
 \text{Requirement}
-]
+$$
 
 into:
 
-[
+$$
 \text{Requirement}
 +
 \text{Test}
-]
+$$
 
 A strong specification therefore creates a direct path:
 
-[
+$$
 \text{Requirement}
 \rightarrow
 \text{Test}
@@ -1083,7 +1081,7 @@ A strong specification therefore creates a direct path:
 \text{Implementation}
 \rightarrow
 \text{Evaluation}
-]
+$$
 
 This is particularly powerful for AI systems because many requirements can otherwise remain subjective.
 
@@ -1093,7 +1091,7 @@ This is particularly powerful for AI systems because many requirements can other
 
 The entire Day 24 process can be represented as:
 
-[
+$$
 \boxed{
 \text{Opportunity}
 \rightarrow
@@ -1113,11 +1111,11 @@ The entire Day 24 process can be represented as:
 \rightarrow
 \text{MVP}
 }
-]
+$$
 
 Then:
 
-[
+$$
 \boxed{
 \text{MVP}
 \rightarrow
@@ -1129,7 +1127,7 @@ Then:
 \rightarrow
 \text{Product Revision}
 }
-]
+$$
 
 The important point is that the MVP is not the end of the process.
 
@@ -1172,7 +1170,7 @@ State what you believe the product will accomplish and what assumptions must be 
 
 Describe the complete workflow:
 
-[
+$$
 \text{User Intent}
 \rightarrow
 \text{System Processing}
@@ -1180,7 +1178,7 @@ Describe the complete workflow:
 \text{Actions}
 \rightarrow
 \text{Output}
-]
+$$
 
 ## 5. Product Requirements
 
@@ -1219,21 +1217,21 @@ Define:
 
 Define product-level metrics such as:
 
-[
+$$
 \text{Time Saved}
-]
+$$
 
-[
+$$
 \text{Task Completion Rate}
-]
+$$
 
-[
+$$
 \text{Adoption}
-]
+$$
 
-[
+$$
 \text{User Satisfaction}
-]
+$$
 
 ## 9. Evaluation Metrics
 
@@ -1291,13 +1289,13 @@ It should answer:
 
 The specification should be precise enough that the coding agent can move directly from:
 
-[
+$$
 \text{Specification}
-]
+$$
 
 to:
 
-[
+$$
 \text{Repository}
 \rightarrow
 \text{Implementation}
@@ -1305,7 +1303,7 @@ to:
 \text{Tests}
 \rightarrow
 \text{Evaluation}
-]
+$$
 
 without inventing the product itself.
 
@@ -1343,7 +1341,7 @@ That is the central skill being developed.
 
 10. **The specification is the bridge between product and engineering.**
 
-    [
+$$
     \boxed{
     \text{Product Hypothesis}
     \rightarrow
@@ -1355,7 +1353,7 @@ That is the central skill being developed.
     \rightarrow
     \text{Evaluation}
     }
-    ]
+$$
 
 11. **The MVP is an experiment, not a final product.**
     Its purpose is to generate evidence about whether the problem, solution, economics, and workflow are actually valid.
