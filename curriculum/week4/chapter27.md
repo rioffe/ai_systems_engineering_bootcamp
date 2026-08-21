@@ -774,7 +774,7 @@ Logs should answer:
 A useful request identifier is:
 
 $$
-request_id
+request\_id
 $$
 
 Every downstream operation should carry it.
@@ -782,7 +782,7 @@ Every downstream operation should carry it.
 Then:
 
 $$
-request_id
+request\_id
 \rightarrow
 {
 API,
@@ -955,7 +955,7 @@ $$
 Metric_{new}
 \geq
 Metric_{baseline}
------------------
+-
 \epsilon
 $$
 
