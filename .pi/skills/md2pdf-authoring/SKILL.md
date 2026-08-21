@@ -118,11 +118,21 @@ the `[`/`]` convention).
   model`. Pandoc (default extensions) only treats `$…$`/`$$…$$` as math, so a
   bare `(f_\theta)` renders the literal characters `\theta` -- garbled output that
   compiles with **no warning**. Convert every prose `\(var\)` whose token carries
-  math (subscripts, `\_`, `\theta`, Greek letters) to inline `$…$`. (Ordinary
+  math (subscripts, `\_`, `\theta`, Greek letters, or a named metric with a
+  subscript like `T_{p99}`) to inline `$…$`. (Ordinary
   English parentheticals and code function calls like `F(s_t)` are not offenders.)
 
       `` where (x) is the prompt, (f_\theta) is the model `` =>
       `` where $x$ is the prompt, $f_\theta$ is the model ``
+
+      A frequent spot to miss it: a short prose sentence that references
+      back to a quantity just displayed in a `$$ … $$` block. E.g. a
+      display equation for `T_{p95}` followed by `or (T_{p99}) where
+      appropriate.` -- that `(T_{p99})` means "the p99 latency" and
+      must be inlined:
+
+      `` ...or (T_{p99}) where appropriate. `` =>
+      `` ...or $T_{p99}$ where appropriate. ``
 
 ### Fixing garbled math blocks
 
