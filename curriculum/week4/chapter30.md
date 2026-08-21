@@ -958,15 +958,13 @@ You have:
 
 $$
 \boxed{
-\text{A real AI system}
-+
-\text{evaluation}
-+
-\text{production infrastructure}
-+
-\text{agentic development workflow}
-+
-\text{product evidence}
+\begin{aligned}
+\text{A real AI system} \\
++ \ \text{evaluation} \\
++ \ \text{production infrastructure} \\
++ \ \text{agentic development workflow} \\
++ \ \text{product evidence}
+\end{aligned}
 }
 $$
 
