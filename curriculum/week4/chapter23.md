@@ -1005,13 +1005,15 @@ This gives us a powerful product heuristic:
 
 $$
 \boxed{
-\text{AI-Native Design}
-=
-\text{Identify Constraints}
-\rightarrow
-\text{Determine Which Were Caused by Expensive Intelligence}
-\rightarrow
+\begin{gathered}
+\text{AI-Native Design} \\
+= \\
+\text{Identify Constraints} \\
+\downarrow \\
+\text{Determine Which Were Caused by Expensive Intelligence} \\
+\downarrow \\
 \text{Remove Them}
+\end{gathered}
 }
 $$
 
