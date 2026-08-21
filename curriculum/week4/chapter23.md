@@ -315,7 +315,8 @@ Q
 \text{Retrieval}
 \rightarrow
 \text{Reranking}
-\\
+$$
+$$
 \rightarrow
 \text{Reading}
 \rightarrow

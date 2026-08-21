@@ -6,3 +6,7 @@
 backup/
 curriculum/week1/fix_math.py
 curriculum/week1/fix_unicode.py
+
+# Vim swap files
+*.swp
+*.swo
