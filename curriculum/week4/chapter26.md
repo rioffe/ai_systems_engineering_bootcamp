@@ -24,7 +24,7 @@ The only reliable way to discover this is to put the system in front of real use
 
 The central loop becomes:
 
-[
+$$
 \boxed{
 \text{Build}
 \rightarrow
@@ -34,7 +34,7 @@ The central loop becomes:
 \rightarrow
 \text{Revise}
 }
-]
+$$
 
 This is fundamentally different from asking users:
 
@@ -54,24 +54,24 @@ Treat it as an **experiment**.
 
 You have a hypothesis:
 
-[
+$$
 H =
 \text{"This product provides meaningful value for this user performing this task."}
-]
+$$
 
 User testing produces evidence:
 
-[
+$$
 E = {e_1,e_2,\ldots,e_n}
-]
+$$
 
 You then update your belief in (H).
 
 Conceptually:
 
-[
+$$
 P(H|E)
-]
+$$
 
 The goal is not to prove that the original product is correct.
 
@@ -95,23 +95,23 @@ If a user clicks a button, the system usually performs the same operation.
 
 AI systems introduce another variable:
 
-[
+$$
 P(y|x)
-]
+$$
 
 The same input may produce different outputs.
 
 Consequently, the user is evaluating both:
 
-[
+$$
 \text{Product UX}
-]
+$$
 
 and:
 
-[
+$$
 \text{AI Behavior}
-]
+$$
 
 A user might say:
 
@@ -160,7 +160,7 @@ Which capabilities actually matter?
 
 These categories provide a practical observation framework:
 
-[
+$$
 \boxed{
 \text{Confusion}
 +
@@ -174,7 +174,7 @@ These categories provide a practical observation framework:
 +
 \text{Value}
 }
-]
+$$
 
 ---
 
@@ -213,37 +213,33 @@ Ask:
 
 Observe:
 
-[
+$$
 W_{\text{current}}
-]
+$$
 
 Then introduce the MVP and observe:
 
-[
+$$
 W_{\text{AI}}
-]
+$$
 
 The real comparison is:
 
-[
+$$
 \boxed{
 W_{\text{current}}
 \quad\text{vs.}\quad
 W_{\text{AI}}
 }
-]
+$$
 
 The product only creates value if:
 
-[
-U(W_{\text{AI}})
+$$
+U(W_{\text{AI}}) > U(W_{\text{current}})
+$$
 
->
-
-U(W_{\text{current}})
-]
-
-where (U) represents the user's perceived or measured utility.
+where $U$ represents the user's perceived or measured utility.
 
 ---
 
@@ -302,11 +298,11 @@ These statements expose the user's internal model of the system.
 
 The key question is:
 
-[
+$$
 \text{User Mental Model}
 \stackrel{?}{=}
 \text{System Mental Model}
-]
+$$
 
 If they differ substantially, the interface or workflow needs improvement.
 
@@ -330,15 +326,15 @@ but use it repeatedly because it saves substantial time.
 
 Therefore collect:
 
-[
+$$
 \text{Declared Preference}
-]
+$$
 
 and:
 
-[
+$$
 \text{Observed Behavior}
-]
+$$
 
 Prefer the latter when they conflict.
 
@@ -371,13 +367,13 @@ Record every moment where users:
 
 For each confusion point, record:
 
-[
+$$
 C_i =
 (\text{Context},
 \text{User Action},
 \text{Expected},
 \text{Actual})
-]
+$$
 
 For example:
 
@@ -398,13 +394,13 @@ A user may accept ordinary software behavior automatically.
 
 AI output requires a different decision:
 
-[
+$$
 \text{Should I believe this?}
-]
+$$
 
 Trust therefore depends on multiple factors:
 
-[
+$$
 T =
 f(
 A,
@@ -413,15 +409,15 @@ C,
 P,
 X
 )
-]
+$$
 
 where:
 
-* (A) = perceived accuracy,
-* (E) = evidence,
-* (C) = consistency,
-* (P) = predictability,
-* (X) = explainability/transparency.
+* $A$ = perceived accuracy,
+* $E$ = evidence,
+* $C$ = consistency,
+* $P$ = predictability,
+* $X$ = explainability/transparency.
 
 A highly capable system can still fail if users cannot determine when it is reliable.
 
@@ -439,17 +435,17 @@ Two failure modes exist.
 
 The system is correct, but users ignore it.
 
-[
+$$
 T_{\text{user}} < T_{\text{appropriate}}
-]
+$$
 
 ### Over-trust
 
 The system is unreliable, but users believe it.
 
-[
+$$
 T_{\text{user}} > T_{\text{appropriate}}
-]
+$$
 
 The second case is substantially more dangerous.
 
@@ -462,13 +458,13 @@ A good AI product should help the user distinguish:
 
 The ideal state is:
 
-[
+$$
 \boxed{
 T_{\text{user}}
 \approx
 R_{\text{system}}
 }
-]
+$$
 
 where perceived reliability is aligned with actual reliability.
 
@@ -494,25 +490,25 @@ Include:
 
 Observe:
 
-[
+$$
 x
 \rightarrow
 AI(x)
 \rightarrow
 \text{User Reaction}
-]
+$$
 
 The user may discover failures that the offline evaluation set missed.
 
 This is why:
 
-[
+$$
 \boxed{
 \text{Offline Evaluation}
 \neq
 \text{Real-World Evaluation}
 }
-]
+$$
 
 Both are necessary.
 
@@ -526,9 +522,9 @@ It is a UX variable.
 
 Suppose an AI system takes:
 
-[
+$$
 t = 3s
-]
+$$
 
 for a simple operation.
 
@@ -536,9 +532,9 @@ That may feel instantaneous.
 
 But:
 
-[
+$$
 t = 45s
-]
+$$
 
 may fundamentally change how the user interacts with the product.
 
@@ -552,10 +548,9 @@ They may:
 
 For agentic systems, latency can be decomposed as:
 
-[
+$$
 T_{\text{total}}
-================
-
+=
 T_{\text{LLM}}
 +
 T_{\text{retrieval}}
@@ -565,19 +560,19 @@ T_{\text{tools}}
 T_{\text{orchestration}}
 +
 T_{\text{network}}
-]
+$$
 
 Measure both:
 
-[
+$$
 T_{\text{mean}}
-]
+$$
 
 and:
 
-[
+$$
 T_{p95}
-]
+$$
 
 or (T_{p99}) where appropriate.
 
@@ -591,7 +586,7 @@ Long-running AI operations do not necessarily need to feel slow.
 
 The product can expose progress:
 
-[
+$$
 \text{Request}
 \rightarrow
 \text{Searching}
@@ -601,17 +596,17 @@ The product can expose progress:
 \text{Verifying}
 \rightarrow
 \text{Result}
-]
+$$
 
 This creates a perceived interaction model that is substantially better than:
 
-[
+$$
 \text{Request}
 \rightarrow
 \text{Blank Screen}
 \rightarrow
 \text{Result}
-]
+$$
 
 However, progress indicators must be truthful.
 
@@ -641,7 +636,7 @@ But they may want to personally:
 
 This produces a spectrum:
 
-[
+$$
 \text{Manual}
 \rightarrow
 \text{Assisted}
@@ -651,13 +646,13 @@ This produces a spectrum:
 \text{Supervised Autonomous}
 \rightarrow
 \text{Autonomous}
-]
+$$
 
 Do not assume that maximum autonomy is maximum value.
 
 The optimal point depends on:
 
-[
+$$
 \text{Risk}
 +
 \text{Trust}
@@ -665,7 +660,7 @@ The optimal point depends on:
 \text{Task Structure}
 +
 \text{User Preference}
-]
+$$
 
 ---
 
@@ -713,24 +708,24 @@ But their actual behavior may reveal that one simple capability provides almost 
 
 Suppose your product has:
 
-[
+$$
 F =
 {f_1,f_2,\ldots,f_{20}}
-]
+$$
 
 but users repeatedly rely on:
 
-[
+$$
 f_7
-]
+$$
 
 Then the product may actually be:
 
-[
+$$
 \text{Product}
 \approx
 f_7
-]
+$$
 
 rather than a 20-feature platform.
 
@@ -750,9 +745,9 @@ This is the **magic moment**.
 
 Identify:
 
-[
+$$
 M_{\text{magic}}
-]
+$$
 
 and ask:
 
@@ -805,17 +800,17 @@ Suppose a user says:
 
 Possible problem:
 
-[
+$$
 P_{\text{UX}}
-]
+$$
 
 The evidence exists but is poorly presented.
 
 Alternatively:
 
-[
+$$
 P_{\text{AI}}
-]
+$$
 
 The system genuinely cannot support the conclusion.
 
@@ -858,7 +853,7 @@ Instrument:
 
 A useful event model is:
 
-[
+$$
 e_i =
 (
 timestamp,
@@ -867,14 +862,14 @@ action,
 context,
 result
 )
-]
+$$
 
 A session becomes:
 
-[
+$$
 S =
 (e_1,e_2,\ldots,e_n)
-]
+$$
 
 This allows qualitative observations to be combined with quantitative evidence.
 
@@ -906,16 +901,15 @@ Provides:
 
 Together:
 
-[
+$$
 \boxed{
 \text{Product Insight}
-======================
-
+=
 \text{Qualitative Evidence}
 +
 \text{Quantitative Evidence}
 }
-]
+$$
 
 For example:
 
@@ -925,7 +919,7 @@ Qualitative:
 
 Quantitative:
 
-> 62% of users inspect the source evidence before accepting it, and 31% manually verify the result elsewhere.
+> 62\% of users inspect the source evidence before accepting it, and 31\% manually verify the result elsewhere.
 
 Now the problem becomes measurable.
 
@@ -937,25 +931,25 @@ Do not treat every piece of feedback equally.
 
 A useful prioritization function is:
 
-[
+$$
 Priority =
 Severity
 \times
 Frequency
 \times
 Value
-]
+$$
 
 You can further include implementation cost:
 
-[
+$$
 ROI =
 \frac{
 Severity \times Frequency \times Value
 }{
 Cost
 }
-]
+$$
 
 For example:
 
@@ -992,15 +986,15 @@ Instead ask:
 
 The feature request:
 
-[
+$$
 F
-]
+$$
 
 may actually represent a desired outcome:
 
-[
+$$
 O
-]
+$$
 
 For example:
 
@@ -1032,11 +1026,11 @@ That is a successful learning event.
 
 The hypothesis has been refined:
 
-[
+$$
 H_0
 \rightarrow
 H_1
-]
+$$
 
 This is exactly what the MVP was designed to accomplish.
 
@@ -1046,7 +1040,7 @@ This is exactly what the MVP was designed to accomplish.
 
 The complete loop becomes:
 
-[
+$$
 \boxed{
 \text{Hypothesis}
 \rightarrow
@@ -1062,23 +1056,23 @@ The complete loop becomes:
 \rightarrow
 \text{New Hypothesis}
 }
-]
+$$
 
 This is effectively an empirical optimization process.
 
 You are searching over product designs:
 
-[
+$$
 P_1,P_2,\ldots,P_n
-]
+$$
 
 and attempting to maximize:
 
-[
+$$
 U(P)
-]
+$$
 
-where (U) represents user and business value.
+where $U$ represents user and business value.
 
 Each user-testing cycle provides information about the shape of (U(P)).
 
@@ -1104,31 +1098,31 @@ Then discover:
 
 This produces:
 
-[
+$$
 \text{Engineering Effort}
 \gg
 \text{Validated Product Value}
-]
+$$
 
 The better sequence is:
 
-[
+$$
 \text{Cheap Experiment}
 \rightarrow
 \text{Evidence}
 \rightarrow
 \text{Commit Resources}
-]
+$$
 
 not:
 
-[
+$$
 \text{Large Investment}
 \rightarrow
 \text{Hope}
 \rightarrow
 \text{Evidence}
-]
+$$
 
 This is the core principle of Day 26.
 
@@ -1267,7 +1261,7 @@ Select the highest-value changes.
 
 Then repeat:
 
-[
+$$
 \boxed{
 \text{Test}
 \rightarrow
@@ -1275,7 +1269,7 @@ Then repeat:
 \rightarrow
 \text{Test Again}
 }
-]
+$$
 
 ---
 
@@ -1345,29 +1339,28 @@ Day 26 teaches a principle that extends far beyond UX:
 
 You can optimize:
 
-[
+$$
 Q_{\text{software}}
-]
+$$
 
 while neglecting:
 
-[
+$$
 V_{\text{user}}
-]
+$$
 
 A successful AI product requires both:
 
-[
+$$
 \boxed{
 \text{Product Success}
-======================
-
+=
 f(
 \text{Technical Quality},
 \text{User Value}
 )
 }
-]
+$$
 
 Technical excellence without user value produces elegant irrelevance.
 
@@ -1389,25 +1382,25 @@ Therefore the bottleneck moves.
 
 Traditional constraint:
 
-[
+$$
 \text{Can we build it?}
-]
+$$
 
 AI-native constraint:
 
-[
+$$
 \boxed{
 \text{Should we build it?}
 }
-]
+$$
 
 And once the answer is yes:
 
-[
+$$
 \boxed{
 \text{What exactly should we build?}
 }
-]
+$$
 
 This makes product discovery increasingly important as AI coding capability improves.
 
@@ -1417,7 +1410,7 @@ This makes product discovery increasingly important as AI coding capability impr
 
 The emerging workflow is:
 
-[
+$$
 \text{Observe}
 \rightarrow
 \text{Hypothesize}
@@ -1429,7 +1422,7 @@ The emerging workflow is:
 \text{Evaluate}
 \rightarrow
 \text{Observe Again}
-]
+$$
 
 Notice that the loop does not end with deployment.
 
@@ -1441,7 +1434,7 @@ The product is therefore not a static artifact.
 
 It is an evolving socio-technical system:
 
-[
+$$
 \boxed{
 \text{Users}
 \leftrightarrow
@@ -1451,7 +1444,7 @@ It is an evolving socio-technical system:
 \leftrightarrow
 \text{Data}
 }
-]
+$$
 
 ---
 
@@ -1480,16 +1473,15 @@ It is an evolving socio-technical system:
 
 9. **Combine qualitative and quantitative evidence.**
 
-   [
+$$
    \boxed{
    \text{Product Insight}
-   ======================
-
+=
    \text{Observation}
    +
    \text{Measurement}
    }
-   ]
+$$
 
 10. **Rank problems instead of reacting to every piece of feedback.**
 
@@ -1498,7 +1490,7 @@ It is an evolving socio-technical system:
 
 12. **User testing is a hypothesis-testing mechanism.**
 
-    [
+$$
     H_0
     \rightarrow
     \text{MVP}
@@ -1508,7 +1500,7 @@ It is an evolving socio-technical system:
     E
     \rightarrow
     H_1
-    ]
+$$
 
 13. **The MVP should be revised based on evidence, not defended because engineering effort has already been invested.**
 
@@ -1518,7 +1510,7 @@ It is an evolving socio-technical system:
 
 15. **As AI makes implementation cheaper, product discovery becomes more—not less—important.**
 
-    [
+$$
     \boxed{
     \text{Cheaper Implementation}
     \Rightarrow
@@ -1528,7 +1520,7 @@ It is an evolving socio-technical system:
     \Rightarrow
     \text{Better Products}
     }
-    ]
+$$
 
 Day 26 therefore completes an important transition. Day 24 defined the product, Day 25 built the product, and Day 26 exposes the product to reality. **The real product-development loop begins when users interact with what you built.**
 
