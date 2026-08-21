@@ -830,7 +830,7 @@ The project begins as a simple AI application and progressively becomes an agent
 
 ---
 
-## Week 1 — Make It Work
+# Week 1 — Make It Work
 
 Build:
 
