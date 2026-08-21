@@ -1,0 +1,8 @@
+# Local tooling & editor config
+.claude/
+.obsidian/
+
+# Local backups & scratch scripts
+backup/
+curriculum/week1/fix_math.py
+curriculum/week1/fix_unicode.py

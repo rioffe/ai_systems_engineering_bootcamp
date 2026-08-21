@@ -38,7 +38,7 @@ Automated verification
 Evaluation
    ↓
 Human judgment
-   ↺
+   ^ (loop back)
 ```
 
 And potentially:
@@ -192,11 +192,11 @@ Every project gets scored on five dimensions:
 
 | Dimension              | Weight |
 | ---------------------- | -----: |
-| AI system quality      |    20% |
-| Software engineering   |    20% |
-| Agent utilization      |    20% |
-| Evaluation/reliability |    20% |
-| Product judgment       |    20% |
+| AI system quality      |    20\% |
+| Software engineering   |    20\% |
+| Agent utilization      |    20\% |
+| Evaluation/reliability |    20\% |
+| Product judgment       |    20\% |
 
 And I'd require **evidence**, not claims.
 
@@ -265,16 +265,16 @@ The post's four categories can actually be arranged as a **hierarchy**:
 
 ```text
                     SHAPE THE BUILD
-                         ▲
+                         ^
                          |
                 SOFTWARE ENGINEERING
-                         ▲
+                         ^
                          |
                   CODING AGENTS
-                         ▲
+                         ^
                          |
               AI APPLICATIONS
-                         ▲
+                         ^
                          |
                  FOUNDATION
 ```
@@ -287,25 +287,25 @@ But I think the real future hierarchy is closer to:
                  |   "What to build?"  |
                  +----------+----------+
                             |
-                 +----------▼----------+
+                 +----------↓----------+
                  |   SYSTEM DESIGN     |
                  | "How should it      |
                  |  work?"             |
                  +----------+----------+
                             |
-                 +----------▼----------+
+                 +----------↓----------+
                  |  AGENT SUPERVISION  |
                  | "How do I get AI to |
                  |  build it?"         |
                  +----------+----------+
                             |
-                 +----------▼----------+
+                 +----------↓----------+
                  | AUTOMATED VERIFIERS |
                  | "How do I know it   |
                  |  actually works?"   |
                  +----------+----------+
                             |
-                 +----------▼----------+
+                 +----------↓----------+
                  |     AI MODELS       |
                  +---------------------+
 ```
