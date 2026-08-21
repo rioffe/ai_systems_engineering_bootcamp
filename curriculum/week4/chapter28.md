@@ -114,7 +114,7 @@ Without explicit thresholds, evaluation degenerates into subjective judgment.
 
 The first layer evaluates the engineering system surrounding the AI.
 
-## 3.1 Functionality
+# 4. Functionality
 
 Start with the basic question:
 
@@ -177,7 +177,7 @@ This is why system-level evaluation matters.
 
 ---
 
-# 4. Reliability
+# 5. Reliability
 
 Reliability asks whether the system continues functioning under realistic operating conditions.
 
@@ -223,7 +223,7 @@ The final evaluation should therefore measure not merely whether failures occur,
 
 ---
 
-# 5. Latency
+# 6. Latency
 
 Latency is a first-class product metric.
 
@@ -278,7 +278,7 @@ Then determine where the latency is actually coming from.
 
 ---
 
-# 6. Cost
+# 7. Cost
 
 Measure the economics of the complete system.
 
@@ -338,7 +338,7 @@ $$
 
 ---
 
-# 7. Scalability
+# 8. Scalability
 
 A prototype can work perfectly for ten users and fail catastrophically for ten thousand.
 
@@ -375,7 +375,7 @@ The evaluation should identify the point at which:
 
 ---
 
-# 8. Security
+# 9. Security
 
 AI applications introduce security problems that conventional application testing does not fully capture.
 
@@ -417,7 +417,7 @@ $$
 
 ---
 
-# 9. AI Evaluation
+# 10. AI Evaluation
 
 Technical correctness is necessary but insufficient.
 
@@ -433,7 +433,7 @@ The major dimensions are:
 
 ---
 
-# 10. Accuracy
+# 11. Accuracy
 
 Accuracy depends on the application.
 
@@ -477,7 +477,7 @@ This is often more informative than a single "answer quality" score.
 
 ---
 
-# 11. Hallucination
+# 12. Hallucination
 
 Hallucination measures whether the system asserts information that is unsupported or false.
 
@@ -531,7 +531,7 @@ It is **correctly calibrated behavior**.
 
 ---
 
-# 12. Groundedness
+# 13. Groundedness
 
 Groundedness asks:
 
@@ -582,7 +582,7 @@ A citation that exists but does not actually support the claim is not a successf
 
 ---
 
-# 13. Robustness
+# 14. Robustness
 
 A robust AI system should not collapse when inputs move slightly outside the benchmark distribution.
 
@@ -630,7 +630,7 @@ A smaller $\Delta P$ generally indicates greater robustness.
 
 ---
 
-# 14. Tool-Use Success
+# 15. Tool-Use Success
 
 For agentic applications, model quality cannot be evaluated independently from tool behavior.
 
@@ -665,7 +665,7 @@ The failure may have occurred at any of four different layers.
 
 ---
 
-# 15. Product Evaluation
+# 16. Product Evaluation
 
 The third layer asks the question engineers most often under-measure:
 
@@ -682,7 +682,7 @@ Evaluate:
 
 ---
 
-# 16. User Value
+# 17. User Value
 
 The primary product metric is whether the system improves a real user outcome.
 
@@ -727,7 +727,7 @@ User value should ultimately be expressed in terms of a meaningful outcome.
 
 ---
 
-# 17. Usability
+# 18. Usability
 
 AI systems introduce unusual usability problems.
 
@@ -775,7 +775,7 @@ Users should trust the system when it is reliable and question it when uncertain
 
 ---
 
-# 18. Adoption
+# 19. Adoption
 
 A product can pass every laboratory test and still fail in the market.
 
@@ -798,7 +798,7 @@ If they repeatedly return because the product solves a real problem, that demons
 
 ---
 
-# 19. Differentiation
+# 20. Differentiation
 
 Finally, determine whether the system has a reason to exist.
 
@@ -843,7 +843,7 @@ The durable advantage therefore tends to reside above the model.
 
 ---
 
-# 20. The Evaluation Matrix
+# 21. The Evaluation Matrix
 
 The final evaluation should combine all three dimensions into one matrix.
 
@@ -871,7 +871,7 @@ This matrix prevents a common engineering failure:
 
 ---
 
-# 21. Build an Evaluation Scorecard
+# 22. Build an Evaluation Scorecard
 
 At the end of the project, produce a scorecard.
 
@@ -901,7 +901,7 @@ That is the difference between a prototype demonstration and an engineering eval
 
 ---
 
-# 22. Evaluate the System Under Failure
+# 23. Evaluate the System Under Failure
 
 The final evaluation should deliberately attempt to break the system.
 
@@ -985,7 +985,7 @@ is well engineered.
 
 ---
 
-# 23. From Evaluation to Release Decision
+# 24. From Evaluation to Release Decision
 
 The final evaluation should result in an explicit decision.
 
@@ -1013,7 +1013,7 @@ The purpose of evaluation is to inform action.
 
 ---
 
-# 24. The Final Engineering Principle
+# 25. The Final Engineering Principle
 
 The most important lesson of this entire curriculum is that **AI engineering is systems engineering under uncertainty**.
 
