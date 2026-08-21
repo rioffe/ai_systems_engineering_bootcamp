@@ -12,7 +12,7 @@ Use this skill when creating, editing, or verifying any chapter in
 
 The pipeline is `md2pdf.sh` at the repo root. It preprocesses the Markdown with
 `sed`, then runs `pandoc … --pdf-engine=xelatex`. Knowing what the `sed` layer
-does avoids the recurring failure modes: **JSON-array mangling**, the **blank after `$$`** pitfall, and **broken LaTeX math**.
+does avoids the recurring failure modes: **JSON-array mangling**, the **blank-after / blank-inside `$$`** pitfalls, and **broken LaTeX math**.
 
 ## Run / verify
 
@@ -140,6 +140,64 @@ commonly appear *with* the blank vanish once the fence truly opens -- but tidy t
 per the "Standards for LaTeX math" list below regardless.)
 
 
+### Bug 3: a blank line *inside* a `$$ … $$` block makes pandoc escape the `$$`
+
+Bug 2 is the *sed-open* variant of a deeper, general rule: **pandoc refuses to open a
+display-math fence when a blank line sits anywhere between the opening and closing
+`$$`.** A block can therefore carry a stray blank **even in hand-written, native-`$$`
+source** -- e.g. when a separator `=` line is preceded or followed by a blank, or when
+it was copied out of the `[ … ]` convention.
+
+```
+$$
+A
+=
+
+\frac{b}{c}
+$$
+```
+
+Here the blank line between `=` and `\frac` makes pandoc render the delimiters as
+*literal* `$$` text:
+
+```
+\$\$ A =
+
+\frac{b}{c}
+
+\$\$
+```
+
+which drops `\frac` / `\text{…}` into text mode and cascades into
+`! Missing $ inserted` (and, per Bug 2, `Missing character: … in font [lmroman…]`).
+Like Bug 2 it still prints `Success!`, so it is easy to miss.
+
+Proof (minimal): with a blank inside, pandoc escapes `$$`; without it, it renders:
+
+```bash
+printf '$$\nA\n=\n\n\\frac{b}{c}\n$$\n' > t1.md   # blank inside
+printf '$$\nA\n=\\frac{b}{c}\n$$\n'     > t2.md   # no blank
+pandoc t1.md --to latex    # -> \$\$ A = … \$\$    (escaped; BROKEN)
+pandoc t2.md --to latex    # -> \[ A = \frac{b}{c} \]   (renders)
+```
+
+**Rule: no blank line may sit inside a `$$ … $$` block.** After converting fences, strip
+any blank that falls *inside* a display-math region by toggling a flag on each line that
+is exactly `$$` (a plain grep can't see block state):
+
+```python
+lines = open("chapter.md").read().split("\n")
+out, in_m = [], False
+for ln in lines:
+    if ln.strip() == "$$":
+        out.append(ln); in_m = not in_m
+        continue
+    if in_m and ln.strip() == "":
+        continue            # drop blank line inside the fence
+    out.append(ln)
+open("chapter.md", "w").write("\n".join(out))
+```
+
 ## Standards for LaTeX math
 
 Match the existing chapters (chapter1–3 use display math directly; do not rely on
@@ -150,6 +208,11 @@ the `[`/`]` convention).
   stable, explicit convention.
 - **Native `$$` is mandatory, not a style preference** -- the `[ … ]` convention
   triggers the Bug 2 blank-after-`$$`, which silently breaks every equation.
+- **No blank line *inside* a `$$ … $$` block.** A blank between the delimiters makes
+  pandoc escape the `$$` to literal `$$` text, after which the equation breaks
+  (`! Missing $ inserted` / `Missing character`). This is the general form of the
+  Bug 2 open-line blank; strip it with the toggle-flag pass, not by eye. This is *not
+  catchable by a single grep* -- you must track the open/close `$$` state.
 - **`{cases}` blocks must end in a brace and use `\\` for row separators.**
   Write `\boxed{ \begin{cases} A \\ B \\ C \end{cases} }` so the display closes on
   a `}`; a lone trailing `\` on a row is a control-space / line-break, *not* a row
@@ -327,6 +390,9 @@ The `l.<n>` in the xelatex log points at a line in pandoc's generated `.tex`, *n
      (Bug 2: `[` injects a blank after the opening `$$`, silently breaking every
      equation -- symptoms: `Missing character: … in font [lmroman…]`, or cascaded
      `! Missing $ inserted`; the run still prints `Success!`)
+- [ ] No blank line *inside* a `$$` block (Bug 3: a blank between the delimiters makes
+      pandoc escape `$$` to literal `$$`, then `! Missing $ inserted`; strip it with the
+      toggle-flag script, not by eye -- it isn't catchable by a single grep)
 - [ ] No `===…=` run or a line that is just `>` inside a math fence (use one `=` and
        a one-line `A > B > C`)
 - [ ] `{cases}` fences end in `}` (wrap as `\boxed{…}`); rows separate with `\\`,
