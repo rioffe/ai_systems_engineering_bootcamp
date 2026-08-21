@@ -1093,23 +1093,25 @@ The entire Day 24 process can be represented as:
 
 $$
 \boxed{
-\text{Opportunity}
-\rightarrow
-\text{Persona}
-\rightarrow
-\text{Problem}
-\rightarrow
-\text{Hypothesis}
-\rightarrow
-\text{Workflow}
-\rightarrow
-\text{Requirements}
-\rightarrow
-\text{Architecture}
-\rightarrow
-\text{Evaluation}
-\rightarrow
+\begin{gathered}
+\text{Opportunity} \\
+\downarrow \\
+\text{Persona} \\
+\downarrow \\
+\text{Problem} \\
+\downarrow \\
+\text{Hypothesis} \\
+\downarrow \\
+\text{Workflow} \\
+\downarrow \\
+\text{Requirements} \\
+\downarrow \\
+\text{Architecture} \\
+\downarrow \\
+\text{Evaluation} \\
+\downarrow \\
 \text{MVP}
+\end{gathered}
 }
 $$
 
@@ -1117,15 +1119,17 @@ Then:
 
 $$
 \boxed{
-\text{MVP}
-\rightarrow
-\text{Real Users}
-\rightarrow
-\text{Measurements}
-\rightarrow
-\text{Learning}
-\rightarrow
+\begin{gathered}
+\text{MVP} \\
+\downarrow \\
+\text{Real Users} \\
+\downarrow \\
+\text{Measurements} \\
+\downarrow \\
+\text{Learning} \\
+\downarrow \\
 \text{Product Revision}
+\end{gathered}
 }
 $$
 
