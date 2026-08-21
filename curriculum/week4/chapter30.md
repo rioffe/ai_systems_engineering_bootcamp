@@ -830,7 +830,7 @@ The project begins as a simple AI application and progressively becomes an agent
 
 ---
 
-# Week 1 — Make It Work
+## Week 1 — Make It Work
 
 Build:
 
@@ -853,7 +853,7 @@ At the end of Week 1, you have a functional AI application.
 
 ---
 
-# Week 2 — Make It Robust
+## Week 2 — Make It Robust
 
 Now engineer the system.
 
@@ -885,7 +885,7 @@ It becomes an engineered application.
 
 ---
 
-# Week 3 — Make the Agent Build It
+## Week 3 — Make the Agent Build It
 
 Now introduce coding agents.
 
@@ -927,7 +927,7 @@ Rather, make the development process increasingly **agentic and closed-loop**.
 
 ---
 
-# Week 4 — Make It Valuable
+## Week 4 — Make It Valuable
 
 Now move beyond engineering.
 
