@@ -10,7 +10,7 @@ The exercise is deliberately constrained to a **30-minute presentation**. The co
 
 The presenter should be able to establish:
 
-[
+$$
 \boxed{
 \text{Problem}
 \rightarrow
@@ -28,7 +28,7 @@ The presenter should be able to establish:
 \rightarrow
 \text{Roadmap}
 }
-]
+$$
 
 The presentation should tell a coherent story from user problem to engineering solution.
 
@@ -58,19 +58,19 @@ These are different questions.
 
 This is primarily a product question:
 
-[
+$$
 \text{User Problem}
 \rightarrow
 \text{Desired Outcome}
 \rightarrow
 \text{Product}
-]
+$$
 
 ### Building the system correctly
 
 This is primarily an engineering question:
 
-[
+$$
 \text{Requirements}
 \rightarrow
 \text{Architecture}
@@ -78,7 +78,7 @@ This is primarily an engineering question:
 \text{Implementation}
 \rightarrow
 \text{Validation}
-]
+$$
 
 A project can succeed at one and fail at the other.
 
@@ -156,39 +156,39 @@ Whenever possible, quantify the baseline.
 
 For example:
 
-[
+$$
 T_{\text{manual}} = 45\text{ min}
-]
+$$
 
 versus:
 
-[
+$$
 T_{\text{system}} = 5\text{ min}
-]
+$$
 
 or:
 
-[
-E_{\text{manual}} = 12%
-]
+$$
+E_{\text{manual}} = 12\%
+$$
 
 versus:
 
-[
-E_{\text{system}} = 5%
-]
+$$
+E_{\text{system}} = 5\%
+$$
 
 The goal is to establish a measurable baseline against which the product can be evaluated.
 
 The problem statement should therefore eventually become:
 
-[
+$$
 \text{Current State}
 \rightarrow
 \text{Pain}
 \rightarrow
 \text{Desired State}
-]
+$$
 
 ---
 
@@ -234,14 +234,14 @@ Explicitly define what the product does **and does not do**.
 
 A useful formulation is:
 
-[
+$$
 \text{Product Scope}
-====================
-
-## \text{Capabilities}
-
+=
+\{
+\text{Capabilities},
 \text{Non-goals}
-]
+\}
+$$
 
 For example:
 
@@ -276,7 +276,7 @@ Start with the simplest possible architecture diagram.
 
 For example:
 
-[
+$$
 \text{User}
 \rightarrow
 \text{Application}
@@ -284,14 +284,14 @@ For example:
 \text{Orchestrator}
 \rightarrow
 \begin{cases}
-\text{Retriever}\
-\text{LLM}\
-\text{Tools}\
+\text{Retriever}\\
+\text{LLM}\\
+\text{Tools}\\
 \text{Memory}
 \end{cases}
 \rightarrow
 \text{Response}
-]
+$$
 
 Then expand the architecture only as necessary.
 
@@ -348,35 +348,35 @@ Every meaningful architectural decision has trade-offs.
 
 Examples:
 
-[
+$$
 \text{Latency}
 \leftrightarrow
 \text{Quality}
-]
+$$
 
-[
+$$
 \text{Cost}
 \leftrightarrow
 \text{Model Capability}
-]
+$$
 
-[
+$$
 \text{Recall}
 \leftrightarrow
 \text{Context Size}
-]
+$$
 
-[
+$$
 \text{Autonomy}
 \leftrightarrow
 \text{Control}
-]
+$$
 
-[
+$$
 \text{Simplicity}
 \leftrightarrow
 \text{Flexibility}
-]
+$$
 
 A mature architecture review explicitly identifies these trade-offs.
 
@@ -424,9 +424,9 @@ Explain the AI system as a set of responsibilities.
 
 For example:
 
-[
+$$
 \text{AI System}
-================
+=
 
 {
 \text{Model},
@@ -436,7 +436,7 @@ For example:
 \text{Memory},
 \text{Verification}
 }
-]
+$$
 
 For each component, explain its role.
 
@@ -474,15 +474,15 @@ A strong review should explicitly justify the AI boundary.
 
 For every AI component, ask:
 
-[
+$$
 \text{Why AI?}
-]
+$$
 
 For every deterministic component, ask:
 
-[
+$$
 \text{Why not AI?}
-]
+$$
 
 This leads to an important architectural principle:
 
@@ -490,27 +490,27 @@ This leads to an important architectural principle:
 
 For example:
 
-[
+$$
 \text{LLM}
 \rightarrow
 \text{interpret intent}
-]
+$$
 
 followed by:
 
-[
+$$
 \text{deterministic code}
 \rightarrow
 \text{validate parameters}
-]
+$$
 
 followed by:
 
-[
+$$
 \text{tool}
 \rightarrow
 \text{perform action}
-]
+$$
 
 This hybrid architecture is often more reliable than allowing the model to control the entire system.
 
@@ -540,7 +540,7 @@ For AI systems, include both component-level and end-to-end evaluation.
 
 For example:
 
-[
+$$
 \text{Retrieval}
 \rightarrow
 \text{Generation}
@@ -548,7 +548,7 @@ For example:
 \text{Citation}
 \rightarrow
 \text{Task Outcome}
-]
+$$
 
 Evaluate each stage independently.
 
@@ -574,9 +574,9 @@ For example:
 
 | System       | Accuracy | Latency |  Cost |
 | ------------ | -------: | ------: | ----: |
-| Manual       |      82% |  45 min |   $20 |
-| Baseline AI  |      87% |     8 s | $0.08 |
-| Final system |      94% |     4 s | $0.05 |
+| Manual       |      82% |  45 min |   \$20 |
+| Baseline AI  |      87% |     8 s | \$0.08 |
+| Final system |      94% |     4 s | \$0.05 |
 
 Now the engineering improvements become meaningful.
 
@@ -592,9 +592,9 @@ AI systems introduce variable inference costs that traditional software often do
 
 Estimate:
 
-[
+$$
 C_{\text{request}}
-==================
+=
 
 C_{\text{LLM}}
 +
@@ -605,26 +605,26 @@ C_{\text{retrieval}}
 C_{\text{tools}}
 +
 C_{\text{infrastructure}}
-]
+$$
 
 Then estimate:
 
-[
+$$
 C_{\text{user/month}}
-]
+$$
 
 and at scale:
 
-[
+$$
 C_{\text{monthly}}
-==================
+=
 
 N_{\text{requests}}
 \times
 C_{\text{request}}
 +
 C_{\text{fixed}}
-]
+$$
 
 This allows the team to reason about the economics of deployment.
 
@@ -638,47 +638,47 @@ Architecture determines economics.
 
 For example:
 
-[
+$$
 \text{More retrieval}
 \rightarrow
 \text{more tokens}
 \rightarrow
 \text{higher model cost}
-]
+$$
 
 and:
 
-[
+$$
 \text{More agent steps}
 \rightarrow
 \text{more inference calls}
 \rightarrow
 \text{higher latency and cost}
-]
+$$
 
 Similarly:
 
-[
+$$
 \text{larger model}
 \rightarrow
 \text{higher quality}
 \rightarrow
 \text{higher cost}
-]
+$$
 
 The engineering objective is therefore not simply:
 
-[
+$$
 \max \text{quality}
-]
+$$
 
 but something closer to:
 
-[
+$$
 \max
 \frac{\text{quality}\times\text{user value}}
 {\text{cost}\times\text{latency}\times\text{risk}}
-]
+$$
 
 This is why model selection, context engineering, retrieval, caching, routing, and workflow design are economic decisions as well as technical decisions.
 
@@ -719,7 +719,7 @@ For each major failure, explain:
 
 A useful representation is:
 
-[
+$$
 \text{Failure}
 \rightarrow
 \text{Cause}
@@ -727,7 +727,7 @@ A useful representation is:
 \text{Impact}
 \rightarrow
 \text{Mitigation}
-]
+$$
 
 ---
 
@@ -739,51 +739,51 @@ It is defined by having **controlled failure modes**.
 
 For example:
 
-[
+$$
 \text{Unknown answer}
 \rightarrow
 \text{Abstain}
-]
+$$
 
 is better than:
 
-[
+$$
 \text{Unknown answer}
 \rightarrow
 \text{Hallucinate}
-]
+$$
 
 Similarly:
 
-[
+$$
 \text{Tool unavailable}
 \rightarrow
 \text{Retry}
 \rightarrow
 \text{Fallback}
-]
+$$
 
 is better than:
 
-[
+$$
 \text{Tool unavailable}
 \rightarrow
 \text{Agent crashes}
-]
+$$
 
 The architecture should therefore specify not only the normal path:
 
-[
+$$
 \text{Input}
 \rightarrow
 \text{Processing}
 \rightarrow
 \text{Output}
-]
+$$
 
 but also:
 
-[
+$$
 \text{Failure}
 \rightarrow
 \text{Detection}
@@ -791,7 +791,7 @@ but also:
 \text{Recovery}
 \rightarrow
 \text{Safe degradation}
-]
+$$
 
 ---
 
@@ -807,12 +807,12 @@ Prioritize improvements according to expected value.
 
 A useful framework is:
 
-[
+$$
 \text{Priority}
 \approx
 \frac{\text{Expected Impact}\times\text{Confidence}}
 {\text{Cost}\times\text{Risk}}
-]
+$$
 
 Potential roadmap categories include:
 
@@ -866,20 +866,20 @@ If users rarely use a particular feature, building more features may be the wron
 
 One of the most useful engineering principles is:
 
-[
+$$
 \boxed{
 \text{Next Investment}
 \approx
 \text{Largest Constraint on User Value}
 }
-]
+$$
 
 Suppose:
 
 * model accuracy = 95%
 * retrieval accuracy = 72%
 * latency = 2 seconds
-* cost = $0.03/request
+* cost = \$0.03/request
 
 Improving the model from 95% to 96% may have little impact.
 
@@ -934,7 +934,7 @@ During the presentation, reviewers should be able to ask questions such as:
 ### Economics
 
 * What does one request cost?
-* What happens at 10× or 100× traffic?
+* What happens at 10x or 100x traffic?
 * What is the largest cost driver?
 * What architectural decisions affect cost?
 
@@ -993,7 +993,7 @@ At the end of Day 29, the team should be able to step back from the implementati
 
 The review should expose whether there is alignment between:
 
-[
+$$
 \text{Problem}
 \leftrightarrow
 \text{Product}
@@ -1005,7 +1005,7 @@ The review should expose whether there is alignment between:
 \text{Evaluation}
 \leftrightarrow
 \text{Economics}
-]
+$$
 
 Misalignment is a powerful diagnostic signal.
 
@@ -1053,7 +1053,7 @@ The architecture review teaches you how to reason about it as a complete system.
 
 That requires moving between several abstraction levels:
 
-[
+$$
 \text{User}
 \rightarrow
 \text{Product}
@@ -1065,11 +1065,11 @@ That requires moving between several abstraction levels:
 \text{Model}
 \rightarrow
 \text{Infrastructure}
-]
+$$
 
 and then moving back upward:
 
-[
+$$
 \text{Infrastructure}
 \rightarrow
 \text{System}
@@ -1077,7 +1077,7 @@ and then moving back upward:
 \text{Product}
 \rightarrow
 \text{User Value}
-]
+$$
 
 Strong AI engineers can operate at both levels.
 
@@ -1109,7 +1109,7 @@ They can discuss token budgets and inference latency, but they can also explain 
 
 11. **The eight sections should form one causal story:**
 
-[
+$$
 \boxed{
 \text{Problem}
 \rightarrow
@@ -1127,7 +1127,7 @@ They can discuss token budgets and inference latency, but they can also explain 
 \rightarrow
 \text{Next Step}
 }
-]
+$$
 
 12. **The ultimate skill being tested is engineering judgment.** You should be able to explain not only what you built, but why you built it, whether it works, what it costs, where it fails, and what should happen next.
 
