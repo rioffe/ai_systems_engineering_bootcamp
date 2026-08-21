@@ -138,7 +138,7 @@ In fact, the opposite may be true.
 
 But the engineer's scarce resource has shifted from **typing speed** toward:
 
-[
+$$
 \boxed{
 \text{Specification}
 +
@@ -148,7 +148,7 @@ But the engineer's scarce resource has shifted from **typing speed** toward:
 +
 \text{Judgment}
 }
-]
+$$
 
 ---
 
@@ -178,15 +178,15 @@ Deployment requirements
 
 The specification becomes an executable contract between:
 
-[
+$$
 \text{Human Intent}
-]
+$$
 
 and:
 
-[
+$$
 \text{Machine Implementation}
-]
+$$
 
 This makes specification quality increasingly important.
 
@@ -217,9 +217,9 @@ It needs to be given the appropriate:
 
 This creates a new engineering discipline:
 
-[
+$$
 \boxed{\text{Context Engineering}}
-]
+$$
 
 The problem is no longer simply:
 
@@ -237,7 +237,7 @@ That is a fundamentally different question.
 
 The agent's effective context can be thought of as:
 
-[
+$$
 C =
 C_{\text{requirements}}
 +
@@ -250,7 +250,7 @@ C_{\text{history}}
 C_{\text{tools}}
 +
 C_{\text{constraints}}
-]
+$$
 
 But more context is not necessarily better.
 
@@ -267,17 +267,17 @@ Too much context causes:
 
 Therefore the objective is not:
 
-[
+$$
 \max |C|
-]
+$$
 
 but something closer to:
 
-[
+$$
 \max
 \frac{\text{relevant information}}
 {\text{context size}}
-]
+$$
 
 The engineer increasingly becomes responsible for constructing this information environment.
 
@@ -319,15 +319,15 @@ Instead, the engineer manages a **closed-loop production process**.
 
 A mature coding agent should not simply:
 
-[
+$$
 \text{Prompt}
 \rightarrow
 \text{Code}
-]
+$$
 
 It should operate more like:
 
-[
+$$
 \text{Goal}
 \rightarrow
 \text{Context}
@@ -343,7 +343,7 @@ It should operate more like:
 \text{Repair}
 \rightarrow
 \text{Verify}
-]
+$$
 
 This is fundamentally different from autocomplete.
 
@@ -369,15 +369,15 @@ That changes the optimization problem.
 
 The scarce resource is no longer necessarily:
 
-[
+$$
 \text{Code Production}
-]
+$$
 
 It becomes:
 
-[
+$$
 \boxed{\text{Confidence in Correctness}}
-]
+$$
 
 Therefore automated verification becomes central.
 
@@ -427,7 +427,7 @@ Instead of manually inspecting every generated artifact, the engineer increasing
 
 For example:
 
-[
+$$
 \text{Agent}
 \rightarrow
 \text{Implementation}
@@ -439,7 +439,7 @@ For example:
 \text{Score}
 \rightarrow
 \text{Repair}
-]
+$$
 
 The engineer specifies what correctness means.
 
@@ -464,23 +464,23 @@ A future software-development system may look like:
                    ↓
              Agent Orchestrator
                    ↓
-        ┌──────────┼──────────┐
+        +----------+----------+
         ↓          ↓          ↓
      Planner     Coder     Researcher
         ↓          ↓          ↓
-        └──────────┼──────────┘
+        +----------+----------+
                    ↓
               Software
                    ↓
           Automated Evaluation
                    ↓
-        ┌──────────┴──────────┐
+        +----------+----------+
         ↓                     ↓
       Pass                   Fail
         ↓                     ↓
     Deployment             Repair
-                              │
-                              └──→ Agent
+                              |
+                              +--→ Agent
 ```
 
 This resembles a compiler pipeline more than traditional pair programming.
@@ -502,11 +502,11 @@ A possible architecture is:
 ```text
                  Supervisor
                      ↓
-        ┌────────────┼────────────┐
+        +------------+------------+
         ↓            ↓            ↓
    Researcher     Architect     Coder
         ↓            ↓            ↓
-        └────────────┼────────────┘
+        +------------+------------+
                      ↓
                   Tester
                      ↓
@@ -546,11 +546,11 @@ More agents introduce:
 
 Therefore:
 
-[
+$$
 \text{More Agents}
 \not\Rightarrow
 \text{Better System}
-]
+$$
 
 The right question is:
 
@@ -762,22 +762,22 @@ These skills can be represented as:
 ```text
                  SHAPE THE BUILD
                   "What to build?"
-                         ↑
+                         ^
                          |
                  SYSTEM DESIGN
                   "How should it
                      work?"
-                         ↑
+                         ^
                          |
                 AGENT SUPERVISION
                   "How do I get
                  AI to build it?"
-                         ↑
+                         ^
                          |
                 AI APPLICATIONS
                   "How do I use
                    models well?"
-                         ↑
+                         ^
                          |
              SOFTWARE ENGINEERING
                 "How do systems
@@ -845,9 +845,9 @@ Build:
 
 The objective is:
 
-[
+$$
 \boxed{\text{Make it work}}
-]
+$$
 
 At the end of Week 1, you have a functional AI application.
 
@@ -875,9 +875,9 @@ Add:
 
 The objective becomes:
 
-[
+$$
 \boxed{\text{Make it reliable}}
-]
+$$
 
 The system stops being a prototype.
 
@@ -901,7 +901,7 @@ Give the agent:
 
 Teach the agent to operate through:
 
-[
+$$
 \text{Specification}
 \rightarrow
 \text{Planning}
@@ -913,13 +913,13 @@ Teach the agent to operate through:
 \text{Verification}
 \rightarrow
 \text{Repair}
-]
+$$
 
 The objective becomes:
 
-[
+$$
 \boxed{\text{Make the system capable of building itself}}
-]
+$$
 
 Not literally without human supervision.
 
@@ -948,15 +948,15 @@ Then deploy it.
 
 The objective becomes:
 
-[
+$$
 \boxed{\text{Make it valuable}}
-]
+$$
 
 At the end of the month, you have something fundamentally different from thirty tutorials.
 
 You have:
 
-[
+$$
 \boxed{
 \text{A real AI system}
 +
@@ -968,7 +968,7 @@ You have:
 +
 \text{product evidence}
 }
-]
+$$
 
 ---
 
@@ -1105,7 +1105,7 @@ The purpose is comparing development workflows.
 
 Study the invariant process:
 
-[
+$$
 \boxed{
 \text{Context}
 \rightarrow
@@ -1119,7 +1119,7 @@ Study the invariant process:
 \rightarrow
 \text{Iteration}
 }
-]
+$$
 
 Different agents will implement this loop differently.
 
@@ -1151,15 +1151,15 @@ But they are not the highest-leverage activities for this curriculum.
 
 The objective is not:
 
-[
+$$
 \max \text{number of technologies learned}
-]
+$$
 
 It is:
 
-[
+$$
 \max \text{engineering capability}
-]
+$$
 
 ---
 
@@ -1201,7 +1201,7 @@ Now we have an engineering result.
 
 The difference is:
 
-[
+$$
 \boxed{
 \text{Claim}
 \rightarrow
@@ -1209,7 +1209,7 @@ The difference is:
 \rightarrow
 \text{Evidence}
 }
-]
+$$
 
 This principle applies to everything:
 
@@ -1249,7 +1249,7 @@ This creates a second abstraction boundary.
 
 You can reason about:
 
-[
+$$
 \text{Application}
 \rightarrow
 \text{Model}
@@ -1257,7 +1257,7 @@ You can reason about:
 \text{Inference Engine}
 \rightarrow
 \text{Hardware}
-]
+$$
 
 rather than treating model inference as an opaque API call.
 
@@ -1298,10 +1298,9 @@ The final track connects engineering to product economics.
 
 A useful conceptual model is:
 
-[
+$$
 \text{AI Value}
-===============
-
+=
 \frac{
 \text{Capability}
 \times
@@ -1313,7 +1312,7 @@ A useful conceptual model is:
 \times
 \text{Failure Rate}
 }
-]
+$$
 
 This is not a literal universal business equation.
 
@@ -1344,27 +1343,27 @@ The entire month can ultimately be compressed into four questions.
 
 ### 1. Can you build an AI application?
 
-[
+$$
 \boxed{\text{AI Application Engineering}}
-]
+$$
 
 ### 2. Can you make it reliable?
 
-[
+$$
 \boxed{\text{Software Engineering}}
-]
+$$
 
 ### 3. Can you make AI build software?
 
-[
+$$
 \boxed{\text{Agentic Engineering}}
-]
+$$
 
 ### 4. Can you decide what should be built?
 
-[
+$$
 \boxed{\text{Product and Systems Judgment}}
-]
+$$
 
 The fourth is the highest-leverage capability.
 
@@ -1408,7 +1407,7 @@ Automated Verification
 Evaluation
   ↓
 Human Judgment
-  ↑________________|
+  ^________________|
 ```
 
 And eventually, increasingly autonomous systems may look like:
@@ -1431,7 +1430,7 @@ Deployment
 Telemetry
   ↓
 Improvement
-  └──────────────→ Agent Swarm
+  +--------------→ Agent Swarm
 ```
 
 The human remains in the loop.
@@ -1470,11 +1469,11 @@ Because someone must decide whether the system is actually solving the right pro
 
 This suggests a general principle:
 
-[
+$$
 \boxed{
 \text{When production becomes cheap, selection becomes valuable.}
 }
-]
+$$
 
 The bottleneck moves from creation toward judgment.
 
@@ -1486,7 +1485,7 @@ There is an even deeper interpretation.
 
 An agentic software-development system can be viewed as a control loop:
 
-[
+$$
 \text{Goal}
 \rightarrow
 \text{Action}
@@ -1498,7 +1497,7 @@ An agentic software-development system can be viewed as a control loop:
 \text{Evaluation}
 \rightarrow
 \text{Correction}
-]
+$$
 
 The human defines the objective and constraints.
 
@@ -1524,7 +1523,7 @@ This leads to the central idea of Day 30:
 
 That system includes:
 
-[
+$$
 H =
 (
 \Delta,
@@ -1536,18 +1535,18 @@ G,
 E,
 P
 )
-]
+$$
 
 where, conceptually:
 
-* (\Delta): control-flow dynamics
-* (T): available tools
-* (C): context-management strategy
-* (M): memory/state
-* (V): verification machinery
-* (G): workflow or agent graph
-* (E): evaluation machinery
-* (P): permissions and policies
+* $\Delta$: control-flow dynamics
+* $T$: available tools
+* $C$: context-management strategy
+* $M$: memory/state
+* $V$: verification machinery
+* $G$: workflow or agent graph
+* $E$: evaluation machinery
+* $P$: permissions and policies
 
 The engineer is no longer merely writing the final artifact.
 
@@ -1589,11 +1588,11 @@ The human remains responsible for deciding whether that implementation should ex
 
 The deepest transformation is therefore:
 
-[
+$$
 \text{Implementation}
 \rightarrow
 \text{Intent}
-]
+$$
 
 Traditional programming emphasizes:
 
@@ -1635,7 +1634,7 @@ A more useful definition is:
 
 That requires three forms of competence:
 
-[
+$$
 \boxed{
 \text{Technical Depth}
 +
@@ -1643,13 +1642,13 @@ That requires three forms of competence:
 +
 \text{Product Judgment}
 }
-]
+$$
 
 And increasingly, a fourth:
 
-[
+$$
 \boxed{\text{Ability to Engineer the AI That Does the Engineering}}
-]
+$$
 
 That is the direction of travel.
 
@@ -1669,7 +1668,7 @@ That is the direction of travel.
 
 6. **Agents should operate in closed loops.**
 
-[
+$$
 \boxed{
 \text{Plan}
 \rightarrow
@@ -1681,7 +1680,7 @@ That is the direction of travel.
 \rightarrow
 \text{Repair}
 }
-]
+$$
 
 7. **More agents do not automatically produce better systems.** Agent decomposition must be justified by improvements in quality, reliability, latency, or economics.
 
@@ -1691,7 +1690,7 @@ That is the direction of travel.
 
 10. **AI engineering has four increasingly high-level capabilities:**
 
-[
+$$
 \boxed{
 \text{Build AI Applications}
 \rightarrow
@@ -1701,7 +1700,7 @@ That is the direction of travel.
 \rightarrow
 \text{Shape What Gets Built}
 }
-]
+$$
 
 11. **Evidence beats claims.** Every important assertion about quality, reliability, cost, or value should be supported by measurements.
 
@@ -1731,8 +1730,8 @@ The month therefore ends where the future of AI engineering begins:
                 Evaluation
                      ↓
                Human Judgment
-                     ↑
-                     └───────────
+                     ^
+                     +-----------
 ```
 
 The engineer remains at the center of the loop.
