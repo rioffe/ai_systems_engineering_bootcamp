@@ -574,7 +574,7 @@ $$
 T_{p95}
 $$
 
-or (T_{p99}) where appropriate.
+or $T_{p99}$ where appropriate.
 
 Users often experience tail latency rather than average latency.
 
