@@ -8,18 +8,17 @@ The final evaluation is broader than an AI benchmark. An AI application is a soc
 
 A useful final evaluation has three dimensions:
 
-[
+$$
 \boxed{
 E_{\text{final}}
-================
-
+=
 E_{\text{technical}}
 +
 E_{\text{AI}}
 +
 E_{\text{product}}
 }
-]
+$$
 
 These dimensions should be evaluated independently and then considered together.
 
@@ -71,7 +70,7 @@ But suppose:
 * responses take 15 seconds,
 * citations are occasionally fabricated,
 * the system leaks document content across users,
-* inference costs $2 per query,
+* inference costs \$2 per query,
 * users cannot understand when the system is uncertain.
 
 The model may be excellent.
@@ -86,22 +85,22 @@ Before running the final evaluation, define explicit acceptance criteria.
 
 For each important system property, specify:
 
-[
-(\text{metric},\text{target},\text{measurement method})
-]
+$$
+(\text{metric},\ \text{target},\ \text{measurement method})
+$$
 
 For example:
 
-| Dimension    | Metric                    | Example target |
-| ------------ | ------------------------- | -------------: |
-| Reliability  | successful request rate   |        ≥ 99.5% |
-| Latency      | p95 end-to-end latency    |          ≤ 5 s |
-| Cost         | cost/request              |        ≤ $0.05 |
-| Accuracy     | task accuracy             |          ≥ 90% |
-| Groundedness | grounded answer rate      |          ≥ 95% |
-| Tool use     | successful tool-call rate |          ≥ 98% |
-| Security     | critical vulnerabilities  |              0 |
-| Usability    | task completion rate      |          ≥ 90% |
+| Dimension     | Metric                  | Example target |
+| ------------- | ----------------------- | -------------: |
+| Reliability   | successful request rate |         $\ge$ 99.5% |
+| Latency       | p95 end-to-end latency  |           $\le$ 5 s |
+| Cost          | cost/request            |         $\le$ \$0.05 |
+| Accuracy      | task accuracy           |           $\ge$ 90% |
+| Groundedness  | grounded answer rate    |           $\ge$ 95% |
+| Tool use      | successful tool-call rate |          $\ge$ 98% |
+| Security      | critical vulnerabilities |              0  |
+| Usability     | task completion rate    |           $\ge$ 90% |
 
 The exact values depend on the application.
 
@@ -155,24 +154,22 @@ For every important workflow, test:
 
 A useful model is:
 
-[
+$$
 P(\text{successful task})
-=========================
-
+=
 P(\text{all required components succeed})
-]
+$$
 
 In a multi-stage pipeline, even individually reliable components can produce a fragile overall system.
 
-If five sequential components each succeed with probability (0.99), then:
+If five sequential components each succeed with probability $0.99$, then:
 
-[
+$$
 P(\text{end-to-end success})
-============================
-
+=
 0.99^5
 \approx 0.951
-]
+$$
 
 The system's end-to-end reliability is therefore approximately 95.1%, despite every component individually having 99% reliability.
 
@@ -202,7 +199,7 @@ A particularly important distinction is between **recoverable and unrecoverable 
 
 For example:
 
-[
+$$
 \text{Tool failure}
 \rightarrow
 \text{retry}
@@ -210,17 +207,17 @@ For example:
 \text{fallback}
 \rightarrow
 \text{successful response}
-]
+$$
 
 is very different from:
 
-[
+$$
 \text{Tool failure}
 \rightarrow
 \text{agent failure}
 \rightarrow
 \text{user-visible error}
-]
+$$
 
 The final evaluation should therefore measure not merely whether failures occur, but whether the system **recovers gracefully**.
 
@@ -247,15 +244,15 @@ Average latency is usually insufficient.
 
 A system with:
 
-[
-\text{mean}=2s
-]
+$$
+\text{mean} = 2\,\text{s}
+$$
 
 may still have:
 
-[
-p99=30s
-]
+$$
+p_{99} = 30\,\text{s}
+$$
 
 which means one out of every hundred requests is extremely slow.
 
@@ -263,7 +260,7 @@ For interactive systems, tail latency often matters more than the mean.
 
 Trace the complete request:
 
-[
+$$
 \text{request}
 \rightarrow
 \text{retrieval}
@@ -275,7 +272,7 @@ Trace the complete request:
 \text{LLM}
 \rightarrow
 \text{response}
-]
+$$
 
 Then determine where the latency is actually coming from.
 
@@ -300,10 +297,9 @@ Cost may include:
 
 A useful metric is:
 
-[
+$$
 C_{\text{request}}
-==================
-
+=
 C_{\text{model}}
 +
 C_{\text{retrieval}}
@@ -311,23 +307,22 @@ C_{\text{retrieval}}
 C_{\text{tools}}
 +
 C_{\text{infrastructure}}
-]
+$$
 
 Then measure:
 
-[
+$$
 C_{\text{user}}
-]
+$$
 
 and ultimately:
 
-[
+$$
 C_{\text{unit}}
-===============
-
+=
 \frac{\text{total operating cost}}
-{\text{successful business outcomes}}
-]
+     {\text{successful business outcomes}}
+$$
 
 The last quantity is particularly important.
 
@@ -335,11 +330,11 @@ Optimizing cost per API call is not necessarily useful if cheaper inference dram
 
 The real objective is usually something closer to:
 
-[
+$$
 \max
 \frac{\text{user value}}
-{\text{system cost}}
-]
+     {\text{system cost}}
+$$
 
 ---
 
@@ -364,11 +359,11 @@ Evaluate how important metrics change as load increases.
 
 Ideally, determine the system's operating envelope:
 
-[
+$$
 L_{\min} \leq L \leq L_{\max}
-]
+$$
 
-where (L) represents system load.
+where $L$ represents system load.
 
 The evaluation should identify the point at which:
 
@@ -416,9 +411,9 @@ Security testing should therefore include adversarial scenarios, not merely stat
 
 The acceptance criterion for critical security failures should generally be:
 
-[
+$$
 \boxed{0}
-]
+$$
 
 ---
 
@@ -458,26 +453,25 @@ For generative systems, exact string matching is often inadequate.
 
 Instead, define a task-specific evaluation function:
 
-[
+$$
 S(y,\hat y)
-]
+$$
 
-where (y) is the expected result and (\hat y) is the generated result.
+where $y$ is the expected result and $\hat y$ is the generated result.
 
 For example, a research assistant may need to satisfy multiple criteria:
 
-[
+$$
 S
 =
-
-w_1S_{\text{correct}}
+w_1 S_{\text{correct}}
 +
-w_2S_{\text{complete}}
+w_2 S_{\text{complete}}
 +
-w_3S_{\text{grounded}}
+w_3 S_{\text{grounded}}
 +
-w_4S_{\text{citation}}
-]
+w_4 S_{\text{citation}}
+$$
 
 This is often more informative than a single "answer quality" score.
 
@@ -510,25 +504,24 @@ In many applications, **calibrated abstention is a feature**.
 
 A useful metric is:
 
-[
+$$
 \text{Hallucination Rate}
-=========================
-
+=
 \frac{\text{unsupported claims}}
-{\text{claims evaluated}}
-]
+     {\text{claims evaluated}}
+$$
 
 but also measure:
 
-[
+$$
 \text{Abstention Precision}
-]
+$$
 
 and
 
-[
+$$
 \text{Abstention Recall}
-]
+$$
 
 because refusing to answer everything would trivially minimize hallucination.
 
@@ -548,15 +541,15 @@ This is particularly important for RAG systems.
 
 Separate:
 
-[
+$$
 \text{retrieval relevance}
-]
+$$
 
 from:
 
-[
+$$
 \text{answer groundedness}
-]
+$$
 
 A system can retrieve the correct document but generate an unsupported conclusion.
 
@@ -564,7 +557,7 @@ Conversely, the answer may be correct while the retrieval system failed to retri
 
 Therefore evaluate the pipeline independently:
 
-[
+$$
 \text{Query}
 \rightarrow
 \text{Retrieval}
@@ -574,7 +567,7 @@ Therefore evaluate the pipeline independently:
 \text{Generation}
 \rightarrow
 \text{Citation}
-]
+$$
 
 Measure each stage.
 
@@ -611,30 +604,29 @@ The key concept is **distributional robustness**.
 
 If performance is:
 
-[
-P_{\text{normal}} = 95%
-]
+$$
+P_{\text{normal}} = 95\%
+$$
 
 but:
 
-[
-P_{\text{perturbed}} = 52%
-]
+$$
+P_{\text{perturbed}} = 52\%
+$$
 
 the system is fragile even though its headline benchmark looks excellent.
 
 Evaluate the degradation:
 
-[
+$$
 \Delta P
-========
-
-## P_{\text{normal}}
-
+=
+P_{\text{normal}}
+-
 P_{\text{perturbed}}
-]
+$$
 
-A smaller (\Delta P) generally indicates greater robustness.
+A smaller $\Delta P$ generally indicates greater robustness.
 
 ---
 
@@ -655,10 +647,9 @@ Measure:
 
 For example:
 
-[
+$$
 \text{Tool Success}
-===================
-
+=
 \text{Correct Selection}
 \times
 \text{Correct Arguments}
@@ -666,7 +657,7 @@ For example:
 \text{Correct Execution}
 \times
 \text{Correct Interpretation}
-]
+$$
 
 This decomposition is useful because "the agent failed" is not sufficiently diagnostic.
 
@@ -714,21 +705,21 @@ Instead of asking:
 
 measure:
 
-[
+$$
 T_{\text{before}}
 \quad\text{vs.}\quad
 T_{\text{after}}
-]
+$$
 
 for the time required to complete a task.
 
 Or:
 
-[
+$$
 E_{\text{before}}
 \quad\text{vs.}\quad
 E_{\text{after}}
-]
+$$
 
 for task error rate.
 
@@ -764,22 +755,21 @@ A dangerous product is one that is easy to use but causes users to become **over
 
 Therefore:
 
-[
+$$
 \text{Good UX}
 \neq
 \text{Maximum user trust}
-]
+$$
 
 Instead:
 
-[
+$$
 \boxed{
 \text{Good UX}
-==============
-
+=
 \text{Appropriate trust}
 }
-]
+$$
 
 Users should trust the system when it is reliable and question it when uncertainty is significant.
 
@@ -833,10 +823,9 @@ Possible sources of differentiation include:
 
 A useful strategic equation is:
 
-[
+$$
 \text{Product Advantage}
-========================
-
+=
 \text{Model Capability}
 +
 \text{System Engineering}
@@ -846,7 +835,7 @@ A useful strategic equation is:
 \text{Workflow}
 +
 \text{Distribution}
-]
+$$
 
 In many modern AI products, the foundation model is increasingly commoditized.
 
@@ -858,23 +847,23 @@ The durable advantage therefore tends to reside above the model.
 
 The final evaluation should combine all three dimensions into one matrix.
 
-| Dimension       | Question                          | Evidence                   |
-| --------------- | --------------------------------- | -------------------------- |
-| Functionality   | Does it work?                     | Automated tests            |
-| Reliability     | Does it keep working?             | Production/load tests      |
-| Latency         | Is it fast enough?                | Traces, p95/p99            |
-| Cost            | Is it economical?                 | Cost telemetry             |
-| Scalability     | Can it handle growth?             | Load tests                 |
-| Security        | Is it safe?                       | Security/adversarial tests |
-| Accuracy        | Is it correct?                    | Golden datasets            |
-| Hallucination   | Does it invent information?       | Claim evaluation           |
-| Groundedness    | Are answers supported?            | Evidence evaluation        |
-| Robustness      | Does it survive perturbation?     | Adversarial tests          |
-| Tool use        | Does it operate tools correctly?  | Tool traces                |
-| User value      | Does it solve a real problem?     | Outcome metrics            |
-| Usability       | Can users operate it effectively? | User studies               |
-| Adoption        | Do users return?                  | Behavioral analytics       |
-| Differentiation | Why this product?                 | Competitive analysis       |
+| Dimension       | Question                     | Evidence                 |
+| --------------- | ---------------------------- | ------------------------ |
+| Functionality   | Does it work?                | Automated tests          |
+| Reliability     | Does it keep working?        | Production/load tests    |
+| Latency         | Is it fast enough?           | Traces, p95/p99          |
+| Cost            | Is it economical?            | Cost telemetry           |
+| Scalability     | Can it handle growth?        | Load tests               |
+| Security        | Is it safe?                  | Security/adversarial tests |
+| Accuracy        | Is it correct?               | Golden datasets          |
+| Hallucination   | Does it invent information?  | Claim evaluation         |
+| Groundedness    | Are answers supported?       | Evidence evaluation      |
+| Robustness      | Does it survive perturbation? | Adversarial tests        |
+| Tool use        | Does it operate tools correctly? | Tool traces          |
+| User value      | Does it solve a real problem? | Outcome metrics          |
+| Usability       | Can users operate it effectively? | User studies        |
+| Adoption        | Do users return?             | Behavioral analytics     |
+| Differentiation | Why this product?            | Competitive analysis     |
 
 This matrix prevents a common engineering failure:
 
@@ -888,19 +877,19 @@ At the end of the project, produce a scorecard.
 
 For example:
 
-| Category      | Metric             |  Target | Actual | Status |
-| ------------- | ------------------ | ------: | -----: | ------ |
-| Reliability   | Success rate       |   99.5% |  99.7% | Pass   |
-| Latency       | p95                |   < 5 s |  4.2 s | Pass   |
-| Cost          | $/request          | < $0.05 |  $0.04 | Pass   |
-| Accuracy      | Task accuracy      |   > 90% |    93% | Pass   |
-| Groundedness  | Grounded answers   |   > 95% |    96% | Pass   |
-| Hallucination | Unsupported claims |    < 2% |   1.4% | Pass   |
-| Tool use      | Successful calls   |   > 98% |    97% | Fail   |
-| Security      | Critical findings  |       0 |      0 | Pass   |
-| Usability     | Task completion    |   > 90% |    94% | Pass   |
+| Category      | Metric            | Target  | actual  | status |
+| ------------- | ----------------- | ------: | ------: | ------ |
+| Reliability   | Success rate      |  99.5%  |  99.7%  | Pass   |
+| Latency       | p95               |  < 5 s  |  4.2 s  | Pass   |
+| Cost          | cost/request      | < \$0.05 | < \$0.05 | Pass   |
+| Accuracy      | Task accuracy     |  > 90%  | 93%     | Pass   |
+| Groundedness  | Grounded answers  |  > 95%  | 96%     | Pass   |
+| Hallucination | Unsupported claims|  < 2%   | 1.4%    | Pass   |
+| Tool use      | Successful calls  |  > 98%  | 97%     | Fail   |
+| Security      | Critical findings |     0   |     0   | Pass   |
+| Usability     | Task completion   |  > 90%  | 94%     | Pass   |
 
-This changes the final presentation from:
+The Cost row shows dollar amounts per request, written with escaped dollar signs (\$0.05) so that pandoc does not mistake them for math. This changes the final presentation from:
 
 > "Here is our application."
 
@@ -918,9 +907,10 @@ The final evaluation should deliberately attempt to break the system.
 
 Construct a failure matrix:
 
-[
-F =
-{
+$$
+F
+=
+\{
 F_{\text{model}},
 F_{\text{retrieval}},
 F_{\text{tool}},
@@ -929,8 +919,8 @@ F_{\text{data}},
 F_{\text{security}},
 F_{\text{load}},
 F_{\text{user}}
-}
-]
+\}
+$$
 
 Then test each class.
 
@@ -979,7 +969,7 @@ That is unrealistic.
 
 The objective is to demonstrate that:
 
-[
+$$
 \boxed{
 \text{Failure}
 \rightarrow
@@ -989,7 +979,7 @@ The objective is to demonstrate that:
 \rightarrow
 \text{Safe Outcome}
 }
-]
+$$
 
 is well engineered.
 
@@ -1031,7 +1021,7 @@ The model is only one component.
 
 The complete system looks more like:
 
-[
+$$
 \text{User}
 \rightarrow
 \text{Interface}
@@ -1049,11 +1039,11 @@ The complete system looks more like:
 \text{Verification}
 \rightarrow
 \text{Response}
-]
+$$
 
 with:
 
-[
+$$
 \text{Observability}
 +
 \text{Security}
@@ -1061,7 +1051,7 @@ with:
 \text{Evaluation}
 +
 \text{Cost Controls}
-]
+$$
 
 running across the entire architecture.
 
@@ -1109,4 +1099,3 @@ The final transition in AI engineering is therefore from **building** to **provi
 You have built the system.
 
 Now you must demonstrate that it deserves to be deployed.
-
