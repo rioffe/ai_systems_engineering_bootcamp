@@ -315,6 +315,7 @@ Q
 \text{Retrieval}
 \rightarrow
 \text{Reranking}
+\\
 \rightarrow
 \text{Reading}
 \rightarrow
@@ -605,7 +606,7 @@ $$
 
 where $V$ is the economic value of the task, the product is not viable.
 
-Now suppose AI reduces the effective cognitive cost to (C_{AI}):
+Now suppose AI reduces the effective cognitive cost to $C_{AI}$:
 
 $$
 H C_{AI} \ll H C_h
