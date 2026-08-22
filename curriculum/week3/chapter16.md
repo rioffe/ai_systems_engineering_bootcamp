@@ -70,12 +70,12 @@ $$
 
 where:
 
-* (R) = requirements
-* (I) = invariants
-* (C) = constraints
-* (A) = acceptance criteria
-* (T) = tests
-* (D) = architectural decisions
+* $R$ = requirements
+* $I$ = invariants
+* $C$ = constraints
+* $A$ = acceptance criteria
+* $T$ = tests
+* $D$ = architectural decisions
 
 The specification defines the set of acceptable implementations:
 
@@ -138,13 +138,13 @@ The larger the number of unspecified decisions, the larger the solution space:
 ```text
                        "Build a RAG application"
                              |
-             +----+-----+----+
-           v         v        v
+           +---------+-------+--+
+           v         v          v
      Architecture   Retrieval  Security
-           |             |            |
-      +---+---+     +---+---+     +---+---+
-     v v    v     v v    v     v v    v
-    A  B    C     X  Y    Z     P  Q    R
+           |             |           |
+       +---+---+     +---+---+     +---+---+
+       v   v   v     v   v   v     v   v   v
+       A   B   C     X   Y   Z     P   Q   R
 ```
 
 The agent is effectively performing two tasks simultaneously:
@@ -407,53 +407,76 @@ Response:
             "document_id": string,
             "page": integer
         }
-$$
 }
 ```
+
 The interface becomes a **contract**.
 The agent can implement internally however it wants, provided the external contract remains satisfied.
 This is an important principle:
+
 > **Specify behavior at the boundary; preserve implementation freedom behind the boundary unless an architectural constraint is intentional.**
+
 ---
+
 # 8. Constraints
+
 Constraints limit the solution space.
 They may include:
+
 ### Technology constraints
+
 ```text
 Python 3.12+
 PostgreSQL
 FastAPI
 ```
+
 ### Resource constraints
+
 ```text
 <= 2 GB memory
 <= 4 CPU cores
 ```
+
 ### Performance constraints
+
 ```text
 P95 latency < 500 ms
 ```
+
 ### Cost constraints
+
 ```text
 LLM inference cost < $0.01/query
 ```
+
 ### Security constraints
+
 ```text
 No plaintext credentials.
 Tenant isolation required.
 ```
+
 ### Deployment constraints
+
 ```text
 Must run in Kubernetes.
 Must support horizontal scaling.
 ```
+
 Constraints are especially important for AI agents because otherwise they may optimize for local correctness while violating system-level requirements.
+
 ---
+
 # 9. Tests as Executable Specifications
+
 One of the most powerful forms of specification is the **executable specification**.
 Instead of:
+
 > The query endpoint should return relevant answers.
+
 write:
+
 ```python
 def test_query_returns_citations():
     response = client.post(
@@ -464,6 +487,7 @@ def test_query_returns_citations():
     assert response.json()["answer"]
     assert response.json()["citations"]
 ```
+
 The test converts a statement of intent into an executable constraint.
 Conceptually:
 $$
@@ -471,7 +495,7 @@ Specification
 \rightarrow
 Test
 \rightarrow
-Observable behavior
+ObservableBehavior
 $$
 This is especially valuable for coding agents.
 The agent can:
@@ -486,12 +510,17 @@ observe failures
        ↓
 repair
 ```
+
 The specification and verifier therefore form a feedback pair.
+
 ---
+
 # 10. Architecture Decision Records
+
 Not every decision should become an implementation constraint.
 Sometimes multiple implementations satisfy the requirements.
 For example:
+
 ```text
 Requirement:
 Store document embeddings.
@@ -507,26 +536,27 @@ OpenSearch
 An **Architecture Decision Record (ADR)** captures why a particular decision was made.
 A typical ADR contains:
 ```text
-```text
                      Specification
                              |
-            +------+-----+---+
-           v           v       v
+           +-------+---------+---+
+           v       v             v
         Intent   Behavior  Constraints
            |              v
     Requirements      Acceptance
                        Criteria
                         |
-                       v
+                        v
                  Interfaces
                       |
-                     v
+                      v
                     Tests
                       |
-                     v
+                      v
                      ADRs
 ```
+
 Each layer answers a different question.
+
 | Layer               | Question                             |
 | ------------------- | ------------------------------------ |
 | Intent              | Why are we building this?            |
@@ -538,14 +568,22 @@ Each layer answers a different question.
 | Acceptance criteria | When is it acceptable?               |
 | Tests               | How can we verify it?                |
 | ADRs                | Why were architectural choices made? |
+
 The layers reinforce one another.
+
 ---
+
 # 12. Specification Engineering vs. Prompt Engineering
+
 These concepts should not be confused.
-**Prompt engineering** focuses primarily on communicating with a model.
-**Specification engineering** focuses on defining the system to be built.
+
+- **Prompt engineering** focuses primarily on communicating with a model.
+- **Specification engineering** focuses on defining the system to be built.
+
 A prompt might say:
+
 > "Implement a secure RAG API."
+
 A specification might define:
 ```text
 Purpose
@@ -583,9 +621,13 @@ Verification
   ↓
 Evidence
 ```
+
 The specification becomes the durable artifact.
+
 ---
+
 # 13. Specification as an Interface Between Humans and Agents
+
 There is a deeper architectural implication.
 Traditional software engineering has interfaces between:
 ```text
@@ -599,7 +641,9 @@ human <-> agent
 ```
 The specification becomes the interface at that boundary.
 A human may communicate intent in natural language:
+
 > "We need a reliable document search service."
+
 The specification transforms that into something closer to:
 ```text
 Inputs
@@ -613,14 +657,20 @@ Security properties
 ```
 This reduces the amount of implicit reasoning the agent must perform.
 The human is effectively moving from:
+
 > **telling the agent what to do**
+
 toward:
+
 > **defining the space of acceptable outcomes.**
+
 That is a much more scalable interaction model.
+
 ---
+
 # 14. The Specification-to-Implementation Pipeline
+
 A mature agentic workflow can look like:
-```text
 ```text
                  Human intent
                        |
@@ -628,7 +678,7 @@ A mature agentic workflow can look like:
              Specification
                        |
                        v
-     +------------------------+
+     +-------------------------+
      | Requirements            |
      | Interfaces              |
      | Invariants              |
@@ -636,7 +686,7 @@ A mature agentic workflow can look like:
      | Acceptance criteria     |
      | Tests                   |
      | ADRs                    |
-     +----------+---------+-----+
+     +----------+--------------+
                 |
                 v
                Agent
@@ -644,37 +694,44 @@ A mature agentic workflow can look like:
                 v
                Plan
                 |
-               v
+                v
         Implementation
                 |
-               v
+                v
         Verification
                 |
-               v
+                v
              Evidence
                 |
-               v
-  +-------------------------+
+                v
+  +--------------------------+
   | Spec satisfied?          |
   +-------+---------+--------+
-     No    |        Yes        |
-      v    |        v          v
-   Iterate      Complete
+     No   |        Yes       |
+          v                  v   
+       Iterate           Complete
 ```
 The specification is therefore not merely a document produced before coding.
 It participates in the entire development loop.
+
 ---
+
 # 15. Measuring the Value of Specification
+
 The most important experiment for this day is empirical.
 Take one software task.
 For example:
+
 > Build a document-question-answering service.
+
 Give the agent two different specifications.
+
 ## Prompt A — Vague
 ```text
 Build me a RAG application.
 It should ingest documents and answer questions about them.
 ```
+
 ## Prompt B — Precise
 ```text
 Build a Python 3.12 RAG service.
@@ -701,31 +758,43 @@ Architecture:
 - PostgreSQL + pgvector
 - Redis for caching
 ```
+
 The second specification sharply reduces ambiguity.
+
 ---
+
 # 16. The Experiment
+
 Run the same agent under both conditions.
 Measure at least:
+
 ### Correctness
+
 $$
 Accuracy =
 \frac{\text{requirements satisfied}}
 {\text{requirements}}
 $$
+
 ### Test success
+
 $$
 PassRate =
 \frac{\text{tests passed}}
 {\text{tests}}
 $$
+
 ### Rework
+
 Measure:
 ```text
 number of iterations
 number of failed test runs
 number of reverted edits
 ```
+
 ### Efficiency
+
 Measure:
 ```text
 tokens consumed
@@ -733,7 +802,9 @@ tool calls
 wall-clock time
 LLM cost
 ```
+
 ### Specification compliance
+
 Create a checklist:
 ```text
 Requirement 1 yes
@@ -742,7 +813,9 @@ Requirement 3 no
 Requirement 4 yes
 ...
 ```
+
 ### Architectural compliance
+
 Evaluate:
 ```text
 correct framework?
@@ -765,27 +838,40 @@ Security violations
 Rework
 Human corrections
 ```
+
 The experiment turns specification engineering from an abstract idea into a measurable engineering discipline.
+
 ---
+
 # 17. Specification Quality Is an Engineering Variable
+
 This experiment should lead to a broader conclusion.
 Suppose agent capability is:
+
 $$
 Q = f(M,H,S,V,E)
 $$
+
 where:
-* (M) = model capability
-* (H) = harness quality
-* (S) = specification quality
-* (V) = verification quality
-* (E) = environment/tooling quality
-Improving (M) is not the only way to improve (Q).
-Improving (S) can be equally important.
+
+* $M$ = model capability
+* $H$ = harness quality
+* $S$ = specification quality
+* $V$ = verification quality
+* $E$ = environment/tooling quality
+
+Improving $M$ is not the only way to improve $Q$.
+Improving $S$ can be equally important.
 This creates an interesting possibility:
+
 > A weaker model operating against a precise specification and strong verifier may outperform a stronger model operating against an ambiguous specification.
+
 The system architecture determines how much capability can actually be extracted from the model.
+
 ---
+
 # 18. From Requirements Engineering to Specification Engineering
+
 Traditional requirements engineering remains essential.
 But agentic development expands its scope.
 Traditional requirements often emphasize:
@@ -802,8 +888,10 @@ How is failure detected?
 What architectural decisions are fixed?
 What evidence demonstrates compliance?
 ```
+
 This makes the specification much closer to an **engineering contract**.
 A mature specification may therefore serve simultaneously as:
+
 * a requirements document
 * an architectural contract
 * an API contract
@@ -811,9 +899,13 @@ A mature specification may therefore serve simultaneously as:
 * an agent instruction set
 * a verification target
 * a review artifact
+
 This convergence is one of the defining characteristics of AI-assisted software engineering.
+
 ---
+
 # 19. The Deeper Idea: Specification as Search-Space Reduction
+
 Return to the coding-agent model from Day 15.
 The agent is searching through possible repository states:
 $$
@@ -825,20 +917,20 @@ $$
 $$
 With a precise specification:
 $$
-\mathcal{G}*{precise}
+\mathcal{G}_{precise}
 \subset
-\mathcal{G}*{vague}
+\mathcal{G}_{vague}
 $$
 The specification reduces the search space.
 But this is not necessarily a limitation.
 It is **useful constraint**.
-```text
+
 ```text
             All possible implementations
-                         |
+                       |
                      spec
-|                        |
-|                        v
+                       |
+                       v
           Valid implementations
                        |
                     tests
@@ -848,23 +940,34 @@ It is **useful constraint**.
 ```
 This is why specification quality directly affects agent performance.
 The agent does not need to discover every design decision if the specification has already encoded them.
+
 ---
+
 # 20. Exercise — Specification A vs. Specification B
+
 Choose a problem substantial enough to expose ambiguity.
 For example:
+
 > Build a service that answers questions about a collection of documents.
+
 Create two specifications.
+
 ### Version A
+
 Use only a few sentences.
 Do not specify:
+
 * technology
 * API
 * security
 * performance
 * failure behavior
 * tests
+
 ### Version B
+
 Specify:
+
 * functional requirements
 * non-functional requirements
 * invariants
@@ -873,14 +976,17 @@ Specify:
 * acceptance criteria
 * test cases
 * architecture decisions
+
 Run the **same coding agent** against both.
 Do not change:
+
 * model
 * temperature/settings
 * repository
 * tool access
 * verifier
 * hardware
+
 Only change the specification.
 Then compare the resulting systems.
 Your evaluation should include:
@@ -898,10 +1004,15 @@ Cost
 Human intervention
 ```
 Finally ask:
+
 > **How much of the agent's apparent coding ability was actually specification quality?**
+
 That is the central lesson of Day 16.
+
 ---
+
 # Key Takeaways
+
 1. **Specification engineering is the discipline of converting intent into a precise, testable system contract.**
 2. **A vague request creates a large solution space.**
    A precise specification constrains that space and reduces ambiguity.
@@ -940,4 +1051,5 @@ That is the central lesson of Day 16.
 14. **The future software-engineering artifact may be less "code" and more "specification + evidence."**
     Code becomes one implementation of a formally constrained desired system.
 15. **The key shift is from asking an agent to write software to specifying the state of the world that the agent must create.**
+
     > **Don't merely tell the agent what to code. Define what must be true when the work is finished.**
