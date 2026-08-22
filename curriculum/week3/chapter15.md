@@ -16,27 +16,27 @@ A coding agent looks fundamentally different:
 
 ```text
                            +----------------+
-                           |      LLM          |
+                           |      LLM       |
                            +----------------+
                               |
-                            ↓
+                              ↓
                            +----------------+
-                           |  Agent Harness    |
+                           |  Agent Harness |
                            +----------------+
                               |
-                            ↓
-                 +----+----+----+
-                ↓        ↓        ↓
+                              ↓
+                 +----+----+--------+
+                 ↓         ↓        ↓
             filesystem   shell   tools
-                 |        |        |
-                 +----+----+----+
+                 |         |        |
+                 +----+----+--------+
                        |
-                     ↓
-                verifier
-                     |
-                   ↓
-              feedback
-                   ^
+                       ↓
+                   verifier
+                       |
+                       ↓
+                   feedback
+                       ^
 ```
 
 The important shift is that the model does not simply produce the final artifact. It participates in a **closed-loop engineering process**:
@@ -616,32 +616,32 @@ The basic coding-agent loop is therefore:
 
 ```text
                       +--------------+
-                      |     Task        |
+                      |     Task     |
                       +--------------+
                              |
-                          ↓
+                             ↓
                       +--------------+
-                      |  Observe      |
-                      +--------------+
-                             |
-                          ↓
-                      +--------------+
-                      |  Reason       |
+                      |  Observe     |
                       +--------------+
                              |
-                          ↓
+                             ↓
                       +--------------+
-                      |  Act          |
+                      |  Reason      |
                       +--------------+
                              |
-                          ↓
+                             ↓
+                      +--------------+
+                      |  Act         |
+                      +--------------+
+                             |
+                             ↓
                       +--------------+
                       |  Verify      |
                       +--------------+
                              |
-                          ↓
+                             ↓
                       +-----------+
-                      |  Success?  |
+                      |  Success? |
                       +---+---+---+
                      No    |   Yes
                        |         ↓
@@ -761,7 +761,7 @@ For example:
 ```text
                Main Agent
                      |
-         +----+---+---+
+         +----+------+-----+
          v           v     v
       Explorer    Coder   Tester
          |           |     |
@@ -835,7 +835,7 @@ $$
 For example:
 
 ```text
-Read files                yes
+Read files                 yes
 Edit source                yes
 Run tests                  yes
 Git diff                   yes
@@ -1010,20 +1010,20 @@ For example:
 
 ```text
 ```text
-                 Candidate changes
-                       |
-       +----+-----+----+
-      v           v      v
+          Candidate changes
+                 |
+      +----+-----+------+
+      v          v      v
   Change A  Change B  Change C
-     |          |         |
-    v           v         v
-   tests      tests      tests
-     |          |         |
-     v          v         v
-  failed     passed    failed
-                       |
-                      v
-                  continue
+      |          |      |
+     v           v      v
+   tests      tests   tests
+     |          |       |
+     v          v       v
+  failed     passed   failed
+                        |
+                        v
+                       continue
 ```
 
 This makes verification analogous to a search heuristic.
@@ -1037,65 +1037,63 @@ The stronger the verifier, the more efficiently the system can eliminate incorre
 Putting everything together gives a more realistic architecture:
 
 ```text
-                         +------------------+
-```text
                           +------------------+
-                          |      User            |
+                          |      User        |
                           +------------------+
                                 |
-                              ↓
+                                ↓
                           +------------------+
-                          |  Task / Intent      |
+                          |  Task / Intent   |
                           +------------------+
                                 |
-                              ↓
+                                ↓
                   +-------------------------+
-                  |     Agent Harness          |
-                  |                              |
-                  |   +--------------------+     |
-                  |   |  Context Manager     |     |
-                  |   +--------+------------+     |
-                  |               |               |
-                  |            ↓     |
-                  |   +--------------------+       |
-                  |   |       LLM            |       |
-                  |   +--------+------------+       |
-                  |               |               |
-                  |            ↓     |
-                  |   +--------------------+       |
-                  |   |  Tool / Action        |       |
-                  |   |  Controller           |       |
-                  |   +--------+------------+       |
-                  |               |               |
-                  |            ↓     |
-                  |   +--------------------+       |
-                  |   |  Permission Layer     |       |
-                  |   +--------+------------+       |
-                  +---------------+----------------+
+                  |     Agent Harness       |
+                  |                         |
+                  |   +-------------------+ |
+                  |   |  Context Manager  | |
+                  |   +--------+----------+ |
+                  |            |            |
+                  |            ↓            |
+                  |   +-------------------+ |
+                  |   |       LLM         | |
+                  |   +--------+----------+ |
+                  |            |            |
+                  |            ↓            |
+                  |   +-------------------+ |
+                  |   |  Tool / Action    | |
+                  |   |  Controller       | |
+                  |   +--------+----------+ |
+                  |            |            |
+                  |            ↓            |
+                  |   +-------------------+ |
+                  |   |  Permission Layer | |
+                  |   +--------+----------+ |
+                  +---------------+---------+
                                  |
-                               ↓
-              +-----------+------+
-            v             |         v
-       Filesystem      Shell          Tools
-             |             |           |
-             +------------+-----------+
+                                 ↓
+            +------------+---------+
+            v            |         v
+       Filesystem     Shell      Tools
+            |            |         |
+            +------------+---------+
                           |
-                        ↓
+                          ↓
                    +------------------+
-                   |   Verifiers         |
-                   |  tests               |
-                   |  type checker         |
-                   |  linter               |
-                   |  build                |
-                   |  security             |
-                   +------------------+
-                          |
-                        ↓
-                   +------------------+
-                   |   Feedback          |
+                   |   Verifiers      |
+                   |  tests           |
+                   |  type checker    |
+                   |  linter          |
+                   |  build           |
+                   |  security        |
                    +------------------+
                           |
-                        ↓
+                          ↓
+                   +------------------+
+                   |   Feedback       |
+                   +------------------+
+                          |
+                          ↓
                   Context / State
                    update
                           |
