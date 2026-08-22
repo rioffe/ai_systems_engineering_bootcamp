@@ -32,11 +32,11 @@ has progressively greater **real-world agency**.
 
 The central engineering problem becomes:
 
-[
+$$
 \boxed{
 \text{How do we give an agent enough authority to accomplish its task without giving it enough authority to cause unacceptable damage?}
 }
-]
+$$
 
 This is fundamentally a security and systems-engineering problem.
 
@@ -151,9 +151,9 @@ It changes the set of actions the agent can cause in the world.
 
 A useful model is:
 
-[
+$$
 A = {a_1,a_2,\ldots,a_n}
-]
+$$
 
 where (A) is the set of actions available to the agent.
 
@@ -173,11 +173,11 @@ A =
 
 The security architecture should ensure:
 
-[
+$$
 A_{\text{agent}}
 \subseteq
 A_{\text{required}}
-]
+$$
 
 The agent should receive only the capabilities necessary for its task.
 
@@ -263,11 +263,11 @@ The policy engine rejects unauthorized actions regardless of what the model requ
 
 This creates:
 
-[
+$$
 \text{Model intent}
 \neq
 \text{Authorization}
-]
+$$
 
 The model can propose.
 
@@ -456,15 +456,15 @@ may be acceptable in one context but destructive in another.
 
 Therefore authorization may need to consider:
 
-[
+$$
 (\text{tool},\text{arguments},\text{target})
-]
+$$
 
 rather than merely:
 
-[
+$$
 \text{tool}
-]
+$$
 
 ---
 
@@ -877,14 +877,14 @@ This creates a risk-based autonomy model.
 
 A useful framework is:
 
-[
+$$
 R = P(\text{failure}) \times I(\text{failure})
-]
+$$
 
 where:
 
-* (P) = probability of failure
-* (I) = impact of failure
+* $P$ = probability of failure
+* $I$ = impact of failure
 
 As risk increases, autonomy should decrease.
 
@@ -952,11 +952,11 @@ infrastructure destruction
 
 The principle is:
 
-[
+$$
 \text{Higher capability}
 \Rightarrow
 \text{Stronger controls}
-]
+$$
 
 ---
 
@@ -998,10 +998,10 @@ A very strong model is:
 
 ```text
 Agent environment
-      │
-      │
+      |
+      |
       X
-      │
+      |
 Production
 ```
 
@@ -1053,7 +1053,7 @@ full Kubernetes credentials
 The broker can enforce:
 
 ```text
-environment ∈ {staging}
+environment in {staging}
 artifact signed
 tests passed
 security scan passed
@@ -1070,16 +1070,16 @@ This converts broad infrastructure authority into a constrained API.
 
 A useful abstraction is:
 
-[
+$$
 \text{Allow}(a,c,e,p)
-]
+$$
 
 where:
 
-* (a) = action
-* (c) = context
-* (e) = environment
-* (p) = policy
+* $a$ = action
+* $c$ = context
+* $e$ = environment
+* $p$ = policy
 
 For example:
 
@@ -1430,20 +1430,20 @@ They are **security invariants**.
 
 The system must maintain:
 
-[
+$$
 I(s_t)=true
-]
+$$
 
-for every reachable system state (s_t).
+for every reachable system state $s_t$.
 
 A particularly strong safety property is:
 
-[
+$$
 \forall a \in A_{\text{agent}},
 \quad
 a \not\Rightarrow
 \text{catastrophic production state}
-]
+$$
 
 ---
 
@@ -1451,7 +1451,7 @@ a \not\Rightarrow
 
 Suppose the agent has capability set:
 
-[
+$$
 C =
 {
 \text{read},
@@ -1460,20 +1460,20 @@ C =
 \text{network},
 \text{deploy}
 }
-]
+$$
 
 We can progressively remove dangerous capabilities:
 
 ```text
-C₀ = {read}
+C0 = {read}
 
-C₁ = {read, write}
+C1 = {read, write}
 
-C₂ = {read, write, shell}
+C2 = {read, write, shell}
 
-C₃ = {read, write, shell, network}
+C3 = {read, write, shell, network}
 
-C₄ = {read, write, shell, network, deploy}
+C4 = {read, write, shell, network, deploy}
 ```
 
 The question is not:
@@ -1745,11 +1745,11 @@ approval
 
 In other words:
 
-[
+$$
 \boxed{
 \text{Intelligence} \neq \text{Authority}
 }
-]
+$$
 
 An intelligent agent does not need unrestricted power.
 
@@ -1835,21 +1835,21 @@ This separation is fundamental to safe agentic architecture.
 
 17. **Security should be expressed as invariants.**
 
-    [
+$$
     I(s_t)=true
-    ]
+$$
 
     for every reachable system state.
 
 18. **The most important architectural separation is:**
 
-    [
+$$
     \boxed{
     \text{Agent Intelligence}
     \quad\neq\quad
     \text{System Authority}
     }
-    ]
+$$
 
 19. **The final exercise is not merely to build an agent that behaves safely.**
     Build one that remains safe **even when the model behaves incorrectly or maliciously**.
