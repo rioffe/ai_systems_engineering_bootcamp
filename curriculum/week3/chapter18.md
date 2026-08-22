@@ -24,7 +24,7 @@ VERIFY
 FIX
  ↓
 RETEST
- ↺
+ ^ (loop back)
 ```
 
 This looks superficially similar to traditional software development.
@@ -101,7 +101,7 @@ LLM
 Correction
  ↓
 Verifier
- ↺
+ ^ (loop back)
 ```
 
 The model no longer needs to solve the entire problem in one inference.
@@ -142,48 +142,47 @@ The development loop can be formalized as a feedback-control process.
 
 Let:
 
-[
+$$
 S_t
-]
+$$
 
 represent the current state of the software system.
 
 The specification defines the desired set of states:
 
-[
+$$
 \mathcal{G}
-===========
-
+=
 {S \mid S \models SPEC}
-]
+$$
 
 The agent chooses an action:
 
-[
+$$
 A_t \sim \pi_\theta(A \mid C_t,S_t)
-]
+$$
 
 which changes the system:
 
-[
+$$
 S_{t+1}=T(S_t,A_t)
-]
+$$
 
 A verifier evaluates the new state:
 
-[
+$$
 V(S_{t+1},SPEC)
 \rightarrow
 F_{t+1}
-]
+$$
 
-where (F) is feedback.
+where $F$ is feedback.
 
 The agent then uses that feedback to select the next action.
 
 Thus:
 
-[
+$$
 S_t
 \rightarrow
 A_t
@@ -195,15 +194,15 @@ V
 F
 \rightarrow
 A_{t+1}
-]
+$$
 
 The development process becomes a **closed-loop optimization problem**.
 
 The goal is to reach:
 
-[
+$$
 S_n \in \mathcal{G}
-]
+$$
 
 with sufficiently high confidence.
 
@@ -421,9 +420,9 @@ Intent / architecture / risk
 
 This leads to an important distinction:
 
-[
+$$
 \text{Test} \subset \text{Verification}
-]
+$$
 
 Testing is one verification mechanism, not the entire verification system.
 
@@ -578,12 +577,12 @@ A mature verification pipeline might look like:
 
 ```text
                   Implementation
-                        │
-          ┌─────────────┼─────────────┐
+                        |
+          +-------------+-------------+
           ↓             ↓             ↓
        Compiler      Type Checker    Linter
-          │             │             │
-          └─────────────┼─────────────┘
+          |             |             |
+          +-------------+-------------+
                         ↓
                     Unit Tests
                         ↓
@@ -693,11 +692,11 @@ helps diagnose it.
 
 The distinction is:
 
-[
+$$
 \text{Detection}
 \neq
 \text{Diagnosis}
-]
+$$
 
 A strong development loop tries to maximize both.
 
@@ -722,43 +721,43 @@ Agentic development can also be viewed as search.
 
 Suppose the current implementation is:
 
-[
+$$
 I_0
-]
+$$
 
 The agent generates a modification:
 
-[
+$$
 I_1 = A(I_0)
-]
+$$
 
 The verifier produces:
 
-[
+$$
 V(I_1)=F_1
-]
+$$
 
 The agent then generates:
 
-[
+$$
 I_2=A(I_1,F_1)
-]
+$$
 
 and continues:
 
-[
+$$
 I_0
 \rightarrow I_1
 \rightarrow I_2
 \rightarrow \cdots
 \rightarrow I_n
-]
+$$
 
 until:
 
-[
+$$
 V(I_n)=PASS
-]
+$$
 
 The verifier is therefore a **search oracle** that eliminates incorrect candidate states.
 
@@ -812,10 +811,9 @@ It means model capability is only one term in the overall system.
 
 A useful abstraction is:
 
-[
+$$
 Q_{\text{system}}
-=================
-
+=
 f(
 Q_{\text{model}},
 Q_{\text{spec}},
@@ -824,7 +822,7 @@ Q_{\text{tools}},
 Q_{\text{verifiers}},
 Q_{\text{recovery}}
 )
-]
+$$
 
 Improving any of these can improve the final system.
 
@@ -836,18 +834,17 @@ A key variable is the number of iterations the agent can perform.
 
 Let:
 
-[
+$$
 p
 =
-
 P(\text{successful iteration})
-]
+$$
 
-If iterations were independent—which they are not in practice—the probability of at least one success after (n) attempts would be:
+If iterations were independent—which they are not in practice—the probability of at least one success after $n$ attempts would be:
 
-[
+$$
 1-(1-p)^n
-]
+$$
 
 The equation is only illustrative because real agent iterations are correlated.
 
@@ -915,7 +912,7 @@ Ambiguous requirement
 
 A useful policy is:
 
-[
+$$
 Stop =
 Success
 \lor
@@ -924,7 +921,7 @@ BudgetExceeded
 NoProgress
 \lor
 HumanRequired
-]
+$$
 
 Stopping conditions are part of agent engineering, not an afterthought.
 
@@ -936,15 +933,15 @@ The agent should ideally measure whether it is actually improving.
 
 Suppose a verifier returns a score:
 
-[
+$$
 V_t
-]
+$$
 
 Then:
 
-[
+$$
 \Delta V_t = V_t - V_{t-1}
-]
+$$
 
 can indicate progress.
 
@@ -1022,11 +1019,11 @@ unchanged tests
 
 A stronger acceptance criterion might be:
 
-[
-\text{Pass}*{after}
+$$
+\text{Pass}_{\text{after}}
 \supseteq
-\text{Pass}*{before}
-]
+\text{Pass}_{\text{before}}
+$$
 
 for regression-sensitive systems.
 
@@ -1100,11 +1097,11 @@ This can work well, but introduces another probabilistic component.
 
 Therefore:
 
-[
+$$
 \text{LLM Judge}
 \neq
 \text{ground truth}
-]
+$$
 
 It should ideally be combined with:
 
@@ -1126,9 +1123,9 @@ Performance requirements require different feedback.
 
 Suppose the specification says:
 
-[
+$$
 P95 < 500ms
-]
+$$
 
 Functional tests might all pass while the system violates this requirement.
 
@@ -1136,10 +1133,10 @@ A benchmark provides a different signal:
 
 ```text
 Functional tests
-    ✓
+    PASS
 
 P95 latency
-    ✗ 723 ms
+    FAIL 723 ms
 ```
 
 The agent now has a concrete optimization target.
@@ -1169,7 +1166,7 @@ Security is another dimension that ordinary tests may miss.
 A feature may satisfy:
 
 ```text
-functional tests ✓
+functional tests PASS
 ```
 
 while introducing:
@@ -1227,7 +1224,7 @@ System behavior
 
 The general pattern is unchanged:
 
-[
+$$
 \text{Implementation}
 \rightarrow
 \text{Environment}
@@ -1235,7 +1232,7 @@ The general pattern is unchanged:
 \text{Observation}
 \rightarrow
 \text{Feedback}
-]
+$$
 
 The verifier does not have to be a test runner.
 
@@ -1258,16 +1255,16 @@ A practical coding agent can therefore implement:
                      ↓
                  VERIFY
                      ↓
-             ┌───────────────┐
-             │    Success?   │
-             └───────┬───────┘
-                 No  │  Yes
-                 ↓   └────→ DONE
+             +---------------+
+             |    Success?   |
+             +-------+-------+
+                 No  |  Yes
+                 ↓   +----→ DONE
                 FIX
                  ↓
                RETEST
-                 │
-                 └────────↺
+                 |
+                 +--------^ (loop back)
 ```
 
 A more realistic implementation adds:
@@ -1283,7 +1280,7 @@ A more realistic implementation adds:
                      ↓
                  VERIFY
                      ↓
-              ┌──────┴──────┐
+              +------+------+
               ↓             ↓
            SUCCESS         FAILURE
               ↓             ↓
@@ -1348,22 +1345,22 @@ A useful architecture is:
 
 ```text
                  Agent
-                   │
+                   |
                    ↓
              propose action
-                   │
+                   |
                    ↓
              policy engine
-                   │
-           ┌───────┴───────┐
+                   |
+           +-------+-------+
            ↓               ↓
         allowed          blocked
            ↓               ↓
        execute          human
-           │
+           |
            ↓
         verify
-           │
+           |
            ↓
         continue
 ```
@@ -1603,7 +1600,7 @@ feedback
 replan
  ↓
 repair
- ↺
+ ^ (loop back)
 ```
 
 Keep the model constant.
@@ -1644,7 +1641,7 @@ This experiment demonstrates one of the central ideas of modern AI engineering:
    FIX
     ↓
    RETEST
-    ↺
+    ^ (loop back)
    ```
 
 2. **The goal is not perfect first-pass generation.**
@@ -1679,7 +1676,7 @@ This experiment demonstrates one of the central ideas of modern AI engineering:
 
 12. **The quality of the development trajectory matters more than the quality of an individual completion.**
 
-    [
+$$
     \boxed{
     \text{Agent Capability}
     \approx
@@ -1689,7 +1686,7 @@ This experiment demonstrates one of the central ideas of modern AI engineering:
     \times
     \text{Iteration Quality}
     }
-    ]
+$$
 
 13. **The most powerful optimization may not be a better model.**
     Better specifications, context, tools, verifiers, and recovery mechanisms can substantially improve the same model's performance.
@@ -1710,7 +1707,7 @@ This experiment demonstrates one of the central ideas of modern AI engineering:
     Error signal
          ↓
     Corrective action
-         ↺
+         ^ (loop back)
     ```
 
 15. **The central engineering principle is simple:**
