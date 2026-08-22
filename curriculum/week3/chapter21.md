@@ -94,7 +94,7 @@ With a capable coding agent, the workflow changes:
                   Engineer
                      ↓
                 Redirect
-                     ↺
+                     ^ (loop back)
 ```
 
 The engineer increasingly becomes the **controller of the development process** rather than its primary typist.
@@ -219,8 +219,8 @@ Constraints:
 - p95 latency < 800 ms
 
 Acceptance criteria:
-- Recall@10 ≥ 0.90
-- groundedness ≥ 0.92
+- Recall@10 >= 0.90
+- groundedness >= 0.92
 - existing tests remain green
 - no regression in citation accuracy
 
@@ -301,24 +301,24 @@ For example:
 
 ```text
 src/
-├── api/
-│   └── routes.py
-├── ingestion/
-│   ├── parser.py
-│   └── chunker.py
-├── retrieval/
-│   ├── embed.py
-│   ├── search.py
-│   └── rerank.py
-├── generation/
-│   └── answer.py
-├── memory/
-│   └── conversation.py
-├── evaluation/
-│   ├── dataset.py
-│   └── metrics.py
-└── tools/
-    └── search.py
++-- api/
+|   +-- routes.py
++-- ingestion/
+|   +-- parser.py
+|   +-- chunker.py
++-- retrieval/
+|   +-- embed.py
+|   +-- search.py
+|   +-- rerank.py
++-- generation/
+|   +-- answer.py
++-- memory/
+|   +-- conversation.py
++-- evaluation/
+|   +-- dataset.py
+|   +-- metrics.py
++-- tools/
+    +-- search.py
 ```
 
 This map becomes part of the agent's working context.
@@ -525,7 +525,7 @@ Tenant A query
 retrieve
       ↓
 assert:
-all returned documents ∈ Tenant A
+all returned documents in Tenant A
 ```
 
 Now the requirement is executable.
@@ -738,7 +738,7 @@ The goal is to ensure that:
 
 ```text
 Implementation
-     ↕
+     <->
 Documentation
 ```
 
@@ -873,7 +873,7 @@ A useful abstraction is to think of yourself as the controller.
                  Measurements
                      ↓
                  Engineer
-                     ↺
+                     ^ (loop back)
 ```
 
 This resembles a feedback-control system.
@@ -951,13 +951,13 @@ By Day 21, your complete loop should look like:
                    ↓
                 EVALUATE
                    ↓
-             ┌─────┴─────┐
+             +-----+-----+
              ↓           ↓
            PASS         FAIL
              ↓           ↓
           ACCEPT        FIX
              ↓           ↓
-             └───────────┘
+             +-----------+
 ```
 
 The human engineer supervises the loop.
@@ -1109,7 +1109,7 @@ For example:
 | Requirement                     | Evidence             | Result |
 | ------------------------------- | -------------------- | ------ |
 | API remains backward compatible | Contract tests       | PASS   |
-| Recall@10 ≥ 0.90                | Evaluation suite     | PASS   |
+| Recall@10 >= 0.90                | Evaluation suite     | PASS   |
 | p95 < 800 ms                    | Benchmark            | PASS   |
 | No cross-tenant retrieval       | Security tests       | PASS   |
 | Documentation updated           | Documentation checks | PASS   |
@@ -1146,9 +1146,9 @@ Require:
 
 The distinction is:
 
-[
+$$
 \boxed{\text{assertion} \rightarrow \text{evidence}}
-]
+$$
 
 ---
 
@@ -1219,15 +1219,15 @@ Require a complete artifact set:
 
 ```text
 project/
-├── source code
-├── tests/
-├── evaluations/
-├── benchmarks/
-├── docs/
-├── ADRs/
-├── architecture diagram
-├── security analysis
-└── engineering report
++-- source code
++-- tests/
++-- evaluations/
++-- benchmarks/
++-- docs/
++-- ADRs/
++-- architecture diagram
++-- security analysis
++-- engineering report
 ```
 
 The final report should contain:
@@ -1281,47 +1281,47 @@ Useful metrics include:
 
 ### Task success rate
 
-[
+$$
 P(\text{task completed successfully})
-]
+$$
 
 ### Intervention rate
 
-[
+$$
 \frac{\text{human interventions}}
 {\text{agent tasks}}
-]
+$$
 
 ### First-pass success
 
-[
+$$
 P(\text{success without human correction})
-]
+$$
 
 ### Iterations per task
 
-[
+$$
 N_{\text{iterations}}
-]
+$$
 
 ### Regression rate
 
-[
+$$
 P(\text{existing behavior broken})
-]
+$$
 
 ### Cost per successful task
 
-[
+$$
 \frac{\text{inference + infrastructure cost}}
 {\text{successful tasks}}
-]
+$$
 
 ### Time to verified completion
 
-[
+$$
 T_{\text{verified}}
-]
+$$
 
 These metrics allow you to evaluate whether the agent is actually becoming useful as an engineering collaborator.
 
@@ -1331,11 +1331,11 @@ These metrics allow you to evaluate whether the agent is actually becoming usefu
 
 One of the most interesting metrics is:
 
-[
+$$
 L =
 \frac{\text{software value produced}}
 {\text{human implementation effort}}
-]
+$$
 
 Traditional development might look like:
 
@@ -1367,13 +1367,13 @@ The progression looks approximately like:
 
 ```text
                  Architecture
-                      ↑
+                      ^
                  Specification
-                      ↑
+                      ^
                     Design
-                      ↑
+                      ^
                 Implementation
-                      ↑
+                      ^
                      Code
 ```
 
@@ -1438,13 +1438,13 @@ Greater verification requirement
 
 This is why:
 
-[
+$$
 \boxed{
 \text{Generation capability}
 \Rightarrow
 \text{Verification capability}
 }
-]
+$$
 
 must grow together.
 
@@ -1664,21 +1664,21 @@ The final workflow should look something like:
 
 ```text
                     Engineer
-                        │
+                        |
                         ↓
                  Specification
-                        │
+                        |
                         ↓
                   Context setup
-                        │
+                        |
                         ↓
                       Agent
-                        │
-                  ┌─────┼─────┐
+                        |
+                  +-----+-----+
                   ↓     ↓     ↓
                 Plan  Code   Tests
-                  │     │     │
-                  └─────┼─────┘
+                  |     |     |
+                  +-----+-----+
                         ↓
                     Verifiers
                         ↓
@@ -1690,12 +1690,12 @@ The final workflow should look something like:
                         ↓
                   Engineering
                     review
-                        │
-                 ┌──────┴──────┐
+                        |
+                 +------+------+
                  ↓             ↓
               ACCEPT         REDIRECT
                  ↓             ↓
-                Done ←─────────┘
+                Done <---------+
 ```
 
 The human is not in every loop iteration.
@@ -1762,13 +1762,13 @@ The human controls the system and intervenes at meaningful decision boundaries.
 
 10. **Verification becomes more important as generation becomes cheaper.**
 
-    [
+$$
     \boxed{
     \text{More generation}
     \Rightarrow
     \text{More need for verification}
     }
-    ]
+$$
 
 11. **Agentic development is not "no-code."**
     It requires deep engineering knowledge because someone must establish architecture, constraints, correctness criteria, and acceptance decisions.
@@ -1777,15 +1777,15 @@ The human controls the system and intervenes at meaningful decision boundaries.
 
     ```text
     Code
-      ↑
+      ^
     Implementation
-      ↑
+      ^
     Design
-      ↑
+      ^
     Specification
-      ↑
+      ^
     Architecture
-      ↑
+      ^
     Engineering process
     ```
 
@@ -1796,15 +1796,14 @@ The human controls the system and intervenes at meaningful decision boundaries.
 
 15. **The ultimate objective is human leverage.**
 
-    [
+$$
     \boxed{
     \text{Engineering leverage}
-    ===========================
-
+=
     \frac{\text{verified software value}}
     {\text{human implementation effort}}
     }
-    ]
+$$
 
 16. **The deepest lesson of Day 21 is that AI-assisted development is not primarily about typing code faster.**
 
