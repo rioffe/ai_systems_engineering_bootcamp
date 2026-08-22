@@ -1834,15 +1834,11 @@ This separation is fundamental to safe agentic architecture.
     The objective is not merely to prevent every mistake, but to ensure that inevitable mistakes cannot become catastrophic.
 
 17. **Security should be expressed as invariants.**
-
 $$
     I(s_t)=true
 $$
-
-    for every reachable system state.
-
+for every reachable system state.
 18. **The most important architectural separation is:**
-
 $$
     \boxed{
     \text{Agent Intelligence}
@@ -1850,7 +1846,6 @@ $$
     \text{System Authority}
     }
 $$
-
 19. **The final exercise is not merely to build an agent that behaves safely.**
     Build one that remains safe **even when the model behaves incorrectly or maliciously**.
 
