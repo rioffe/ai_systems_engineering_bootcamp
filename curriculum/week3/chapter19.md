@@ -930,15 +930,20 @@ use:
 }
 ```
 Structured communication provides:
+
 * predictable interfaces
 * easier parsing
 * validation
 * persistence
 * observability
 * lower ambiguity
+
 The same principle applies to agent communication as to conventional APIs.
+
 ---
+
 # 22. Agent Interfaces
+
 A mature multi-agent system should define explicit contracts.
 For example:
 ```text
@@ -975,11 +980,17 @@ Output:
     Severity
     Required changes
 ```
+
 Now the agents resemble services in a distributed system.
+
 ---
+
 # 23. Shared State vs. Isolated State
+
 There is an important architectural choice.
+
 ### Shared state
+
 All agents see the same evolving repository.
 ```text
         Agent A
@@ -988,15 +999,21 @@ All agents see the same evolving repository.
        \       /
    Agent B   Agent C
 ```
+
 Advantages:
+
 * simple artifact sharing
 * immediate visibility
 * easy integration
+
 Risks:
+
 * race conditions
 * accidental interference
 * inconsistent intermediate states
+
 ### Isolated state
+
 Each agent works on a branch or workspace.
 ```text
              Repository
@@ -1006,17 +1023,25 @@ Each agent works on a branch or workspace.
           ↓     ↓      ↓
         Agent A B      C
 ```
+
 Advantages:
+
 * isolation
 * independent experimentation
 * easier rollback
+
 Risks:
+
 * merge conflicts
 * integration complexity
 * duplicated work
+
 This is another distributed-systems tradeoff.
+
 ---
+
 # 24. Multi-Agent Coding Systems and Git
+
 Version control becomes particularly useful.
 Imagine:
 ```text
@@ -1045,34 +1070,47 @@ behavior
 architecture
 ```
 after integration.
+
 ---
+
 # 25. When Multi-Agent Systems Actually Make Sense
+
 Multiple agents are particularly useful when at least one of the following is true.
+
 ### 1. Tasks are naturally parallel
+
 ```text
 Research A
 Research B
 Research C
 ```
+
 ### 2. Tasks require different expertise
+
 ```text
 Developer
 Security specialist
 Performance specialist
 ```
+
 ### 3. Independent verification is valuable
+
 ```text
 Generator
     ↓
 Independent critic
 ```
+
 ### 4. The problem is too large for one context
+
 ```text
 Large repository
  ↓
 Subsystem agents
 ```
+
 ### 5. Work has different time scales
+
 ```text
 Fast worker:
 code search
@@ -1081,28 +1119,48 @@ benchmark
 Background worker:
 documentation analysis
 ```
+
 ### 6. Failure isolation matters
+
 One agent can experiment without contaminating another's workspace.
+
 ---
+
 # 26. When Multi-Agent Systems Do Not Make Sense
+
 Avoid multiple agents when:
+
 ### The task is small
+
 ```text
 Rename a variable.
 ```
 One agent is enough.
+
 ### The subtasks are highly coupled
+
 If every agent constantly needs every other agent's output, parallelism creates communication overhead.
+
 ### The task is sequential by nature
+
 Some reasoning must happen in a strict order.
+
 ### There is no meaningful specialization
+
 Five identical agents may simply produce five similar answers.
+
 ### Verification is already strong
+
 If a deterministic test suite can reliably determine correctness, adding several critics may add little value.
+
 ### Coordination dominates computation
+
 If agents spend more effort communicating than solving the problem, the architecture is counterproductive.
+
 ---
+
 # 27. Amdahl's Law for Agents
+
 Parallel agent systems are constrained by the same principle as parallel computing.
 Suppose fraction $P$ of the workload can be parallelized.
 With $N$ agents, idealized speedup is bounded by:
@@ -1128,17 +1186,24 @@ S_{\text{real}}
 <
 S_{\text{Amdahl}}
 $$
+
 because of:
+
 * communication
 * synchronization
 * scheduling
 * duplicated work
 * model latency
 * token costs
+
 Therefore:
+
 > **More agents do not imply proportionally more capability or speed.**
+
 ---
+
 # 28. Token Economics
+
 Multi-agent systems can become expensive quickly.
 Suppose one agent consumes:
 $$
@@ -1150,11 +1215,13 @@ $$
 5T
 $$
 before accounting for:
+
 * coordination
 * synthesis
 * repeated context
 * retries
 * manager reasoning
+
 A more realistic cost model is:
 $$
 C_{\text{total}}
@@ -1169,9 +1236,13 @@ C_{\text{retries}}
 $$
 This matters because many multi-agent architectures accidentally solve a problem by spending 5–10x more inference budget.
 The correct question is therefore:
+
 > **What additional capability do we get per additional unit of inference cost?**
+
 ---
+
 # 29. Agent Multiplication as Cargo Cult
+
 There is a recurring failure mode in AI engineering:
 ```text
 Single agent
@@ -1194,12 +1265,19 @@ But if the original problem was simply poor context or inadequate verification, 
 The architecture becomes more complicated without becoming more capable.
 This is **agent multiplication without a demonstrated systems benefit**.
 The remedy is empirical evaluation.
+
 ---
+
 # 30. The Right Experimental Question
+
 Do not ask:
+
 > "Would more agents make this system better?"
+
 Ask:
+
 > **"What measurable capability do additional agents provide that one agent cannot provide at acceptable cost?"**
+
 For example:
 ```text
 Metric:
@@ -1224,8 +1302,11 @@ Latency:
 3.1x higher
 ```
 This may not justify the architecture.
+
 ---
+
 # 31. The Agent Ablation Test
+
 Ablation is one of the best tools for evaluating multi-agent architectures.
 Start with:
 ```text
@@ -1241,6 +1322,7 @@ Then add one component at a time:
 ```
 Measure after every addition.
 For example:
+
 | Architecture        | Success | Cost | Latency |
 | ------------------- | ------: | ---: | ------: |
 | Single agent        |     78% | 1.0x |    1.0x |
@@ -1248,9 +1330,13 @@ For example:
 | + critic            |     90% | 1.8x |    1.6x |
 | + researcher        |     91% | 2.6x |    2.2x |
 | + second researcher |     91% | 3.5x |    3.0x |
+
 The results tell you where additional agents stop providing meaningful returns.
+
 ---
+
 # 32. The Marginal Value of an Agent
+
 We can define the marginal benefit of agent $i$ as:
 $$
 \Delta Q_i
@@ -1273,8 +1359,11 @@ $$
 $$
 If this ratio becomes very small, additional agents are probably not justified.
 This gives a quantitative way to resist architectural fashion.
+
 ---
+
 # 33. Multi-Agent Systems Should Still Have a Verifier
+
 One of the most important architectural principles is:
 ```text
 Agents
@@ -1299,8 +1388,11 @@ The first architecture grounds the system in evidence.
 The second risks creating an echo chamber.
 A multi-agent system does not eliminate the need for verification.
 It makes verification even more important.
+
 ---
+
 # 34. A Practical Multi-Agent Coding Architecture
+
 A reasonable first implementation is:
 ```text
                        Specification
@@ -1328,8 +1420,11 @@ A reasonable first implementation is:
 ```
 Notice that the agents are not the ultimate authority.
 The verifier is.
+
 ---
+
 # 35. A More Minimal Architecture
+
 However, start simpler.
 A surprisingly powerful architecture may be:
 ```text
@@ -1352,8 +1447,11 @@ Add security critic
 Security failures decrease
 ```
 Now the second agent has a demonstrated purpose.
+
 ---
+
 # 36. Multi-Agent Systems as Organizational Design
+
 There is a deeper analogy.
 Traditional engineering organizations divide work among:
 ```text
@@ -1366,16 +1464,25 @@ product managers
 ```
 Multi-agent systems reproduce some of this organizational structure computationally.
 But there is an important difference:
+
 > **Software organizations have communication costs, and so do agent organizations.**
+
 Every handoff creates potential information loss.
 Therefore the architecture should minimize unnecessary boundaries.
 This is analogous to Conway's Law:
+
 > System architecture tends to reflect communication structures.
+
 A multi-agent system with ten tightly coupled agents can easily become a distributed monolith.
+
 ---
+
 # 37. Agent Boundaries Should Follow Information Boundaries
+
 A strong principle for decomposition is:
+
 > **Create an agent boundary where there is a meaningful boundary in information, responsibility, or expertise.**
+
 Good boundary:
 ```text
 Application development
@@ -1392,8 +1499,11 @@ Database developer
 ```
 when every change requires coordination across all four.
 The latter may simply create distributed complexity.
+
 ---
+
 # 38. Build One
+
 For the Day 19 project, build a simple **Developer + Critic** system.
 ```text
                 Specification
@@ -1413,11 +1523,14 @@ For the Day 19 project, build a simple **Developer + Critic** system.
                PASS / FAIL
 ```
 The Developer should:
+
 * inspect the repository
 * implement the feature
 * run tests
 * modify code
+
 The Critic should:
+
 * inspect the specification
 * inspect the diff
 * inspect relevant tests
@@ -1425,9 +1538,13 @@ The Critic should:
 * identify missing requirements
 * identify security risks
 * propose corrections
+
 The Verifier should remain independent.
+
 ---
+
 # 39. Instrument the System
+
 Measure:
 ```text
 single-agent success rate
@@ -1451,9 +1568,13 @@ C. Developer + two critics
 D. Developer + generic second agent
 ```
 This gives you an empirical answer to:
+
 > **Does multi-agent architecture actually improve the system?**
+
 ---
+
 # 40. The Deeper Principle
+
 The progression from Day 15 through Day 19 can now be summarized:
 ```text
 Coding Agent
@@ -1481,8 +1602,11 @@ $$
 }
 $$
 This is the correct engineering objective.
+
 ---
+
 # Key Takeaways
+
 1. **Multi-agent systems are not automatically better than single-agent systems.**
 2. **Use multiple agents when there is a concrete reason:** parallelism, specialization, independent verification, context isolation, or failure containment.
 3. **The four fundamental patterns are:**
@@ -1491,12 +1615,15 @@ This is the correct engineering objective.
    A -+
    B -+→ Result
    C -+
+
    Pipeline
    A → B → C → D
+
    Manager/Worker
        Manager
        /     \
       W1     W2
+     
    Critic
    Developer → Critic → Developer
    ```
@@ -1531,6 +1658,7 @@ $$
     Add one component at a time and measure whether it improves meaningful system metrics.
 14. **The right question is not "How many agents should we use?"**
     It is:
+
     > **"What capability does this additional agent provide, and can we demonstrate that capability empirically?"**
 15. **Agent multiplication without measured benefit is cargo cult engineering.**
 16. **A good starting architecture is often just:**
