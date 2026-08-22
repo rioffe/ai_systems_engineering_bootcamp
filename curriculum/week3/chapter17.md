@@ -22,13 +22,13 @@ A somewhat weaker model with carefully constructed context can perform surprisin
 
 The agent therefore has two fundamental resources:
 
-[
+$$
 \boxed{
 \text{Reasoning capability}
 +
 \text{Relevant context}
 }
-]
+$$
 
 Day 16 showed how specifications constrain the space of acceptable solutions.
 
@@ -44,22 +44,22 @@ Consider a repository:
 
 ```text
 my-service/
-├── src/
-│   ├── api/
-│   ├── auth/
-│   ├── database/
-│   ├── retrieval/
-│   ├── models/
-│   └── services/
-├── tests/
-├── migrations/
-├── docs/
-├── scripts/
-├── deployment/
-├── config/
-├── generated/
-├── .github/
-└── README.md
++-- src/
+|   +-- api/
+|   +-- auth/
+|   +-- database/
+|   +-- retrieval/
+|   +-- models/
+|   `-- services/
++-- tests/
++-- migrations/
++-- docs/
++-- scripts/
++-- deployment/
++-- config/
++-- generated/
++-- .github/
+`-- README.md
 ```
 
 Suppose the task is:
@@ -134,9 +134,9 @@ These are engineering decisions.
 
 One of the most important distinctions in agent architecture is:
 
-[
+$$
 \boxed{\text{Context} \neq \text{State}}
-]
+$$
 
 **State** describes what is true about the system or task.
 
@@ -171,16 +171,16 @@ The context is a **projection of that state** into the model's current working w
 
 Formally:
 
-[
+$$
 C_t = P(S_t, H_t, R_t)
-]
+$$
 
 where:
 
-* (S_t) = task/system state
-* (H_t) = interaction history
-* (R_t) = retrieved information
-* (P) = context-construction policy
+* $S_t$ = task/system state
+* $H_t$ = interaction history
+* $R_t$ = retrieved information
+* $P$ = context-construction policy
 
 This distinction becomes essential for long-running agents.
 
@@ -196,13 +196,13 @@ Context is a finite resource.
 
 Suppose the model has a context capacity:
 
-[
+$$
 B
-]
+$$
 
 and the context contains several categories:
 
-[
+$$
 C =
 C_{\text{system}}
 +
@@ -217,13 +217,13 @@ C_{\text{tools}}
 C_{\text{history}}
 +
 C_{\text{feedback}}
-]
+$$
 
 Then:
 
-[
+$$
 |C| \leq B
-]
+$$
 
 The problem becomes an allocation problem.
 
@@ -231,13 +231,13 @@ For example:
 
 ```text
 Context budget
-├── system instructions       10%
-├── task specification         5%
-├── repository context        30%
-├── relevant code             25%
-├── tests                     15%
-├── tool results              10%
-└── working state              5%
++-- system instructions       10%
++-- task specification         5%
++-- repository context        30%
++-- relevant code             25%
++-- tests                     15%
++-- tool results              10%
+`-- working state              5%
 ```
 
 These percentages are illustrative, not universal.
@@ -273,16 +273,16 @@ This produces a dependency neighborhood:
 
 ```text
                  Query API
-                    │
+                    |
                     ↓
               QueryService
               /     |      \
              ↓      ↓       ↓
         Cache     DB      Retriever
-          │
+          |
           ↓
        Config
-          │
+          |
           ↓
         Tests
 ```
@@ -293,11 +293,11 @@ It needs the **relevant subgraph**.
 
 This suggests a useful abstraction:
 
-[
+$$
 R_t = \operatorname{RelevantSubgraph}(G, task)
-]
+$$
 
-where (G) is the repository's conceptual dependency graph.
+where $G$ is the repository's conceptual dependency graph.
 
 The quality of context selection depends on how well the agent identifies this subgraph.
 
@@ -311,24 +311,24 @@ Instead of giving the agent thousands of files, provide something like:
 
 ```text
 src/
-├── api/
-│   ├── query.py          # HTTP query endpoint
-│   └── documents.py      # document management API
-├── services/
-│   ├── query.py          # query orchestration
-│   ├── retrieval.py      # hybrid retrieval
-│   └── embedding.py      # embedding generation
-├── auth/
-│   ├── middleware.py     # authentication
-│   └── permissions.py    # authorization
-└── models/
-    ├── document.py
-    └── user.py
++-- api/
+|   +-- query.py          # HTTP query endpoint
+|   `-- documents.py      # document management API
++-- services/
+|   +-- query.py          # query orchestration
+|   +-- retrieval.py      # hybrid retrieval
+|   `-- embedding.py      # embedding generation
++-- auth/
+|   +-- middleware.py     # authentication
+|   `-- permissions.py    # authorization
+`-- models/
+    +-- document.py
+    `-- user.py
 
 tests/
-├── test_query.py
-├── test_retrieval.py
-└── test_permissions.py
++-- test_query.py
++-- test_retrieval.py
+`-- test_permissions.py
 ```
 
 This gives the model a **map before requiring it to explore the territory**.
@@ -426,15 +426,15 @@ Some of these may not be lexically similar to the task.
 
 Therefore:
 
-[
+$$
 \text{Useful Context}
 \neq
 \text{Top-k Search Results}
-]
+$$
 
 A better model is:
 
-[
+$$
 C_t =
 R_{\text{retrieval}}
 +
@@ -445,7 +445,7 @@ R_{\text{state}}
 R_{\text{constraints}}
 +
 R_{\text{verification}}
-]
+$$
 
 The agent needs both **semantic relevance** and **structural relevance**.
 
@@ -479,21 +479,21 @@ Compressed:
 
 Compression can be represented as:
 
-[
+$$
 C' = \operatorname{Compress}(C)
-]
+$$
 
 with:
 
-[
+$$
 |C'| \ll |C|
-]
+$$
 
 while attempting to preserve task-relevant information:
 
-[
+$$
 I(C'; task) \approx I(C; task)
-]
+$$
 
 The problem is that compression is lossy.
 
@@ -585,17 +585,17 @@ This distinction is useful:
 
 ```text
 Persistent state
-      │
-      ├── architecture
-      ├── decisions
-      ├── constraints
-      └── progress
+      |
+      +-- architecture
+      +-- decisions
+      +-- constraints
+      `-- progress
        
 Ephemeral state
-      │
-      ├── hypotheses
-      ├── intermediate reasoning
-      └── next-action ideas
+      |
+      +-- hypotheses
+      +-- intermediate reasoning
+      `-- next-action ideas
 ```
 
 The agent needs both, but they should not be treated as identical.
@@ -677,8 +677,8 @@ Tests therefore serve two roles:
 
 ```text
 Tests
- ├── verification
- └── specification/context
+ +-- verification
+ `-- specification/context
 ```
 
 This dual role is particularly important for coding agents.
@@ -701,22 +701,22 @@ Instead, decompose:
 
 ```text
 Authentication refactor
-├── analyze current architecture
-├── define new interface
-├── migrate authentication state
-├── migrate authorization
-├── update API middleware
-├── update tests
-└── validate compatibility
++-- analyze current architecture
++-- define new interface
++-- migrate authentication state
++-- migrate authorization
++-- update API middleware
++-- update tests
+`-- validate compatibility
 ```
 
 Each subtask receives a narrower context.
 
 This reduces:
 
-[
+$$
 C_{\text{task}}
-]
+$$
 
 and often increases reasoning quality.
 
@@ -730,17 +730,17 @@ A powerful architecture is hierarchical context.
 
 ```text
                     Global Context
-                         │
-             ┌───────────┼───────────┐
+                         |
+             + -----------+-----------+ 
              ↓           ↓           ↓
          Architecture   Task       Constraints
-             │
+             |
              ↓
          Subsystem
-             │
+             |
              ↓
           Component
-             │
+             |
              ↓
          Current task
 ```
@@ -815,11 +815,11 @@ The model may not know which version of a fact is authoritative.
 
 Therefore:
 
-[
+$$
 \text{Large context capacity}
 \neq
 \text{unlimited useful context}
-]
+$$
 
 The relevant metric is not merely context size.
 
@@ -831,13 +831,12 @@ It is **context utility**.
 
 We can define a conceptual utility function:
 
-[
+$$
 U(C \mid T)
-===========
-
+=
 \frac{\text{task-relevant information}}
 {\text{total information}}
-]
+$$
 
 This is intentionally simplistic, but useful.
 
@@ -857,18 +856,17 @@ Context B may produce better results despite being much smaller.
 
 Another formulation considers both information and cost:
 
-[
+$$
 U(C)
-====
-
+=
 \frac{I(C;T)}
 {\operatorname{Cost}(C)}
-]
+$$
 
 where:
 
-* (I(C;T)) represents useful information about task (T)
-* (\operatorname{Cost}(C)) represents tokens, latency, or computational cost
+* $I(C;T)$ represents useful information about task $T$
+* $\operatorname{Cost}(C)$ represents tokens, latency, or computational cost
 
 The objective of context engineering is therefore not:
 
@@ -1040,12 +1038,12 @@ A sophisticated context manager can be modeled as:
                      ↓
              Context planning
                      ↓
-        ┌────────────┼────────────┐
+        + ------------+------------+ 
         ↓            ↓            ↓
     Repository     State       Constraints
      retrieval                  /spec
-        │            │            │
-        └────────────┼────────────┘
+        |            |            |
+        `------------+------------+ 
                      ↓
                 Ranking
                      ↓
@@ -1150,7 +1148,7 @@ Continue
 
 This produces another feedback loop:
 
-[
+$$
 C_t
 \rightarrow
 Reasoning
@@ -1160,7 +1158,7 @@ Information\ Need
 Retrieval
 \rightarrow
 C_{t+1}
-]
+$$
 
 The agent can therefore actively decide:
 
@@ -1238,32 +1236,32 @@ We can formulate the problem more formally.
 
 Given:
 
-* task (T)
-* repository (R)
-* state (S)
-* context budget (B)
+* task $T$
+* repository $R$
+* state $S$
+* context budget $B$
 
 construct:
 
-[
+$$
 C^* =
 \arg\max_{C:|C|\leq B}
 P(\text{successful outcome}\mid T,C,S)
-]
+$$
 
 This is the central optimization problem of context engineering.
 
 The objective is not:
 
-[
+$$
 \max |C|
-]
+$$
 
 It is:
 
-[
+$$
 \max P(\text{success}\mid C)
-]
+$$
 
 subject to constraints on:
 
@@ -1632,11 +1630,11 @@ That is the core problem of context engineering.
 
 13. **Context engineering can be formulated as an optimization problem.**
 
-    [
+$$
     C^* =
     \arg\max_{C:|C|\leq B}
     P(\text{success}\mid T,C,S)
-    ]
+$$
 
 14. **Context is becoming part of the program.**
     In an AI system, changing the context can change system behavior even when the model and implementation remain unchanged.
@@ -1650,11 +1648,10 @@ The central lesson is:
 
 And that leads to a powerful design principle for agentic software:
 
-[
+$$
 \boxed{
 \text{Reliable Agent}
-=====================
-
+=
 \text{Good Model}
 +
 \text{Good Specification}
@@ -1665,7 +1662,7 @@ And that leads to a powerful design principle for agentic software:
 +
 \text{Good Verification}
 }
-]
+$$
 
 The model provides the reasoning capability.
 
