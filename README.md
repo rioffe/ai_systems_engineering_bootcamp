@@ -75,4 +75,11 @@ To build the whole book in one go, prefer the Makefile targets above (`make book
 
 ## License
 
-[Specify License, e.g., MIT]
+This project — the curriculum, books, and accompanying tooling — is released under the **Creative Commons Attribution 4.0 International License** ([CC BY 4.0](LICENSE)):
+
+- Deed: https://creativecommons.org/licenses/by/4.0/
+- Legal code: https://creativecommons.org/licenses/by/4.0/legalcode
+
+> **Copyright © 2025 Robert Ioffe — <https://github.com/rioffe>**
+
+You are free to use, share, and adapt this material for any purpose, **including commercial**, provided you give **appropriate credit** to Robert Ioffe (<https://github.com/rioffe>), include a link to the license, and indicate if changes were made (and in no way that suggests the author endorses your use).
