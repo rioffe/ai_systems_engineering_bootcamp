@@ -7,6 +7,7 @@ This repository contains the curriculum outline and tools for the **AI Systems E
 - `outline.md`: The core curriculum structure, broken down by weeks and days.
 - `md2pdf.sh`: A utility script to convert the Markdown curriculum into a professional PDF format using `pandoc` and `xelatex`.
 - `outline.pdf`: The generated PDF version of the curriculum.
+- [book-local.pdf](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book-local.pdf): The full bootcamp book (branded copy).
 
 ## Curriculum Overview
 
