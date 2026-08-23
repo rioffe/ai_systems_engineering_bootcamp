@@ -1285,17 +1285,13 @@ Record:
 * whether the system recovered safely
 
 A useful metric is not merely:
-
 $$
 \text{AttackSuccessRate}
 $$
-
 but also:
-
 $$
 \text{Impact} \mid \text{AttackSuccess}
 $$
-
 An attack that causes the model to produce an incorrect sentence is very different from one that:
 
 ```text

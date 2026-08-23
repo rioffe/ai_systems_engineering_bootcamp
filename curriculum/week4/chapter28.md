@@ -7,7 +7,6 @@ This is the purpose of the final evaluation.
 The final evaluation is broader than an AI benchmark. An AI application is a socio-technical system composed of models, retrieval infrastructure, tools, orchestration logic, application code, data, interfaces, operational infrastructure, and users. Evaluating only model accuracy therefore misses many of the ways the system can fail.
 
 A useful final evaluation has three dimensions:
-
 $$
 \boxed{
 E_{\text{final}}
@@ -19,7 +18,6 @@ E_{\text{AI}}
 E_{\text{product}}
 }
 $$
-
 These dimensions should be evaluated independently and then considered together.
 
 A system can have excellent model accuracy but poor latency. It can be technically reliable but provide little user value. It can delight users while introducing unacceptable security risks. Production readiness requires all three dimensions to meet their respective acceptance criteria.
@@ -84,11 +82,9 @@ The product is not.
 Before running the final evaluation, define explicit acceptance criteria.
 
 For each important system property, specify:
-
 $$
 (\text{metric},\ \text{target},\ \text{measurement method})
 $$
-
 For example:
 
 | Dimension     | Metric                  | Example target |
@@ -153,24 +149,20 @@ For every important workflow, test:
 * partial failures
 
 A useful model is:
-
 $$
 P(\text{successful task})
 =
 P(\text{all required components succeed})
 $$
-
 In a multi-stage pipeline, even individually reliable components can produce a fragile overall system.
 
 If five sequential components each succeed with probability $0.99$, then:
-
 $$
 P(\text{end-to-end success})
 =
 0.99^5
 \approx 0.951
 $$
-
 The system's end-to-end reliability is therefore approximately 95.1%, despite every component individually having 99% reliability.
 
 This is why system-level evaluation matters.
@@ -198,7 +190,6 @@ Measure these both globally and by workflow.
 A particularly important distinction is between **recoverable and unrecoverable failures**.
 
 For example:
-
 $$
 \text{Tool failure}
 \rightarrow
@@ -208,9 +199,7 @@ $$
 \rightarrow
 \text{successful response}
 $$
-
 is very different from:
-
 $$
 \text{Tool failure}
 \rightarrow
@@ -218,7 +207,6 @@ $$
 \rightarrow
 \text{user-visible error}
 $$
-
 The final evaluation should therefore measure not merely whether failures occur, but whether the system **recovers gracefully**.
 
 ---
@@ -243,23 +231,18 @@ Measure at least:
 Average latency is usually insufficient.
 
 A system with:
-
 $$
 \text{mean} = 2\,\text{s}
 $$
-
 may still have:
-
 $$
 p_{99} = 30\,\text{s}
 $$
-
 which means one out of every hundred requests is extremely slow.
 
 For interactive systems, tail latency often matters more than the mean.
 
 Trace the complete request:
-
 $$
 \text{request}
 \rightarrow
@@ -273,7 +256,6 @@ $$
 \rightarrow
 \text{response}
 $$
-
 Then determine where the latency is actually coming from.
 
 ---
@@ -296,7 +278,6 @@ Cost may include:
 * human review
 
 A useful metric is:
-
 $$
 C_{\text{request}}
 =
@@ -308,28 +289,22 @@ C_{\text{tools}}
 +
 C_{\text{infrastructure}}
 $$
-
 Then measure:
-
 $$
 C_{\text{user}}
 $$
-
 and ultimately:
-
 $$
 C_{\text{unit}}
 =
 \frac{\text{total operating cost}}
      {\text{successful business outcomes}}
 $$
-
 The last quantity is particularly important.
 
 Optimizing cost per API call is not necessarily useful if cheaper inference dramatically reduces task success.
 
 The real objective is usually something closer to:
-
 $$
 \max
 \frac{\text{user value}}
@@ -358,11 +333,9 @@ Test:
 Evaluate how important metrics change as load increases.
 
 Ideally, determine the system's operating envelope:
-
 $$
 L_{\min} \leq L \leq L_{\max}
 $$
-
 where $L$ represents system load.
 
 The evaluation should identify the point at which:
@@ -410,7 +383,6 @@ The evaluation should verify that the system treats retrieved content as **data 
 Security testing should therefore include adversarial scenarios, not merely static vulnerability scans.
 
 The acceptance criterion for critical security failures should generally be:
-
 $$
 \boxed{0}
 $$
@@ -452,15 +424,12 @@ Possible measures include:
 For generative systems, exact string matching is often inadequate.
 
 Instead, define a task-specific evaluation function:
-
 $$
 S(y,\hat y)
 $$
-
 where $y$ is the expected result and $\hat y$ is the generated result.
 
 For example, a research assistant may need to satisfy multiple criteria:
-
 $$
 S
 =
@@ -472,7 +441,6 @@ w_3 S_{\text{grounded}}
 +
 w_4 S_{\text{citation}}
 $$
-
 This is often more informative than a single "answer quality" score.
 
 ---
@@ -503,26 +471,20 @@ That is not a failure.
 In many applications, **calibrated abstention is a feature**.
 
 A useful metric is:
-
 $$
 \text{Hallucination Rate}
 =
 \frac{\text{unsupported claims}}
      {\text{claims evaluated}}
 $$
-
 but also measure:
-
 $$
 \text{Abstention Precision}
 $$
-
 and
-
 $$
 \text{Abstention Recall}
 $$
-
 because refusing to answer everything would trivially minimize hallucination.
 
 The objective is not maximum caution.
@@ -540,23 +502,18 @@ Groundedness asks:
 This is particularly important for RAG systems.
 
 Separate:
-
 $$
 \text{retrieval relevance}
 $$
-
 from:
-
 $$
 \text{answer groundedness}
 $$
-
 A system can retrieve the correct document but generate an unsupported conclusion.
 
 Conversely, the answer may be correct while the retrieval system failed to retrieve the ideal supporting passage.
 
 Therefore evaluate the pipeline independently:
-
 $$
 \text{Query}
 \rightarrow
@@ -568,7 +525,6 @@ $$
 \rightarrow
 \text{Citation}
 $$
-
 Measure each stage.
 
 For citation-heavy applications, evaluate:
@@ -603,21 +559,16 @@ Test:
 The key concept is **distributional robustness**.
 
 If performance is:
-
 $$
 P_{\text{normal}} = 95\%
 $$
-
 but:
-
 $$
 P_{\text{perturbed}} = 52\%
 $$
-
 the system is fragile even though its headline benchmark looks excellent.
 
 Evaluate the degradation:
-
 $$
 \Delta P
 =
@@ -625,7 +576,6 @@ P_{\text{normal}}
 -
 P_{\text{perturbed}}
 $$
-
 A smaller $\Delta P$ generally indicates greater robustness.
 
 ---
@@ -646,7 +596,6 @@ Measure:
 * successful completion after tool use
 
 For example:
-
 $$
 \text{Tool Success}
 =
@@ -658,7 +607,6 @@ $$
 \times
 \text{Correct Interpretation}
 $$
-
 This decomposition is useful because "the agent failed" is not sufficiently diagnostic.
 
 The failure may have occurred at any of four different layers.
@@ -704,23 +652,19 @@ Instead of asking:
 > "Do you like the application?"
 
 measure:
-
 $$
 T_{\text{before}}
 \quad\text{vs.}\quad
 T_{\text{after}}
 $$
-
 for the time required to complete a task.
 
 Or:
-
 $$
 E_{\text{before}}
 \quad\text{vs.}\quad
 E_{\text{after}}
 $$
-
 for task error rate.
 
 User value should ultimately be expressed in terms of a meaningful outcome.
@@ -754,15 +698,12 @@ Evaluate:
 A dangerous product is one that is easy to use but causes users to become **overconfident** in incorrect outputs.
 
 Therefore:
-
 $$
 \text{Good UX}
 \neq
 \text{Maximum user trust}
 $$
-
 Instead:
-
 $$
 \boxed{
 \text{Good UX}
@@ -770,7 +711,6 @@ $$
 \text{Appropriate trust}
 }
 $$
-
 Users should trust the system when it is reliable and question it when uncertainty is significant.
 
 ---
@@ -822,7 +762,6 @@ Possible sources of differentiation include:
 * domain-specific evaluation and optimization
 
 A useful strategic equation is:
-
 $$
 \text{Product Advantage}
 =
@@ -836,7 +775,6 @@ $$
 +
 \text{Distribution}
 $$
-
 In many modern AI products, the foundation model is increasingly commoditized.
 
 The durable advantage therefore tends to reside above the model.
@@ -906,7 +844,6 @@ That is the difference between a prototype demonstration and an engineering eval
 The final evaluation should deliberately attempt to break the system.
 
 Construct a failure matrix:
-
 $$
 F
 =
@@ -921,7 +858,6 @@ F_{\text{load}},
 F_{\text{user}}
 \}
 $$
-
 Then test each class.
 
 Examples:
@@ -968,7 +904,6 @@ The objective is not to demonstrate that the system never fails.
 That is unrealistic.
 
 The objective is to demonstrate that:
-
 $$
 \boxed{
 \text{Failure}
@@ -980,7 +915,6 @@ $$
 \text{Safe Outcome}
 }
 $$
-
 is well engineered.
 
 ---
@@ -1020,7 +954,6 @@ The most important lesson of this entire curriculum is that **AI engineering is 
 The model is only one component.
 
 The complete system looks more like:
-
 $$
 \text{User}
 \rightarrow
@@ -1040,9 +973,7 @@ $$
 \rightarrow
 \text{Response}
 $$
-
 with:
-
 $$
 \text{Observability}
 +
@@ -1052,7 +983,6 @@ $$
 +
 \text{Cost Controls}
 $$
-
 running across the entire architecture.
 
 The final evaluation therefore asks four progressively deeper questions:

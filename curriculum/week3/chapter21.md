@@ -1145,7 +1145,6 @@ Require:
 > "The new architecture removes the dependency cycle and reduces module coupling from X to Y."
 
 The distinction is:
-
 $$
 \boxed{\text{assertion} \rightarrow \text{evidence}}
 $$
@@ -1280,49 +1279,35 @@ Measure both.
 Useful metrics include:
 
 #### Task success rate
-
 $$
 P(\text{task completed successfully})
 $$
-
 #### Intervention rate
-
 $$
 \frac{\text{human interventions}}
 {\text{agent tasks}}
 $$
-
 #### First-pass success
-
 $$
 P(\text{success without human correction})
 $$
-
 #### Iterations per task
-
 $$
 N_{\text{iterations}}
 $$
-
 #### Regression rate
-
 $$
 P(\text{existing behavior broken})
 $$
-
 #### Cost per successful task
-
 $$
 \frac{\text{inference + infrastructure cost}}
 {\text{successful tasks}}
 $$
-
 #### Time to verified completion
-
 $$
 T_{\text{verified}}
 $$
-
 These metrics allow you to evaluate whether the agent is actually becoming useful as an engineering collaborator.
 
 ---
@@ -1330,13 +1315,11 @@ These metrics allow you to evaluate whether the agent is actually becoming usefu
 ## 34. Measure Human Leverage
 
 One of the most interesting metrics is:
-
 $$
 L =
 \frac{\text{software value produced}}
 {\text{human implementation effort}}
 $$
-
 Traditional development might look like:
 
 ```text
@@ -1437,7 +1420,6 @@ Greater verification requirement
 ```
 
 This is why:
-
 $$
 \boxed{
 \text{Generation capability}
@@ -1445,7 +1427,6 @@ $$
 \text{Verification capability}
 }
 $$
-
 must grow together.
 
 ---
@@ -1761,7 +1742,6 @@ The human controls the system and intervenes at meaningful decision boundaries.
    Investigate specification, context, architecture, tools, decomposition, and verification—not merely the generated code.
 
 10. **Verification becomes more important as generation becomes cheaper.**
-
 $$
     \boxed{
     \text{More generation}
@@ -1769,7 +1749,6 @@ $$
     \text{More need for verification}
     }
 $$
-
 11. **Agentic development is not "no-code."**
     It requires deep engineering knowledge because someone must establish architecture, constraints, correctness criteria, and acceptance decisions.
 
@@ -1795,7 +1774,6 @@ $$
     Important metrics include task success, intervention rate, first-pass success, iterations, regressions, cost, and time-to-verified-completion.
 
 15. **The ultimate objective is human leverage.**
-
 $$
     \boxed{
     \text{Engineering leverage}
@@ -1804,7 +1782,6 @@ $$
     {\text{human implementation effort}}
     }
 $$
-
 16. **The deepest lesson of Chapter 21 is that AI-assisted development is not primarily about typing code faster.**
 
     It is about changing the unit of engineering work:

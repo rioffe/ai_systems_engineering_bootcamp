@@ -37,7 +37,6 @@ The distinction matters because the LLM can only reason over the evidence it rec
 If the retriever returns the wrong documents, the generator is being asked to solve an impossible problem.
 
 A useful abstraction is:
-
 $$
 \text{Documents}
 \rightarrow
@@ -51,7 +50,6 @@ $$
 \rightarrow
 \text{Generation}
 $$
-
 Every stage can fail.
 
 And every stage should therefore be measurable.
@@ -73,17 +71,13 @@ Fourth, the model does not necessarily know which specific source supports a par
 RAG addresses these problems by moving some knowledge out of the model and into an external information system.
 
 Instead of asking:
-
 $$
 P(y \mid x)
 $$
-
 we construct:
-
 $$
 P(y \mid x, D)
 $$
-
 where:
 
 * $x$ is the user's query
@@ -105,11 +99,9 @@ At the highest level, RAG contains two fundamentally different problems.
 ### Retrieval
 
 Find relevant evidence:
-
 $$
 D' = R(q,D)
 $$
-
 where:
 
 * $q$ is the query
@@ -119,11 +111,9 @@ where:
 ### Generation
 
 Generate an answer using that evidence:
-
 $$
 y \sim P(y \mid q,D')
 $$
-
 This decomposition gives us a crucial debugging principle.
 
 If the answer is wrong, ask two separate questions:
@@ -142,11 +132,9 @@ A system that does not measure them separately is difficult to improve.
 The most common RAG architecture begins with embeddings.
 
 An embedding model maps text into a vector space:
-
 $$
 f(x) \rightarrow \mathbf{v} \in \mathbb{R}^{d}
 $$
-
 where $d$ is the embedding dimension.
 
 Texts with related semantic meaning should ideally map to nearby points.
@@ -172,30 +160,23 @@ This allows retrieval based on **semantic similarity** rather than exact lexical
 ## 4. Semantic Search
 
 Given a query vector:
-
 $$
 \mathbf{q}
 $$
-
 and document vectors:
-
 $$
 \mathbf{d}_1,\mathbf{d}_2,\ldots,\mathbf{d}_N
 $$
-
 the system computes a similarity function.
 
 A common choice is cosine similarity:
-
 $$
 \text{sim}(\mathbf{q},\mathbf{d})
 =
 \frac{\mathbf{q}\cdot\mathbf{d}}
 {|\mathbf{q}||\mathbf{d}|}
 $$
-
 The system then retrieves the top-$k$ documents:
-
 $$
 D_k =
 \operatorname{TopK}
@@ -203,7 +184,6 @@ D_k =
 \text{sim}(\mathbf{q},\mathbf{d}_i)
 \right)
 $$
-
 This is powerful because semantic search can retrieve conceptually related information even when the wording differs.
 
 But it also introduces a major weakness:
@@ -388,11 +368,9 @@ department = "Finance"
 ### Recency
 
 Prefer:
-
 $$
 \text{updated\_at} > 2026\text{-}01\text{-}01
 $$
-
 ### Authorization
 
 Only retrieve documents the current user is permitted to see.
@@ -431,7 +409,6 @@ A lexical search system such as BM25 can be much better at exact identifiers.
 This motivates **hybrid retrieval**.
 
 Conceptually:
-
 $$
 S(d,q)
 =
@@ -439,7 +416,6 @@ S(d,q)
 +
 (1-\alpha)S_{\text{lexical}}(d,q)
 $$
-
 The two retrieval mechanisms have complementary strengths.
 
 #### Semantic retrieval
@@ -492,18 +468,14 @@ LLM
 ```
 
 Formally:
-
 $$
 C = R_{\text{fast}}(q,D)
 $$
-
 followed by:
-
 $$
 D_k =
 R_{\text{rerank}}(q,C)
 $$
-
 This is analogous to a database query plan where an inexpensive operation narrows the search space before an expensive operation is applied.
 
 The first stage emphasizes **recall**.
@@ -543,15 +515,12 @@ airfare class restrictions
 The system can then retrieve against multiple formulations.
 
 Conceptually:
-
 $$
 q
 \rightarrow
 {q_1,q_2,\ldots,q_n}
 $$
-
 followed by:
-
 $$
 R(q_1,D)
 \cup
@@ -561,7 +530,6 @@ R(q_2,D)
 \cup
 R(q_n,D)
 $$
-
 This can increase recall.
 
 But query expansion also creates noise.
@@ -684,7 +652,6 @@ Citations provide:
 But citation generation is not automatic simply because documents were retrieved.
 
 The system must establish a relationship:
-
 $$
 \text{Claim}
 \rightarrow
@@ -692,7 +659,6 @@ $$
 \rightarrow
 \text{Source}
 $$
-
 A sophisticated implementation may represent the answer as claims:
 
 ```json
@@ -778,11 +744,9 @@ The correct document is present.
 But so are several distractors.
 
 Now measure how answer accuracy changes as you increase:
-
 $$
 k = 1,5,10,20,50
 $$
-
 This experiment demonstrates an important phenomenon:
 
 > Increasing $k$ can increase recall while decreasing answer quality.
@@ -863,7 +827,6 @@ The user asks:
 A semantic retriever may retrieve all four.
 
 A robust system needs to understand:
-
 $$
 \text{relevance}
 +
@@ -871,9 +834,7 @@ $$
 +
 \text{recency}
 $$
-
 A useful scoring function might conceptually look like:
-
 $$
 S(d,q)
 =
@@ -883,7 +844,6 @@ w_a A(d)
 +
 w_t T(d)
 $$
-
 where:
 
 * $R$ = semantic relevance
@@ -966,11 +926,9 @@ The question is:
 > “Can a director flying from Portland to Tokyo use business class?”
 
 The answer requires:
-
 $$
 A \land B \land C
 $$
-
 This is fundamentally different from simple semantic retrieval.
 
 The system must retrieve a **set of mutually relevant documents** and combine them.
@@ -1004,33 +962,25 @@ This is one of the places where RAG begins to overlap with agentic reasoning.
 A RAG system should expose retrieval metrics independently of generation metrics.
 
 Given a known set of relevant documents:
-
 $$
 G(q)
 $$
-
 and retrieved documents:
-
 $$
 R_k(q)
 $$
-
 we can calculate:
-
 $$
 Precision@k
 =
 \frac{|G(q)\cap R_k(q)|}{|R_k(q)|}
 $$
-
 and:
-
 $$
 Recall@k
 =
 \frac{|G(q)\cap R_k(q)|}{|G(q)|}
 $$
-
 Other useful metrics include:
 
 * MRR — Mean Reciprocal Rank
@@ -1195,7 +1145,6 @@ The deepest lesson from this exercise is that RAG is not simply a feature that y
 It is a probabilistic information-retrieval system.
 
 Every stage introduces uncertainty:
-
 $$
 P(\text{correct answer})
 =
@@ -1205,11 +1154,9 @@ P(\text{correct reasoning}\mid\text{evidence})
 \times
 P(\text{correct output formatting})
 $$
-
 For multi-stage retrieval systems, this becomes even more complex.
 
 For example:
-
 $$
 P(\text{answer})
 =
@@ -1223,7 +1170,6 @@ P(\text{context construction})
 \cdot
 P(\text{generation})
 $$
-
 The exact probabilistic decomposition is an abstraction rather than a literal independence assumption.
 
 But it captures the engineering reality:
@@ -1239,13 +1185,10 @@ Therefore, each stage requires measurement.
 There is an important conceptual connection between RAG and traditional search engines.
 
 A search engine performs:
-
 $$
 q \rightarrow \text{ranked documents}
 $$
-
 A RAG system performs:
-
 $$
 q
 \rightarrow
@@ -1253,7 +1196,6 @@ q
 \rightarrow
 \text{generated answer}
 $$
-
 The second system adds a probabilistic synthesis layer.
 
 That creates both a capability and a risk.
@@ -1384,7 +1326,6 @@ If you cannot answer that question from telemetry and evaluation data, the syste
 13. **Evaluation is part of the architecture.** Precision, recall, ranking quality, answer accuracy, faithfulness, and citation quality should be measured continuously.
 
 The fundamental mental model is:
-
 $$
 \boxed{
 \text{RAG}
@@ -1396,7 +1337,6 @@ $$
 \text{Probabilistic Generation}
 }
 $$
-
 And the fundamental engineering principle is:
 
 > **RAG isn't a feature. It's a probabilistic information-retrieval system that requires measurement.**

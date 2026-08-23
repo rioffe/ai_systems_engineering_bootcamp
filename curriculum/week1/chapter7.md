@@ -581,14 +581,12 @@ retrieve() + search_web()
 Tool selection should be evaluated explicitly.
 
 A useful metric is:
-
 $$
 \text{Tool Success Rate}
 =
 \frac{\text{correct tool selections}}
 {\text{total tool decisions}}
 $$
-
 But also measure unnecessary tool usage.
 
 An agent that gets the correct answer after ten unnecessary searches is not necessarily a good system.
@@ -821,11 +819,9 @@ The model should never have direct access to:
 Even a "personal" research assistant should be designed with data isolation in mind.
 
 The fundamental invariant is:
-
 $$
 \text{User A cannot retrieve User B's documents}
 $$
-
 This must be enforced at the data layer.
 
 Do not rely on the prompt:
@@ -909,11 +905,9 @@ Does it correctly maintain context?
 At minimum, measure:
 
 #### Retrieval
-
 $$
 \text{Recall@K}
 $$
-
 Did the relevant evidence appear in the top (K) results?
 
 #### Answer correctness
@@ -1310,7 +1304,6 @@ from both.
 Measure the complete request latency.
 
 For a RAG request:
-
 $$
 T_{\text{total}}
 =
@@ -1326,7 +1319,6 @@ T_{\text{tools}}
 +
 T_{\text{validation}}
 $$
-
 Do not assume the LLM dominates every workload.
 
 You may discover:
@@ -1350,7 +1342,6 @@ This is another reason observability must be built into the application from the
 Calculate the economics of the application.
 
 For each request:
-
 $$
 C_{\text{request}}
 =
@@ -1364,9 +1355,7 @@ C_{\text{retrieval}}
 +
 C_{\text{tool}}
 $$
-
 Then estimate:
-
 $$
 C_{\text{monthly}}
 =
@@ -1374,15 +1363,12 @@ N_{\text{requests}}
 \times
 C_{\text{request}}
 $$
-
 For agentic workloads, also account for variable execution length:
-
 $$
 E[C]
 =
 \sum_{n} P(N=n)C_n
 $$
-
 where (N) is the number of model/tool operations.
 
 This is important because average cost can conceal expensive tail behavior.

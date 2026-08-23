@@ -168,7 +168,6 @@ Who decides when the work is complete?
 If the coordination cost exceeds the benefit of specialization, the multi-agent system is worse.
 
 A useful conceptual comparison is:
-
 $$
 Q_{\text{multi}}
 =
@@ -186,7 +185,6 @@ C_{\text{communication}}
 -
 C_{\text{duplication}}
 $$
-
 Use multiple agents only when the gains outweigh the costs.
 
 ---
@@ -255,21 +253,16 @@ This pattern works particularly well when subtasks are:
 Parallelism can reduce wall-clock time.
 
 Suppose four independent tasks take:
-
 $$
 T_1,T_2,T_3,T_4
 $$
-
 Sequential execution costs approximately:
-
 $$
 T_{\text{seq}}
 =
 T_1+T_2+T_3+T_4
 $$
-
 Parallel execution costs approximately:
-
 $$
 T_{\text{parallel}}
 =
@@ -277,15 +270,12 @@ T_{\text{parallel}}
 +
 T_{\text{coordination}}
 $$
-
 The potential speedup is:
-
 $$
 S =
 \frac{T_{\text{seq}}}
 {T_{\text{parallel}}}
 $$
-
 But only if the tasks are genuinely independent.
 
 If every agent constantly needs information from every other agent, parallelism disappears.
@@ -677,39 +667,29 @@ The developer revises.
 The strongest justification for multiple agents is often **diversity**.
 
 Suppose:
-
 $$
 E_A
 $$
-
 is the error made by Agent A and
-
 $$
 E_B
 $$
-
 is the error made by Agent B.
 
 If:
-
 $$
 P(E_A \cap E_B)
 $$
-
 is substantially smaller than:
-
 $$
 P(E_A)
 $$
-
 then independent agents can provide useful redundancy.
 
 But if:
-
 $$
 E_A \approx E_B
 $$
-
 then adding Agent B provides little additional information.
 
 This gives a critical design question:
@@ -1186,7 +1166,6 @@ S_{\text{real}}
 <
 S_{\text{Amdahl}}
 $$
-
 because of:
 
 * communication

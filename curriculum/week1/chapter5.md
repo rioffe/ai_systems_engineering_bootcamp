@@ -81,11 +81,9 @@ response = llm(prompt)
 ```
 
 Conceptually:
-
 $$
 y = f_\theta(x)
 $$
-
 where $x$ is the prompt, $f_\theta$ is the model, and $y$ is the generated output.
 
 This architecture works well when the task can be completed entirely from the information supplied to the model.
@@ -250,11 +248,9 @@ There may be several LLM calls, but the execution graph is predetermined.
 This is a **workflow**.
 
 A workflow can be represented as:
-
 $$
 S_0 \rightarrow S_1 \rightarrow S_2 \rightarrow S_3
 $$
-
 The developer determines the control flow.
 
 An agent is different:
@@ -284,23 +280,17 @@ An agent is different:
 The model participates in determining the next transition.
 
 Formally, a workflow has a largely predetermined transition function:
-
 $$
 s_{t+1} = F(s_t)
 $$
-
 An agent introduces model-mediated decision making:
-
 $$
 a_t \sim \pi_\theta(a \mid s_t)
 $$
-
 followed by an environmental transition:
-
 $$
 s_{t+1} = T(s_t, a_t)
 $$
-
 where:
 
 * $s_t$ is the current state,
@@ -381,11 +371,9 @@ This is where agent engineering begins.
 An agent needs state.
 
 A useful abstraction is:
-
 $$
 S_t = (G, H_t, O_t, M_t, P)
 $$
-
 where:
 
 * $G$ = user goal
@@ -1768,13 +1756,10 @@ is not merely an increase in the number of model calls.
 It represents a fundamental change in the computational model.
 
 A conventional LLM application resembles:
-
 $$
 y = f(x)
 $$
-
 An agent resembles:
-
 $$
 a_t \sim \pi_\theta(s_t)
 $$
@@ -1786,13 +1771,10 @@ $$
 $$
 s_{t+1} = U(s_t, a_t, o_t)
 $$
-
 until:
-
 $$
 C(s_t) = \text{true}
 $$
-
 where $C$ is a termination condition.
 
 The system has acquired:

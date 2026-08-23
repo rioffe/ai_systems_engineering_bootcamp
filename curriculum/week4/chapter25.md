@@ -17,7 +17,6 @@ Your role changes accordingly.
 You are no longer primarily the implementer.
 
 You become:
-
 $$
 \boxed{
 \text{Product Owner}
@@ -27,7 +26,6 @@ $$
 \text{Evaluator}
 }
 $$
-
 The coding agent becomes the primary implementation engine.
 
 The engineering challenge is therefore no longer simply:
@@ -45,7 +43,6 @@ This is a fundamentally different engineering skill.
 ## 1. The New Development Loop
 
 Traditional software development often looks like:
-
 $$
 \text{Requirement}
 \rightarrow
@@ -55,9 +52,7 @@ $$
 \rightarrow
 \text{Debug}
 $$
-
 AI-assisted development introduces another layer:
-
 $$
 \text{Specification}
 \rightarrow
@@ -71,11 +66,9 @@ $$
 \rightarrow
 \text{Revision}
 $$
-
 The agent becomes part of the development system.
 
 A more complete formulation is:
-
 $$
 \boxed{
 S
@@ -91,7 +84,6 @@ F
 A'
 }
 $$
-
 where:
 
 * $S$ = specification,
@@ -141,7 +133,6 @@ You are responsible for:
 * deciding what should be changed.
 
 This produces a new division of labor:
-
 $$
 \boxed{
 \text{Human: What + Why + Constraints}
@@ -153,7 +144,6 @@ $$
 \text{Agent: How + Implementation}
 }
 $$
-
 This division is not absolute. You may still write code when useful.
 
 But the goal of the exercise is to learn to operate effectively at the higher level of abstraction.
@@ -183,7 +173,6 @@ The initial coding-agent prompt should therefore communicate:
 * MVP scope.
 
 Conceptually:
-
 $$
 \text{Specification}
 \rightarrow
@@ -191,7 +180,6 @@ $$
 \rightarrow
 \text{Repository}
 $$
-
 The specification should be treated as an engineering contract.
 
 If the agent begins making product decisions that were already resolved, the development process is drifting.
@@ -253,7 +241,6 @@ A common mistake is asking the coding agent to implement the entire architecture
 Instead, build a **vertical slice**.
 
 A vertical slice implements the smallest complete path through the system:
-
 $$
 \boxed{
 \text{Input}
@@ -263,9 +250,7 @@ $$
 \text{Output}
 }
 $$
-
 For an AI research assistant:
-
 $$
 \text{Question}
 \rightarrow
@@ -275,9 +260,7 @@ $$
 \rightarrow
 \text{Cited Answer}
 $$
-
 For an incident investigator:
-
 $$
 \text{Incident ID}
 \rightarrow
@@ -287,7 +270,6 @@ $$
 \rightarrow
 \text{Evidence-backed Report}
 $$
-
 The vertical slice proves that the architecture is viable.
 
 Only after it works should additional capabilities be layered on.
@@ -297,7 +279,6 @@ Only after it works should additional capabilities be layered on.
 ## 6. Why Vertical Slices Matter
 
 AI systems have many possible failure points:
-
 $$
 \text{UI}
 \rightarrow
@@ -313,7 +294,6 @@ $$
 \rightarrow
 \text{Output}
 $$
-
 If all components are built simultaneously, debugging becomes difficult.
 
 Suppose the final answer is wrong.
@@ -333,7 +313,6 @@ Where is the problem?
 A vertical slice makes failures localizable.
 
 The development strategy becomes:
-
 $$
 \text{Small Working System}
 \rightarrow
@@ -343,9 +322,7 @@ $$
 \rightarrow
 \text{Expand}
 $$
-
 rather than:
-
 $$
 \text{Build Everything}
 \rightarrow
@@ -377,7 +354,6 @@ The second task contains:
 This dramatically reduces ambiguity.
 
 A useful task formulation is:
-
 $$
 Task =
 {
@@ -432,7 +408,6 @@ Restrict external access.
 Avoid dangerous or unnecessary operations.
 
 The principle is:
-
 $$
 \boxed{
 \text{Agent Autonomy}
@@ -440,7 +415,6 @@ $$
 \text{Authorized Action Space}
 }
 $$
-
 This is the same principle used for production agents.
 
 A coding agent is itself an agentic system.
@@ -471,13 +445,11 @@ If the agent repeatedly misunderstands a requirement, the problem may not be the
 The specification may be ambiguous.
 
 This creates a useful feedback loop:
-
 $$
 \text{Agent Behavior}
 \rightarrow
 \text{Specification Feedback}
 $$
-
 The coding process therefore becomes a test of the specification itself.
 
 ---
@@ -487,7 +459,6 @@ The coding process therefore becomes a test of the specification itself.
 Do not wait until the entire system is built before testing.
 
 After each meaningful implementation step:
-
 $$
 \text{Implement}
 \rightarrow
@@ -495,29 +466,23 @@ $$
 \rightarrow
 \text{Inspect}
 $$
-
 The testing hierarchy should include:
 
 #### Unit tests
 
 Test isolated components.
-
 $$
 f(x)\rightarrow y
 $$
-
 #### Integration tests
 
 Test component interactions.
-
 $$
 A\rightarrow B\rightarrow C
 $$
-
 #### End-to-end tests
 
 Test complete user workflows.
-
 $$
 \text{User}
 \rightarrow
@@ -525,11 +490,9 @@ $$
 \rightarrow
 \text{Outcome}
 $$
-
 #### AI evaluations
 
 Test probabilistic behavior against a golden dataset.
-
 $$
 D
 \rightarrow
@@ -537,7 +500,6 @@ System(D)
 \rightarrow
 Metrics
 $$
-
 These layers answer different questions.
 
 ---
@@ -549,17 +511,13 @@ Traditional software testing assumes deterministic behavior.
 AI systems violate that assumption.
 
 A function might behave like:
-
 $$
 f(x)=y
 $$
-
 An LLM system behaves more like:
-
 $$
 P(y|x)
 $$
-
 Therefore, testing must evaluate distributions of outcomes and properties of outputs.
 
 For example, instead of asserting:
@@ -576,13 +534,10 @@ test:
 * Did the system use the correct tools?
 
 This is the difference between:
-
 $$
 \text{Output Equality}
 $$
-
 and:
-
 $$
 \text{Behavioral Correctness}
 $$
@@ -596,7 +551,6 @@ The evaluator role should not begin after implementation.
 Build evaluation infrastructure alongside the product.
 
 A minimal harness might look like:
-
 $$
 D_{\text{golden}}
 \rightarrow
@@ -608,7 +562,6 @@ Evaluator
 \rightarrow
 Metrics
 $$
-
 For each test case, record:
 
 * input,
@@ -628,7 +581,6 @@ This creates an empirical development loop.
 ## 13. The Agent Should Test Its Own Work
 
 An important pattern is:
-
 $$
 \text{Generate}
 \rightarrow
@@ -638,7 +590,6 @@ $$
 \rightarrow
 \text{Fix}
 $$
-
 The coding agent can often perform this loop autonomously.
 
 For example:
@@ -656,7 +607,6 @@ The agent can optimize for the tests you gave it.
 If the tests encode the wrong assumptions, the agent can produce a perfectly tested wrong system.
 
 Therefore:
-
 $$
 \text{Automated Verification}
 \neq
@@ -691,7 +641,6 @@ and:
 These questions cannot always be answered by unit tests.
 
 The evaluation stack therefore becomes:
-
 $$
 \boxed{
 \text{Automated Tests}
@@ -746,7 +695,6 @@ They may introduce:
 The correct response is not to accept complexity merely because the agent produced it.
 
 The architect must enforce:
-
 $$
 \boxed{
 \text{Complexity}
@@ -770,17 +718,13 @@ The agent may respond by creating a generalized abstraction framework.
 For an MVP, this is usually unnecessary.
 
 Prefer:
-
 $$
 \text{Concrete Working System}
 $$
-
 over:
-
 $$
 \text{General Framework for Future Systems}
 $$
-
 Generalize when there is evidence that generalization is required.
 
 The principle is:
@@ -805,7 +749,6 @@ The agent may need:
 * recent changes.
 
 A useful context hierarchy is:
-
 $$
 C =
 C_{\text{architecture}}
@@ -818,21 +761,16 @@ C_{\text{tests}}
 +
 C_{\text{constraints}}
 $$
-
 Do not provide the entire repository indiscriminately.
 
 The goal is:
-
 $$
 \text{Maximum Relevant Context}
 $$
-
 rather than:
-
 $$
 \text{Maximum Context}
 $$
-
 This is the same context-engineering principle applied to software development.
 
 ---
@@ -844,7 +782,6 @@ Version control becomes particularly important when agents can make large change
 Use small, meaningful commits.
 
 A useful sequence is:
-
 $$
 Commit_1
 \rightarrow
@@ -852,7 +789,6 @@ Commit_2
 \rightarrow
 Commit_3
 $$
-
 where each commit corresponds to a coherent change.
 
 This creates:
@@ -866,7 +802,6 @@ This creates:
 The agent should not be allowed to turn the repository into an opaque sequence of thousands of modifications.
 
 A useful principle is:
-
 $$
 \boxed{
 \text{Agent Speed}
@@ -880,7 +815,6 @@ $$
 ## 19. The Build Loop
 
 The complete Chapter 25 loop can be represented as:
-
 $$
 \boxed{
 \text{Specify}
@@ -898,11 +832,9 @@ $$
 \text{Revise}
 }
 $$
-
 Repeat until the MVP satisfies the acceptance criteria.
 
 The human should spend most of their time on the high-leverage portions of this loop:
-
 $$
 \text{Direction}
 \quad
@@ -912,7 +844,6 @@ $$
 \quad
 \text{Evaluation}
 $$
-
 rather than typing implementation details.
 
 ---
@@ -943,7 +874,6 @@ Implement:
 ### Phase 3 — Vertical slice
 
 Build:
-
 $$
 \text{Input}
 \rightarrow
@@ -951,7 +881,6 @@ $$
 \rightarrow
 \text{Output}
 $$
-
 ### Phase 4 — Tool integration
 
 Connect the required external systems.
@@ -1016,15 +945,12 @@ This sequence deliberately prioritizes a working path over architectural complet
 AI systems have variable inference costs.
 
 A naive agent may perform:
-
 $$
 N_{\text{calls}} \gg 1
 $$
-
 LLM calls, retrieval operations, and tool calls can accumulate quickly.
 
 A simple cost model is:
-
 $$
 C_{\text{request}}
 =
@@ -1036,16 +962,13 @@ C_{\text{tools}}
 +
 C_{\text{infrastructure}}
 $$
-
 For an agent:
-
 $$
 C_{\text{agent}}
 =
 \sum_{i=1}^{N}
 C_i
 $$
-
 where $N$ is the number of model/tool operations.
 
 During the build, measure:
@@ -1070,7 +993,6 @@ An MVP that works but costs \$50 per user action may not be a viable product.
 A model's benchmark score does not determine the reliability of the product.
 
 Overall system reliability depends on multiple components:
-
 $$
 R_{\text{system}}
 \approx
@@ -1084,7 +1006,6 @@ R_{\text{verification}}
 \times
 R_{\text{orchestration}}
 $$
-
 This multiplicative intuition is useful.
 
 If any critical component is unreliable, the overall system can become unreliable.
@@ -1125,7 +1046,6 @@ Possible failures include:
 * unexpected user input.
 
 The architecture should define:
-
 $$
 F_i
 \rightarrow
@@ -1135,9 +1055,7 @@ F_i
 \rightarrow
 \text{Escalation}
 $$
-
 For example:
-
 $$
 \text{Tool Failure}
 \rightarrow
@@ -1147,7 +1065,6 @@ $$
 \rightarrow
 \text{Human Notification}
 $$
-
 The system should not silently continue when a critical dependency fails.
 
 ---
@@ -1157,7 +1074,6 @@ The system should not silently continue when a critical dependency fails.
 The product owner must define where autonomy ends.
 
 A useful model is:
-
 $$
 \text{AI Recommendation}
 \rightarrow
@@ -1165,7 +1081,6 @@ $$
 \rightarrow
 \text{Action}
 $$
-
 For the MVP, keep the agent within a narrow permission boundary.
 
 For example:
@@ -1185,7 +1100,6 @@ For example:
 * delete data.
 
 This establishes a safe progression:
-
 $$
 \text{Read}
 \rightarrow
@@ -1195,7 +1109,6 @@ $$
 \rightarrow
 \text{Act}
 $$
-
 Autonomy can increase later as evidence justifies it.
 
 ---
@@ -1222,7 +1135,6 @@ But it may also:
 * optimize for passing tests rather than satisfying the product.
 
 Therefore:
-
 $$
 \boxed{
 \text{Agent Output}
@@ -1230,9 +1142,7 @@ $$
 \text{Proposal}
 }
 $$
-
 not:
-
 $$
 \boxed{
 \text{Agent Output}
@@ -1240,7 +1150,6 @@ $$
 \text{Truth}
 }
 $$
-
 The human architect must review consequential decisions.
 
 ---
@@ -1250,7 +1159,6 @@ The human architect must review consequential decisions.
 A more powerful mental model is to treat the coding agent as a compiler.
 
 You provide:
-
 $$
 \text{Product Intent}
 +
@@ -1258,31 +1166,24 @@ $$
 +
 \text{Architecture}
 $$
-
 and the agent produces:
-
 $$
 \text{Executable Software}
 $$
-
 Conceptually:
-
 $$
 Compiler_{\text{AI}}:
 S \rightarrow I
 $$
-
 where:
 
 * $S$ = high-level specification,
 * $I$ = implementation.
 
 But unlike a traditional compiler, the transformation is probabilistic:
-
 $$
 P(I|S)
 $$
-
 This explains why evaluation and iterative refinement are necessary.
 
 A traditional compiler either compiles correctly or fails.
@@ -1290,7 +1191,6 @@ A traditional compiler either compiles correctly or fails.
 An AI coding agent can produce a syntactically valid implementation that is semantically wrong.
 
 Therefore:
-
 $$
 \boxed{
 \text{AI Coding}
@@ -1320,7 +1220,6 @@ How often does the agent complete tasks without substantial human intervention?
 #### Rework rate
 
 How much generated code must be rewritten?
-
 $$
 R_{\text{rework}}
 =
@@ -1330,7 +1229,6 @@ R_{\text{rework}}
 \text{Generated Code}
 }
 $$
-
 #### Test effectiveness
 
 How many meaningful defects are caught automatically?
@@ -1364,7 +1262,6 @@ If the agent writes 10,000 lines of code but nobody understands whether the syst
 If the agent writes 2,000 lines and produces a working, evaluated MVP that users genuinely value, the build succeeded.
 
 Therefore:
-
 $$
 \boxed{
 \text{Engineering Productivity}
@@ -1372,9 +1269,7 @@ $$
 \text{Lines of Code}
 }
 $$
-
 A better measure is:
-
 $$
 \text{Productive Engineering}
 =
@@ -1384,7 +1279,6 @@ $$
 \text{Human Time}
 }
 $$
-
 AI coding agents have the potential to dramatically increase this ratio.
 
 ---
@@ -1440,7 +1334,6 @@ A written list of:
 #### Demo
 
 A complete end-to-end demonstration:
-
 $$
 \boxed{
 \text{User}
@@ -1456,7 +1349,6 @@ $$
 \text{Evaluation}
 }
 $$
-
 The system should work on at least one realistic scenario from beginning to end.
 
 ---
@@ -1509,7 +1401,6 @@ Before declaring the MVP complete, verify:
 
 7. **Test continuously.**
    The development loop should be:
-
 $$
    \text{Implement}
    \rightarrow
@@ -1519,7 +1410,6 @@ $$
    \rightarrow
    \text{Revise}
 $$
-
 8. **AI systems require more than conventional tests.**
    Combine deterministic tests, AI evaluations, human evaluation, and user outcome metrics.
 
@@ -1541,7 +1431,6 @@ $$
 14. **The deepest shift is in the engineering abstraction level.**
 
     Traditional development:
-
 $$
     \text{Human}
     \rightarrow
@@ -1549,9 +1438,7 @@ $$
     \rightarrow
     \text{Software}
 $$
-
     AI-native development:
-
 $$
     \boxed{
     \text{Human Intent}
@@ -1565,10 +1452,8 @@ $$
     \text{Evaluation}
     }
 $$
-
 15. **The objective is not to maximize generated code.**
     It is to maximize validated user value per unit of human engineering effort.
-
 $$
     \boxed{
     \text{Productive Engineering}
@@ -1577,6 +1462,5 @@ $$
     {\text{Human Effort}}
     }
 $$
-
 Chapter 25 therefore represents an important transition in the AI engineering discipline: **the engineer increasingly becomes the designer and governor of intelligent software-production systems, rather than the person who manually produces every implementation detail.**
 

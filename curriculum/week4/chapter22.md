@@ -13,7 +13,6 @@ Product thinking asks a different question:
 For an AI engineer, this is a critical transition. The objective is no longer simply to optimize model quality or system reliability. It is to optimize **problem–solution fit**.
 
 A useful abstraction is:
-
 $$
 \text{Value} =
 f(\text{Problem Importance},
@@ -21,7 +20,6 @@ f(\text{Problem Importance},
 \text{Adoption},
 \text{Economics})
 $$
-
 A system can have excellent model performance and still have low value if the underlying problem is unimportant, infrequent, difficult to monetize, or poorly aligned with existing workflows.
 
 This chapter introduces the core concepts required to evaluate AI opportunities before investing heavily in implementation.
@@ -54,19 +52,14 @@ It identifies:
 * and potential constraints.
 
 The distinction is fundamental:
-
 $$
 \text{Technology} \rightarrow \text{Capability}
 $$
-
 whereas
-
 $$
 \text{Problem} \rightarrow \text{Value}
 $$
-
 The engineering process should therefore proceed roughly as:
-
 $$
 \boxed{
 \text{Problem}
@@ -78,9 +71,7 @@ $$
 \text{Solution}
 }
 $$
-
 rather than:
-
 $$
 \text{LLM}
 \rightarrow
@@ -88,7 +79,6 @@ $$
 \rightarrow
 \text{Find a Use Case}
 $$
-
 The latter approach frequently produces impressive demonstrations that nobody needs.
 
 ---
@@ -110,7 +100,6 @@ The underlying job might be:
 The AI system is merely one possible mechanism for accomplishing that job.
 
 A useful formulation is:
-
 $$
 \text{Job}
 =
@@ -120,7 +109,6 @@ $$
 +
 \text{Constraints}
 $$
-
 For example:
 
 **Situation**
@@ -136,7 +124,6 @@ Create an accurate incident report and identify corrective actions.
 The report must use evidence from logs, tickets, and deployment history and must not invent facts.
 
 This formulation immediately suggests an engineering architecture:
-
 $$
 \text{Logs}
 +
@@ -152,7 +139,6 @@ $$
 \rightarrow
 \text{Human Review}
 $$
-
 The product definition and system architecture become connected.
 
 ---
@@ -212,7 +198,6 @@ Now suppose another user spends four hours every day performing the same kind of
 The second problem has substantially greater economic significance.
 
 We can think about pain along several dimensions:
-
 $$
 P =
 f(
@@ -223,7 +208,6 @@ f(
 \text{Frustration}
 )
 $$
-
 The most interesting AI opportunities often involve tasks where mistakes are expensive or human effort is unusually costly.
 
 Examples include:
@@ -254,7 +238,6 @@ AI products rarely replace a single isolated task.
 They operate inside workflows.
 
 Consider:
-
 $$
 \text{Customer Request}
 \rightarrow
@@ -268,7 +251,6 @@ $$
 \rightarrow
 \text{Documentation}
 $$
-
 An AI system might automate only one stage.
 
 Alternatively, an agentic system might coordinate several stages.
@@ -280,12 +262,10 @@ Suppose a task takes two hours but the AI can automate only ten minutes of it. T
 Conversely, if AI can eliminate most of the workflow while preserving human approval at a critical decision point, the opportunity may be substantial.
 
 A useful engineering representation is:
-
 $$
 W =
 {s_1,s_2,\ldots,s_n}
 $$
-
 where each $s_i$ is a workflow step.
 
 For each step, measure:
@@ -329,17 +309,14 @@ AI becomes particularly interesting when the workflow contains:
 * variable user intent.
 
 This suggests a useful distinction:
-
 $$
 \text{Software Automation}
 \neq
 \text{AI Automation}
 $$
-
 The question is whether the probabilistic capabilities of AI provide **incremental leverage** over conventional software.
 
 For example:
-
 $$
 \text{Traditional System}
 \rightarrow
@@ -347,9 +324,7 @@ $$
 \rightarrow
 \text{Structured Output}
 $$
-
 versus:
-
 $$
 \text{AI System}
 \rightarrow
@@ -361,7 +336,6 @@ $$
 \rightarrow
 \text{Adaptive Output}
 $$
-
 AI leverage is highest when the latter provides a substantial improvement in economics or user experience.
 
 ---
@@ -373,13 +347,10 @@ Usage and willingness to pay are different variables.
 A user might enthusiastically use a free AI tool while having no interest in paying for it.
 
 The fundamental question is:
-
 $$
 \text{Value Captured by Customer} > \text{Price}
 $$
-
 For a business application, a simple model is:
-
 $$
 V =
 T_s C_h
@@ -390,7 +361,6 @@ C_r
 +
 R
 $$
-
 where:
 
 * $T_s$ = time saved,
@@ -400,11 +370,9 @@ where:
 * $R$ = incremental revenue or business value.
 
 The maximum economically rational price is bounded by the value created:
-
 $$
 P < V
 $$
-
 This is obviously a simplification. Real pricing depends on alternatives, budgets, procurement processes, switching costs, strategic importance, and competitive dynamics.
 
 Nevertheless, the framework forces a critical question:
@@ -434,15 +402,12 @@ Users may worry about:
 * model unpredictability.
 
 Therefore:
-
 $$
 \text{Product Value}
 \neq
 \text{Capability}
 $$
-
 A more realistic formulation is:
-
 $$
 \text{Realized Value}
 =
@@ -452,7 +417,6 @@ $$
 \times
 \text{Reliability}
 $$
-
 Suppose an AI system could theoretically save an organization \$1 million per year.
 
 If users trust it only 20\% of the time, the realized value may be dramatically lower.
@@ -460,7 +424,6 @@ If users trust it only 20\% of the time, the realized value may be dramatically 
 This is why human-in-the-loop design is often a product feature rather than merely a safety mechanism.
 
 For example:
-
 $$
 \text{AI}
 \rightarrow
@@ -470,15 +433,12 @@ $$
 \rightarrow
 \text{Execution}
 $$
-
 may initially create more value than:
-
 $$
 \text{AI}
 \rightarrow
 \text{Autonomous Execution}
 $$
-
 because the first architecture has a much higher adoption probability.
 
 ---
@@ -488,13 +448,11 @@ because the first architecture has a much higher adoption probability.
 An AI feature is not necessarily a durable business.
 
 If a product consists primarily of:
-
 $$
 \text{Prompt}
 +
 \text{LLM API}
 $$
-
 then competitors may reproduce it quickly.
 
 Durable advantage can instead emerge from:
@@ -513,7 +471,6 @@ Durable advantage can instead emerge from:
 * accumulated workflow state.
 
 A useful abstraction is:
-
 $$
 \text{Moat}
 =
@@ -526,11 +483,9 @@ f(
 \text{Learning}
 )
 $$
-
 The strongest AI products often become better because they are embedded in the customer's workflow.
 
 This creates a feedback loop:
-
 $$
 \text{Usage}
 \rightarrow
@@ -540,7 +495,6 @@ $$
 \rightarrow
 \text{More Usage}
 $$
-
 The resulting advantage is considerably stronger than simply having access to a particular foundation model.
 
 ---
@@ -548,7 +502,6 @@ The resulting advantage is considerably stronger than simply having access to a 
 ## 10. The AI Opportunity Equation
 
 For today's exercise, we will use the following deliberately simple scoring model:
-
 $$
 \boxed{
 Opportunity =
@@ -559,7 +512,6 @@ Frequency
 AI\ Leverage
 }
 $$
-
 Each dimension can be scored, for example, from 1 to 10.
 
 #### Pain
@@ -598,29 +550,21 @@ A useful scale might be:
 The multiplication is intentional.
 
 A problem with:
-
 $$
 Pain=10,\quad Frequency=1,\quad Leverage=10
 $$
-
 has:
-
 $$
 Opportunity=100
 $$
-
 while:
-
 $$
 Pain=7,\quad Frequency=8,\quad Leverage=8
 $$
-
 has:
-
 $$
 Opportunity=448
 $$
-
 This illustrates an important product principle:
 
 > **Large problems are not necessarily large opportunities.**
@@ -634,12 +578,10 @@ The frequency and AI leverage dimensions matter.
 The basic equation is useful for discovery, but advanced product analysis should eventually incorporate additional variables.
 
 One possible extension is:
-
 $$
 Opportunity =
 P \times F \times L \times W \times A
 $$
-
 where:
 
 * $P$ = pain,
@@ -649,7 +591,6 @@ where:
 * $A$ = adoption feasibility.
 
 A competitive-adjusted formulation could be:
-
 $$
 Opportunity^*
 =
@@ -659,7 +600,6 @@ PFLWA
 1+C
 }
 $$
-
 where $C$ represents competitive intensity or difficulty of differentiation.
 
 This is not intended as a scientifically precise metric.
@@ -755,12 +695,10 @@ This is much stronger than:
 The first statement contains measurable assumptions.
 
 We can decompose it into:
-
 $$
 H =
 (H_p,H_f,H_l,H_a,H_e)
 $$
-
 where:
 
 * $H_p$: the problem is sufficiently painful,
@@ -778,7 +716,6 @@ Each hypothesis can then be tested independently.
 This perspective also changes how we allocate engineering effort.
 
 Without product thinking, an AI team might optimize:
-
 $$
 \text{Model Accuracy}
 \rightarrow
@@ -786,9 +723,7 @@ $$
 \rightarrow
 \text{Cost}
 $$
-
 With product thinking, the optimization target becomes:
-
 $$
 \text{User Outcome}
 \rightarrow
@@ -798,7 +733,6 @@ $$
 \rightarrow
 \text{Economics}
 $$
-
 Model quality remains important, but it is subordinate to the actual outcome.
 
 For example, improving answer accuracy from 92\% to 94\% may be irrelevant if users still have to manually perform 80\% of the workflow.
@@ -850,14 +784,12 @@ What could prevent users from adopting the solution?
 What could make a solution difficult to copy?
 
 Then calculate:
-
 $$
 \boxed{
 Opportunity =
 Pain \times Frequency \times AI\ Leverage
 }
 $$
-
 Rank the ten opportunities from highest to lowest.
 
 Finally, select the **top three** and write a one-paragraph product hypothesis for each.

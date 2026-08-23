@@ -63,11 +63,9 @@ Verification
 The specification becomes the **contract between human intent and machine execution**.
 
 A useful abstraction is:
-
 $$
 S = (R, I, C, A, T, D, \ldots)
 $$
-
 where:
 
 * $R$ = requirements
@@ -78,27 +76,21 @@ where:
 * $D$ = architectural decisions
 
 The specification defines the set of acceptable implementations:
-
 $$
 \mathcal{I}_{valid}
 =
 {i \mid i \models S}
 $$
-
 The objective of engineering is no longer simply:
-
 $$
 \text{generate code}
 $$
-
 but:
-
 $$
 \text{find implementation } i
 \text{ such that }
 i \models S
 $$
-
 This is a much more precise formulation.
 
 ---
@@ -165,7 +157,6 @@ A precise specification reduces this ambiguity.
 One useful way to think about a specification is as a collection of constraints.
 
 Suppose the system must satisfy:
-
 $$
 C_1 = \text{REST API exists}
 $$
@@ -189,14 +180,11 @@ $$
 $$
 C_6 = \text{no document crosses tenant boundaries}
 $$
-
 The implementation is acceptable only if:
-
 $$
 C_1 \land C_2 \land C_3
 \land C_4 \land C_5 \land C_6
 $$
-
 are satisfied.
 
 This is a major conceptual improvement over:
@@ -283,7 +271,6 @@ For example:
 That is a security invariant.
 
 Formally:
-
 $$
 \forall u,d:
 \quad
@@ -291,18 +278,15 @@ tenant(u) \neq tenant(d)
 \Rightarrow
 accessible(u,d)=false
 $$
-
 Another example:
 
 > Every generated answer must be grounded in retrieved evidence.
 
 Conceptually:
-
 $$
 Answer(x) \Rightarrow
 Evidence(x) \neq \varnothing
 $$
-
 Invariants are particularly valuable for agentic systems because they constrain implementation choices.
 
 A feature says:
@@ -769,21 +753,17 @@ Run the same agent under both conditions.
 Measure at least:
 
 #### Correctness
-
 $$
 Accuracy =
 \frac{\text{requirements satisfied}}
 {\text{requirements}}
 $$
-
 #### Test success
-
 $$
 PassRate =
 \frac{\text{tests passed}}
 {\text{tests}}
 $$
-
 #### Rework
 
 Measure:
@@ -847,11 +827,9 @@ The experiment turns specification engineering from an abstract idea into a meas
 
 This experiment should lead to a broader conclusion.
 Suppose agent capability is:
-
 $$
 Q = f(M,H,S,V,E)
 $$
-
 where:
 
 * $M$ = model capability

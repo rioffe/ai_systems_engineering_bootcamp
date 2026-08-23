@@ -41,13 +41,11 @@ Context engineering focuses on the **entire information environment in which the
 That distinction becomes fundamental as AI systems become more capable.
 
 A useful mental model is:
-
 $$
 \text{Application Quality}
 \approx
 f(\text{Model},\text{Instructions},\text{Context},\text{Tools},\text{State},\text{Evaluation})
 $$
-
 The model is only one component.
 
 The rest of the system determines what the model actually sees.
@@ -57,27 +55,22 @@ The rest of the system determines what the model actually sees.
 ## 1. The Context Is the Program
 
 Traditional software executes an explicitly defined program:
-
 $$
 y = f(x)
 $$
-
 The programmer determines the control flow, data structures, and inputs.
 
 An LLM application is different.
 
 A useful abstraction is:
-
 $$
 y \sim P(y \mid C)
 $$
-
 where $C$ is the context supplied to the model.
 
 The output is probabilistic, but more importantly, **the context is constructed by the application**.
 
 This gives us a different engineering pipeline:
-
 $$
 \text{World}
 \rightarrow
@@ -89,7 +82,6 @@ $$
 \rightarrow
 \text{Output}
 $$
-
 The LLM cannot reason over information that it does not receive.
 
 It also cannot reliably distinguish important information from irrelevant information if the application presents them indiscriminately.
@@ -112,7 +104,6 @@ The context is effectively the **runtime environment for the model**.
 A production system typically constructs context from several sources.
 
 A simplified representation is:
-
 $$
 C =
 C_{\text{system}}
@@ -127,7 +118,6 @@ C_{\text{tools}}
 \oplus
 C_{\text{state}}
 $$
-
 where $\oplus$ represents some application-specific composition operation.
 
 These components are not interchangeable.
@@ -206,7 +196,6 @@ database → 37 matching records
 The tool result becomes new context for the model.
 
 A capable agent therefore operates a loop:
-
 $$
 \text{Context}
 \rightarrow
@@ -218,7 +207,6 @@ $$
 \rightarrow
 \text{Context}'
 $$
-
 The context changes as the agent interacts with the world.
 
 ---
@@ -228,11 +216,9 @@ The context changes as the agent interacts with the world.
 Every model has a finite context capacity.
 
 Conceptually:
-
 $$
 |C| \leq W
 $$
-
 where $W$ is the context window measured in tokens.
 
 Modern models may support very large contexts, but this does **not** mean that unlimited context is free or equally useful.
@@ -321,11 +307,9 @@ This distinction becomes particularly important for **prompt injection**.
 ## 5. Retrieval: Giving the Model the Right Information
 
 Suppose an organization has:
-
 $$
 N = 1,000,000
 $$
-
 documents.
 
 A user asks:
@@ -337,13 +321,11 @@ The naive solution is to give the model everything.
 That is impossible or economically absurd.
 
 Instead:
-
 $$
 D_1,\ldots,D_N
 \xrightarrow{\text{retrieval}}
 D_{i_1},\ldots,D_{i_k}
 $$
-
 The retrieval system selects a small subset of potentially relevant information.
 
 This creates a new engineering problem.
@@ -351,7 +333,6 @@ This creates a new engineering problem.
 The LLM may be extremely good at reasoning over the retrieved documents, but if retrieval returns the wrong documents, the model has little chance of producing a correct answer.
 
 This leads to a critical decomposition:
-
 $$
 P(\text{correct answer})
 \approx
@@ -359,7 +340,6 @@ P(\text{retrieve relevant information})
 \times
 P(\text{correctly use information}\mid\text{relevant information})
 $$
-
 An excellent generator cannot fully compensate for a broken retriever.
 
 ---
@@ -379,11 +359,9 @@ $D_2,D_{17},D_{84}$
 Excellent!
 
 Now suppose it returns:
-
 $$
 D_2,D_{17},D_{84},D_{105},D_{204},\ldots,D_{500}
 $$
-
 You have increased completeness, but potentially decreased usability.
 
 The context now contains hundreds of irrelevant documents.
@@ -395,19 +373,15 @@ The retrieval problem therefore has two competing objectives:
 #### Recall
 
 Did we retrieve the information necessary to answer the question?
-
 $$
 Recall = \frac{\text{relevant items retrieved}}{\text{all relevant items}}
 $$
-
 #### Precision
 
 How much of what we retrieved was actually relevant?
-
 $$
 Precision = \frac{\text{relevant items retrieved}}{\text{all items retrieved}}
 $$
-
 High recall reduces the risk of missing necessary information.
 
 High precision reduces context pollution.
@@ -515,19 +489,15 @@ It is not a context-management strategy.
 As conversations and agent trajectories grow, the system eventually needs to compress information.
 
 Suppose an agent has accumulated:
-
 $$
 C_1,C_2,\ldots,C_{100}
 $$
-
 Passing all 100 turns indefinitely is expensive and increasingly noisy.
 
 Instead, the application can construct a compressed representation:
-
 $$
 S = f(C_1,\ldots,C_{100})
 $$
-
 where $S$ preserves the information expected to remain useful.
 
 For example:
@@ -545,17 +515,13 @@ Future context
 But compression is lossy.
 
 If:
-
 $$
 C' = f(C)
 $$
-
 then generally:
-
 $$
 C' \neq C
 $$
-
 The engineering question becomes:
 
 > **Which information is safe to discard?**
@@ -627,17 +593,13 @@ customer.shipping_address =
 The next request can then retrieve that state and inject the relevant portion into context.
 
 This gives us:
-
 $$
 \text{State} \rightarrow \text{Context}
 $$
-
 rather than:
-
 $$
 \text{History} \rightarrow \text{Everything}
 $$
-
 The latter is a common architectural anti-pattern.
 
 Conversation history is not a database.
@@ -844,7 +806,6 @@ Total:                  19,500 tokens
 ```
 
 Rather than allowing context to grow without constraint, the application can enforce:
-
 $$
 B_{\text{system}}
 +
@@ -855,7 +816,6 @@ B_{\text{retrieval}}
 B_{\text{tools}}
 \leq B_{\text{total}}
 $$
-
 This makes context a managed resource.
 
 It also creates useful observability.
@@ -951,7 +911,6 @@ Answer
 ```
 
 Measure:
-
 $$
 \text{Retrieval Precision}
 $$
@@ -967,7 +926,6 @@ $$
 $$
 \text{Hallucination Rate}
 $$
-
 This establishes the baseline.
 
 ---
@@ -1024,7 +982,6 @@ For a known set of relevant documents, measure retrieval quality explicitly usin
 * **False Negatives (FN)**: Relevant documents that the retriever missed.
 
 From these, we derive:
-
 $$
 \text{Precision} = \frac{TP}{TP + FP}
 $$
@@ -1032,7 +989,6 @@ $$
 $$
 \text{Recall} = \frac{TP}{TP + FN}
 $$
-
 Suppose:
 
 Relevant documents:
@@ -1048,17 +1004,13 @@ In this case:
 * $FN = 1$ (Document $D_{42}$ was missed)
 
 Therefore:
-
 $$
 \text{Precision} = \frac{2}{2 + 2} = 0.50
 $$
-
 and:
-
 $$
 \text{Recall} = \frac{2}{2 + 1} \approx 0.67
 $$
-
 This gives you a concrete diagnosis.
 
 If answer quality is poor, you can now ask:
@@ -1080,13 +1032,11 @@ Retrieval metrics are not sufficient.
 A system can retrieve the correct documents and still produce the wrong answer.
 
 Therefore evaluate:
-
 $$
 \text{Retrieved Evidence}
 \rightarrow
 \text{Generated Answer}
 $$
-
 Possible evaluation approaches include:
 
 #### Exact Match
@@ -1119,17 +1069,13 @@ Ask an evaluator to classify:
 Compare the generated answer against a known reference answer and evidence set.
 
 For production systems, it is often useful to evaluate both:
-
 $$
 \text{Answer correctness}
 $$
-
 and:
-
 $$
 \text{Evidence support}
 $$
-
 An answer can be correct for the wrong reason.
 
 That is dangerous.
@@ -1158,11 +1104,9 @@ Contradicted claim
 ```
 
 This gives a more useful definition of hallucination:
-
 $$
 Hallucination Rate = \frac{\text{unsupported claims}}{\text{total factual claims}}
 $$
-
 The exact implementation can vary, but the principle is important:
 
 > **An AI system should be evaluated on whether its outputs are grounded in available evidence, not merely whether they sound plausible.**
@@ -1232,17 +1176,13 @@ It can treat untrusted data as instructions.
 And it can faithfully produce an incorrect answer when the application constructs the wrong context.
 
 Therefore:
-
 $$
 \text{LLM Application} \neq \text{Prompt} + \text{Model}
 $$
-
 A better abstraction is:
-
 $$
 \text{LLM Application} = \text{State} + \text{Retrieval} + \text{Context Construction} + \text{Model} + \text{Tools} + \text{Evaluation}
 $$
-
 The model remains important.
 
 But the engineering system surrounding it determines whether that model becomes a useful component or an unreliable demo.

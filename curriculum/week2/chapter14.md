@@ -142,19 +142,15 @@ Disadvantages:
 Neither is universally better.
 
 Architecture is therefore fundamentally an optimization problem:
-
 $$
 A^* =
 \arg\max_A
 Utility(A)
 $$
-
 subject to constraints involving:
-
 $$
 Cost,\ Latency,\ Reliability,\ Security,\ Quality,\ Complexity
 $$
-
 The architecture review makes those tradeoffs explicit.
 
 ---
@@ -525,11 +521,9 @@ Consider an agent calling a tool:
 ```
 
 The tool interface should specify:
-
 $$
 Input \rightarrow Output
 $$
-
 including failure behavior.
 
 For example:
@@ -640,17 +634,13 @@ ToolExecution
 The model should capture ownership and authorization.
 
 For example:
-
 $$
 Document.owner_id = User.id
 $$
-
 and retrieval should enforce:
-
 $$
 Accessible(u,d)
 $$
-
 before returning document (d) to user (u).
 
 ---
@@ -920,7 +910,6 @@ The goal is to understand and control it.
 Now apply Chapter 12.
 
 Estimate:
-
 $$
 C_{system}
  = 
@@ -936,9 +925,7 @@ C_{network}
 +
 C_{observability}
 $$
-
 For inference:
-
 $$
 C_{model}
  = 
@@ -947,16 +934,13 @@ N_{requests}
 +
 T_{output}P_{output})
 $$
-
 For an agent:
-
 $$
 C_{task}
  = 
 \sum_{i=1}^{k}
 C_i
 $$
-
 where $k$ is the number of model/tool operations.
 
 Build assumptions.
@@ -1020,19 +1004,15 @@ or:
 This is sensitivity analysis.
 
 Mathematically:
-
 $$
 \frac{\partial C}{\partial T_{input}}
 $$
-
 tells us how sensitive cost is to input tokens.
 
 Similarly:
-
 $$
 \frac{\partial C}{\partial N_{requests}}
 $$
-
 tells us how strongly cost scales with traffic.
 
 This turns cost from an accounting number into an architectural variable.
@@ -1104,13 +1084,11 @@ Application
 The system's availability depends on those dependencies.
 
 If every dependency must be available:
-
 $$
 A_{system}
  = 
 A_1 A_2 A_3
 $$
-
 If:
 
 ```text
@@ -1120,19 +1098,15 @@ A3 = 99.9%
 ```
 
 then:
-
 $$
 A_{system}
 \approx
 0.999 \times 0.995 \times 0.999
 $$
-
 which is approximately:
-
 $$
 99.3\%
 $$
-
 The more dependencies you introduce, the more carefully you need to design failure handling.
 
 ---
@@ -1241,7 +1215,6 @@ max_context
 The runtime should enforce these limits outside the model.
 
 For example:
-
 $$
 Steps \leq S_{max}
 $$
@@ -1253,7 +1226,6 @@ $$
 $$
 Time \leq T_{max}
 $$
-
 The agent is not allowed to negotiate these limits.
 
 ---
@@ -1381,7 +1353,6 @@ The evaluation suite prevents those failures from returning.
 Finally, model system performance.
 
 Decompose latency:
-
 $$
 L_{total}
  = 
@@ -1395,23 +1366,18 @@ L_{model}
 +
 L_{tools}
 $$
-
 For an agent with sequential model calls:
-
 $$
 L_{total}
  = 
 \sum_i L_i
 $$
-
 For parallel operations:
-
 $$
 L_{parallel}
  = 
 \max(L_1,\ldots,L_n)
 $$
-
 Define:
 
 * expected throughput
@@ -1444,17 +1410,13 @@ and each request requires:
 ```
 
 Then the system requires approximately:
-
 $$
 200,000
 $$
-
 input tokens/sec and:
-
 $$
 50,000
 $$
-
 output tokens/sec.
 
 This is a fundamentally different engineering problem from:

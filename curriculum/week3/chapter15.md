@@ -60,11 +60,9 @@ It is:
 A useful abstraction is to model a coding agent as a feedback controller.
 
 Let:
-
 $$
 S_t
 $$
-
 represent the state of the software environment at time $t$. This includes:
 
 * source files
@@ -78,17 +76,13 @@ represent the state of the software environment at time $t$. This includes:
 * repository conventions
 
 The agent observes some representation of that state:
-
 $$
 O_t = \mathcal{O}(S_t)
 $$
-
 and uses its context and reasoning to select an action:
-
 $$
 A_t \sim \pi_\theta(A \mid C_t, O_t)
 $$
-
 where:
 
 * $C_t$ is the agent's current context
@@ -96,17 +90,13 @@ where:
 * $A_t$ might be a file edit, shell command, test invocation, search operation, or tool call
 
 The environment then transitions:
-
 $$
 S_{t+1} = T(S_t,A_t)
 $$
-
 The agent receives new observations:
-
 $$
 O_{t+1} = \mathcal{O}(S_{t+1})
 $$
-
 and continues.
 
 Thus:
@@ -221,7 +211,6 @@ repository
 The model cannot simply receive the entire repository on every iteration.
 
 The harness must construct an appropriate context:
-
 $$
 C_t =
 C_{\text{system}}
@@ -236,7 +225,6 @@ C_{\text{tools}}
 +
 C_{\text{feedback}}
 $$
-
 The problem is not merely fitting within the context window.
 
 It is **selecting the information that matters**.
@@ -510,12 +498,10 @@ observation
 This is sometimes called an **agent trajectory**.
 
 A trajectory can be represented as:
-
 $$
 \tau =
 (O_0,A_0,O_1,A_1,\ldots,O_n)
 $$
-
 The quality of the final result depends not only on the quality of individual actions, but on the quality of the entire trajectory.
 
 ---
@@ -659,18 +645,14 @@ If verification reliably detects the error and the agent can repair it, the syst
 This changes the engineering objective.
 
 We no longer need:
-
 $$
 P(\text{correct first attempt}) \approx 1
 $$
-
 Instead, we want:
-
 $$
 P(\text{eventual success} \mid
 \text{feedback + iteration})
 $$
-
 to be high.
 
 This is a profound shift.
@@ -706,7 +688,6 @@ Sending the complete history back to the model indefinitely is inefficient and e
 The harness therefore needs **context compaction**.
 
 Conceptually:
-
 $$
 H_{0:t}
 \rightarrow
@@ -714,7 +695,6 @@ H_{0:t}
 \rightarrow
 S_t
 $$
-
 where $H_{0:t}$ is the complete interaction history and $S_t$ is a compact representation of the state that matters.
 
 A useful summary might preserve:
@@ -825,13 +805,11 @@ change infrastructure
 Therefore, tool access must be governed by permissions.
 
 A useful abstraction is:
-
 $$
 \text{AllowedActions}
 =
 f(\text{user},\text{task},\text{environment},\text{risk})
 $$
-
 For example:
 
 ```text
@@ -894,7 +872,6 @@ It does not initially know:
 It discovers these through actions.
 
 This resembles a partially observable decision process:
-
 $$
 \text{Hidden repository state}
 \rightarrow
@@ -904,7 +881,6 @@ $$
 \rightarrow
 \text{new observations}
 $$
-
 This explains why repository exploration is not overhead.
 
 **Exploration is part of reasoning.**
@@ -977,7 +953,6 @@ Another useful perspective is to view coding as a search problem.
 Suppose the repository state is $S_0$.
 
 The agent explores a sequence:
-
 $$
 S_0
 \xrightarrow{A_0}
@@ -987,9 +962,7 @@ S_2
 \rightarrow \cdots
 \rightarrow S_n
 $$
-
 The objective is to find a state satisfying a set of constraints:
-
 $$
 S_n \models
 {
@@ -1001,7 +974,6 @@ S_n \models
 \text{style}
 }
 $$
-
 The agent is effectively searching through a large space of possible modifications.
 
 Verification prunes that search space.
@@ -1101,7 +1073,6 @@ Putting everything together gives a more realistic architecture:
 ```
 
 The architecture reveals that a coding agent is really a composition of several engineering systems:
-
 $$
 \boxed{
 \text{Coding Agent}
@@ -1119,7 +1090,6 @@ $$
 \text{Control}
 }
 $$
-
 The model is essential, but it is only one component.
 
 ---
@@ -1131,7 +1101,6 @@ It is tempting to rank coding agents by model benchmark scores alone.
 That is inadequate.
 
 A more complete model is:
-
 $$
 Q_{\text{agent}}
 =
@@ -1145,7 +1114,6 @@ Q_{\text{recovery}},
 Q_{\text{permissions}}
 )
 $$
-
 Consider two systems using the same model.
 
 #### System A

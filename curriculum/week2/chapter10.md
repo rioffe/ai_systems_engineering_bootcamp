@@ -85,17 +85,13 @@ Transactional database
 ```
 
 If these components are independent, the availability of the complete synchronous path is approximately:
-
 $$
 A_{system} = \prod_i A_i
 $$
-
 Ten components with 99.9% availability each produce:
-
 $$
 0.999^{10} \approx 99.0\%
 $$
-
 The application has approximately **1% downtime**, despite every individual dependency having an apparently excellent 99.9% availability.
 
 And this calculation is optimistic.
@@ -210,11 +206,9 @@ Now multiply this by thousands of concurrent requests.
 The result can be resource exhaustion.
 
 Timeouts establish a fundamental invariant:
-
 $$
 T_{operation} \leq T_{max}
 $$
-
 But timeout design is hierarchical.
 
 Suppose:
@@ -295,17 +289,13 @@ Retries should therefore have:
 * total time budgets
 
 A common strategy is:
-
 $$
 t_n = \min(t_{max}, t_0 2^n)
 $$
-
 with randomized jitter:
-
 $$
 t_n' = U(0,t_n)
 $$
-
 where $U$ is a uniform random variable.
 
 For example:
@@ -725,19 +715,15 @@ Two classic metrics are:
 #### RTO — Recovery Time Objective
 
 How quickly must the system be restored?
-
 $$
 RTO = \text{maximum acceptable recovery time}
 $$
-
 #### RPO — Recovery Point Objective
 
 How much data loss is acceptable?
-
 $$
 RPO = \text{maximum acceptable data-loss window}
 $$
-
 For example:
 
 ```text
@@ -971,7 +957,6 @@ Everything looks healthy.
 But if none of the five documents answer the question, retrieval has failed semantically.
 
 Therefore RAG systems require metrics beyond infrastructure health:
-
 $$
 \text{Recall@k}
 $$
@@ -979,13 +964,10 @@ $$
 $$
 \text{Precision@k}
 $$
-
 and ultimately:
-
 $$
 \text{Answer Accuracy}
 $$
-
 The reliability chain is:
 
 ```text

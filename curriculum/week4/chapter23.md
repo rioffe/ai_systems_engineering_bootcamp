@@ -43,19 +43,16 @@ An important distinction is between **AI-enhanced** and **AI-native** products.
 An AI-enhanced product takes an existing workflow and improves one component.
 
 For example:
-
 $$
 \text{Traditional CRM}
 +
 \text{AI Email Generation}
 $$
-
 The underlying product remains fundamentally the same.
 
 An AI-native product starts with a workflow that becomes possible because intelligence is cheap.
 
 For example:
-
 $$
 \text{Goal}
 \rightarrow
@@ -69,9 +66,7 @@ $$
 \rightarrow
 \text{AI adapts}
 $$
-
 The distinction can be expressed as:
-
 $$
 \text{AI-enhanced}
 =
@@ -79,15 +74,12 @@ $$
 +
 \text{AI Feature}
 $$
-
 whereas:
-
 $$
 \text{AI-native}
 =
 f(\text{Product},\text{Cheap Intelligence})
 $$
-
 The second formulation changes the architecture of the product itself.
 
 ---
@@ -110,15 +102,12 @@ Someone still had to:
 AI lowers the cost of these cognitive operations.
 
 We can think of the old model as:
-
 $$
 \text{Human Intelligence}
 +
 \text{Software Automation}
 $$
-
 The emerging model is:
-
 $$
 \text{Human Intent}
 +
@@ -126,13 +115,11 @@ $$
 +
 \text{Software Automation}
 $$
-
 The human increasingly specifies **what outcome is desired**, while the system determines much of **how to achieve it**.
 
 This changes the fundamental abstraction of software.
 
 Traditional software:
-
 $$
 \text{User}
 \rightarrow
@@ -140,9 +127,7 @@ $$
 \rightarrow
 \text{Application}
 $$
-
 AI-native software:
-
 $$
 \text{User}
 \rightarrow
@@ -152,7 +137,6 @@ $$
 \rightarrow
 \text{Outcome}
 $$
-
 The application becomes less like a collection of commands and more like an **intelligent environment**.
 
 ---
@@ -185,7 +169,6 @@ the user can express:
 > "Show me the customers whose support volume increased significantly this quarter and export the results."
 
 The system must then transform language into an executable representation:
-
 $$
 x_{\text{language}}
 \rightarrow
@@ -197,13 +180,11 @@ x_{\text{language}}
 \rightarrow
 \text{Result}
 $$
-
 This does not mean graphical interfaces disappear.
 
 Rather, natural language becomes another control plane.
 
 The best AI-native products will likely combine:
-
 $$
 \text{Language}
 +
@@ -213,7 +194,6 @@ $$
 +
 \text{Direct Manipulation}
 $$
-
 The interface becomes multimodal and adaptive rather than purely graphical.
 
 ---
@@ -229,7 +209,6 @@ AI makes **per-user workflow generation** economically feasible.
 Consider a research application.
 
 For one user:
-
 $$
 \text{Question}
 \rightarrow
@@ -239,9 +218,7 @@ $$
 \rightarrow
 \text{Evidence Table}
 $$
-
 For another:
-
 $$
 \text{Question}
 \rightarrow
@@ -253,7 +230,6 @@ $$
 \rightarrow
 \text{Executive Summary}
 $$
-
 The product dynamically constructs the workflow according to:
 
 * user intent,
@@ -265,7 +241,6 @@ The product dynamically constructs the workflow according to:
 * organizational policies.
 
 The architecture therefore becomes:
-
 $$
 \text{User}
 \rightarrow
@@ -277,7 +252,6 @@ $$
 \rightarrow
 \text{Feedback}
 $$
-
 This is fundamentally different from hard-coding every possible workflow.
 
 ---
@@ -304,7 +278,6 @@ Traditional software could automate individual steps.
 AI can coordinate the entire process.
 
 A research agent might implement:
-
 $$
 Q
 \rightarrow
@@ -326,7 +299,6 @@ $$
 \rightarrow
 \text{Synthesis}
 $$
-
 The critical product insight is that the unit of value is no longer a search result.
 
 It is the **completed research task**.
@@ -350,13 +322,10 @@ The system moves from **information retrieval** toward **knowledge work executio
 Another major consequence of cheap intelligence is that software can continuously interpret streams of information.
 
 Traditional monitoring systems rely heavily on explicit rules:
-
 $$
 \text{If } x > threshold,\text{ alert}
 $$
-
 AI allows more semantic monitoring:
-
 $$
 \text{Events}
 \rightarrow
@@ -368,7 +337,6 @@ $$
 \rightarrow
 \text{Action}
 $$
-
 For example, an AI system could continuously monitor:
 
 * production systems,
@@ -404,13 +372,11 @@ The user adapts to the application.
 AI makes it possible for the application to adapt to the user.
 
 Consider:
-
 $$
 S_{t+1}
 =
 f(S_t,U_t,C_t,F_t)
 $$
-
 where:
 
 * $S_t$ = current system state,
@@ -421,17 +387,13 @@ where:
 The system can learn which information is important, which actions are common, and which workflows are preferred.
 
 The interface can therefore become:
-
 $$
 UI_t = f(\text{User},\text{Task},\text{Context},\text{History})
 $$
-
 rather than:
-
 $$
 UI = \text{Fixed}
 $$
-
 This creates the possibility of software that behaves less like a static tool and more like a persistent collaborator.
 
 ---
@@ -441,7 +403,6 @@ This creates the possibility of software that behaves less like a static tool an
 Programming itself is being transformed by the declining cost of machine intelligence.
 
 Traditional programming:
-
 $$
 \text{Human}
 \rightarrow
@@ -451,9 +412,7 @@ $$
 \rightarrow
 \text{Software}
 $$
-
 AI-assisted programming introduces:
-
 $$
 \text{Intent}
 \rightarrow
@@ -465,7 +424,6 @@ $$
 \rightarrow
 \text{Verification}
 $$
-
 This does not eliminate programming.
 
 Instead, it changes the abstraction level.
@@ -486,7 +444,6 @@ The key limitation is verification.
 Generated software remains probabilistic at the point of generation.
 
 Therefore:
-
 $$
 \text{Natural-Language Programming}
 =
@@ -494,7 +451,6 @@ $$
 +
 \text{Verification}
 $$
-
 A mature AI-native development environment will need:
 
 * code generation,
@@ -531,7 +487,6 @@ We communicate through:
 Traditional software often forces these signals through narrow interfaces.
 
 Modern foundation models allow a much richer interaction model:
-
 $$
 X =
 {
@@ -543,11 +498,9 @@ X =
 \text{sensor data}
 }
 $$
-
 The system can reason over combinations of these modalities.
 
 For example:
-
 $$
 \text{Photo}
 +
@@ -557,9 +510,7 @@ $$
 \rightarrow
 \text{Diagnosis/Action}
 $$
-
 or:
-
 $$
 \text{Screen Recording}
 +
@@ -569,7 +520,6 @@ $$
 \rightarrow
 \text{Automated Assistance}
 $$
-
 This enables products that would be difficult to construct using traditional interface paradigms.
 
 ---
@@ -589,30 +539,24 @@ This distinction separates incremental product improvement from genuinely new pr
 Consider a simple model.
 
 Before AI, suppose a task requires:
-
 $$
 H \times C_h
 $$
-
 where:
 
 * $H$ = human cognitive effort,
 * $C_h$ = cost of human intelligence.
 
 If:
-
 $$
 H C_h > V
 $$
-
 where $V$ is the economic value of the task, the product is not viable.
 
 Now suppose AI reduces the effective cognitive cost to $C_{AI}$:
-
 $$
 H C_{AI} \ll H C_h
 $$
-
 A previously uneconomic product may become viable.
 
 This is the core economic mechanism behind AI-native products.
@@ -634,21 +578,17 @@ AI changes the economics.
 If intelligence can dynamically generate the workflow, the cost of supporting a niche workflow can approach the cost of specifying the desired behavior.
 
 Conceptually:
-
 $$
 C_{\text{workflow}}
 \rightarrow
 C_{\text{inference}}
 $$
-
 rather than:
-
 $$
 C_{\text{workflow}}
 \rightarrow
 C_{\text{engineering team}}
 $$
-
 This creates an enormous design space.
 
 Products can potentially support highly specialized workflows without requiring a dedicated engineering team for each one.
@@ -680,7 +620,6 @@ The user says:
 > "Prepare the Q3 customer-risk report."
 
 The system determines that this requires:
-
 $$
 \text{Customer Data}
 +
@@ -692,21 +631,17 @@ $$
 +
 \text{Historical Context}
 $$
-
 and constructs the workflow automatically.
 
 The product becomes an **intent execution engine**.
 
 This is a fundamental shift:
-
 $$
 \text{Application Model}
 =
 \text{Objects + Commands}
 $$
-
 toward:
-
 $$
 \text{AI-Native Model}
 =
@@ -722,21 +657,17 @@ An AI-native product typically requires several layers.
 #### Intent layer
 
 Determines what the user wants.
-
 $$
 I = f(U,C)
 $$
-
 where $U$ is the user request and $C$ is context.
 
 #### Planning layer
 
 Determines how to accomplish the goal.
-
 $$
 P = f(I,S,T)
 $$
-
 where:
 
 * $I$ = intent,
@@ -746,31 +677,25 @@ where:
 #### Execution layer
 
 Carries out the plan.
-
 $$
 A_t = \pi(S_t)
 $$
-
 where $\pi$ is the policy selecting actions.
 
 #### Verification layer
 
 Determines whether the result is acceptable.
-
 $$
 V = f(\text{Output},\text{Goal},\text{Evidence})
 $$
-
 #### Adaptation layer
 
 Uses feedback to modify future behavior.
-
 $$
 S_{t+1}
 =
 f(S_t,A_t,F_t)
 $$
-
 The resulting system is closer to an **adaptive control system** than a conventional CRUD application.
 
 ---
@@ -778,7 +703,6 @@ The resulting system is closer to an **adaptive control system** than a conventi
 ## 14. The Product Becomes a Closed Loop
 
 Traditional software often has an open-loop interaction:
-
 $$
 \text{Input}
 \rightarrow
@@ -786,9 +710,7 @@ $$
 \rightarrow
 \text{Output}
 $$
-
 AI-native software increasingly becomes closed-loop:
-
 $$
 \text{Goal}
 \rightarrow
@@ -804,19 +726,15 @@ $$
 \rightarrow
 \text{Action}
 $$
-
 This resembles a control system.
 
 The product continuously observes its environment and attempts to move the system toward a desired state.
 
 For example:
-
 $$
 \text{Goal: Reduce Cloud Cost}
 $$
-
 might produce:
-
 $$
 \text{Observe}
 \rightarrow
@@ -832,7 +750,6 @@ $$
 \rightarrow
 \text{Adapt}
 $$
-
 This is qualitatively different from a dashboard that merely displays cloud costs.
 
 The system is no longer just **informing the user**.
@@ -850,7 +767,6 @@ This raises an important question:
 The distinction is useful but not absolute.
 
 A conventional application:
-
 $$
 \text{User}
 \rightarrow
@@ -858,9 +774,7 @@ $$
 \rightarrow
 \text{Result}
 $$
-
 An AI assistant:
-
 $$
 \text{User}
 \rightarrow
@@ -868,9 +782,7 @@ $$
 \rightarrow
 \text{Response}
 $$
-
 An agentic product:
-
 $$
 \text{User}
 \rightarrow
@@ -884,7 +796,6 @@ $$
 \rightarrow
 \text{Adaptation}
 $$
-
 The critical property is not whether the product is called an "agent."
 
 It is whether the system has:
@@ -910,7 +821,6 @@ Consider systems such as:
 #### Personal research organizations
 
 Instead of a search engine, every individual could have a persistent research system that continuously investigates topics of interest.
-
 $$
 \text{User Interests}
 \rightarrow
@@ -920,17 +830,14 @@ $$
 \rightarrow
 \text{Alerts}
 $$
-
 #### Personal software
 
 Instead of configuring a generic application, the user describes what they need and the system constructs the workflow.
-
 $$
 \text{Intent}
 \rightarrow
 \text{Generated Application}
 $$
-
 #### Autonomous business operations
 
 A small company could have AI systems continuously monitoring:
@@ -940,7 +847,6 @@ A small company could have AI systems continuously monitoring:
 * finances,
 * inventory,
 * operations.
-
 $$
 \text{Business State}
 \rightarrow
@@ -948,11 +854,9 @@ $$
 \rightarrow
 \text{Actions}
 $$
-
 #### Persistent personal assistants
 
 Rather than responding only when queried, the system maintains context and proactively identifies useful actions.
-
 $$
 \text{Persistent Context}
 +
@@ -962,7 +866,6 @@ $$
 \rightarrow
 \text{Proactive Assistance}
 $$
-
 These are not simply existing software with an LLM attached.
 
 Their economics depend fundamentally on cheap intelligence.
@@ -1002,7 +905,6 @@ AI can continuously monitor and escalate exceptions.
 AI can translate high-level intent into executable code.
 
 This gives us a powerful product heuristic:
-
 $$
 \boxed{
 \begin{gathered}
@@ -1078,7 +980,6 @@ Explain the complete workflow and user outcome.
 ## 19. A Useful Design Framework
 
 For each proposed product, construct the following model:
-
 $$
 \boxed{
 \text{Intent}
@@ -1096,7 +997,6 @@ $$
 \text{Adaptation}
 }
 $$
-
 Then ask what part of this loop was previously too expensive.
 
 That question often reveals the genuinely novel product.
@@ -1104,7 +1004,6 @@ That question often reveals the genuinely novel product.
 For example:
 
 #### Before AI
-
 $$
 \text{Research Question}
 \rightarrow
@@ -1114,9 +1013,7 @@ $$
 \rightarrow
 \text{Human Synthesis}
 $$
-
 #### With AI
-
 $$
 \text{Research Question}
 \rightarrow
@@ -1128,7 +1025,6 @@ $$
 \rightarrow
 \text{Verification}
 $$
-
 The important innovation is not merely "AI summarizes documents."
 
 It is that **a complete research workflow can operate at machine scale**.
@@ -1148,7 +1044,6 @@ AI-native software asks:
 > **What outcome should the system achieve?**
 
 Traditional engineering:
-
 $$
 \text{Requirements}
 \rightarrow
@@ -1156,9 +1051,7 @@ $$
 \rightarrow
 \text{Code}
 $$
-
 AI-native engineering increasingly becomes:
-
 $$
 \text{Goal}
 \rightarrow
@@ -1170,7 +1063,6 @@ $$
 \rightarrow
 \text{Verification}
 $$
-
 This does not make conventional software engineering obsolete.
 
 Quite the opposite.
@@ -1223,13 +1115,11 @@ The difference is that these engineering mechanisms now support systems that can
 
 10. **The most interesting AI products may be products that could not economically exist before AI.**
     The strongest product question is therefore not "How do we improve an existing application?" but:
-
 $$
     \boxed{
     \text{What can we build now that was previously impossible?}
     }
 $$
-
 11. **AI-native products are increasingly closed-loop systems.**
     They observe, reason, act, verify, and adapt rather than simply accept an input and return an output.
 

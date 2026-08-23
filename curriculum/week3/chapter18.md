@@ -141,47 +141,36 @@ Agentic development operationalizes this process.
 The development loop can be formalized as a feedback-control process.
 
 Let:
-
 $$
 S_t
 $$
-
 represent the current state of the software system.
 
 The specification defines the desired set of states:
-
 $$
 \mathcal{G}
 =
 {S \mid S \models SPEC}
 $$
-
 The agent chooses an action:
-
 $$
 A_t \sim \pi_\theta(A \mid C_t,S_t)
 $$
-
 which changes the system:
-
 $$
 S_{t+1}=T(S_t,A_t)
 $$
-
 A verifier evaluates the new state:
-
 $$
 V(S_{t+1},SPEC)
 \rightarrow
 F_{t+1}
 $$
-
 where $F$ is feedback.
 
 The agent then uses that feedback to select the next action.
 
 Thus:
-
 $$
 S_t
 \rightarrow
@@ -195,15 +184,12 @@ F
 \rightarrow
 A_{t+1}
 $$
-
 The development process becomes a **closed-loop optimization problem**.
 
 The goal is to reach:
-
 $$
 S_n \in \mathcal{G}
 $$
-
 with sufficiently high confidence.
 
 ---
@@ -419,11 +405,9 @@ Intent / architecture / risk
 ```
 
 This leads to an important distinction:
-
 $$
 \text{Test} \subset \text{Verification}
 $$
-
 Testing is one verification mechanism, not the entire verification system.
 
 ---
@@ -691,13 +675,11 @@ Failure occurs only when filters are combined.
 helps diagnose it.
 
 The distinction is:
-
 $$
 \text{Detection}
 \neq
 \text{Diagnosis}
 $$
-
 A strong development loop tries to maximize both.
 
 The ideal feedback is:
@@ -720,31 +702,22 @@ This dramatically reduces the search space for the agent's next action.
 Agentic development can also be viewed as search.
 
 Suppose the current implementation is:
-
 $$
 I_0
 $$
-
 The agent generates a modification:
-
 $$
 I_1 = A(I_0)
 $$
-
 The verifier produces:
-
 $$
 V(I_1)=F_1
 $$
-
 The agent then generates:
-
 $$
 I_2=A(I_1,F_1)
 $$
-
 and continues:
-
 $$
 I_0
 \rightarrow I_1
@@ -752,13 +725,10 @@ I_0
 \rightarrow \cdots
 \rightarrow I_n
 $$
-
 until:
-
 $$
 V(I_n)=PASS
 $$
-
 The verifier is therefore a **search oracle** that eliminates incorrect candidate states.
 
 This is one reason automated verification is so powerful.
@@ -810,7 +780,6 @@ This does not mean model capability is irrelevant.
 It means model capability is only one term in the overall system.
 
 A useful abstraction is:
-
 $$
 Q_{\text{system}}
 =
@@ -823,7 +792,6 @@ Q_{\text{verifiers}},
 Q_{\text{recovery}}
 )
 $$
-
 Improving any of these can improve the final system.
 
 ---
@@ -833,19 +801,15 @@ Improving any of these can improve the final system.
 A key variable is the number of iterations the agent can perform.
 
 Let:
-
 $$
 p
 =
 P(\text{successful iteration})
 $$
-
 If iterations were independent—which they are not in practice—the probability of at least one success after $n$ attempts would be:
-
 $$
 1-(1-p)^n
 $$
-
 The equation is only illustrative because real agent iterations are correlated.
 
 Nevertheless, it captures an important intuition:
@@ -911,7 +875,6 @@ Ambiguous requirement
 ```
 
 A useful policy is:
-
 $$
 Stop =
 Success
@@ -922,7 +885,6 @@ NoProgress
 \lor
 HumanRequired
 $$
-
 Stopping conditions are part of agent engineering, not an afterthought.
 
 ---
@@ -932,17 +894,13 @@ Stopping conditions are part of agent engineering, not an afterthought.
 The agent should ideally measure whether it is actually improving.
 
 Suppose a verifier returns a score:
-
 $$
 V_t
 $$
-
 Then:
-
 $$
 \Delta V_t = V_t - V_{t-1}
 $$
-
 can indicate progress.
 
 For example:
@@ -1018,13 +976,11 @@ unchanged tests
 ```
 
 A stronger acceptance criterion might be:
-
 $$
 \text{Pass}_{\text{after}}
 \supseteq
 \text{Pass}_{\text{before}}
 $$
-
 for regression-sensitive systems.
 
 This creates an important principle:
@@ -1096,13 +1052,11 @@ score
 This can work well, but introduces another probabilistic component.
 
 Therefore:
-
 $$
 \text{LLM Judge}
 \neq
 \text{ground truth}
 $$
-
 It should ideally be combined with:
 
 * deterministic tests
@@ -1122,11 +1076,9 @@ The general principle remains:
 Performance requirements require different feedback.
 
 Suppose the specification says:
-
 $$
 P95 < 500ms
 $$
-
 Functional tests might all pass while the system violates this requirement.
 
 A benchmark provides a different signal:
@@ -1223,7 +1175,6 @@ System behavior
 ```
 
 The general pattern is unchanged:
-
 $$
 \text{Implementation}
 \rightarrow
@@ -1233,7 +1184,6 @@ $$
 \rightarrow
 \text{Feedback}
 $$
-
 The verifier does not have to be a test runner.
 
 It is any mechanism that produces evidence about whether the system satisfies its specification.
@@ -1675,7 +1625,6 @@ This experiment demonstrates one of the central ideas of modern AI engineering:
     A repair that fixes one failure while introducing another is not necessarily progress.
 
 12. **The quality of the development trajectory matters more than the quality of an individual completion.**
-
 $$
     \boxed{
     \text{Agent Capability}
@@ -1687,7 +1636,6 @@ $$
     \text{Iteration Quality}
     }
 $$
-
 13. **The most powerful optimization may not be a better model.**
     Better specifications, context, tools, verifiers, and recovery mechanisms can substantially improve the same model's performance.
 

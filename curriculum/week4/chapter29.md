@@ -9,7 +9,6 @@ That is the purpose of the architecture and product review.
 The exercise is deliberately constrained to a **30-minute presentation**. The constraint matters. A good architecture review is not a tour through every implementation detail. It is an argument.
 
 The presenter should be able to establish:
-
 $$
 \boxed{
 \text{Problem}
@@ -29,7 +28,6 @@ $$
 \text{Roadmap}
 }
 $$
-
 The presentation should tell a coherent story from user problem to engineering solution.
 
 ---
@@ -57,7 +55,6 @@ These are different questions.
 #### Building the right system
 
 This is primarily a product question:
-
 $$
 \text{User Problem}
 \rightarrow
@@ -65,11 +62,9 @@ $$
 \rightarrow
 \text{Product}
 $$
-
 #### Building the system correctly
 
 This is primarily an engineering question:
-
 $$
 \text{Requirements}
 \rightarrow
@@ -79,7 +74,6 @@ $$
 \rightarrow
 \text{Validation}
 $$
-
 A project can succeed at one and fail at the other.
 
 For example, an AI assistant might be technically excellent but solve a problem users do not care about.
@@ -155,33 +149,24 @@ The first describes a problem.
 Whenever possible, quantify the baseline.
 
 For example:
-
 $$
 T_{\text{manual}} = 45\text{ min}
 $$
-
 versus:
-
 $$
 T_{\text{system}} = 5\text{ min}
 $$
-
 or:
-
 $$
 E_{\text{manual}} = 12\%
 $$
-
 versus:
-
 $$
 E_{\text{system}} = 5\%
 $$
-
 The goal is to establish a measurable baseline against which the product can be evaluated.
 
 The problem statement should therefore eventually become:
-
 $$
 \text{Current State}
 \rightarrow
@@ -233,7 +218,6 @@ The latter belongs in the architecture section.
 Explicitly define what the product does **and does not do**.
 
 A useful formulation is:
-
 $$
 \text{Product Scope}
 =
@@ -242,7 +226,6 @@ $$
 \text{Non-goals}
 \}
 $$
-
 For example:
 
 #### Does
@@ -275,7 +258,6 @@ This is where the engineering depth becomes visible.
 Start with the simplest possible architecture diagram.
 
 For example:
-
 $$
 \text{User}
 \rightarrow
@@ -292,7 +274,6 @@ $$
 \rightarrow
 \text{Response}
 $$
-
 Then expand the architecture only as necessary.
 
 A good architecture diagram should make the major flows obvious.
@@ -347,7 +328,6 @@ This transforms the architecture diagram from a collection of boxes into an engi
 Every meaningful architectural decision has trade-offs.
 
 Examples:
-
 $$
 \text{Latency}
 \leftrightarrow
@@ -377,7 +357,6 @@ $$
 \leftrightarrow
 \text{Flexibility}
 $$
-
 A mature architecture review explicitly identifies these trade-offs.
 
 For example:
@@ -423,7 +402,6 @@ If deterministic code can solve a problem more reliably, quickly, cheaply, and p
 Explain the AI system as a set of responsibilities.
 
 For example:
-
 $$
 \text{AI System}
 =
@@ -436,7 +414,6 @@ $$
 \text{Verification}
 }
 $$
-
 For each component, explain its role.
 
 #### Model
@@ -472,45 +449,35 @@ This decomposition makes it possible to distinguish **model intelligence** from 
 A strong review should explicitly justify the AI boundary.
 
 For every AI component, ask:
-
 $$
 \text{Why AI?}
 $$
-
 For every deterministic component, ask:
-
 $$
 \text{Why not AI?}
 $$
-
 This leads to an important architectural principle:
 
 > **Use probabilistic components where flexibility is valuable and deterministic components where correctness is required.**
 
 For example:
-
 $$
 \text{LLM}
 \rightarrow
 \text{interpret intent}
 $$
-
 followed by:
-
 $$
 \text{deterministic code}
 \rightarrow
 \text{validate parameters}
 $$
-
 followed by:
-
 $$
 \text{tool}
 \rightarrow
 \text{perform action}
 $$
-
 This hybrid architecture is often more reliable than allowing the model to control the entire system.
 
 ---
@@ -538,7 +505,6 @@ Show:
 For AI systems, include both component-level and end-to-end evaluation.
 
 For example:
-
 $$
 \text{Retrieval}
 \rightarrow
@@ -548,7 +514,6 @@ $$
 \rightarrow
 \text{Task Outcome}
 $$
-
 Evaluate each stage independently.
 
 Then evaluate the complete workflow.
@@ -590,7 +555,6 @@ Answer:
 AI systems introduce variable inference costs that traditional software often does not have.
 
 Estimate:
-
 $$
 C_{\text{request}}
 =
@@ -604,15 +568,11 @@ C_{\text{tools}}
 +
 C_{\text{infrastructure}}
 $$
-
 Then estimate:
-
 $$
 C_{\text{user/month}}
 $$
-
 and at scale:
-
 $$
 C_{\text{monthly}}
 =
@@ -622,7 +582,6 @@ C_{\text{request}}
 +
 C_{\text{fixed}}
 $$
-
 This allows the team to reason about the economics of deployment.
 
 ---
@@ -634,7 +593,6 @@ Cost should not be treated as a finance issue that appears after architecture is
 Architecture determines economics.
 
 For example:
-
 $$
 \text{More retrieval}
 \rightarrow
@@ -642,9 +600,7 @@ $$
 \rightarrow
 \text{higher model cost}
 $$
-
 and:
-
 $$
 \text{More agent steps}
 \rightarrow
@@ -652,9 +608,7 @@ $$
 \rightarrow
 \text{higher latency and cost}
 $$
-
 Similarly:
-
 $$
 \text{larger model}
 \rightarrow
@@ -662,21 +616,16 @@ $$
 \rightarrow
 \text{higher cost}
 $$
-
 The engineering objective is therefore not simply:
-
 $$
 \max \text{quality}
 $$
-
 but something closer to:
-
 $$
 \max
 \frac{\text{quality}\times\text{user value}}
 {\text{cost}\times\text{latency}\times\text{risk}}
 $$
-
 This is why model selection, context engineering, retrieval, caching, routing, and workflow design are economic decisions as well as technical decisions.
 
 ---
@@ -715,7 +664,6 @@ For each major failure, explain:
 7. what mitigation exists
 
 A useful representation is:
-
 $$
 \text{Failure}
 \rightarrow
@@ -735,23 +683,18 @@ A mature system is not defined by having no failures.
 It is defined by having **controlled failure modes**.
 
 For example:
-
 $$
 \text{Unknown answer}
 \rightarrow
 \text{Abstain}
 $$
-
 is better than:
-
 $$
 \text{Unknown answer}
 \rightarrow
 \text{Hallucinate}
 $$
-
 Similarly:
-
 $$
 \text{Tool unavailable}
 \rightarrow
@@ -759,17 +702,13 @@ $$
 \rightarrow
 \text{Fallback}
 $$
-
 is better than:
-
 $$
 \text{Tool unavailable}
 \rightarrow
 \text{Agent crashes}
 $$
-
 The architecture should therefore specify not only the normal path:
-
 $$
 \text{Input}
 \rightarrow
@@ -777,9 +716,7 @@ $$
 \rightarrow
 \text{Output}
 $$
-
 but also:
-
 $$
 \text{Failure}
 \rightarrow
@@ -803,14 +740,12 @@ Do not turn the roadmap into a random feature wishlist.
 Prioritize improvements according to expected value.
 
 A useful framework is:
-
 $$
 \text{Priority}
 \approx
 \frac{\text{Expected Impact}\times\text{Confidence}}
 {\text{Cost}\times\text{Risk}}
 $$
-
 Potential roadmap categories include:
 
 #### Product
@@ -862,7 +797,6 @@ If users rarely use a particular feature, building more features may be the wron
 ## 19. The Roadmap Should Follow the Bottleneck
 
 One of the most useful engineering principles is:
-
 $$
 \boxed{
 \text{Next Investment}
@@ -870,7 +804,6 @@ $$
 \text{Largest Constraint on User Value}
 }
 $$
-
 Suppose:
 
 * model accuracy = 95%
@@ -989,7 +922,6 @@ That is much stronger than presenting eight disconnected sections.
 At the end of Chapter 29, the team should be able to step back from the implementation and evaluate the entire system.
 
 The review should expose whether there is alignment between:
-
 $$
 \text{Problem}
 \leftrightarrow
@@ -1003,7 +935,6 @@ $$
 \leftrightarrow
 \text{Economics}
 $$
-
 Misalignment is a powerful diagnostic signal.
 
 For example:
@@ -1049,7 +980,6 @@ Evaluating it teaches you how to measure it.
 The architecture review teaches you how to reason about it as a complete system.
 
 That requires moving between several abstraction levels:
-
 $$
 \text{User}
 \rightarrow
@@ -1063,9 +993,7 @@ $$
 \rightarrow
 \text{Infrastructure}
 $$
-
 and then moving back upward:
-
 $$
 \text{Infrastructure}
 \rightarrow
@@ -1075,7 +1003,6 @@ $$
 \rightarrow
 \text{User Value}
 $$
-
 Strong AI engineers can operate at both levels.
 
 They can discuss token budgets and inference latency, but they can also explain why those details matter to the user and the business.
@@ -1105,7 +1032,6 @@ They can discuss token budgets and inference latency, but they can also explain 
 10. **The roadmap should follow evidence.** The next investment should target the largest constraint on user value rather than the most interesting technical feature.
 
 11. **The eight sections should form one causal story:**
-
 $$
 \boxed{
 \text{Problem}
@@ -1125,7 +1051,6 @@ $$
 \text{Next Step}
 }
 $$
-
 12. **The ultimate skill being tested is engineering judgment.** You should be able to explain not only what you built, but why you built it, whether it works, what it costs, where it fails, and what should happen next.
 
 The project is no longer merely an implementation.

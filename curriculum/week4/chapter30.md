@@ -137,7 +137,6 @@ Engineer B still needs strong programming skills.
 In fact, the opposite may be true.
 
 But the engineer's scarce resource has shifted from **typing speed** toward:
-
 $$
 \boxed{
 \text{Specification}
@@ -177,17 +176,13 @@ Deployment requirements
 ```
 
 The specification becomes an executable contract between:
-
 $$
 \text{Human Intent}
 $$
-
 and:
-
 $$
 \text{Machine Implementation}
 $$
-
 This makes specification quality increasingly important.
 
 An ambiguous specification produces an ambiguous implementation.
@@ -216,11 +211,9 @@ It needs to be given the appropriate:
 * constraints
 
 This creates a new engineering discipline:
-
 $$
 \boxed{\text{Context Engineering}}
 $$
-
 The problem is no longer simply:
 
 > "What code should I write?"
@@ -236,7 +229,6 @@ That is a fundamentally different question.
 ## 5. Context Is an Engineering Resource
 
 The agent's effective context can be thought of as:
-
 $$
 C =
 C_{\text{requirements}}
@@ -251,7 +243,6 @@ C_{\text{tools}}
 +
 C_{\text{constraints}}
 $$
-
 But more context is not necessarily better.
 
 Too little context causes missing information.
@@ -266,19 +257,15 @@ Too much context causes:
 * context-window pressure
 
 Therefore the objective is not:
-
 $$
 \max |C|
 $$
-
 but something closer to:
-
 $$
 \max
 \frac{\text{relevant information}}
 {\text{context size}}
 $$
-
 The engineer increasingly becomes responsible for constructing this information environment.
 
 ---
@@ -318,15 +305,12 @@ Instead, the engineer manages a **closed-loop production process**.
 ## 7. The Agentic Software Loop
 
 A mature coding agent should not simply:
-
 $$
 \text{Prompt}
 \rightarrow
 \text{Code}
 $$
-
 It should operate more like:
-
 $$
 \text{Goal}
 \rightarrow
@@ -344,7 +328,6 @@ $$
 \rightarrow
 \text{Verify}
 $$
-
 This is fundamentally different from autocomplete.
 
 The system is performing an engineering workflow.
@@ -368,17 +351,13 @@ The marginal cost of generating more code approaches zero.
 That changes the optimization problem.
 
 The scarce resource is no longer necessarily:
-
 $$
 \text{Code Production}
 $$
-
 It becomes:
-
 $$
 \boxed{\text{Confidence in Correctness}}
 $$
-
 Therefore automated verification becomes central.
 
 ---
@@ -426,7 +405,6 @@ This is one of the deepest changes.
 Instead of manually inspecting every generated artifact, the engineer increasingly designs systems capable of evaluating those artifacts.
 
 For example:
-
 $$
 \text{Agent}
 \rightarrow
@@ -440,7 +418,6 @@ $$
 \rightarrow
 \text{Repair}
 $$
-
 The engineer specifies what correctness means.
 
 The machine performs much of the mechanical checking.
@@ -545,13 +522,11 @@ More agents introduce:
 * harder debugging
 
 Therefore:
-
 $$
 \text{More Agents}
 \not\Rightarrow
 \text{Better System}
 $$
-
 The right question is:
 
 > Does decomposition improve the quality, reliability, or economics of the overall workflow?
@@ -844,11 +819,9 @@ Build:
 * evaluation
 
 The objective is:
-
 $$
 \boxed{\text{Make it work}}
 $$
-
 At the end of Week 1, you have a functional AI application.
 
 ---
@@ -874,11 +847,9 @@ Add:
 * production deployment
 
 The objective becomes:
-
 $$
 \boxed{\text{Make it reliable}}
 $$
-
 The system stops being a prototype.
 
 It becomes an engineered application.
@@ -900,7 +871,6 @@ Give the agent:
 * deployment environment
 
 Teach the agent to operate through:
-
 $$
 \text{Specification}
 \rightarrow
@@ -914,13 +884,10 @@ $$
 \rightarrow
 \text{Repair}
 $$
-
 The objective becomes:
-
 $$
 \boxed{\text{Make the system capable of building itself}}
 $$
-
 Not literally without human supervision.
 
 Rather, make the development process increasingly **agentic and closed-loop**.
@@ -947,15 +914,12 @@ Determine:
 Then deploy it.
 
 The objective becomes:
-
 $$
 \boxed{\text{Make it valuable}}
 $$
-
 At the end of the month, you have something fundamentally different from thirty tutorials.
 
 You have:
-
 $$
 \boxed{
 \begin{aligned}
@@ -1102,7 +1066,6 @@ The purpose is not learning product-specific commands.
 The purpose is comparing development workflows.
 
 Study the invariant process:
-
 $$
 \boxed{
 \text{Context}
@@ -1118,7 +1081,6 @@ $$
 \text{Iteration}
 }
 $$
-
 Different agents will implement this loop differently.
 
 The transferable skill is understanding the loop itself.
@@ -1148,13 +1110,10 @@ These can be valuable in the appropriate context.
 But they are not the highest-leverage activities for this curriculum.
 
 The objective is not:
-
 $$
 \max \text{number of technologies learned}
 $$
-
 It is:
-
 $$
 \max \text{engineering capability}
 $$
@@ -1198,7 +1157,6 @@ Compare it with:
 Now we have an engineering result.
 
 The difference is:
-
 $$
 \boxed{
 \text{Claim}
@@ -1208,7 +1166,6 @@ $$
 \text{Evidence}
 }
 $$
-
 This principle applies to everything:
 
 * accuracy
@@ -1246,7 +1203,6 @@ Important topics include:
 This creates a second abstraction boundary.
 
 You can reason about:
-
 $$
 \text{Application}
 \rightarrow
@@ -1256,7 +1212,6 @@ $$
 \rightarrow
 \text{Hardware}
 $$
-
 rather than treating model inference as an opaque API call.
 
 ---
@@ -1295,7 +1250,6 @@ This is a much deeper question than prompt engineering.
 The final track connects engineering to product economics.
 
 A useful conceptual model is:
-
 $$
 \text{AI Value}
 =
@@ -1311,7 +1265,6 @@ $$
 \text{Failure Rate}
 }
 $$
-
 This is not a literal universal business equation.
 
 It is a useful way to reason about trade-offs.
@@ -1340,29 +1293,21 @@ AI engineering therefore increasingly requires **economic reasoning**.
 The entire month can ultimately be compressed into four questions.
 
 #### 1. Can you build an AI application?
-
 $$
 \boxed{\text{AI Application Engineering}}
 $$
-
 #### 2. Can you make it reliable?
-
 $$
 \boxed{\text{Software Engineering}}
 $$
-
 #### 3. Can you make AI build software?
-
 $$
 \boxed{\text{Agentic Engineering}}
 $$
-
 #### 4. Can you decide what should be built?
-
 $$
 \boxed{\text{Product and Systems Judgment}}
 $$
-
 The fourth is the highest-leverage capability.
 
 ---
@@ -1466,13 +1411,11 @@ Because generated artifacts must be distinguished from correct artifacts.
 Because someone must decide whether the system is actually solving the right problem.
 
 This suggests a general principle:
-
 $$
 \boxed{
 \text{When production becomes cheap, selection becomes valuable.}
 }
 $$
-
 The bottleneck moves from creation toward judgment.
 
 ---
@@ -1482,7 +1425,6 @@ The bottleneck moves from creation toward judgment.
 There is an even deeper interpretation.
 
 An agentic software-development system can be viewed as a control loop:
-
 $$
 \text{Goal}
 \rightarrow
@@ -1496,7 +1438,6 @@ $$
 \rightarrow
 \text{Correction}
 $$
-
 The human defines the objective and constraints.
 
 The agent performs actions.
@@ -1520,7 +1461,6 @@ This leads to the central idea of Chapter 30:
 > **The AI engineer increasingly designs the system that produces software.**
 
 That system includes:
-
 $$
 H =
 (
@@ -1534,7 +1474,6 @@ E,
 P
 )
 $$
-
 where, conceptually:
 
 * $\Delta$: control-flow dynamics
@@ -1585,13 +1524,11 @@ The human remains responsible for deciding whether that implementation should ex
 ## 36. The Ultimate Shift: From Implementation to Intent
 
 The deepest transformation is therefore:
-
 $$
 \text{Implementation}
 \rightarrow
 \text{Intent}
 $$
-
 Traditional programming emphasizes:
 
 > How do I implement this?
@@ -1631,7 +1568,6 @@ A more useful definition is:
 > **An AI engineer designs and operates computational systems in which models, software, tools, data, agents, and verification mechanisms cooperate to produce reliable outcomes.**
 
 That requires three forms of competence:
-
 $$
 \boxed{
 \text{Technical Depth}
@@ -1641,13 +1577,10 @@ $$
 \text{Product Judgment}
 }
 $$
-
 And increasingly, a fourth:
-
 $$
 \boxed{\text{Ability to Engineer the AI That Does the Engineering}}
 $$
-
 That is the direction of travel.
 
 ---
@@ -1665,7 +1598,6 @@ That is the direction of travel.
 5. **Verification becomes more important as generation becomes cheaper.** When software can be generated rapidly, confidence in correctness becomes the bottleneck.
 
 6. **Agents should operate in closed loops.**
-
 $$
 \boxed{
 \text{Plan}
@@ -1679,7 +1611,6 @@ $$
 \text{Repair}
 }
 $$
-
 7. **More agents do not automatically produce better systems.** Agent decomposition must be justified by improvements in quality, reliability, latency, or economics.
 
 8. **Traditional software engineering remains essential.** AI increases the importance of systems knowledge because engineers must evaluate and constrain increasingly capable automated systems.
@@ -1687,7 +1618,6 @@ $$
 9. **The best curriculum follows one evolving project.** Build it, harden it, make agents build it, and then make it valuable.
 
 10. **AI engineering has four increasingly high-level capabilities:**
-
 $$
 \boxed{
 \text{Build AI Applications}
@@ -1699,7 +1629,6 @@ $$
 \text{Shape What Gets Built}
 }
 $$
-
 11. **Evidence beats claims.** Every important assertion about quality, reliability, cost, or value should be supported by measurements.
 
 12. **The future engineer designs feedback loops.** Agents produce artifacts; automated systems verify them; evaluation provides feedback; humans provide judgment and direction.

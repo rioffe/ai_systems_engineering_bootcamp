@@ -31,13 +31,11 @@ An agent that can:
 has progressively greater **real-world agency**.
 
 The central engineering problem becomes:
-
 $$
 \boxed{
 \text{How do we give an agent enough authority to accomplish its task without giving it enough authority to cause unacceptable damage?}
 }
 $$
-
 This is fundamentally a security and systems-engineering problem.
 
 ---
@@ -150,11 +148,9 @@ It changes the set of actions the agent can cause in the world.
 ## 2. Capability Is an Authority Boundary
 
 A useful model is:
-
 $$
 A = {a_1,a_2,\ldots,a_n}
 $$
-
 where (A) is the set of actions available to the agent.
 
 For example:
@@ -172,13 +168,11 @@ A =
 ```
 
 The security architecture should ensure:
-
 $$
 A_{\text{agent}}
 \subseteq
 A_{\text{required}}
 $$
-
 The agent should receive only the capabilities necessary for its task.
 
 This is the classical security principle of:
@@ -262,13 +256,11 @@ Production database
 The policy engine rejects unauthorized actions regardless of what the model requests.
 
 This creates:
-
 $$
 \text{Model intent}
 \neq
 \text{Authorization}
 $$
-
 The model can propose.
 
 The security boundary decides.
@@ -455,13 +447,10 @@ git checkout
 may be acceptable in one context but destructive in another.
 
 Therefore authorization may need to consider:
-
 $$
 (\text{tool},\text{arguments},\text{target})
 $$
-
 rather than merely:
-
 $$
 \text{tool}
 $$
@@ -876,11 +865,9 @@ This creates a risk-based autonomy model.
 ## 20. Risk-Based Permissions
 
 A useful framework is:
-
 $$
 R = P(\text{failure}) \times I(\text{failure})
 $$
-
 where:
 
 * $P$ = probability of failure
@@ -951,7 +938,6 @@ infrastructure destruction
 ```
 
 The principle is:
-
 $$
 \text{Higher capability}
 \Rightarrow
@@ -1069,11 +1055,9 @@ This converts broad infrastructure authority into a constrained API.
 ## 25. Tool Calls Should Be Policy Decisions
 
 A useful abstraction is:
-
 $$
 \text{Allow}(a,c,e,p)
 $$
-
 where:
 
 * $a$ = action
@@ -1429,15 +1413,12 @@ These are not merely requirements.
 They are **security invariants**.
 
 The system must maintain:
-
 $$
 I(s_t)=true
 $$
-
 for every reachable system state $s_t$.
 
 A particularly strong safety property is:
-
 $$
 \forall a \in A_{\text{agent}},
 \quad
@@ -1450,7 +1431,6 @@ $$
 ## 35. Safety Through Capability Restriction
 
 Suppose the agent has capability set:
-
 $$
 C =
 {
@@ -1461,7 +1441,6 @@ C =
 \text{deploy}
 }
 $$
-
 We can progressively remove dangerous capabilities:
 
 ```text
@@ -1744,13 +1723,11 @@ approval
 ```
 
 In other words:
-
 $$
 \boxed{
 \text{Intelligence} \neq \text{Authority}
 }
 $$
-
 An intelligent agent does not need unrestricted power.
 
 And a powerful tool does not need to trust the model.

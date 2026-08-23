@@ -3,7 +3,6 @@
 ## From Prototype to Production System
 
 Days 24–26 established the basic product-development loop:
-
 $$
 \text{Specify}
 \rightarrow
@@ -13,7 +12,6 @@ $$
 \rightarrow
 \text{Revise}
 $$
-
 Chapter 27 addresses the next problem:
 
 > **Can this system be trusted to operate as a real service?**
@@ -42,7 +40,6 @@ A production system asks:
 > **"Can we make this work reliably, safely, repeatedly, and economically?"**
 
 The transformation is:
-
 $$
 \boxed{
 \text{Prototype}
@@ -73,7 +70,6 @@ Production introduces:
 The system must therefore be designed around failure.
 
 A useful model is:
-
 $$
 \boxed{
 \text{Production Readiness}
@@ -89,7 +85,6 @@ $$
 \text{Operability}
 }
 $$
-
 A feature that works once is not necessarily production-ready.
 
 ---
@@ -99,7 +94,6 @@ A feature that works once is not necessarily production-ready.
 Before hardening, explicitly define what the production system contains.
 
 For example:
-
 $$
 \boxed{
 \text{Internet}
@@ -118,7 +112,6 @@ $$
 \end{cases}
 }
 $$
-
 Every boundary introduces:
 
 * authentication,
@@ -151,7 +144,6 @@ Typical mechanisms include:
 For an MVP becoming a real service, choose the simplest mechanism appropriate for the risk profile.
 
 The architecture becomes:
-
 $$
 \text{Request}
 \rightarrow
@@ -159,7 +151,6 @@ $$
 \rightarrow
 \text{Authorized Application}
 $$
-
 Never rely on:
 
 > "The URL is difficult to guess."
@@ -179,12 +170,10 @@ You also need:
 This is authorization.
 
 A useful model is:
-
 $$
 Permissions =
 f(User, Resource, Action)
 $$
-
 For example:
 
 | User   | Resource               | Action |
@@ -199,7 +188,6 @@ For AI systems, authorization is particularly important because the model may ha
 The agent must not be allowed to bypass application permissions.
 
 A critical rule is:
-
 $$
 \boxed{
 \text{LLM Intent}
@@ -207,7 +195,6 @@ $$
 \text{Authorization}
 }
 $$
-
 The model can request an action.
 
 The application must decide whether that action is permitted.
@@ -229,7 +216,6 @@ The model might decide:
 That does not mean the operation should execute.
 
 The actual path should be:
-
 $$
 \text{LLM}
 \rightarrow
@@ -239,7 +225,6 @@ $$
 \rightarrow
 \text{Tool Execution}
 $$
-
 The security boundary must exist in deterministic application code.
 
 Never use an instruction such as:
@@ -267,7 +252,6 @@ Validate:
 * content types.
 
 Conceptually:
-
 $$
 Input
 \rightarrow
@@ -275,15 +259,12 @@ Validation
 \rightarrow
 Application
 $$
-
 rather than:
-
 $$
 Input
 \rightarrow
 LLM
 $$
-
 For AI applications, validation should occur both before and after model interaction.
 
 ---
@@ -291,11 +272,9 @@ For AI applications, validation should occur both before and after model interac
 ## 7. Prompt Injection
 
 AI systems introduce a new attack surface:
-
 $$
 \boxed{\text{Prompt Injection}}
 $$
-
 An attacker may provide content that attempts to manipulate the model's behavior.
 
 For example, a retrieved document could contain instructions such as:
@@ -305,11 +284,9 @@ For example, a retrieved document could contain instructions such as:
 The model should treat retrieved content as **data**, not automatically as trusted instructions.
 
 A useful conceptual hierarchy is:
-
 $$
 \text{System Policy} > \text{Application Constraints} > \text{User Request} > \text{Retrieved Content}
 $$
-
 The exact implementation varies, but the principle is consistent:
 
 > **Untrusted data must not automatically gain control authority.**
@@ -328,7 +305,6 @@ Suppose an agent has access to:
 * external APIs.
 
 An attacker might attempt:
-
 $$
 \text{Malicious Input}
 \rightarrow
@@ -338,17 +314,14 @@ $$
 \rightarrow
 \text{External Transmission}
 $$
-
 Therefore, tool permissions should be narrowly scoped.
 
 A strong security architecture follows:
-
 $$
 \boxed{
 \text{Least Privilege}
 }
 $$
-
 Give each component only the permissions it requires.
 
 ---
@@ -376,7 +349,6 @@ Never embed these in:
 Use environment-level or dedicated secret-management mechanisms.
 
 The basic principle is:
-
 $$
 \boxed{
 \text{Credentials}
@@ -384,9 +356,7 @@ $$
 \text{Application Source}
 }
 $$
-
 And especially:
-
 $$
 \boxed{
 \text{Secrets}
@@ -394,7 +364,6 @@ $$
 \text{LLM Context}
 }
 $$
-
 unless explicitly required and carefully controlled.
 
 ---
@@ -402,19 +371,15 @@ unless explicitly required and carefully controlled.
 ## 10. Error Handling
 
 Prototype code often assumes:
-
 $$
 \text{Everything Works}
 $$
-
 Production code assumes:
-
 $$
 \boxed{
 \text{Everything Eventually Fails}
 }
 $$
-
 Potential failures include:
 
 * model timeout,
@@ -439,39 +404,30 @@ Create a failure taxonomy.
 For example:
 
 #### User errors
-
 $$
 E_U
 $$
-
 Invalid input, unauthorized request, unsupported operation.
 
 #### Dependency errors
-
 $$
 E_D
 $$
-
 LLM provider unavailable, database outage, API timeout.
 
 #### AI errors
-
 $$
 E_A
 $$
-
 Malformed output, hallucination, failed tool selection.
 
 #### System errors
-
 $$
 E_S
 $$
-
 Internal bugs, resource exhaustion, corrupted state.
 
 Then define:
-
 $$
 E_i
 \rightarrow
@@ -481,7 +437,6 @@ Recovery
 \rightarrow
 User Response
 $$
-
 This makes failure behavior deliberate rather than accidental.
 
 ---
@@ -508,18 +463,15 @@ Use:
 * idempotency where appropriate.
 
 Conceptually:
-
 $$
 RetryDelay_n =
 \boxed{
 \min(D_{\max},\, D_0\, 2^n)
 }
 $$
-
 with randomized jitter.
 
 The principle is:
-
 $$
 \boxed{
 \text{Retry}
@@ -535,7 +487,6 @@ $$
 Every external operation needs a timeout.
 
 Without timeouts:
-
 $$
 \text{Request}
 \rightarrow
@@ -545,11 +496,9 @@ $$
 \rightarrow
 \text{Waiting}
 $$
-
 can consume resources indefinitely.
 
 Instead:
-
 $$
 \boxed{
 \text{Request}
@@ -562,7 +511,6 @@ $$
 \end{cases}
 }
 $$
-
 Timeouts should exist at multiple levels:
 
 * HTTP,
@@ -579,7 +527,6 @@ Timeouts should exist at multiple levels:
 Production systems need resource protection.
 
 Without rate limits:
-
 $$
 \text{Users}
 \rightarrow
@@ -587,7 +534,6 @@ $$
 \rightarrow
 \text{Resource Exhaustion}
 $$
-
 Rate limiting can be defined per:
 
 * user,
@@ -597,13 +543,11 @@ Rate limiting can be defined per:
 * endpoint.
 
 A simple conceptual model is:
-
 $$
 \boxed{
 R_u \leq R_{\max}
 }
 $$
-
 where $R_u$ is the request rate for user $u$.
 
 For AI systems, rate limiting also protects against unexpected inference costs.
@@ -615,7 +559,6 @@ For AI systems, rate limiting also protects against unexpected inference costs.
 AI introduces a variable cost per request.
 
 A rough request-cost model is:
-
 $$
 C =
 C_{\text{input}}
@@ -628,16 +571,13 @@ C_{\text{retrieval}}
 +
 C_{\text{compute}}
 $$
-
 For an agentic workflow:
-
 $$
 C_{\text{request}}
 =
 \sum_{i=1}^{N}
 C_i
 $$
-
 where $N$ may vary depending on how many steps the agent takes.
 
 This makes uncontrolled agent loops particularly dangerous.
@@ -656,17 +596,14 @@ A production system should therefore enforce:
 ## 16. The Cost Guardrail
 
 Define:
-
 $$
 \boxed{
 C_{\max}
 }
 $$
-
 for an individual request.
 
 Then enforce:
-
 $$
 \boxed{
 C_{\text{request}}
@@ -674,11 +611,9 @@ C_{\text{request}}
 C_{\max}
 }
 $$
-
 The agent should stop or degrade gracefully when the budget is exhausted.
 
 For example:
-
 $$
 \boxed{
 \text{Agent}
@@ -691,7 +626,6 @@ $$
 \end{cases}
 }
 $$
-
 This is an important difference between a prototype and a production agent.
 
 ---
@@ -701,7 +635,6 @@ This is an important difference between a prototype and a production agent.
 You cannot operate what you cannot observe.
 
 Production observability typically consists of:
-
 $$
 \boxed{
 \text{Logs}
@@ -711,7 +644,6 @@ $$
 \text{Traces}
 }
 $$
-
 Each answers a different question.
 
 #### Logs
@@ -747,7 +679,6 @@ Record appropriate metadata such as:
 * cost.
 
 For an agent request:
-
 $$
 Trace =
 {
@@ -758,7 +689,6 @@ LLM_2,
 Verifier
 }
 $$
-
 The trace should make the execution path visible.
 
 This is essential when debugging an agentic system.
@@ -772,15 +702,12 @@ Logs should answer:
 > What happened during this request?
 
 A useful request identifier is:
-
 $$
 request\_id
 $$
-
 Every downstream operation should carry it.
 
 Then:
-
 $$
 request\_id
 \rightarrow
@@ -792,7 +719,6 @@ Tools,
 Database
 }
 $$
-
 You can reconstruct the request lifecycle.
 
 However, never blindly log everything.
@@ -814,7 +740,6 @@ Observability itself must respect privacy.
 Useful production metrics include:
 
 #### Reliability
-
 $$
 \boxed{
 \text{ErrorRate}
@@ -822,15 +747,11 @@ $$
 \frac{\text{Failed Requests}}{\text{Total Requests}}
 }
 $$
-
 #### Latency
-
 $$
 T_{p50}, T_{p95}, T_{p99}
 $$
-
 #### Availability
-
 $$
 \boxed{
 \text{Availability}
@@ -838,7 +759,6 @@ $$
 \frac{\text{Successful Service Time}}{\text{Total Service Time}}
 }
 $$
-
 #### AI quality
 
 * groundedness,
@@ -864,7 +784,6 @@ Offline evaluation is necessary but insufficient.
 The production system should continue to collect evidence about quality.
 
 A useful hierarchy is:
-
 $$
 \boxed{
 \text{Offline Evals}
@@ -874,7 +793,6 @@ $$
 \text{Production Monitoring}
 }
 $$
-
 Production evaluation might use:
 
 * sampled interactions,
@@ -893,7 +811,6 @@ The objective is to detect degradation after deployment.
 AI behavior depends on more than code.
 
 It may depend on:
-
 $$
 V =
 (
@@ -905,13 +822,11 @@ V =
 \text{Configuration}
 )
 $$
-
 A change to any of these can change system behavior.
 
 Therefore evaluation results should be associated with versions.
 
 For example:
-
 $$
 Eval(
 Model_v,
@@ -920,7 +835,6 @@ Retriever_v,
 Tools_v
 )
 $$
-
 This enables meaningful comparisons.
 
 Otherwise:
@@ -936,21 +850,16 @@ becomes difficult to diagnose.
 Every meaningful change should trigger evaluation.
 
 Suppose the baseline is:
-
 $$
 Accuracy_0 = 0.87
 $$
-
 After a prompt change:
-
 $$
 Accuracy_1 = 0.81
 $$
-
 The change should be rejected.
 
 A regression framework can enforce:
-
 $$
 Metric_{new}
 \geq
@@ -958,7 +867,6 @@ Metric_{baseline}
 -
 \epsilon
 $$
-
 for an acceptable tolerance $\epsilon$.
 
 This is particularly important because AI systems can regress in unexpected ways.
@@ -972,7 +880,6 @@ Improving one capability may damage another.
 Deployment turns the application into a service.
 
 A basic production path is:
-
 $$
 \text{Repository}
 \rightarrow
@@ -984,7 +891,6 @@ $$
 \rightarrow
 \text{Monitor}
 $$
-
 The build should ideally be reproducible.
 
 The deployment system should define:
@@ -1001,7 +907,6 @@ The deployment system should define:
 ## 25. CI/CD
 
 A minimal continuous integration pipeline might be:
-
 $$
 \text{Commit}
 \rightarrow
@@ -1015,9 +920,7 @@ $$
 \rightarrow
 \text{Build}
 $$
-
 Then deployment:
-
 $$
 \text{Build}
 \rightarrow
@@ -1027,7 +930,6 @@ $$
 \rightarrow
 \text{Production}
 $$
-
 Not every project needs an elaborate deployment system.
 
 But every production system needs a reproducible path from source code to deployed artifact.
@@ -1055,13 +957,11 @@ A process may be alive while:
 * required configuration is missing.
 
 Therefore:
-
 $$
 Liveness
 \neq
 Readiness
 $$
-
 This distinction becomes important for automated deployment and recovery.
 
 ---
@@ -1073,35 +973,28 @@ Production AI systems should not assume every dependency is always available.
 Suppose the primary model fails.
 
 Possible fallback:
-
 $$
 Model_A
 \rightarrow
 Model_B
 $$
-
 Suppose retrieval fails.
 
 Possible behavior:
-
 $$
 RetrievalFailure
 \rightarrow
 \text{Explicit Uncertainty}
 $$
-
 rather than:
-
 $$
 RetrievalFailure
 \rightarrow
 \text{Hallucinated Answer}
 $$
-
 A robust system knows when it cannot safely complete the task.
 
 The ideal failure mode is often:
-
 $$
 \boxed{
 \text{Fail Clearly} > \text{Fail Silently}
@@ -1115,7 +1008,6 @@ $$
 Security cannot be added as a final checkbox.
 
 The relevant attack surface includes:
-
 $$
 {
 \text{UI},
@@ -1128,11 +1020,9 @@ $$
 \text{Infrastructure}
 }
 $$
-
 Threat modeling should therefore consider the complete data flow.
 
 For example:
-
 $$
 \text{Untrusted User}
 \rightarrow
@@ -1140,15 +1030,12 @@ $$
 \rightarrow
 \text{Privileged Tool}
 $$
-
 is fundamentally different from:
-
 $$
 \text{User}
 \rightarrow
 \text{Read-only Search}
 $$
-
 The level of autonomy determines the required security controls.
 
 ---
@@ -1158,21 +1045,17 @@ The level of autonomy determines the required security controls.
 Every component should receive only the permissions it needs.
 
 For an agent:
-
 $$
 Permissions_{agent}
 =
 {Tool_1, Tool_2, Tool_3}
 $$
-
 rather than:
-
 $$
 Permissions_{agent}
 =
 \text{Entire Infrastructure}
 $$
-
 For a database:
 
 * read-only credentials where possible,
@@ -1186,7 +1069,6 @@ For users:
 * role-based permissions.
 
 The principle is:
-
 $$
 \boxed{
 \text{Minimum Necessary Authority}
@@ -1200,7 +1082,6 @@ $$
 If multiple users or organizations use the system, data boundaries become critical.
 
 A request should carry tenant context:
-
 $$
 Request
 \rightarrow
@@ -1208,27 +1089,22 @@ Tenant
 \rightarrow
 Authorized Resources
 $$
-
 Retrieval must preserve the same boundary.
 
 A dangerous architecture is:
-
 $$
 \text{Global Vector Search}
 \rightarrow
 \text{Filter Later}
 $$
-
 because sensitive information may already have entered model context.
 
 Prefer:
-
 $$
 \boxed{
 \text{Authorization-aware Retrieval}
 }
 $$
-
 where access constraints are enforced before data reaches the model.
 
 ---
@@ -1297,7 +1173,6 @@ For example:
 Similarly:
 
 #### Database outage
-
 $$
 Detect
 \rightarrow
@@ -1309,7 +1184,6 @@ Recover
 \rightarrow
 Verify
 $$
-
 The goal is to reduce dependence on tribal knowledge.
 
 ---
@@ -1386,7 +1260,6 @@ Before deployment, verify:
 Once the system is real, define service objectives.
 
 For example:
-
 $$
 SLO_{\text{availability}} = 99.9%
 $$
@@ -1400,13 +1273,10 @@ $$
 SLO_{\text{error}}:
 ErrorRate < 1%
 $$
-
 For AI systems, also define quality objectives:
-
 $$
 SLO_{\text{groundedness}} > 95%
 $$
-
 where appropriate.
 
 The exact values depend on the product.
@@ -1420,7 +1290,6 @@ The important principle is:
 ## 35. The Production Feedback Loop
 
 Production deployment creates a new loop:
-
 $$
 \boxed{
 \text{Users}
@@ -1436,19 +1305,15 @@ $$
 \text{Deployment}
 }
 $$
-
 This connects directly to Chapter 26.
 
 User testing was:
-
 $$
 \text{Observe}
 \rightarrow
 \text{Revise}
 $$
-
 Production adds continuous operational evidence:
-
 $$
 \text{Observe}
 \rightarrow
@@ -1466,39 +1331,29 @@ $$
 At this point, the architecture can be understood as a feedback control system.
 
 The desired state is:
-
 $$
 S^*
 $$
-
 The actual system state is:
-
 $$
 S_t
 $$
-
 Telemetry measures:
-
 $$
 O_t = h(S_t)
 $$
-
 The engineering process uses these observations to select changes:
-
 $$
 \Delta S_t
 =
 g(O_t,S^*)
 $$
-
 Then:
-
 $$
 S_{t+1}
 =
 S_t+\Delta S_t
 $$
-
 In plain language:
 
 > Measure the system, compare it to the desired behavior, and continuously correct deviations.
@@ -1607,7 +1462,6 @@ Add limits where appropriate.
 ### Step 8 — Deployment
 
 Create:
-
 $$
 \text{Commit}
 \rightarrow
@@ -1617,7 +1471,6 @@ $$
 \rightarrow
 \text{Deploy}
 $$
-
 ### Step 9 — Documentation
 
 Write:
@@ -1691,7 +1544,6 @@ Explicit SLOs and acceptance thresholds.
 1. **A prototype demonstrates that a system can work; production engineering demonstrates that it can be trusted to keep working.**
 
 2. **Production readiness is multidimensional:**
-
 $$
    \boxed{
    Reliability
@@ -1705,20 +1557,17 @@ $$
    Operability
    }
 $$
-
 3. **Authentication answers "Who are you?" Authorization answers "What are you allowed to do?"**
 
 4. **Never use the LLM as the primary security boundary.**
    Authorization must be enforced by deterministic application infrastructure.
 
 5. **AI agents require explicit permission boundaries.**
-
 $$
    \text{Agent Authority}
    \leq
    \text{Explicitly Authorized Capability}
 $$
-
 6. **Assume external dependencies will fail.**
    Use timeouts, bounded retries, graceful degradation, and explicit failure states.
 
@@ -1732,7 +1581,6 @@ $$
    AI quality can regress as models, prompts, retrieval systems, tools, and data change.
 
 10. **Version the entire AI configuration surface.**
-
 $$
     V =
     (
@@ -1744,9 +1592,7 @@ $$
     Configuration
     )
 $$
-
 11. **Observability is not optional.**
-
 $$
     \boxed{
     \text{Logs}
@@ -1756,7 +1602,6 @@ $$
     \text{Traces}
     }
 $$
-
 12. **Security must be designed around the entire AI data flow**, including prompt injection, data exfiltration, tool abuse, secrets, and tenant isolation.
 
 13. **Documentation and runbooks are production infrastructure.**
@@ -1766,7 +1611,6 @@ $$
     Availability, latency, error rates, cost, and AI quality should have measurable targets.
 
 15. **Production is a feedback-control problem.**
-
 $$
     \boxed{
     \text{Observe}
@@ -1778,9 +1622,7 @@ $$
     \text{Correct}
     }
 $$
-
 16. **The central transition is:**
-
 $$
     \boxed{
     \text{Prototype}
@@ -1796,6 +1638,5 @@ $$
     \text{Production}
     }
 $$
-
 Chapter 27 therefore completes the transition from **AI application development to AI systems engineering**. The objective is no longer merely to build something intelligent. It is to build a system whose behavior can be **controlled, measured, secured, evaluated, recovered, and operated at scale**.
 

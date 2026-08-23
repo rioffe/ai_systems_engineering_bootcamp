@@ -22,13 +22,10 @@ It may be **10x more expensive, 10x slower, and 10x harder to scale**.
 This makes performance and economics architectural concerns.
 
 The fundamental optimization problem is:
-
 $$
 \text{maximize useful work}
 $$
-
 subject to:
-
 $$
 \text{latency} \leq L_{max}
 $$
@@ -40,13 +37,10 @@ $$
 $$
 \text{quality} \geq Q_{min}
 $$
-
 and:
-
 $$
 \text{throughput} \geq R_{required}
 $$
-
 The engineer therefore needs to reason simultaneously about:
 
 ```text
@@ -78,14 +72,12 @@ It is to make them **economically efficient systems that satisfy explicit perfor
 ## 1. Start With a Cost Model
 
 The simplest useful model is:
-
 $$
 C =
 N_{requests}
 \times
 (T_{input}P_{input}+T_{output}P_{output})
 $$
-
 where:
 
 * $N_{requests}$ = number of model requests
@@ -123,7 +115,6 @@ That gives us:
 For agentic systems, the equation should be expanded.
 
 If a task requires $k$ model calls:
-
 $$
 C_{task}
 =
@@ -132,7 +123,6 @@ C_{task}
 +
 T_{output,i}P_{output,i})
 $$
-
 Now agent architecture directly affects economics.
 
 A workflow:
@@ -180,19 +170,15 @@ Important metrics include:
 #### Latency
 
 How long does one request take?
-
 $$
 L = t_{response} - t_{request}
 $$
-
 #### Throughput
 
 How much work can the system perform per unit time?
-
 $$
 Throughput = \frac{requests}{second}
 $$
-
 #### Concurrency
 
 How many requests are being processed simultaneously?
@@ -225,7 +211,6 @@ The engineering task is to find the appropriate point in this multidimensional s
 ## 3. Latency
 
 For an AI application, end-to-end latency can be decomposed as:
-
 $$
 L_{total}
 =
@@ -239,15 +224,12 @@ L_{tools}
 +
 L_{postprocess}
 $$
-
 For an agentic system:
-
 $$
 L_{total}
 =
 \sum_{i=1}^{k} L_i
 $$
-
 for sequential operations.
 
 Consider:
@@ -267,11 +249,9 @@ Response
 ```
 
 Total latency is approximately:
-
 $$
 4.6s
 $$
-
 If the operations can safely execute in parallel:
 
 ```text
@@ -306,11 +286,9 @@ Most users experience a fast system.
 But 1% of requests take 12 seconds.
 
 At 100,000 requests per day, that is:
-
 $$
 1,000
 $$
-
 very slow requests every day.
 
 AI systems often have significant tail latency because of:
@@ -357,11 +335,9 @@ Request
 Users often perceive the system as responsive once generation begins.
 
 Therefore:
-
 $$
 TTFT = t_{first\ token} - t_{request}
 $$
-
 can matter independently of total generation time.
 
 A system might have:
@@ -395,12 +371,10 @@ Throughput asks:
 > How many requests can the system handle?
 
 For an inference system:
-
 $$
 Throughput =
 \frac{tokens}{second}
 $$
-
 may be more useful than requests/second.
 
 A model generating:
@@ -465,17 +439,13 @@ But batching introduces a tradeoff.
 A request may wait for other requests to arrive.
 
 Therefore:
-
 $$
 Latency \uparrow
 $$
-
 while:
-
 $$
 Throughput \uparrow
 $$
-
 The optimal batch size depends on workload characteristics.
 
 For interactive applications, small dynamic batches may provide a better tradeoff.
@@ -583,11 +553,9 @@ Even if both generate 500 output tokens, Request B requires substantially more i
 Long contexts also consume more memory.
 
 For transformer inference, attention historically had approximately quadratic scaling in sequence length:
-
 $$
 O(n^2)
 $$
-
 although modern architectures and inference optimizations can significantly change practical behavior.
 
 The key engineering principle remains:
@@ -646,25 +614,18 @@ If quality remains acceptable, the cost reduction can be substantial.
 But compression is not automatically beneficial.
 
 You must evaluate:
-
 $$
 Quality_{compressed}
 $$
-
 against:
-
 $$
 Quality_{full}
 $$
-
 The optimization objective is:
-
 $$
 \min Cost
 $$
-
 subject to:
-
 $$
 Quality \geq Q_{min}
 $$
@@ -696,19 +657,15 @@ cache lookup
 ```
 
 The effective model workload becomes:
-
 $$
 N_{LLM} = N_{requests}(1-H)
 $$
-
 where $H$ is cache hit rate.
 
 At:
-
 $$
 H=0.30
 $$
-
 the model workload falls by 30%.
 
 Caching can apply to:
@@ -867,7 +824,6 @@ But "simple" and "complex" are not enough.
 Routing should ideally optimize a utility function.
 
 For example:
-
 $$
 U_i
 =
@@ -875,7 +831,6 @@ U_i
 - \beta L_i
 - \gamma C_i
 $$
-
 where:
 
 * $Q_i$ = expected quality
@@ -883,19 +838,14 @@ where:
 * $C_i$ = expected cost
 
 The router chooses:
-
 $$
 i^* = \arg\max_i U_i
 $$
-
 subject to hard constraints such as:
-
 $$
 Q_i \geq Q_{min}
 $$
-
 and:
-
 $$
 L_i \leq L_{max}
 $$
@@ -1002,19 +952,15 @@ Suppose:
 * 20% require Model B
 
 Then expected cost is:
-
 $$
 E[C]
 =
 0.8C_A + 0.2(C_A+C_B)
 $$
-
 or:
-
 $$
 E[C] = C_A + 0.2C_B
 $$
-
 assuming Model A runs first on every request.
 
 If $C_A$ is very small, this can be substantially cheaper than sending everything directly to Model B.
@@ -1051,14 +997,12 @@ Reducing precision generally reduces:
 For example, a parameter represented using 16 bits requires half the raw parameter storage of a 32-bit representation.
 
 A rough relationship is:
-
 $$
 Memory \approx
 N_{parameters}
 \times
 \frac{bits}{8}
 $$
-
 before accounting for additional runtime memory such as:
 
 * KV cache
@@ -1248,21 +1192,17 @@ Question ----+-- Search B --+-- LLM
 ```
 
 the total latency becomes approximately:
-
 $$
 L =
 \max(L_A,L_B,L_C)
 +
 L_{LLM}
 $$
-
 rather than:
-
 $$
 L =
 L_A+L_B+L_C+L_{LLM}
 $$
-
 This can provide dramatic improvements.
 
 The key question is:
@@ -1350,7 +1290,6 @@ model
 Suppose the cost of one model call is $C$.
 
 Then approximately:
-
 $$
 C_A=C
 $$
@@ -1362,7 +1301,6 @@ $$
 $$
 C_C=4C
 $$
-
 before accounting for different token volumes.
 
 The additional calls may improve quality.
@@ -1370,21 +1308,17 @@ The additional calls may improve quality.
 But every call should have an engineering justification.
 
 A useful metric is:
-
 $$
 Value\ per\ dollar
 =
 \frac{Task\ Quality}{Inference\ Cost}
 $$
-
 Another is:
-
 $$
 Value\ per\ second
 =
 \frac{Task\ Quality}{Latency}
 $$
-
 The optimal architecture depends on the application.
 
 ---
@@ -1406,21 +1340,17 @@ Success rate = 98%
 ```
 
 The cost per successful task is approximately:
-
 $$
 \frac{0.01}{0.80}
 =
 \$ 0.0125
 $$
-
 for A and:
-
 $$
 \frac{0.05}{0.98}
 \approx
 \$ 0.051
 $$
-
 for B.
 
 Model A is still substantially cheaper per successful task.
@@ -1430,17 +1360,13 @@ But suppose failed requests trigger retries.
 If Model A requires expensive fallback processing, its economics can change dramatically.
 
 Therefore measure:
-
 $$
 Cost_{successful\ task}
 $$
-
 rather than only:
-
 $$
 Cost_{request}
 $$
-
 This is especially important for routing and agent systems.
 
 ---
@@ -1450,7 +1376,6 @@ This is especially important for routing and agent systems.
 A realistic production cost model should include more than model tokens.
 
 For example:
-
 $$
 C_{total}
 =
@@ -1468,9 +1393,7 @@ C_{observability}
 +
 C_{failed\ work}
 $$
-
 For self-hosted inference:
-
 $$
 C_{inference}
 \approx
@@ -1484,15 +1407,12 @@ C_{host}
 +
 C_{operations}
 $$
-
 The economic objective becomes:
-
 $$
 C_{task}
 =
 \frac{C_{infrastructure}}{N_{successful\ tasks}}
 $$
-
 This is much closer to the real economics of an AI product.
 
 ---
@@ -1717,41 +1637,31 @@ Then construct:
 Then measure the economics.
 
 Let:
-
 $$
 p = P(\text{Model A succeeds})
 $$
-
 and let:
-
 $$
 C_A,C_B
 $$
-
 be the respective costs.
 
 The expected cost of the cascade is:
-
 $$
 E[C]=C_A+(1-p)C_B
 $$
-
 Compare this with:
-
 $$
 C_B
 $$
-
 for sending every request directly to Model B.
 
 Now include latency:
-
 $$
 E[L]
 =
 L_A+(1-p)L_B
 $$
-
 for a sequential fallback architecture.
 
 If this violates your latency SLO, consider:
@@ -1829,7 +1739,6 @@ It makes them more economically consequential.
 $$
    C=N_{requests}(T_{input}P_{input}+T_{output}P_{output})
 $$
-
 3. **Agentic systems multiply cost through repeated model calls.** Optimize the number of calls before optimizing individual calls.
 
 4. **Measure the complete performance profile.** Track latency, TTFT, throughput, concurrency, utilization, tokens, and cost—not a single benchmark number.
@@ -1875,7 +1784,6 @@ optimize inference
 17. **Performance optimization is empirical.** Measure → profile → change → benchmark → compare.
 
 18. **The ultimate objective is not "maximum speed" or "minimum cost."** It is:
-
 $$
 \boxed{
 \text{Maximum useful capability}
@@ -1885,7 +1793,6 @@ $$
 \text{quality, latency, reliability, and cost constraints}
 }
 $$
-
 The central lesson is that an AI engineer should think of every token, model invocation, GPU cycle, byte of context, and millisecond of latency as a **resource allocation decision**.
 
 The best AI system is not necessarily the one with the most powerful model.

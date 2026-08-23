@@ -848,11 +848,9 @@ Request
 ```
 
 The trace immediately explains why total latency is approximately:
-
 $$
 4 + 120 + 2100 + 400 + 1800 \approx 4424\,\text{ms}
 $$
-
 For an agentic system, tracing becomes even more important.
 
 A trace might show:
@@ -1148,7 +1146,6 @@ model
 The cost becomes a function of behavior.
 
 A useful approximation is:
-
 $$
 C_{\text{request}}
 =
@@ -1158,7 +1155,6 @@ C_{\text{request}}
 +
 C_{\text{infrastructure}}
 $$
-
 Production systems should therefore enforce:
 
 ```text
@@ -2032,11 +2028,9 @@ The model should operate inside those boundaries.
 Agentic systems can dynamically increase their own computational cost.
 
 Therefore:
-
 $$
 \text{Cost} = f(\text{model calls}, \text{tokens}, \text{tools}, \text{runtime})
 $$
-
 Cost controls belong in the execution path, not merely in the finance dashboard.
 
 ---

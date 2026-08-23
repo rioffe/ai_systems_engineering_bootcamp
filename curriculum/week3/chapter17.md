@@ -21,7 +21,6 @@ A highly capable model with poor context can perform badly.
 A somewhat weaker model with carefully constructed context can perform surprisingly well.
 
 The agent therefore has two fundamental resources:
-
 $$
 \boxed{
 \text{Reasoning capability}
@@ -29,7 +28,6 @@ $$
 \text{Relevant context}
 }
 $$
-
 Chapter 16 showed how specifications constrain the space of acceptable solutions.
 
 Chapter 17 focuses on the other side of the equation:
@@ -133,11 +131,9 @@ These are engineering decisions.
 ## 2. Context Is Not the Same as State
 
 One of the most important distinctions in agent architecture is:
-
 $$
 \boxed{\text{Context} \neq \text{State}}
 $$
-
 **State** describes what is true about the system or task.
 
 **Context** is the information currently presented to the model.
@@ -170,11 +166,9 @@ The state may persist across many context windows.
 The context is a **projection of that state** into the model's current working window.
 
 Formally:
-
 $$
 C_t = P(S_t, H_t, R_t)
 $$
-
 where:
 
 * $S_t$ = task/system state
@@ -195,13 +189,10 @@ It should preserve **state** and reconstruct **context** as needed.
 Context is a finite resource.
 
 Suppose the model has a context capacity:
-
 $$
 B
 $$
-
 and the context contains several categories:
-
 $$
 C =
 C_{\text{system}}
@@ -218,13 +209,10 @@ C_{\text{history}}
 +
 C_{\text{feedback}}
 $$
-
 Then:
-
 $$
 |C| \leq B
 $$
-
 The problem becomes an allocation problem.
 
 For example:
@@ -292,11 +280,9 @@ The agent does not need the entire repository.
 It needs the **relevant subgraph**.
 
 This suggests a useful abstraction:
-
 $$
 R_t = \operatorname{RelevantSubgraph}(G, task)
 $$
-
 where $G$ is the repository's conceptual dependency graph.
 
 The quality of context selection depends on how well the agent identifies this subgraph.
@@ -425,15 +411,12 @@ deployment constraints
 Some of these may not be lexically similar to the task.
 
 Therefore:
-
 $$
 \text{Useful Context}
 \neq
 \text{Top-k Search Results}
 $$
-
 A better model is:
-
 $$
 C_t =
 R_{\text{retrieval}}
@@ -446,7 +429,6 @@ R_{\text{constraints}}
 +
 R_{\text{verification}}
 $$
-
 The agent needs both **semantic relevance** and **structural relevance**.
 
 ---
@@ -478,23 +460,17 @@ Compressed:
 ```
 
 Compression can be represented as:
-
 $$
 C' = \operatorname{Compress}(C)
 $$
-
 with:
-
 $$
 |C'| \ll |C|
 $$
-
 while attempting to preserve task-relevant information:
-
 $$
 I(C'; task) \approx I(C; task)
 $$
-
 The problem is that compression is lossy.
 
 If the compressor removes a subtle invariant, the agent may make an incorrect change.
@@ -713,11 +689,9 @@ Authentication refactor
 Each subtask receives a narrower context.
 
 This reduces:
-
 $$
 C_{\text{task}}
 $$
-
 and often increases reasoning quality.
 
 Task decomposition is therefore a **context-management technique**, not merely a project-management technique.
@@ -814,13 +788,11 @@ Large amounts of historical material may contain outdated or contradictory infor
 The model may not know which version of a fact is authoritative.
 
 Therefore:
-
 $$
 \text{Large context capacity}
 \neq
 \text{unlimited useful context}
 $$
-
 The relevant metric is not merely context size.
 
 It is **context utility**.
@@ -830,14 +802,12 @@ It is **context utility**.
 ## 16. Context Utility
 
 We can define a conceptual utility function:
-
 $$
 U(C \mid T)
 =
 \frac{\text{task-relevant information}}
 {\text{total information}}
 $$
-
 This is intentionally simplistic, but useful.
 
 Consider:
@@ -855,14 +825,12 @@ Context B:
 Context B may produce better results despite being much smaller.
 
 Another formulation considers both information and cost:
-
 $$
 U(C)
 =
 \frac{I(C;T)}
 {\operatorname{Cost}(C)}
 $$
-
 where:
 
 * $I(C;T)$ represents useful information about task $T$
@@ -1147,7 +1115,6 @@ Continue
 ```
 
 This produces another feedback loop:
-
 $$
 C_t
 \rightarrow
@@ -1159,7 +1126,6 @@ Retrieval
 \rightarrow
 C_{t+1}
 $$
-
 The agent can therefore actively decide:
 
 > "I don't have enough information to determine how authentication is configured."
@@ -1242,27 +1208,21 @@ Given:
 * context budget $B$
 
 construct:
-
 $$
 C^* =
 \arg\max_{C:|C|\leq B}
 P(\text{successful outcome}\mid T,C,S)
 $$
-
 This is the central optimization problem of context engineering.
 
 The objective is not:
-
 $$
 \max |C|
 $$
-
 It is:
-
 $$
 \max P(\text{success}\mid C)
 $$
-
 subject to constraints on:
 
 * tokens
@@ -1629,13 +1589,11 @@ That is the core problem of context engineering.
     It can identify missing information, retrieve it through tools, refresh stale information, and compress older state.
 
 13. **Context engineering can be formulated as an optimization problem.**
-
 $$
     C^* =
     \arg\max_{C:|C|\leq B}
     P(\text{success}\mid T,C,S)
 $$
-
 14. **Context is becoming part of the program.**
     In an AI system, changing the context can change system behavior even when the model and implementation remain unchanged.
 
@@ -1647,7 +1605,6 @@ The central lesson is:
 > **A coding agent does not fail only because it cannot reason. It often fails because it was given the wrong information, too much information, stale information, or insufficient information.**
 
 And that leads to a powerful design principle for agentic software:
-
 $$
 \boxed{
 \text{Reliable Agent}
@@ -1663,7 +1620,6 @@ $$
 \text{Good Verification}
 }
 $$
-
 The model provides the reasoning capability.
 
 **Context determines what that capability can actually reason about.**

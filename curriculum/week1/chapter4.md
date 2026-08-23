@@ -31,11 +31,9 @@ AI applications require the same discipline.
 The difference is that many of their outputs are not deterministic.
 
 A traditional function might have a contract:
-
 $$
 f(2,3)=5
 $$
-
 An LLM application might instead produce several acceptable outputs:
 
 ```text
@@ -77,11 +75,9 @@ This is the beginning of **eval-driven development**.
 Consider an AI assistant that answers questions over company documentation.
 
 Version 1 achieves:
-
 $$
 \text{Accuracy} = 87\%
 $$
-
 An engineer changes:
 
 * the system prompt
@@ -95,11 +91,9 @@ The new system feels better.
 But what is the actual accuracy?
 
 Perhaps:
-
 $$
 \text{Accuracy} = 81\%
 $$
-
 The engineer has accidentally introduced a regression.
 
 Without an evaluation suite, this may go unnoticed.
@@ -280,7 +274,6 @@ Previously observed failures.
 Every important production failure should ideally become a permanent evaluation case.
 
 This creates a powerful loop:
-
 $$
 \text{Production Failure}
 \rightarrow
@@ -288,7 +281,6 @@ $$
 \rightarrow
 \text{Regression Protection}
 $$
-
 The system becomes progressively harder to break in the same way twice.
 
 ---
@@ -502,17 +494,13 @@ Pairwise evaluation is useful for comparing:
 It also avoids some difficulties associated with absolute scoring.
 
 Instead of asking for:
-
 $$
 \text{Quality}(A)=8.3
 $$
-
 we ask:
-
 $$
 A > B\ ?
 $$
-
 This is often a more stable judgment.
 
 ---
@@ -564,14 +552,12 @@ That tells the engineer where to investigate.
 Accuracy is the most intuitive metric.
 
 For classification:
-
 $$
 \text{Accuracy}
 =
 \frac{\text{correct predictions}}
 {\text{total predictions}}
 $$
-
 Suppose:
 
 ```text
@@ -580,11 +566,9 @@ Suppose:
 ```
 
 Then:
-
 $$
 \text{Accuracy} = 93\%
 $$
-
 Accuracy is excellent when classes and error costs are relatively balanced.
 
 It becomes problematic when they are not.
@@ -597,11 +581,9 @@ Suppose:
 ```
 
 A system that always predicts "normal" achieves:
-
 $$
 \text{Accuracy} = 99\%
 $$
-
 while completely failing the critical cases.
 
 This is why evaluation metrics must match the application.
@@ -611,7 +593,6 @@ This is why evaluation metrics must match the application.
 ## 11. Precision and Recall
 
 For retrieval and classification, precision and recall are often more informative.
-
 $$
 \text{Precision}
 =
@@ -623,7 +604,6 @@ $$
 =
 \frac{TP}{TP+FN}
 $$
-
 Consider a security classifier.
 
 A high-precision system generates few false alarms.
@@ -669,14 +649,12 @@ The answer may sound perfectly plausible.
 It is not grounded.
 
 A useful conceptual metric is:
-
 $$
 \text{Groundedness}
 =
 \frac{\text{supported claims}}
 {\text{total factual claims}}
 $$
-
 Groundedness is especially important because LLMs are optimized to produce plausible language, not necessarily evidentially constrained language.
 
 ---
@@ -732,17 +710,13 @@ The answer is partially correct.
 But it omits the approval requirement.
 
 Therefore:
-
 $$
 \text{Correctness} = \text{high}
 $$
-
 while:
-
 $$
 \text{Completeness} = \text{low}
 $$
-
 This distinction is important.
 
 A system can be factually accurate about every statement it makes and still fail because it omits necessary information.
@@ -760,7 +734,6 @@ Eight are supported.
 Two are not.
 
 Then a simple conceptual metric is:
-
 $$
 \text{HallucinationRate}
 =
@@ -768,7 +741,6 @@ $$
 =
 20\%
 $$
-
 The exact implementation can be more sophisticated, but the key is to make hallucination measurable rather than treating it as a vague subjective property.
 
 For high-stakes systems, it may be useful to track:
@@ -803,14 +775,12 @@ The final answer might be correct-looking even if the agent failed to perform th
 Therefore evaluate the trajectory.
 
 For example:
-
 $$
 \text{ToolSuccess}
 =
 \frac{\text{correct tool calls}}
 {\text{required tool calls}}
 $$
-
 Also measure:
 
 * correct tool selection
@@ -856,11 +826,9 @@ Total latency
 ```
 
 Useful statistics include:
-
 $$
 P50,\quad P90,\quad P95,\quad P99
 $$
-
 Average latency alone can hide severe tail behavior.
 
 For production systems, users experience the tail.
@@ -876,17 +844,13 @@ A system might improve accuracy by 1% while doubling inference cost.
 Whether that is a good trade depends on the application.
 
 Track:
-
 $$
 Cost_{\text{request}}
 $$
-
 and:
-
 $$
 Cost_{\text{successful task}}
 $$
-
 The second metric can be particularly useful.
 
 Suppose:
@@ -902,7 +866,6 @@ Success rate = 95%
 ```
 
 Then:
-
 $$
 Cost_{\text{success,A}}
 =
@@ -910,9 +873,7 @@ Cost_{\text{success,A}}
 =
 \$0.025
 $$
-
 while:
-
 $$
 Cost_{\text{success,B}}
 =
@@ -920,7 +881,6 @@ Cost_{\text{success,B}}
 \approx
 \$0.042
 $$
-
 System B is more capable but substantially more expensive per successful task.
 
 Evaluation therefore becomes a multidimensional optimization problem.
@@ -930,13 +890,11 @@ Evaluation therefore becomes a multidimensional optimization problem.
 ## 19. The Evaluation Vector
 
 Instead of thinking about application quality as one number, think of it as a vector:
-
 $$
 \mathbf{Q}
 =
 (A, P, R, G, C, H, T, L, K)
 $$
-
 where:
 
 * $A$ = accuracy
@@ -952,29 +910,21 @@ where:
 Different applications assign different importance to each dimension.
 
 A search assistant may prioritize:
-
 $$
 \text{Recall},\ \text{Precision},\ \text{Relevance}
 $$
-
 A financial assistant may prioritize:
-
 $$
 \text{Accuracy},\ \text{Groundedness},\ \text{Citation Quality}
 $$
-
 An autonomous agent may prioritize:
-
 $$
 \text{Task Success},\ \text{Tool Reliability},\ \text{Safety}
 $$
-
 A consumer chatbot may prioritize:
-
 $$
 \text{Helpfulness},\ \text{Latency},\ \text{Cost}
 $$
-
 There is no universal leaderboard.
 
 The evaluation suite must encode the actual requirements of the system.
@@ -998,11 +948,9 @@ and:
 ```
 
 Your system can achieve:
-
 $$
 \text{Accuracy} = 99\%
 $$
-
 while failing every important edge case.
 
 The dataset therefore needs to represent the **distribution of real-world difficulty**.
@@ -1031,11 +979,9 @@ The principle is:
 Aggregate metrics can hide important failures.
 
 Suppose overall accuracy is:
-
 $$
 94\%
 $$
-
 Break it down:
 
 ```text
@@ -1195,7 +1141,6 @@ The important idea is that **AI changes can become testable deployment artifacts
 ## 25. But Don't Over-Automate Evaluation
 
 There is a temptation to create one giant score:
-
 $$
 \text{Score}
 =
@@ -1209,7 +1154,6 @@ $$
 +
 0.2\,\text{Cost}
 $$
-
 This can be useful for ranking experiments.
 
 It can also be dangerous.
@@ -1231,11 +1175,9 @@ A weighted average could still look impressive.
 For high-consequence properties, use **hard constraints** rather than averages.
 
 For example:
-
 $$
 \text{HallucinationRate} < 2\%
 $$
-
 must be satisfied regardless of other improvements.
 
 This is analogous to safety constraints in traditional engineering.
@@ -1319,14 +1261,12 @@ For every example:
 ```
 
 Then calculate:
-
 $$
 \text{WinRate}(A)
 =
 \frac{\text{A wins}}
 {\text{comparisons}}
 $$
-
 This can be more informative than comparing independent numerical scores.
 
 It is particularly useful for:
@@ -1370,7 +1310,6 @@ New Golden Case
 A production failure should ideally become a permanent offline test.
 
 This creates a continuous learning loop:
-
 $$
 \text{Production}
 \rightarrow
@@ -1382,7 +1321,6 @@ $$
 \rightarrow
 \text{Improved System}
 $$
-
 The evaluation dataset becomes a living representation of the system's known failure modes.
 
 ---
@@ -1766,17 +1704,13 @@ For AI systems, we need a slightly different version:
 The distinction between testing and evaluation reflects the probabilistic nature of the component.
 
 Traditional tests often establish:
-
 $$
 f(x)=y
 $$
-
 AI evaluations often establish:
-
 $$
 f(x)\in\mathcal{Y}_{\text{acceptable}}
 $$
-
 where $\mathcal{Y}_{\text{acceptable}}$ is a set of outputs satisfying the behavioral requirements.
 
 This is the appropriate abstraction for probabilistic software.
@@ -1848,7 +1782,6 @@ the system is not yet ready for serious engineering.
 12. **Evaluation should run continuously.** Model changes, prompt changes, retrieval changes, and context changes should all be measurable.
 
 The central equation for Chapter 4 is therefore:
-
 $$
 \boxed{
 \text{AI Engineering}
@@ -1860,7 +1793,6 @@ $$
 \text{Feedback Loop}
 }
 $$
-
 And the most important mental model is:
 
 > **An AI application is not engineered when it works. It is engineered when you can measure its behavior, detect regressions, explain failures, and improve it systematically.**

@@ -35,11 +35,9 @@ Input --> Model -----+-- Output B
 ```
 
 The correct abstraction is therefore:
-
 $$
 P(y \mid x, c, m, s)
 $$
-
 where:
 
 * $x$ = input
@@ -49,17 +47,13 @@ where:
 * $y$ = possible output
 
 Testing is no longer simply:
-
 $$
 f(x)=y
 $$
-
 It becomes:
-
 $$
 P(Y \mid X,C,M,S) \in \text{acceptable behavior}
 $$
-
 This does **not** mean AI systems cannot be tested rigorously.
 
 It means the testing strategy must evolve from checking exact outputs to checking **properties, distributions, constraints, quality, safety, and system behavior**.
@@ -263,29 +257,21 @@ Property-based testing asks:
 Instead of enumerating only specific examples, generate many inputs and test invariants.
 
 For example, for a context manager:
-
 $$
 tokens(context) \leq budget
 $$
-
 For an authorization system:
-
 $$
 Unauthorized(action) \Rightarrow Denied(action)
 $$
-
 For a cost limiter:
-
 $$
 Cost(execution) \leq Budget
 $$
-
 For an agent runtime:
-
 $$
 Steps(execution) \leq MaxSteps
 $$
-
 These properties are extremely valuable for AI systems because the model introduces enormous input and output variability.
 
 For example:
@@ -338,11 +324,9 @@ Unacceptable:
 ```
 
 The evaluator is checking a property:
-
 $$
 Correct(answer, reference)=True
 $$
-
 rather than exact string equality.
 
 ---
@@ -369,11 +353,9 @@ output
 ```
 
 and an evaluator computes:
-
 $$
 score = E(input, output, expected\ behavior)
 $$
-
 Examples of evaluation dimensions include:
 
 * correctness
@@ -520,17 +502,13 @@ and ask:
 > Which answer is better?
 
 This produces:
-
 $$
 A > B
 $$
-
 or:
-
 $$
 B > A
 $$
-
 Pairwise evaluation can be useful for comparing:
 
 * model versions
@@ -694,7 +672,6 @@ Cost/task     <= $0.10
 ```
 
 Then:
-
 $$
 PASS =
 Q \ge Q_{min}
@@ -709,7 +686,6 @@ L \le L_{max}
 \land
 C \le C_{max}
 $$
-
 This is much stronger than:
 
 ```text
@@ -893,11 +869,9 @@ For example, if the invariant is:
 Generate thousands of variations attempting to convince the model to invoke the tool.
 
 The deterministic authorization layer should continue to enforce:
-
 $$
 Unauthorized(tool) \Rightarrow DENY
 $$
-
 This is an important distinction:
 
 > **Fuzz the model; enforce invariants outside the model.**
@@ -938,11 +912,9 @@ Please summarize this document.
 The semantic result should be substantially unchanged.
 
 This creates a metamorphic relation:
-
 $$
 f(T(x)) \approx f(x)
 $$
-
 where (T) is a transformation that should preserve the relevant semantics.
 
 Other useful transformations include:
@@ -983,7 +955,6 @@ Each stage can fail.
 #### Retrieval tests
 
 Measure:
-
 $$
 \text{Recall@k}
 $$
@@ -991,7 +962,6 @@ $$
 $$
 \text{Precision@k}
 $$
-
 #### Context tests
 
 Verify:
@@ -1173,27 +1143,21 @@ Run 5 → PASS
 ```
 
 The observed success rate is:
-
 $$
 \hat{p} = \frac{4}{5}=80\%
 $$
-
 The important question becomes:
 
 > What probability of failure are we willing to tolerate?
 
 For stochastic systems, evaluation should often measure:
-
 $$
 P(success)
 $$
-
 rather than simply:
-
 $$
 success \in {0,1}
 $$
-
 This is one of the most fundamental differences between deterministic software testing and AI evaluation.
 
 ---
@@ -1225,11 +1189,9 @@ The result depends on:
 * confidence intervals
 
 For a binomial estimate:
-
 $$
 \hat{p}=\frac{k}{n}
 $$
-
 but uncertainty around $\hat{p}$ matters.
 
 If you test:
@@ -1800,7 +1762,6 @@ It is:
 For deterministic software, testing asks whether the implementation produces the expected result.
 
 For AI systems, testing asks something more ambitious:
-
 $$
 \boxed{
 P(\text{acceptable behavior}\mid
@@ -1809,6 +1770,5 @@ P(\text{acceptable behavior}\mid
 \text{required threshold}
 }
 $$
-
 That shift—from **exact-output verification** to **behavioral assurance**—is one of the defining changes in AI engineering.
 
