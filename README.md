@@ -2,26 +2,6 @@
 
 This repository contains the curriculum and build tooling for the **AI Systems Engineering Bootcamp**. The course focuses on the transition from traditional software engineering to AI systems engineering, emphasizing reliability, observability, and agentic workflows.
 
-## Repository layout
-
-- `outline.md`: The top-level, master curriculum structure — 4 weeks / 30 days laid out at a glance.
-- `curriculum/`: The chapter-by-chapter authoring tree:
-  - `introduction.md` / `introduction.pdf`: The Introduction front matter prepended to the book.
-  - `week1/` … `week4/`: One folder per week. Each holds:
-    - `day<N>.md` — daily notes / outlines for that day.
-    - `chapter<N>.md` (+ its generated `chapter<N>.pdf`) — the canonical numbered chapters (30 total, `chapter1`–`chapter30`).
-    - `*_v2.md` — in-progress draft revisions of a few week-1 chapters.
-- [book.pdf](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book.pdf): The full assembled book — the Introduction + all 30 chapters in one PDF, with a master table of contents and title page.
-- [book-local.pdf](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book-local.pdf): The same book with a **two-level table of contents** — a front-matter chapter list plus a compact per-chapter "Contents" page. This is the local working copy (currently carries a name on the title page).
-- `outline.pdf`: A single-PDF render of `outline.md`, kept for reference.
-- Build tooling:
-  - `Makefile`: The build driver — the normal way to generate PDFs (see below).
-  - `tools/build-book.sh`: Assembles `book.pdf` (concats every canonical chapter and runs pandoc once).
-  - `tools/build-book-localtoc.sh`: Assembles `book-local.pdf` with the two-level TOC.
-  - `tools/regen-ch-targets.py`: Regenerates the per-chapter `ch<N>` targets inside the `Makefile`.
-  - `md2pdf.sh`: The underlying Markdown→PDF converter (pandoc + XeLaTeX); drives every target above.
-  - `.pi/skills/md2pdf-authoring/SKILL.md`: Authoring / conversion playbook (preprocessor, pitfalls, exit-code masking).
-
 ## Curriculum Overview
 
 The bootcamp covers four key pillars of AI engineering (mapped to Ng's four skills):
@@ -36,7 +16,7 @@ The bootcamp covers four key pillars of AI engineering (mapped to Ng's four skil
 Reading order: front matter, then the 30 chapters grouped by week (Weeks 1–4 map to
 the four pillars above). Links point to the source Markdown, which renders on
 GitHub; for ready-to-read PDFs, see the [assembled book](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book.pdf)
-and the [two-level-TOC book](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book-local.pdf) in the [Repository layout](#repository-layout) above.
+and the [two-level-TOC book](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book-local.pdf) in the [Repository layout](#repository-layout) below.
 
 ### Front matter
 
@@ -84,6 +64,26 @@ and the [two-level-TOC book](https://github.com/rioffe/ai_systems_engineering_bo
 - [Chapter 28: Final Evaluation](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter28.md)
 - [Chapter 29: Architecture and Product Review](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter29.md)
 - [Chapter 30: The AI Engineer's Future](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter30.md)
+
+## Repository layout
+
+- `outline.md`: The top-level, master curriculum structure — 4 weeks / 30 days laid out at a glance.
+- `curriculum/`: The chapter-by-chapter authoring tree:
+  - `introduction.md` / `introduction.pdf`: The Introduction front matter prepended to the book.
+  - `week1/` … `week4/`: One folder per week. Each holds:
+    - `day<N>.md` — daily notes / outlines for that day.
+    - `chapter<N>.md` (+ its generated `chapter<N>.pdf`) — the canonical numbered chapters (30 total, `chapter1`–`chapter30`).
+    - `*_v2.md` — in-progress draft revisions of a few week-1 chapters.
+- [book.pdf](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book.pdf): The full assembled book — the Introduction + all 30 chapters in one PDF, with a master table of contents and title page.
+- [book-local.pdf](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book-local.pdf): The same book with a **two-level table of contents** — a front-matter chapter list plus a compact per-chapter "Contents" page. This is the local working copy (currently carries a name on the title page).
+- `outline.pdf`: A single-PDF render of `outline.md`, kept for reference.
+- Build tooling:
+  - `Makefile`: The build driver — the normal way to generate PDFs (see below).
+  - `tools/build-book.sh`: Assembles `book.pdf` (concats every canonical chapter and runs pandoc once).
+  - `tools/build-book-localtoc.sh`: Assembles `book-local.pdf` with the two-level TOC.
+  - `tools/regen-ch-targets.py`: Regenerates the per-chapter `ch<N>` targets inside the `Makefile`.
+  - `md2pdf.sh`: The underlying Markdown→PDF converter (pandoc + XeLaTeX); drives every target above.
+  - `.pi/skills/md2pdf-authoring/SKILL.md`: Authoring / conversion playbook (preprocessor, pitfalls, exit-code masking).
 
 ## Building PDFs
 
