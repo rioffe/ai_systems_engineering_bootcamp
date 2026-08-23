@@ -55,7 +55,7 @@ It is:
 
 ---
 
-## 1. The Coding Agent as a Control System
+# 1. The Coding Agent as a Control System
 
 A useful abstraction is to model a coding agent as a feedback controller.
 

@@ -54,7 +54,7 @@ Not whether it fails.
 
 ---
 
-## 1. Reliability Is a System Property
+# 1. Reliability Is a System Property
 
 A common mistake is to think about reliability component-by-component.
 

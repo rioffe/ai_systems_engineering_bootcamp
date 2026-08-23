@@ -573,7 +573,7 @@ The layers reinforce one another.
 
 ---
 
-# 12. Specification Engineering vs. Prompt Engineering
+# 11. Specification Engineering vs. Prompt Engineering
 
 These concepts should not be confused.
 
@@ -626,7 +626,7 @@ The specification becomes the durable artifact.
 
 ---
 
-# 13. Specification as an Interface Between Humans and Agents
+# 12. Specification as an Interface Between Humans and Agents
 
 There is a deeper architectural implication.
 Traditional software engineering has interfaces between:
@@ -668,7 +668,7 @@ That is a much more scalable interaction model.
 
 ---
 
-# 14. The Specification-to-Implementation Pipeline
+# 13. The Specification-to-Implementation Pipeline
 
 A mature agentic workflow can look like:
 ```text
@@ -716,7 +716,7 @@ It participates in the entire development loop.
 
 ---
 
-# 15. Measuring the Value of Specification
+# 14. Measuring the Value of Specification
 
 The most important experiment for this day is empirical.
 Take one software task.
@@ -763,7 +763,7 @@ The second specification sharply reduces ambiguity.
 
 ---
 
-# 16. The Experiment
+# 15. The Experiment
 
 Run the same agent under both conditions.
 Measure at least:
@@ -843,7 +843,7 @@ The experiment turns specification engineering from an abstract idea into a meas
 
 ---
 
-# 17. Specification Quality Is an Engineering Variable
+# 16. Specification Quality Is an Engineering Variable
 
 This experiment should lead to a broader conclusion.
 Suppose agent capability is:
@@ -870,7 +870,7 @@ The system architecture determines how much capability can actually be extracted
 
 ---
 
-# 18. From Requirements Engineering to Specification Engineering
+# 17. From Requirements Engineering to Specification Engineering
 
 Traditional requirements engineering remains essential.
 But agentic development expands its scope.
@@ -904,7 +904,7 @@ This convergence is one of the defining characteristics of AI-assisted software 
 
 ---
 
-# 19. The Deeper Idea: Specification as Search-Space Reduction
+# 18. The Deeper Idea: Specification as Search-Space Reduction
 
 Return to the coding-agent model from Day 15.
 The agent is searching through possible repository states:
@@ -943,7 +943,7 @@ The agent does not need to discover every design decision if the specification h
 
 ---
 
-# 20. Exercise — Specification A vs. Specification B
+# 19. Exercise — Specification A vs. Specification B
 
 Choose a problem substantial enough to expose ambiguity.
 For example:

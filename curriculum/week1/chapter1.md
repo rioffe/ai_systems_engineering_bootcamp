@@ -1078,3 +1078,41 @@ And that is the fundamental transition this first week is designed to establish:
 
 > **The future of AI application development is not about writing better prompts around a magical model. It is about engineering reliable systems around increasingly capable probabilistic computation.**
 
+---
+
+## Key Takeaways
+
+1. **LLMs are probabilistic components, not deterministic functions.** They produce a distribution over continuations, so the central engineering task is to wrap a reliable system around a probabilistic component.
+
+2. **The AI application stack adds a harness layer.** Between the application and the accelerator sits a harness that supplies input/output representation, validation, error handling, observability, and fallback behavior the model itself does not guarantee.
+
+3. **The model is one component, not the whole system.** Application quality is determined by the entire system, not merely by the benchmark score of the underlying model.
+
+4. **A foundation model is a general-purpose probabilistic computation engine.** Treat it as such, not as a trusted business-logic component: general capability does not imply reliability.
+
+5. **Deployment is a tradeoff, not a binary.** Hosted inference optimizes for operational ease; local inference for control. Choose the architecture that best fits quality, latency, cost, privacy, and operational requirements.
+
+6. **Tokens are the unit of LLM computation and context is a scarce resource.** More context is not free; it raises latency, cost, and the chance of conflicting instructions. Context management is a core skill.
+
+7. **Prompting is programming a probabilistic interpreter.** A production prompt is an engineering artifact with explicit requirements, defined I/O, constraints, failure behavior, and versioning.
+
+8. **Generation is not validation.** Parse output, validate it against a schema, and accept or reject. The generation/validation boundary is one of the most important abstractions in AI engineering.
+
+9. **The model decides *what*; deterministic software decides *how and whether*.** This separation between proposed actions and permitted execution is essential for security and reliability.
+
+10. **Multimodal models remain probabilistic.** Adding modalities changes the interface but not the discipline: inference must still flow into validation and then decision.
+
+11. **Inference configuration is part of the application's behavior.** What you benchmark must match what you deploy, so configuration belongs in source control, experiment metadata, and reproducibility infrastructure.
+
+12. **The correct model is the best model for the workload, not the highest-scoring one.** Model selection is an optimization over quality, latency, cost, and reliability weighted by the task.
+
+13. **Quality, latency, and cost form an explicit three-way tradeoff.** Decompose latency (network, queue, prefill, decode, postprocess) and distinguish model throughput from user-perceived latency via time to first token.
+
+14. **The model playground is an inference substrate.** Measuring tokens, comparing outputs, and enforcing structured JSON turn a small experiment into the beginning of an evaluation harness and a reliability boundary.
+
+The conceptual shift can be summarized as:
+
+> **Do not ask the model to provide guarantees it was never designed to provide. Surround probabilistic computation with deterministic boundaries.**
+
+That is the foundation of AI systems engineering and the mental model for the rest of the bootcamp.
+
