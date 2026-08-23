@@ -166,10 +166,12 @@ gen-ch:
 lint:
 	shellcheck md2pdf.sh
 
-## Build the full book: all 30 chapters in one PDF (master TOC, title page,
-## book document class, mermaid in ch1). Output: book.pdf at repo root.
+## Build the full book: the Introduction front matter + all 30 chapters in one
+## PDF (master TOC, title page, book document class, mermaid in ch1). Output:
+## book.pdf at repo root.  INTRO=0 omits the Introduction.
 ##   make book                 -> book.pdf
 ##   make book TITLE="..." AUTHOR="..."
+##   INTRO=0 make book                -> book.pdf without the Introduction
 book:
 	bash tools/build-book.sh
 
@@ -177,9 +179,12 @@ book:
 ## deep master TOC: a short front-matter "Contents" listing only the chapters
 ## (--toc-depth=1), plus a compact per-chapter "Contents" box printed at the top
 ## of each chapter that lists that chapter's own ## sections / ### subsections.
-## Output: book-local.pdf at repo root.  This replaces the ~30-page master TOC.
+## Includes the Introduction as front matter (but not its own local "Contents"
+## page).  Output: book-local.pdf at repo root.  This replaces the ~30-page
+## master TOC.  INTRO=0 omits the Introduction.
 ##   make book-local                   -> book-local.pdf
 ##   make book-local TITLE="..." AUTHOR="..."
+##   INTRO=0 make book-local          -> without the Introduction
 book-local:
 	bash tools/build-book-localtoc.sh
 
