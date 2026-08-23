@@ -29,7 +29,7 @@ names = [f"ch{num}" for num, _ in files]
 out = [
     BEGIN,
     "## Regenerate this block with: make gen-ch   (after adding/removing a chapter).",
-    ".PHONY: all one lint clean gen-ch " + " ".join(names),
+    ".PHONY: all one lint clean book gen-ch " + " ".join(names),
     "",
 ]
 for num, rel in files:
