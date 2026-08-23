@@ -9,6 +9,8 @@
 #   tools/build-book.sh                   -> book.pdf at repo root
 #   tools/build-book.sh out.pdf           -> custom output path
 #   TITLE="..." AUTHOR="..." tools/build-book.sh
+#   INTRO=0 tools/build-book.sh             -> omit the Introduction front matter
+#                                             (default: on)
 #
 # Only the chapters that embed mermaid diagrams (currently ch1) need a Chrome/
 # Chromium for the mermaid-filter; one is auto-detected (same as md2pdf.sh) and is
@@ -46,6 +48,16 @@ PY
 if [ -z "$chapters" ]; then
         echo "build-book.sh: no chapter*.md files found under $CURRIC" >&2
         exit 1
+fi
+
+# ---- optionally prepend the book's Introduction as front matter -----------
+# The Introduction (curriculum/introduction.md) is front matter: its own
+# "# Introduction" chapter -- landing at the top of the master "Contents" list and
+# opening on its own page (book class -> \chapter).  Opt out with INTRO=0.
+intro="$CURRIC/introduction.md"
+if [ "${INTRO:-1}" != 0 ] && [ -f "$intro" ]; then
+        chapters="$intro"$'\n'"$chapters"
+        echo "build-book: including Introduction front matter"
 fi
 
 total="$(printf '%s\n' "$chapters" | grep -c .)"
