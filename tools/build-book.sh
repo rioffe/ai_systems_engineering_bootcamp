@@ -55,6 +55,11 @@ fi
 # "# Introduction" chapter -- landing at the top of the master "Contents" list and
 # opening on its own page (book class -> \chapter).  Opt out with INTRO=0.
 intro="$CURRIC/introduction.md"
+license_md="$CURRIC/license.md"
+if [ "${LICENSE:-1}" != 0 ] && [ -f "$license_md" ]; then
+        chapters="$license_md"$'\n'"$chapters"
+        echo "build-book: including License front matter"
+fi
 if [ "${INTRO:-1}" != 0 ] && [ -f "$intro" ]; then
         chapters="$intro"$'\n'"$chapters"
         echo "build-book: including Introduction front matter"

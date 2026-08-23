@@ -81,6 +81,14 @@ fi
 # Opt out of the Introduction entirely with INTRO=0.
 intro="$CURRIC/introduction.md"
 NOLOCAL=""
+license_md="$CURRIC/license.md"
+# The License page has no ## / ### subheadings, so it earns no per-chapter
+# local "Contents" page on its own. Prepend it first; intro is prepended next,
+# so the final order is intro -> License -> chapters.
+if [ "${LICENSE:-1}" != 0 ] && [ -f "$license_md" ]; then
+        chapters="$license_md"$'\n'"$chapters"
+        echo "build-book-localtoc: including License front matter"
+fi
 if [ "${INTRO:-1}" != 0 ] && [ -f "$intro" ]; then
         chapters="$intro"$'\n'"$chapters"
         NOLOCAL="$intro"
