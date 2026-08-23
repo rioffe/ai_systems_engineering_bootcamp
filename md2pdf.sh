@@ -4,20 +4,20 @@
 
 set -e
 
-TOC_FLAG=""
-MERMAID_FLAG=""
-GEOMETRY_FLAG=""
+TOC_FLAG=()
+MERMAID_FLAG=()
+GEOMETRY_FLAG=()
 MARGIN_HEADER_FILE=""
 
 while [[ $# -gt 0 ]]; do
   echo "Arg: $1"
   case $1 in
      --toc)
-      TOC_FLAG="--toc"
+      TOC_FLAG=(--toc)
       shift
       ;;
      --mermaid)
-      MERMAID_FLAG="--filter mermaid-filter"
+      MERMAID_FLAG=(--filter mermaid-filter)
       shift
       ;;
      --margin)
@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
       shift
       MARGIN_HEADER_FILE=$(mktemp /tmp/md2pdf_geometry_$$_XXXXXX)
       echo "\usepackage[margin=${MARGIN_VAL}]{geometry}" > "$MARGIN_HEADER_FILE"
-      GEOMETRY_FLAG="--include-in-header=$MARGIN_HEADER_FILE"
+      GEOMETRY_FLAG=(--include-in-header="$MARGIN_HEADER_FILE")
       ;;
      *)
       INPUT_FILE="$1"
@@ -50,6 +50,50 @@ if [ ! -f "$INPUT_FILE" ]; then
     exit 1
 fi
 
+# When rendering mermaid, 'mermaid-filter' -> 'mmdc' -> puppeteer needs a
+# Chromium executable. puppeteer's pinned rev is often missing from
+# ~/.cache/puppeteer; fall back to a system Chrome/Chromium/Edge via
+# PUPPETEER_EXECUTABLE_PATH (an already-exported value is always respected).
+if [ "${#MERMAID_FLAG[@]}" -gt 0 ]; then
+    # mmdc -> puppeteer needs a Chromium binary. A pinned rev is often
+    # missing from ~/.cache/puppeteer, so fall back to a system browser.
+    # An already-exported PUPPETEER_EXECUTABLE_PATH is always respected.
+    if [ -z "${PUPPETEER_EXECUTABLE_PATH:-}" ]; then
+        found=0
+        if [ "$(uname)" = "Darwin" ]; then
+            for cand in \
+                            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+                            "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary" \
+                            "/Applications/Chromium.app/Contents/MacOS/Chromium" \
+                            "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"; do
+                if [ -x "$cand" ]; then
+                    PUPPETEER_EXECUTABLE_PATH="$cand"
+                    export PUPPETEER_EXECUTABLE_PATH
+                    found=1
+                    break
+                fi
+            done
+        else
+            for cand in google-chrome google-chrome-stable chromium chromium-browser; do
+                if bin="$(command -v "$cand" 2>/dev/null)"; then
+                    PUPPETEER_EXECUTABLE_PATH="$bin"
+                    export PUPPETEER_EXECUTABLE_PATH
+                    found=1
+                    break
+                fi
+            done
+        fi
+        if [ "$found" -eq 1 ]; then
+            echo "mermaid: using system browser via PUPPETEER_EXECUTABLE_PATH=$PUPPETEER_EXECUTABLE_PATH"
+        else
+            echo "Warning: no Chromium/Chrome found for mermaid; diagrams may fail to render." >&2
+            echo "           (set PUPPETEER_EXECUTABLE_PATH, or run \"npx puppeteer browsers install chrome\")." >&2
+        fi
+    else
+        echo "mermaid: using PUPPETEER_EXECUTABLE_PATH=$PUPPETEER_EXECUTABLE_PATH"
+    fi
+fi
+
 OUTPUT_FILE="${INPUT_FILE%.md}.pdf"
 TEMP_FILE=$(mktemp /tmp/md2pdf.XXXXXX.md)
 
@@ -61,14 +105,14 @@ sed -e 's/^[[:space:]]*\[[[:space:]]*$/$$\n/' \
      -e 's/^[[:space:]]*\][[:space:]]*$/\n$$/' \
      "$INPUT_FILE" > "$TEMP_FILE"
 
-echo "Converting to PDF via pandoc (using xelatex) with $TOC_FLAG $MERMAID_FLAG $GEOMETRY_FLAG..."
+echo "Converting to PDF via pandoc (using xelatex) with ${TOC_FLAG[*]} ${MERMAID_FLAG[*]} ${GEOMETRY_FLAG[*]}..."
 
-if pandoc "$TEMP_FILE" $TOC_FLAG $MERMAID_FLAG $GEOMETRY_FLAG --pdf-engine=xelatex -o "$OUTPUT_FILE"; then
+if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" --pdf-engine=xelatex -o "$OUTPUT_FILE"; then
     echo "Success! Created '$OUTPUT_FILE'."
 else
     # Fallback to default engine if xelatex fails
     echo "xelatex failed or not found. Retrying with default engine..."
-    if pandoc "$TEMP_FILE" $TOC_FLAG $MERMAID_FLAG $GEOMETRY_FLAG -o "$OUTPUT_FILE"; then
+    if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" -o "$OUTPUT_FILE"; then
         echo "Success! Created '$OUTPUT_FILE' (using default engine)."
     else
         echo "Error: Conversion failed."
