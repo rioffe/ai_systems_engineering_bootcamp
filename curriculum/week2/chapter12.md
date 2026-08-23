@@ -17,53 +17,53 @@ In an AI application, every additional model invocation can consume:
 
 An agent that takes ten model calls instead of one is not merely "more intelligent."
 
-It may be **10× more expensive, 10× slower, and 10× harder to scale**.
+It may be **10x more expensive, 10x slower, and 10x harder to scale**.
 
 This makes performance and economics architectural concerns.
 
 The fundamental optimization problem is:
 
-[
+$$
 \text{maximize useful work}
-]
+$$
 
 subject to:
 
-[
+$$
 \text{latency} \leq L_{max}
-]
+$$
 
-[
+$$
 \text{cost} \leq C_{max}
-]
+$$
 
-[
+$$
 \text{quality} \geq Q_{min}
-]
+$$
 
 and:
 
-[
+$$
 \text{throughput} \geq R_{required}
-]
+$$
 
 The engineer therefore needs to reason simultaneously about:
 
 ```text
               AI System Economics
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
+                       |
+        +--------------+--------------+
+        |              |              |
      Latency        Throughput       Cost
-        │              │              │
-        └──────────────┼──────────────┘
-                       │
+        |              |              |
+        +--------------+--------------+
+                       |
                     Quality
 ```
 
 Optimizing any one dimension in isolation can make the overall system worse.
 
-A faster model that costs 5× more may be a bad optimization.
+A faster model that costs 5x more may be a bad optimization.
 
 A cheaper model that produces 30% more retries may also be a bad optimization.
 
@@ -79,20 +79,20 @@ It is to make them **economically efficient systems that satisfy explicit perfor
 
 The simplest useful model is:
 
-[
+$$
 C =
 N_{requests}
 \times
 (T_{input}P_{input}+T_{output}P_{output})
-]
+$$
 
 where:
 
-* (N_{requests}) = number of model requests
-* (T_{input}) = input tokens per request
-* (T_{output}) = output tokens per request
-* (P_{input}) = price per input token
-* (P_{output}) = price per output token
+* $N_{requests}$ = number of model requests
+* $T_{input}$ = input tokens per request
+* $T_{output}$ = output tokens per request
+* $P_{input}$ = price per input token
+* $P_{output}$ = price per output token
 
 This simple equation already exposes several optimization levers.
 
@@ -109,12 +109,12 @@ That gives us:
 
 ```text
                     Cost
-                      │
-        ┌─────────────┼─────────────┐
-        │             │             │
+                      |
+        +-------------+-------------+
+        |             |             |
      Requests       Input         Output
-        │           tokens         tokens
-        │             │             │
+        |           tokens         tokens
+        |             |             |
     caching       context       generation
     batching      retrieval     max tokens
     routing       compression   structured output
@@ -122,17 +122,16 @@ That gives us:
 
 For agentic systems, the equation should be expanded.
 
-If a task requires (k) model calls:
+If a task requires $k$ model calls:
 
-[
+$$
 C_{task}
-========
-
+=
 \sum_{i=1}^{k}
 (T_{input,i}P_{input,i}
 +
 T_{output,i}P_{output,i})
-]
+$$
 
 Now agent architecture directly affects economics.
 
@@ -182,17 +181,17 @@ Important metrics include:
 
 How long does one request take?
 
-[
+$$
 L = t_{response} - t_{request}
-]
+$$
 
 ### Throughput
 
 How much work can the system perform per unit time?
 
-[
+$$
 Throughput = \frac{requests}{second}
-]
+$$
 
 ### Concurrency
 
@@ -227,10 +226,9 @@ The engineering task is to find the appropriate point in this multidimensional s
 
 For an AI application, end-to-end latency can be decomposed as:
 
-[
+$$
 L_{total}
-=========
-
+=
 L_{network}
 +
 L_{retrieval}
@@ -240,16 +238,15 @@ L_{model}
 L_{tools}
 +
 L_{postprocess}
-]
+$$
 
 For an agentic system:
 
-[
+$$
 L_{total}
-=========
-
+=
 \sum_{i=1}^{k} L_i
-]
+$$
 
 for sequential operations.
 
@@ -271,16 +268,16 @@ Response
 
 Total latency is approximately:
 
-[
+$$
 4.6s
-]
+$$
 
 If the operations can safely execute in parallel:
 
 ```text
-           ┌── Retrieval ──┐
-User ──────┤               ├── LLM
-           └── Tool ───────┘
+           +-- Retrieval --+
+User ------|               +-- LLM
+           +-- Tool -------+
 ```
 
 the critical path may be much shorter.
@@ -310,9 +307,9 @@ But 1% of requests take 12 seconds.
 
 At 100,000 requests per day, that is:
 
-[
+$$
 1,000
-]
+$$
 
 very slow requests every day.
 
@@ -351,19 +348,19 @@ For an LLM request:
 
 ```text
 Request
-   │
-   ├──── Time to First Token
-   │
-   └─────────────── Time to Complete
+   |
+   +---- Time to First Token
+   |
+   +--------------- Time to Complete
 ```
 
 Users often perceive the system as responsive once generation begins.
 
 Therefore:
 
-[
+$$
 TTFT = t_{first\ token} - t_{request}
-]
+$$
 
 can matter independently of total generation time.
 
@@ -399,10 +396,10 @@ Throughput asks:
 
 For an inference system:
 
-[
+$$
 Throughput =
 \frac{tokens}{second}
-]
+$$
 
 may be more useful than requests/second.
 
@@ -440,9 +437,9 @@ Running one request at a time often leaves substantial capacity unused.
 Batching combines multiple requests:
 
 ```text
-Request 1 ─┐
-Request 2 ─┼──> Batch ──> GPU
-Request 3 ─┘
+Request 1 -+
+Request 2 -+--> Batch --> GPU
+Request 3 -+
 ```
 
 Instead of:
@@ -469,15 +466,15 @@ A request may wait for other requests to arrive.
 
 Therefore:
 
-[
+$$
 Latency \uparrow
-]
+$$
 
 while:
 
-[
+$$
 Throughput \uparrow
-]
+$$
 
 The optimal batch size depends on workload characteristics.
 
@@ -495,9 +492,9 @@ Instead of waiting for an entire batch to finish:
 
 ```text
 Batch
- ├── Request A
- ├── Request B
- └── Request C
+ +-- Request A
+ +-- Request B
+ +-- Request C
 
 wait for all
 ```
@@ -508,13 +505,13 @@ Conceptually:
 
 ```text
 Time →
-──────────────────────────────>
+------------------------------>
 
-A ███████████
-B ███████
-C █████████████
-D       ████████
-E           █████████
+A ###########
+B #######
+C #############
+D       ########
+E           #########
 ```
 
 This allows the system to keep GPU resources busy despite different generation lengths.
@@ -540,15 +537,15 @@ Increasing concurrency can improve utilization until some resource saturates.
 After that point:
 
 ```text
-Concurrency ↑
+Concurrency ^
      ↓
-Queueing ↑
+Queueing ^
      ↓
-Latency ↑
+Latency ^
      ↓
-Timeouts ↑
+Timeouts ^
      ↓
-Retries ↑
+Retries ^
      ↓
 Effective throughput ↓
 ```
@@ -587,9 +584,9 @@ Long contexts also consume more memory.
 
 For transformer inference, attention historically had approximately quadratic scaling in sequence length:
 
-[
+$$
 O(n^2)
-]
+$$
 
 although modern architectures and inference optimizations can significantly change practical behavior.
 
@@ -650,27 +647,27 @@ But compression is not automatically beneficial.
 
 You must evaluate:
 
-[
+$$
 Quality_{compressed}
-]
+$$
 
 against:
 
-[
+$$
 Quality_{full}
-]
+$$
 
 The optimization objective is:
 
-[
+$$
 \min Cost
-]
+$$
 
 subject to:
 
-[
+$$
 Quality \geq Q_{min}
-]
+$$
 
 ---
 
@@ -694,23 +691,23 @@ With caching:
 request
  ↓
 cache lookup
- ├── hit → response
- └── miss → LLM
+ +-- hit → response
+ +-- miss → LLM
 ```
 
 The effective model workload becomes:
 
-[
+$$
 N_{LLM} = N_{requests}(1-H)
-]
+$$
 
-where (H) is cache hit rate.
+where $H$ is cache hit rate.
 
 At:
 
-[
+$$
 H=0.30
-]
+$$
 
 the model workload falls by 30%.
 
@@ -766,9 +763,9 @@ Conceptually:
 
 ```text
                 Shared prefix
-                     │
-            ┌────────┴────────┐
-            │                 │
+                     |
+            +--------+--------+
+            |                 |
         Question A        Question B
 ```
 
@@ -797,11 +794,11 @@ Model X
 use:
 
 ```text
-                 ┌── cheap model
-                 │
-Request → Router ├── medium model
-                 │
-                 └── expensive model
+                 +-- cheap model
+                 |
+Request → Router +-- medium model
+                 |
+                 +-- expensive model
 ```
 
 The router considers:
@@ -854,14 +851,14 @@ For example:
 
 ```text
                     Request
-                       │
+                       |
                  Complexity
                    classifier
-                       │
-          ┌────────────┴────────────┐
-          │                         │
+                       |
+          +------------+------------+
+          |                         |
        simple                    complex
-          │                         │
+          |                         |
        Model A                   Model B
 ```
 
@@ -871,39 +868,37 @@ Routing should ideally optimize a utility function.
 
 For example:
 
-[
-U_i =
+$$
+U_i
+=
 \alpha Q_i
-----------
-
-## \beta L_i
-
-\gamma C_i
-]
+- \beta L_i
+- \gamma C_i
+$$
 
 where:
 
-* (Q_i) = expected quality
-* (L_i) = expected latency
-* (C_i) = expected cost
+* $Q_i$ = expected quality
+* $L_i$ = expected latency
+* $C_i$ = expected cost
 
 The router chooses:
 
-[
+$$
 i^* = \arg\max_i U_i
-]
+$$
 
 subject to hard constraints such as:
 
-[
+$$
 Q_i \geq Q_{min}
-]
+$$
 
 and:
 
-[
+$$
 L_i \leq L_{max}
-]
+$$
 
 ---
 
@@ -971,10 +966,10 @@ It can attempt the task and escalate when necessary:
 Cheap model
      ↓
 Validation
- ┌───┴────┐
- │        │
+ +---+----+
+ |        |
 pass     fail
- │        │
+ |        |
 done   expensive model
 ```
 
@@ -988,16 +983,16 @@ Model routing can be implemented as a cascade.
 
 ```text
                 Request
-                   │
-                   ▼
+                   |
+                   v
               Cheap model
-                   │
+                   |
              validation
-             ┌─────┴─────┐
-             │           │
+             +-----+-----+
+             |           |
            pass         fail
-             │           │
-             ▼           ▼
+             |           |
+             v           v
            result    Expensive model
 ```
 
@@ -1008,22 +1003,21 @@ Suppose:
 
 Then expected cost is:
 
-[
+$$
 E[C]
-====
-
+=
 0.8C_A + 0.2(C_A+C_B)
-]
+$$
 
 or:
 
-[
+$$
 E[C] = C_A + 0.2C_B
-]
+$$
 
 assuming Model A runs first on every request.
 
-If (C_A) is very small, this can be substantially cheaper than sending everything directly to Model B.
+If $C_A$ is very small, this can be substantially cheaper than sending everything directly to Model B.
 
 But the additional Model A latency must also be considered.
 
@@ -1058,12 +1052,12 @@ For example, a parameter represented using 16 bits requires half the raw paramet
 
 A rough relationship is:
 
-[
+$$
 Memory \approx
 N_{parameters}
 \times
 \frac{bits}{8}
-]
+$$
 
 before accounting for additional runtime memory such as:
 
@@ -1117,9 +1111,9 @@ It may reduce the number of simultaneous sequences that fit in memory.
 Therefore:
 
 ```text
-context length ↑
+context length ^
       ↓
-KV cache ↑
+KV cache ^
       ↓
 concurrency capacity ↓
       ↓
@@ -1248,26 +1242,26 @@ LLM
 If the searches are independent:
 
 ```text
-             ┌── Search A ──┐
-Question ────┼── Search B ──┼── LLM
-             └── Search C ──┘
+             +-- Search A --+
+Question ----+-- Search B --+-- LLM
+             +-- Search C --+
 ```
 
 the total latency becomes approximately:
 
-[
+$$
 L =
 \max(L_A,L_B,L_C)
 +
 L_{LLM}
-]
+$$
 
 rather than:
 
-[
+$$
 L =
 L_A+L_B+L_C+L_{LLM}
-]
+$$
 
 This can provide dramatic improvements.
 
@@ -1291,9 +1285,9 @@ Request
 Cheap classifier
    ↓
 Does this require an LLM?
- ┌─┴─┐
+ +-+-+
 No  Yes
- │    │
+ |    |
 rule  LLM
 ```
 
@@ -1353,21 +1347,21 @@ verification
 model
 ```
 
-Suppose the cost of one model call is (C).
+Suppose the cost of one model call is $C$.
 
 Then approximately:
 
-[
+$$
 C_A=C
-]
+$$
 
-[
+$$
 C_B=2C
-]
+$$
 
-[
+$$
 C_C=4C
-]
+$$
 
 before accounting for different token volumes.
 
@@ -1377,21 +1371,19 @@ But every call should have an engineering justification.
 
 A useful metric is:
 
-[
+$$
 Value\ per\ dollar
-==================
-
+=
 \frac{Task\ Quality}{Inference\ Cost}
-]
+$$
 
 Another is:
 
-[
+$$
 Value\ per\ second
-==================
-
+=
 \frac{Task\ Quality}{Latency}
-]
+$$
 
 The optimal architecture depends on the application.
 
@@ -1415,20 +1407,19 @@ Success rate = 98%
 
 The cost per successful task is approximately:
 
-[
+$$
 \frac{0.01}{0.80}
-=================
-
-$0.0125
-]
+=
+\$ 0.0125
+$$
 
 for A and:
 
-[
+$$
 \frac{0.05}{0.98}
 \approx
-$0.051
-]
+\$ 0.051
+$$
 
 for B.
 
@@ -1440,15 +1431,15 @@ If Model A requires expensive fallback processing, its economics can change dram
 
 Therefore measure:
 
-[
+$$
 Cost_{successful\ task}
-]
+$$
 
 rather than only:
 
-[
+$$
 Cost_{request}
-]
+$$
 
 This is especially important for routing and agent systems.
 
@@ -1460,10 +1451,9 @@ A realistic production cost model should include more than model tokens.
 
 For example:
 
-[
+$$
 C_{total}
-=========
-
+=
 C_{inference}
 +
 C_{retrieval}
@@ -1477,11 +1467,11 @@ C_{compute}
 C_{observability}
 +
 C_{failed\ work}
-]
+$$
 
 For self-hosted inference:
 
-[
+$$
 C_{inference}
 \approx
 C_{GPU}
@@ -1493,16 +1483,15 @@ C_{memory}
 C_{host}
 +
 C_{operations}
-]
+$$
 
 The economic objective becomes:
 
-[
+$$
 C_{task}
-========
-
+=
 \frac{C_{infrastructure}}{N_{successful\ tasks}}
-]
+$$
 
 This is much closer to the real economics of an AI product.
 
@@ -1592,7 +1581,7 @@ For example:
 
 ```text
 Baseline
-──────────────
+--------------
 P95 latency       8.2 s
 Input tokens      8,000
 Output tokens     900
@@ -1704,24 +1693,24 @@ Then construct:
 
 ```text
                        Request
-                          │
-                          ▼
+                          |
+                          v
                     Request classifier
-                          │
-               ┌──────────┴──────────┐
-               │                     │
+                          |
+               +----------+----------+
+               |                     |
           latency-sensitive      normal
-               │                     │
+               |                     |
             Model B               Model A
-               │                     │
-               └──────────┬──────────┘
-                          │
+               |                     |
+               +----------+----------+
+                          |
                      validation
-                          │
-                   ┌──────┴──────┐
-                   │             │
+                          |
+                   +------+------+
+                   |             |
                  pass          fail
-                   │             │
+                   |             |
                  done          Model B
 ```
 
@@ -1729,40 +1718,39 @@ Then measure the economics.
 
 Let:
 
-[
+$$
 p = P(\text{Model A succeeds})
-]
+$$
 
 and let:
 
-[
+$$
 C_A,C_B
-]
+$$
 
 be the respective costs.
 
 The expected cost of the cascade is:
 
-[
+$$
 E[C]=C_A+(1-p)C_B
-]
+$$
 
 Compare this with:
 
-[
+$$
 C_B
-]
+$$
 
 for sending every request directly to Model B.
 
 Now include latency:
 
-[
+$$
 E[L]
-====
-
+=
 L_A+(1-p)L_B
-]
+$$
 
 for a sequential fallback architecture.
 
@@ -1838,9 +1826,9 @@ It makes them more economically consequential.
 1. **Performance and economics are architectural concerns.** Model calls consume real latency, compute, memory, quota, and money.
 
 2. **Start with an explicit cost model.** The basic model is:
-   [
+$$
    C=N_{requests}(T_{input}P_{input}+T_{output}P_{output})
-   ]
+$$
 
 3. **Agentic systems multiply cost through repeated model calls.** Optimize the number of calls before optimizing individual calls.
 
@@ -1888,7 +1876,7 @@ optimize inference
 
 18. **The ultimate objective is not "maximum speed" or "minimum cost."** It is:
 
-[
+$$
 \boxed{
 \text{Maximum useful capability}
 \quad
@@ -1896,7 +1884,7 @@ optimize inference
 \quad
 \text{quality, latency, reliability, and cost constraints}
 }
-]
+$$
 
 The central lesson is that an AI engineer should think of every token, model invocation, GPU cycle, byte of context, and millisecond of latency as a **resource allocation decision**.
 
