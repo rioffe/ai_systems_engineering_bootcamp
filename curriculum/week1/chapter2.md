@@ -1276,7 +1276,7 @@ And that distinction becomes increasingly important as the system grows.
 
 ---
 
-# Key Takeaways
+# 24. Key Takeaways
 
 1. **Context engineering is broader than prompt engineering.** It governs the entire information environment presented to the model.
 

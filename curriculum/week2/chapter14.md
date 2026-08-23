@@ -1923,7 +1923,7 @@ If not:
 
 ---
 
-# Key Takeaways
+# 37. Key Takeaways
 
 1. **Architecture review is the transition from implementation to systems engineering.** The question changes from "Can I build it?" to "Can I defend the design?"
 

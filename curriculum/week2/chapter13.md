@@ -1732,7 +1732,7 @@ It is to **measure and control it**.
 
 ---
 
-# Key Takeaways
+# 33. Key Takeaways
 
 1. **AI testing is different because outputs are distributions, not fixed values.** The correct abstraction is behavioral acceptance rather than exact string equality.
 

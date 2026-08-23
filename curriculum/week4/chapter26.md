@@ -1448,7 +1448,7 @@ $$
 
 ---
 
-# Key Takeaways
+# 35. Key Takeaways
 
 1. **Put the product in front of real users as early as possible.**
 

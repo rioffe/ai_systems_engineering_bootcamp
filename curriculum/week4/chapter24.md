@@ -1315,7 +1315,7 @@ That is the central skill being developed.
 
 ---
 
-# Key Takeaways
+# 25. Key Takeaways
 
 1. **An MVP is the smallest complete system capable of testing a product hypothesis.**
    It is not simply the smallest amount of code.

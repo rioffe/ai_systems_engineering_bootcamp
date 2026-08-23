@@ -1355,7 +1355,7 @@ If you cannot answer that question from telemetry and evaluation data, the syste
 
 ---
 
-# Key Takeaways
+# 28. Key Takeaways
 
 1. **RAG is not “embeddings + vector database.”** It is a multi-stage information-retrieval and generation system.
 

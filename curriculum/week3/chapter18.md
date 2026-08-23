@@ -1623,7 +1623,7 @@ This experiment demonstrates one of the central ideas of modern AI engineering:
 
 ---
 
-# Key Takeaways
+# 33. Key Takeaways
 
 1. **Agentic development is fundamentally a feedback loop.**
 

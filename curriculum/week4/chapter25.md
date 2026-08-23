@@ -1487,7 +1487,7 @@ Before declaring the MVP complete, verify:
 
 ---
 
-# Key Takeaways
+# 31. Key Takeaways
 
 1. **Day 25 is the transition from specification to execution.**
    The product has been defined; now the system must be built.

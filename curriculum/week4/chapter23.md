@@ -1192,7 +1192,7 @@ The difference is that these engineering mechanisms now support systems that can
 
 ---
 
-# Key Takeaways
+# 21. Key Takeaways
 
 1. **AI-native products are not simply existing products with AI features.**
    They redesign the product around the economics of cheap intelligence.

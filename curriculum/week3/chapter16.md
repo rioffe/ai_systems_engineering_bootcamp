@@ -1011,7 +1011,7 @@ That is the central lesson of Day 16.
 
 ---
 
-# Key Takeaways
+# 20. Key Takeaways
 
 1. **Specification engineering is the discipline of converting intent into a precise, testable system contract.**
 2. **A vague request creates a large solution space.**

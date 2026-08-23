@@ -1605,7 +1605,7 @@ This is the correct engineering objective.
 
 ---
 
-# Key Takeaways
+# 41. Key Takeaways
 
 1. **Multi-agent systems are not automatically better than single-agent systems.**
 2. **Use multiple agents when there is a concrete reason:** parallelism, specialization, independent verification, context isolation, or failure containment.

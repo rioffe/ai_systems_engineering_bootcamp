@@ -1821,7 +1821,7 @@ It makes them more economically consequential.
 
 ---
 
-# Key Takeaways
+# 31. Key Takeaways
 
 1. **Performance and economics are architectural concerns.** Model calls consume real latency, compute, memory, quota, and money.
 

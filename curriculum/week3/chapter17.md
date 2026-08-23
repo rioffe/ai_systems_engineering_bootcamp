@@ -1590,7 +1590,7 @@ That is the core problem of context engineering.
 
 ---
 
-# Key Takeaways
+# 31. Key Takeaways
 
 1. **Context is one of the primary resources of an AI agent.**
    Model capability alone is insufficient; the model must receive the right information.

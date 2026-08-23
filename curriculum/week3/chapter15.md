@@ -1287,7 +1287,7 @@ That is the fundamental conceptual transition.
 
 ---
 
-# Key Takeaways
+# 18. Key Takeaways
 
 1. **A coding agent is not an LLM.**
    It is an LLM embedded inside a runtime that provides context, tools, state, permissions, execution, and verification.

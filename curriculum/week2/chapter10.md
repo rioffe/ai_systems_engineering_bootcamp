@@ -1379,7 +1379,7 @@ Reliability engineering therefore becomes the discipline of controlling both **f
 
 ---
 
-# Key Takeaways
+# 21. Key Takeaways
 
 1. **Reliability is a system property, not a component property.** High availability of individual services does not guarantee high availability of the complete AI workflow.
 

@@ -864,7 +864,7 @@ Finally, select the **top three** and write a one-paragraph product hypothesis f
 
 ---
 
-# Key Takeaways
+# 17. Key Takeaways
 
 1. **Start with problems, not AI capabilities.**
    An LLM, agent, or RAG system is a technology component, not a product.

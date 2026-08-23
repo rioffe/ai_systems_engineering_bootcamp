@@ -2028,3 +2028,31 @@ And that leads directly to the next problem: if the system can take multiple act
 
 That is the subject of evaluation.
 
+
+---
+
+# 36. Key Takeaways
+
+1. **An agent is a control loop, not a single model call.** It repeatedly plans, acts, observes, and updates state until a termination condition is met.
+
+2. **Prefer workflows over autonomy.** Use deterministic workflows when they suffice; add autonomy only where judgment or recovery genuinely helps.
+
+3. **Treat tools as APIs.** Tool definitions should be explicit, typed, validated, and versioned.
+
+4. **Keep authorization outside the model.** The model may request an action, but it cannot grant itself permission to execute it.
+
+5. **Make state explicit.** Do not allow critical state to exist only implicitly inside a prompt.
+
+6. **Separate observation from reasoning.** A retrieved fact is not the same as the model's interpretation of it.
+
+7. **Bound every loop.** Set explicit limits on steps, tokens, latency, cost, retries, and context size so the system always terminates.
+
+8. **Design failure paths first.** For every tool and every transition, specify what the runtime does when something goes wrong.
+
+9. **Instrument every step.** An agent without traces is very hard to debug; log tool selection, recovery, and termination.
+
+10. **Evaluate the loop, not just the answer.** Tool choice, argument correctness, recovery behavior, and final-answer quality all matter.
+
+The engineering shift is therefore:
+
+> **We no longer build only prompts. We build the deterministic boundaries—a bounded, authorized, observable, recoverable loop—around a probabilistic policy.**

@@ -1686,7 +1686,7 @@ Explicit SLOs and acceptance thresholds.
 
 ---
 
-# Key Takeaways
+# 40. Key Takeaways
 
 1. **A prototype demonstrates that a system can work; production engineering demonstrates that it can be trusted to keep working.**
 

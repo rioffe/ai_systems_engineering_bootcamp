@@ -1080,7 +1080,7 @@ And that is the fundamental transition this first week is designed to establish:
 
 ---
 
-## Key Takeaways
+## 19. Key Takeaways
 
 1. **LLMs are probabilistic components, not deterministic functions.** They produce a distribution over continuations, so the central engineering task is to wrap a reliable system around a probabilistic component.
 

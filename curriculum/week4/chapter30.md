@@ -1652,7 +1652,7 @@ That is the direction of travel.
 
 ---
 
-# Key Takeaways
+# 38. Key Takeaways
 
 1. **The software-development loop is changing.** Code generation increasingly sits inside a larger loop of specification, context, agents, verification, evaluation, and human judgment.
 

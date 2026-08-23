@@ -1066,7 +1066,7 @@ Only when the answer to all four is satisfactory do we have a production-ready A
 
 ---
 
-# Key Takeaways
+# 26. Key Takeaways
 
 1. **Final evaluation must be system-level.** Model benchmarks alone cannot establish production readiness.
 

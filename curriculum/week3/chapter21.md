@@ -1704,7 +1704,7 @@ The human controls the system and intervenes at meaningful decision boundaries.
 
 ---
 
-# Key Takeaways
+# 45. Key Takeaways
 
 1. **Day 21 is the transition from learning agent capabilities to practicing agentic engineering.**
 

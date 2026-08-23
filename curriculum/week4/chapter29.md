@@ -1082,7 +1082,7 @@ They can discuss token budgets and inference latency, but they can also explain 
 
 ---
 
-# Key Takeaways
+# 24. Key Takeaways
 
 1. **An architecture review is an engineering argument, not a feature tour.**
 

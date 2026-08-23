@@ -1460,7 +1460,7 @@ The goal is to construct a system in which **model compromise does not imply sys
 
 ---
 
-# Key Takeaways
+# 24. Key Takeaways
 
 1. **The LLM is not a security boundary.** Treat model-generated decisions and outputs as untrusted.
 

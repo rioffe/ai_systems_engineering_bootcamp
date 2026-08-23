@@ -1821,7 +1821,7 @@ the system is not yet ready for serious engineering.
 
 ---
 
-# Key Takeaways
+# 39. Key Takeaways
 
 1. **Evals are the foundation of reliable AI engineering.** Without them, application development becomes guesswork.
 
