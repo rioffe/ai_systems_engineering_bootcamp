@@ -31,6 +31,60 @@ The bootcamp covers four key pillars of AI engineering (mapped to Ng's four skil
 3. **Using Coding Agents** (Week 3): Learning to supervise and orchestrate AI agents.
 4. **Shaping the Build** (Week 4): Product design, evaluation, and deployment.
 
+## Table of Contents
+
+Reading order: front matter, then the 30 chapters grouped by week (Weeks 1–4 map to
+the four pillars above). Links point to the source Markdown, which renders on
+GitHub; for ready-to-read PDFs, see the [assembled book](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book.pdf)
+and the [two-level-TOC book](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book-local.pdf) in the [Repository layout](#repository-layout) above.
+
+### Front matter
+
+- [Introduction](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/introduction.md)
+- [License](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/license.md)
+
+### Week 1 — Building & Deploying AI Applications
+
+- [Chapter 1: Building AI Applications](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week1/chapter1.md)
+- [Chapter 2: Context Engineering](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week1/chapter2.md)
+- [Chapter 3: Retrieval-Augmented Generation](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week1/chapter3.md)
+- [Chapter 4: Evals](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week1/chapter4.md)
+- [Chapter 5: Agentic Workflows](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week1/chapter5.md)
+- [Chapter 6: Production AI](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week1/chapter6.md)
+- [Chapter 7: Week 1 Project](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week1/chapter7.md)
+
+### Week 2 — Software Engineering Fundamentals
+
+- [Chapter 8: Architecture: Designing AI Systems That Scale](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week2/chapter8.md)
+- [Chapter 9: Data Systems: Designing the State and Information Layer](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week2/chapter9.md)
+- [Chapter 10: Reliability Engineering](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week2/chapter10.md)
+- [Chapter 11: Security](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week2/chapter11.md)
+- [Chapter 12: Performance and Economics](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week2/chapter12.md)
+- [Chapter 13: Testing AI Systems](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week2/chapter13.md)
+- [Chapter 14: Architecture Review](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week2/chapter14.md)
+
+### Week 3 — Using Coding Agents
+
+- [Chapter 15: How Coding Agents Work](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week3/chapter15.md)
+- [Chapter 16: Specification Engineering](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week3/chapter16.md)
+- [Chapter 17: Agent Context Management](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week3/chapter17.md)
+- [Chapter 18: Agentic Development Loops](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week3/chapter18.md)
+- [Chapter 19: Multi-Agent Systems](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week3/chapter19.md)
+- [Chapter 20: Coding-Agent Safety](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week3/chapter20.md)
+- [Chapter 21: The Agentic Software Project](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week3/chapter21.md)
+
+### Week 4 — Shaping the Build
+
+- [Chapter 22: Product Thinking](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter22.md)
+- [Chapter 23: AI-Native Product Design](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter23.md)
+- [Chapter 24: MVP Design](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter24.md)
+- [Chapter 25: Build](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter25.md)
+- [Chapter 26: User Testing](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter26.md)
+- [Chapter 27: Production Hardening](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter27.md)
+- [Chapter 28: Final Evaluation](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter28.md)
+- [Chapter 29: Architecture and Product Review](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter29.md)
+- [Chapter 30: The AI Engineer's Future](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter30.md)
+
 ## Building PDFs
 
 Generating PDFs is driven by the **Makefile**, which wraps `md2pdf.sh` (the converter itself is invoked via `bash`, so it does not need to be executable when called through `make`).
