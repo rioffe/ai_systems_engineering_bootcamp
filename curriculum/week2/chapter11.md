@@ -317,19 +317,19 @@ Instead, permissions should be narrow:
 
 ```text
 Research agent
-    ├── read approved documents
-    ├── search approved sources
-    └── no writes
+    +-- read approved documents
+    +-- search approved sources
+    +-- no writes
 
 Coding agent
-    ├── read repository
-    ├── write repository
-    ├── run tests
-    └── no production credentials
+    +-- read repository
+    +-- write repository
+    +-- run tests
+    +-- no production credentials
 
 Deployment agent
-    ├── deploy approved artifact
-    └── no arbitrary shell access
+    +-- deploy approved artifact
+    +-- no arbitrary shell access
 ```
 
 This reduces blast radius.
@@ -444,12 +444,12 @@ For example:
 
 ```text
 Sandbox
- ├── /workspace       READ/WRITE
- ├── /tmp             READ/WRITE
- ├── ~/.ssh           DENY
- ├── production DB    DENY
- ├── host filesystem  DENY
- └── internet         DENY or allowlist
+ +-- /workspace       READ/WRITE
+ +-- /tmp             READ/WRITE
+ +-- ~/.ssh           DENY
+ +-- production DB    DENY
+ +-- host filesystem  DENY
+ +-- internet         DENY or allowlist
 ```
 
 The objective is not to trust the agent.
@@ -624,10 +624,10 @@ Consider:
 User
  ↓
 Agent
- ├── retrieval
- ├── memory
- ├── tools
- └── external APIs
+ +-- retrieval
+ +-- memory
+ +-- tools
+ +-- external APIs
 ```
 
 Potential leakage paths include:
@@ -813,37 +813,37 @@ A secure agent architecture should look something like:
 
 ```text
                          User
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │   Agent     │
-                    │    LLM      │
-                    └──────┬──────┘
-                           │
+                           |
+                           v
+                    +-------------+
+                    |   Agent     |
+                    |    LLM      |
+                    +------+------+
+                           |
                     proposed action
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │   Policy    │
-                    │    Layer    │
-                    └──────┬──────┘
-                           │
+                           |
+                           v
+                    +-------------+
+                    |   Policy    |
+                    |    Layer    |
+                    +------+------+
+                           |
                     authorization
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │    Tool     │
-                    │  Executor   │
-                    └──────┬──────┘
-                           │
+                           |
+                           v
+                    +-------------+
+                    |    Tool     |
+                    |  Executor   |
+                    +------+------+
+                           |
                      validation
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │  Sandbox    │
-                    └──────┬──────┘
-                           │
-                           ▼
+                           |
+                           v
+                    +-------------+
+                    |  Sandbox    |
+                    +------+------+
+                           |
+                           v
                     External system
 ```
 
@@ -925,7 +925,7 @@ This creates a powerful separation:
 
 ```text
 Model reasoning
-       ≠
+       !=
 Security authorization
 ```
 
@@ -1286,15 +1286,15 @@ Record:
 
 A useful metric is not merely:
 
-[
-AttackSuccessRate
-]
+$$
+\text{AttackSuccessRate}
+$$
 
 but also:
 
-[
-Impact \mid AttackSuccess
-]
+$$
+\text{Impact} \mid \text{AttackSuccess}
+$$
 
 An attack that causes the model to produce an incorrect sentence is very different from one that:
 
@@ -1497,28 +1497,28 @@ The architectural principle to carry forward is simple:
 ```text
                  Untrusted
                     LLM
-                     │
-                     ▼
-              ┌─────────────┐
-              │    Policy   │
-              │    Layer    │
-              └──────┬──────┘
-                     │
+                     |
+                     v
+              +-------------+
+              |    Policy   |
+              |    Layer    |
+              +------+------+
+                     |
               Authorization
-                     │
-                     ▼
-              ┌─────────────┐
-              │ Tool Runtime│
-              └──────┬──────┘
-                     │
+                     |
+                     v
+              +-------------+
+              | Tool Runtime|
+              +------+------+
+                     |
                 Validation
-                     │
-                     ▼
-              ┌─────────────┐
-              │   Sandbox   │
-              └──────┬──────┘
-                     │
-                     ▼
+                     |
+                     v
+              +-------------+
+              |   Sandbox   |
+              +------+------+
+                     |
+                     v
               External System
 ```
 
