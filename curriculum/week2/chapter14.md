@@ -42,21 +42,21 @@ A useful abstraction is:
 
 ```text
                     System Specification
-                           │
-                           ▼
+                           |
+                           v
                     Architecture
-                           │
-          ┌────────────────┼────────────────┐
-          │                │                │
+                           |
+          +----------------+----------------+
+          |                |                |
        Behavior         Quality          Economics
-          │                │                │
+          |                |                |
       features       reliability       cost
       workflows      security          capacity
       interfaces     performance       scalability
-          │                │                │
-          └────────────────┼────────────────┘
-                           │
-                           ▼
+          |                |                |
+          +----------------+----------------+
+                           |
+                           v
                      Architecture
                        Decision
 ```
@@ -143,17 +143,17 @@ Neither is universally better.
 
 Architecture is therefore fundamentally an optimization problem:
 
-[
+$$
 A^* =
 \arg\max_A
 Utility(A)
-]
+$$
 
 subject to constraints involving:
 
-[
+$$
 Cost,\ Latency,\ Reliability,\ Security,\ Quality,\ Complexity
-]
+$$
 
 The architecture review makes those tradeoffs explicit.
 
@@ -206,51 +206,51 @@ The first deliverable is the system architecture.
 A reasonable production architecture might look like:
 
 ```text
-                         ┌──────────────┐
-                         │     User     │
-                         └──────┬───────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │   API Gateway   │
-                       │ Auth / Rate     │
-                       │ Limiting        │
-                       └────────┬────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │ Application /   │
-                       │ Agent Runtime   │
-                       └────────┬────────┘
-                                │
-             ┌──────────────────┼──────────────────┐
-             │                  │                  │
-             ▼                  ▼                  ▼
-      ┌────────────┐     ┌──────────────┐   ┌─────────────┐
-      │ Retrieval  │     │ Context      │   │ Tool        │
-      │ Service    │     │ Manager      │   │ Gateway     │
-      └─────┬──────┘     └──────┬───────┘   └──────┬──────┘
-            │                   │                  │
-            ▼                   │                  ▼
-      ┌────────────┐            │           ┌─────────────┐
-      │ Vector DB  │            │           │ External    │
-      └────────────┘            │           │ Systems     │
-                                │           └─────────────┘
-                                ▼
-                         ┌──────────────┐
-                         │ Model Router │
-                         └──────┬───────┘
-                                │
-                     ┌──────────┴──────────┐
-                     ▼                     ▼
-                ┌─────────┐           ┌─────────┐
-                │ Model A │           │ Model B │
-                └─────────┘           └─────────┘
+                         +--------------+
+                         |     User     |
+                         +------+-------+
+                                |
+                                v
+                       +-----------------+
+                       |   API Gateway   |
+                       | Auth / Rate     |
+                       | Limiting        |
+                       +--------+--------+
+                                |
+                                v
+                       +-----------------+
+                       | Application /   |
+                       | Agent Runtime   |
+                       +--------+--------+
+                                |
+             +------------------+------------------+
+             |                  |                  |
+             v                  v                  v
+      +------------+     +--------------+   +-------------+
+      | Retrieval  |     | Context      |   | Tool        |
+      | Service    |     | Manager      |   | Gateway     |
+      +-----+------+     +------+-------+   +------+------+
+            |                   |                  |
+            v                   |                  v
+      +------------+            |           +-------------+
+      | Vector DB  |            |           | External    |
+      +------------+            |           | Systems     |
+                                |           +-------------+
+                                v
+                         +--------------+
+                         | Model Router |
+                         +------+-------+
+                                |
+                     +----------+----------+
+                     v                     v
+                +---------+           +---------+
+                | Model A |           | Model B |
+                +---------+           +---------+
 
-             ┌─────────────────────────────────────┐
-             │ Observability / Logs / Traces /     │
-             │ Metrics / Evals                     │
-             └─────────────────────────────────────┘
+             +-------------------------------------+
+             | Observability / Logs / Traces /     |
+             | Metrics / Evals                     |
+             +-------------------------------------+
 ```
 
 The diagram should answer:
@@ -352,17 +352,17 @@ For example:
 
 ```text
                  Trust Boundary
-                       │
-User ──────────────────┤
-                       │
+                       |
+User ------------------|
+                       |
                  Application
-                       │
+                       |
                  Policy Boundary
-                       │
+                       |
                     Agent
-                       │
+                       |
                 Tool Boundary
-                       │
+                       |
                 External System
 ```
 
@@ -526,9 +526,9 @@ Consider an agent calling a tool:
 
 The tool interface should specify:
 
-[
+$$
 Input \rightarrow Output
-]
+$$
 
 including failure behavior.
 
@@ -599,57 +599,57 @@ A simple data model might contain:
 
 ```text
 User
- ├── id
- ├── preferences
- └── permissions
+ +-- id
+ +-- preferences
+ +-- permissions
 
 Document
- ├── id
- ├── owner_id
- ├── metadata
- └── content
+ +-- id
+ +-- owner_id
+ +-- metadata
+ +-- content
 
 Chunk
- ├── id
- ├── document_id
- ├── text
- ├── embedding
- └── metadata
+ +-- id
+ +-- document_id
+ +-- text
+ +-- embedding
+ +-- metadata
 
 Conversation
- ├── id
- ├── user_id
- └── state
+ +-- id
+ +-- user_id
+ +-- state
 
 Message
- ├── id
- ├── conversation_id
- ├── role
- ├── content
- └── timestamp
+ +-- id
+ +-- conversation_id
+ +-- role
+ +-- content
+ +-- timestamp
 
 ToolExecution
- ├── id
- ├── conversation_id
- ├── tool
- ├── arguments
- ├── result
- └── status
+ +-- id
+ +-- conversation_id
+ +-- tool
+ +-- arguments
+ +-- result
+ +-- status
 ```
 
 The model should capture ownership and authorization.
 
 For example:
 
-[
+$$
 Document.owner_id = User.id
-]
+$$
 
 and retrieval should enforce:
 
-[
+$$
 Accessible(u,d)
-]
+$$
 
 before returning document (d) to user (u).
 
@@ -805,23 +805,23 @@ Application
 An agent introduces additional attack paths:
 
 ```text
-                 ┌── User
-                 │
-                 ├── Document
-                 │
-Attacker ────────┼── Tool result
-                 │
-                 ├── Retrieved content
-                 │
-                 └── External API
-                          │
-                          ▼
+                 +-- User
+                 |
+                 +-- Document
+                 |
+Attacker --------+-- Tool result
+                 |
+                 +-- Retrieved content
+                 |
+                 +-- External API
+                          |
+                          v
                          Agent
-                          │
-                          ▼
+                          |
+                          v
                     Tool Gateway
-                          │
-                          ▼
+                          |
+                          v
                     External System
 ```
 
@@ -921,10 +921,9 @@ Now apply Day 12.
 
 Estimate:
 
-[
+$$
 C_{system}
-==========
-
+ = 
 C_{model}
 +
 C_{retrieval}
@@ -936,31 +935,29 @@ C_{compute}
 C_{network}
 +
 C_{observability}
-]
+$$
 
 For inference:
 
-[
+$$
 C_{model}
-=========
-
+ = 
 N_{requests}
 (T_{input}P_{input}
 +
 T_{output}P_{output})
-]
+$$
 
 For an agent:
 
-[
+$$
 C_{task}
-========
-
+ = 
 \sum_{i=1}^{k}
 C_i
-]
+$$
 
-where (k) is the number of model/tool operations.
+where $k$ is the number of model/tool operations.
 
 Build assumptions.
 
@@ -1024,17 +1021,17 @@ This is sensitivity analysis.
 
 Mathematically:
 
-[
+$$
 \frac{\partial C}{\partial T_{input}}
-]
+$$
 
 tells us how sensitive cost is to input tokens.
 
 Similarly:
 
-[
+$$
 \frac{\partial C}{\partial N_{requests}}
-]
+$$
 
 tells us how strongly cost scales with traffic.
 
@@ -1096,24 +1093,23 @@ Suppose:
 
 ```text
 Application
-    │
-    ├── Vector DB
-    │
-    ├── Model Provider
-    │
-    └── Tool API
+    |
+    +-- Vector DB
+    |
+    +-- Model Provider
+    |
+    +-- Tool API
 ```
 
 The system's availability depends on those dependencies.
 
 If every dependency must be available:
 
-[
+$$
 A_{system}
-==========
-
+ = 
 A_1 A_2 A_3
-]
+$$
 
 If:
 
@@ -1125,17 +1121,17 @@ A3 = 99.9%
 
 then:
 
-[
+$$
 A_{system}
 \approx
 0.999 \times 0.995 \times 0.999
-]
+$$
 
 which is approximately:
 
-[
-99.3%
-]
+$$
+99.3\%
+$$
 
 The more dependencies you introduce, the more carefully you need to design failure handling.
 
@@ -1188,11 +1184,11 @@ For example:
 
 ```text
                     Application
-                         │
-             ┌───────────┼───────────┐
-             │           │           │
+                         |
+             +-----------+-----------+
+             |           |           |
            Model       Vector       Tools
-             │           │           │
+             |           |           |
           Provider     Storage      APIs
 ```
 
@@ -1246,17 +1242,17 @@ The runtime should enforce these limits outside the model.
 
 For example:
 
-[
+$$
 Steps \leq S_{max}
-]
+$$
 
-[
+$$
 Cost \leq C_{max}
-]
+$$
 
-[
+$$
 Time \leq T_{max}
-]
+$$
 
 The agent is not allowed to negotiate these limits.
 
@@ -1272,23 +1268,23 @@ The evaluation architecture might be:
 
 ```text
                   Test Dataset
-                       │
-                       ▼
+                       |
+                       v
                  System Under Test
-                       │
-                ┌──────┼──────┐
-                │      │      │
+                       |
+                +------+------+
+                |      |      |
              Quality Safety Tools
-                │      │      │
-                └──────┼──────┘
-                       │
-                       ▼
+                |      |      |
+                +------+------+
+                       |
+                       v
                   Eval Engine
-                       │
-                       ▼
+                       |
+                       v
                 Regression Store
-                       │
-                       ▼
+                       |
+                       v
                  Release Gate
 ```
 
@@ -1350,26 +1346,26 @@ It belongs in the architecture:
 
 ```text
                   Development
-                       │
-                       ▼
+                       |
+                       v
                  Regression
-                       │
-                       ▼
+                       |
+                       v
                   Deployment
-                       │
-                       ▼
+                       |
+                       v
                   Production
-                       │
-                       ▼
+                       |
+                       v
                  Monitoring
-                       │
-                       ▼
+                       |
+                       v
                   New failures
-                       │
-                       ▼
+                       |
+                       v
                 Evaluation data
-                       │
-                       └──────────► Regression
+                       |
+                       +----------> Regression
 ```
 
 This creates a self-reinforcing engineering process.
@@ -1386,10 +1382,9 @@ Finally, model system performance.
 
 Decompose latency:
 
-[
+$$
 L_{total}
-=========
-
+ = 
 L_{API}
 +
 L_{retrieval}
@@ -1399,25 +1394,23 @@ L_{context}
 L_{model}
 +
 L_{tools}
-]
+$$
 
 For an agent with sequential model calls:
 
-[
+$$
 L_{total}
-=========
-
+ = 
 \sum_i L_i
-]
+$$
 
 For parallel operations:
 
-[
+$$
 L_{parallel}
-============
-
+ = 
 \max(L_1,\ldots,L_n)
-]
+$$
 
 Define:
 
@@ -1452,15 +1445,15 @@ and each request requires:
 
 Then the system requires approximately:
 
-[
+$$
 200,000
-]
+$$
 
 input tokens/sec and:
 
-[
+$$
 50,000
-]
+$$
 
 output tokens/sec.
 
@@ -1567,7 +1560,7 @@ The final deliverable should look something like:
 ```text
 Personal Research Assistant
 Architecture Review
-────────────────────────────────────
+------------------------------------
 
 1. Executive Summary
 
@@ -1646,7 +1639,7 @@ The reviewer should ask:
 
 > What is the bottleneck?
 
-> What happens at 10× traffic?
+> What happens at 10x traffic?
 
 ### Economics
 
@@ -1672,19 +1665,19 @@ A useful mental model is:
 
 ```text
              Normal operation
-                    │
-                    ▼
+                    |
+                    v
              Architecture
-                    │
-        ┌───────────┼───────────┐
-        │           │           │
+                    |
+        +-----------+-----------+
+        |           |           |
       Failure     Attack      Scale
-        │           │           │
-        ▼           ▼           ▼
+        |           |           |
+        v           v           v
      degrade     contain     scale
-        │           │           │
-        └───────────┼───────────┘
-                    ▼
+        |           |           |
+        +-----------+-----------+
+                    v
                  recover
 ```
 
@@ -1772,12 +1765,12 @@ By the end of the review, you should be able to express the system as a collecti
 
 ```text
                     System
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
+                       |
+        +--------------+--------------+
+        |              |              |
     Functional      Quality        Operational
      Contract       Contract        Contract
-        │              │              │
+        |              |              |
      behavior       quality        cost
      workflow       safety         latency
      API            reliability    capacity
@@ -1805,7 +1798,7 @@ Evaluation
 Operation
       ↓
 Feedback
-      └───────────────→ Specification
+      +---------------→ Specification
 ```
 
 ---
@@ -1978,14 +1971,14 @@ production architecture
 
 ```text
 Architecture
-    │
-    ├── API
-    ├── Data
-    ├── Security
-    ├── Cost
-    ├── Reliability
-    ├── Evaluation
-    └── Performance
+    |
+    +-- API
+    +-- Data
+    +-- Security
+    +-- Cost
+    +-- Reliability
+    +-- Evaluation
+    +-- Performance
 ```
 
 17. **The architecture is ultimately a set of guarantees and tradeoffs.** The implementation is merely one realization of those decisions.
