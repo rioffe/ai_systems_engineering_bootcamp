@@ -1,4 +1,4 @@
-# Day 10 — Reliability Engineering
+# Chapter 10: Reliability Engineering
 
 AI systems are probabilistic systems embedded inside deterministic infrastructure.
 
@@ -54,7 +54,7 @@ Not whether it fails.
 
 ---
 
-# 1. Reliability Is a System Property
+## 1. Reliability Is a System Property
 
 A common mistake is to think about reliability component-by-component.
 
@@ -117,7 +117,7 @@ Reliability must therefore be designed at the **system level**.
 
 ---
 
-# 2. Failure Domains
+## 2. Failure Domains
 
 A failure domain is a set of components that can fail together.
 
@@ -191,7 +191,7 @@ That is a much more useful reliability specification than simply saying "high av
 
 ---
 
-# 3. Timeouts
+## 3. Timeouts
 
 Every external operation needs a timeout.
 
@@ -248,7 +248,7 @@ Timeouts should therefore be treated as **budgets**, not arbitrary numbers.
 
 ---
 
-# 4. Retries
+## 4. Retries
 
 Transient failures are common:
 
@@ -319,7 +319,7 @@ Attempt 4: 4 s
 
 with jitter applied to avoid synchronization.
 
-### Do not retry everything
+#### Do not retry everything
 
 A useful classification is:
 
@@ -363,7 +363,7 @@ Every retry consumes:
 
 ---
 
-# 5. Idempotency
+## 5. Idempotency
 
 Retries are safe only when repeated operations do not create unintended side effects.
 
@@ -433,7 +433,7 @@ The agent should never be allowed to infer that "retry" means "perform the side 
 
 ---
 
-# 6. Circuit Breakers
+## 6. Circuit Breakers
 
 Suppose an external service is failing continuously.
 
@@ -489,7 +489,7 @@ For AI applications, circuit breakers are especially useful around:
 
 ---
 
-# 7. Graceful Degradation
+## 7. Graceful Degradation
 
 A reliable system does not necessarily provide its full functionality during failure.
 
@@ -546,7 +546,7 @@ This is more reliable than producing a fluent but ungrounded answer.
 
 ---
 
-# 8. Load Shedding
+## 8. Load Shedding
 
 When demand exceeds capacity, something must give.
 
@@ -630,7 +630,7 @@ Useful controls include:
 
 ---
 
-# 9. SLI, SLO, and Reliability Targets
+## 9. SLI, SLO, and Reliability Targets
 
 Reliability needs measurable definitions.
 
@@ -712,7 +712,7 @@ If the model answers every request but 20% of answers are materially incorrect, 
 
 ---
 
-# 10. Disaster Recovery
+## 10. Disaster Recovery
 
 Reliability engineering must consider failures larger than individual requests.
 
@@ -722,7 +722,7 @@ Disaster recovery asks:
 
 Two classic metrics are:
 
-### RTO — Recovery Time Objective
+#### RTO — Recovery Time Objective
 
 How quickly must the system be restored?
 
@@ -730,7 +730,7 @@ $$
 RTO = \text{maximum acceptable recovery time}
 $$
 
-### RPO — Recovery Point Objective
+#### RPO — Recovery Point Objective
 
 How much data loss is acceptable?
 
@@ -770,13 +770,13 @@ The **AI system is a combination of state, configuration, models, tools, and orc
 
 ---
 
-# 11. AI-Specific Failure Modes
+## 11. AI-Specific Failure Modes
 
 Traditional reliability engineering is necessary but insufficient.
 
 AI systems have failure modes that are fundamentally behavioral.
 
-## Model unavailable
+### Model unavailable
 
 The provider returns:
 
@@ -805,7 +805,7 @@ The system should not silently fabricate a response.
 
 ---
 
-## Model behavior changes
+### Model behavior changes
 
 A model provider can change the model behind an API.
 
@@ -835,7 +835,7 @@ This is why production AI systems require **continuous evaluation**, not merely 
 
 ---
 
-## Malformed output
+### Malformed output
 
 LLMs generate strings.
 
@@ -889,7 +889,7 @@ The final execution layer should accept only validated data.
 
 ---
 
-# 12. Hallucinations Are Reliability Failures
+## 12. Hallucinations Are Reliability Failures
 
 Hallucination is often discussed as a model-quality problem.
 
@@ -936,7 +936,7 @@ Abstention is often a reliability feature.
 
 ---
 
-# 13. Retrieval Failure
+## 13. Retrieval Failure
 
 RAG systems introduce another failure domain.
 
@@ -1004,7 +1004,7 @@ Every stage can fail independently.
 
 ---
 
-# 14. Context Overflow
+## 14. Context Overflow
 
 Context is a finite resource.
 
@@ -1052,7 +1052,7 @@ A system that works for a five-turn conversation but fails after 200 turns is no
 
 ---
 
-# 15. The Runaway Agent
+## 15. The Runaway Agent
 
 One of the most distinctive AI reliability failures is the runaway agent.
 
@@ -1111,7 +1111,7 @@ The runtime must enforce termination.
 
 ---
 
-# 16. Reliability Through Defense in Depth
+## 16. Reliability Through Defense in Depth
 
 A mature AI system does not have one reliability mechanism.
 
@@ -1167,7 +1167,7 @@ The deterministic runtime should enforce those properties.
 
 ---
 
-# 17. Failure-Mode Design
+## 17. Failure-Mode Design
 
 One of the most useful exercises is to construct a failure-mode table.
 
@@ -1200,7 +1200,7 @@ For each failure, ask:
 
 ---
 
-# 18. The Reliability Exercise
+## 18. The Reliability Exercise
 
 Take the Week 1 Personal Research Assistant.
 
@@ -1239,7 +1239,7 @@ User-visible behavior
 
 For example:
 
-### Scenario: LLM timeout
+#### Scenario: LLM timeout
 
 ```text
 LLM timeout
@@ -1273,7 +1273,7 @@ A reliable AI system must satisfy all three.
 
 ---
 
-# 19. Reliability as a Specification
+## 19. Reliability as a Specification
 
 Reliability should not be something added after implementation.
 
@@ -1327,7 +1327,7 @@ Reliability as specification
 
 ---
 
-# 20. The Reliability Mindset
+## 20. The Reliability Mindset
 
 The deepest lesson is not any particular mechanism.
 
@@ -1379,7 +1379,7 @@ Reliability engineering therefore becomes the discipline of controlling both **f
 
 ---
 
-# 21. Key Takeaways
+## 21. Key Takeaways
 
 1. **Reliability is a system property, not a component property.** High availability of individual services does not guarantee high availability of the complete AI workflow.
 

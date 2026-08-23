@@ -1,21 +1,21 @@
-# Day 19 — Multi-Agent Systems
+# Chapter 19: Multi-Agent Systems
 
-The previous days established a progression:
+The previous chapters established a progression:
 
 ```text
-Day 15
+Chapter 15
 Coding agent
     ↓
-Day 16
+Chapter 16
 Specification
     ↓
-Day 17
+Chapter 17
 Context engineering
     ↓
-Day 18
+Chapter 18
 Development loop
     ↓
-Day 19
+Chapter 19
 Multiple agents
 ```
 
@@ -59,7 +59,7 @@ Agent multiplication is often cargo cult.
 
 ---
 
-# 1. What Is a Multi-Agent System?
+## 1. What Is a Multi-Agent System?
 
 A simple coding agent can be modeled as:
 
@@ -121,7 +121,7 @@ If there is no strong answer, a multi-agent architecture may simply add complexi
 
 ---
 
-# 2. One Agent vs. Multiple Agents
+## 2. One Agent vs. Multiple Agents
 
 Suppose a task is:
 
@@ -191,7 +191,7 @@ Use multiple agents only when the gains outweigh the costs.
 
 ---
 
-# 3. The Four Fundamental Patterns
+## 3. The Four Fundamental Patterns
 
 There are four particularly important multi-agent patterns:
 
@@ -204,7 +204,7 @@ These patterns represent different ways of distributing work and information.
 
 ---
 
-# 4. Pattern 1 — Parallel Agents
+## 4. Pattern 1 — Parallel Agents
 
 The simplest pattern is parallel execution.
 
@@ -250,7 +250,7 @@ This pattern works particularly well when subtasks are:
 
 ---
 
-# 5. Parallelism and the Critical Path
+## 5. Parallelism and the Critical Path
 
 Parallelism can reduce wall-clock time.
 
@@ -294,7 +294,7 @@ The architecture becomes a communication system rather than a parallel computati
 
 ---
 
-# 6. Parallel Agents for Independent Perspectives
+## 6. Parallel Agents for Independent Perspectives
 
 Parallelism is not only about speed.
 
@@ -336,7 +336,7 @@ If all agents make exactly the same mistake, adding agents provides little value
 
 ---
 
-# 7. Pattern 2 — Pipeline
+## 7. Pattern 2 — Pipeline
 
 In a pipeline, agents operate sequentially.
 
@@ -387,7 +387,7 @@ Each agent has a narrower responsibility.
 
 ---
 
-# 8. Pipeline Failure Propagation
+## 8. Pipeline Failure Propagation
 
 Pipelines have an important weakness:
 
@@ -429,7 +429,7 @@ Without them, specialization can amplify upstream errors.
 
 ---
 
-# 9. Pattern 3 — Manager/Worker
+## 9. Pattern 3 — Manager/Worker
 
 A manager agent decomposes the task and delegates work.
 
@@ -469,7 +469,7 @@ The workers focus on execution.
 
 ---
 
-# 10. Manager/Worker Resembles Distributed Computing
+## 10. Manager/Worker Resembles Distributed Computing
 
 The manager/worker pattern has a strong analogy to distributed systems.
 
@@ -505,7 +505,7 @@ The same engineering disciplines apply.
 
 ---
 
-# 11. The Manager Can Become a Bottleneck
+## 11. The Manager Can Become a Bottleneck
 
 The manager itself can become a single point of failure.
 
@@ -551,7 +551,7 @@ Again:
 
 ---
 
-# 12. Pattern 4 — Critic
+## 12. Pattern 4 — Critic
 
 A particularly useful pattern is:
 
@@ -583,13 +583,13 @@ Developer
 Revised implementation
 ```
 
-This resembles the development loop from Day 18.
+This resembles the development loop from Chapter 18.
 
 The difference is that the critic is an explicit reasoning component.
 
 ---
 
-# 13. Critic Agents and Independent Evaluation
+## 13. Critic Agents and Independent Evaluation
 
 A critic can evaluate:
 
@@ -636,7 +636,7 @@ may simply reproduce the same blind spot.
 
 ---
 
-# 14. Adversarial Criticism
+## 14. Adversarial Criticism
 
 A stronger critic can be explicitly instructed to search for failure.
 
@@ -672,7 +672,7 @@ The developer revises.
 
 ---
 
-# 15. Multi-Agent Systems and Diversity
+## 15. Multi-Agent Systems and Diversity
 
 The strongest justification for multiple agents is often **diversity**.
 
@@ -720,7 +720,7 @@ Changing the agent's name from "developer" to "reviewer" does not automatically 
 
 ---
 
-# 16. Independence Can Come From Different Contexts
+## 16. Independence Can Come From Different Contexts
 
 Agents can be diversified through different information.
 
@@ -748,7 +748,7 @@ Context diversity can produce reasoning diversity.
 
 ---
 
-# 17. Independence Can Come From Different Objectives
+## 17. Independence Can Come From Different Objectives
 
 Agents can also have different optimization objectives.
 
@@ -775,7 +775,7 @@ The system then needs an integration mechanism.
 
 ---
 
-# 18. The Integration Problem
+## 18. The Integration Problem
 
 Multiple agents produce multiple outputs.
 
@@ -800,7 +800,7 @@ How does the system decide?
 
 Possible mechanisms include:
 
-### Voting
+#### Voting
 
 ```text
 A → PostgreSQL
@@ -810,7 +810,7 @@ C → PostgreSQL
 Winner: PostgreSQL
 ```
 
-### Manager synthesis
+#### Manager synthesis
 
 ```text
 Manager
@@ -820,7 +820,7 @@ Compare arguments
 Select architecture
 ```
 
-### Evidence-based selection
+#### Evidence-based selection
 
 ```text
 Proposal
@@ -838,7 +838,7 @@ The third approach is often stronger because it moves the decision from opinion 
 
 ---
 
-# 19. Consensus Is Not Correctness
+## 19. Consensus Is Not Correctness
 
 A dangerous assumption is:
 
@@ -866,7 +866,7 @@ This is why multi-agent systems should still have verifiers.
 
 ---
 
-# 20. Multi-Agent Systems Need a Shared World Model
+## 20. Multi-Agent Systems Need a Shared World Model
 
 Agents need some representation of shared state.
 
@@ -908,7 +908,7 @@ Possible solutions include:
 
 ---
 
-# 21. Structured Communication
+## 21. Structured Communication
 
 Agent-to-agent communication should ideally be structured.
 
@@ -942,7 +942,7 @@ The same principle applies to agent communication as to conventional APIs.
 
 ---
 
-# 22. Agent Interfaces
+## 22. Agent Interfaces
 
 A mature multi-agent system should define explicit contracts.
 For example:
@@ -985,11 +985,11 @@ Now the agents resemble services in a distributed system.
 
 ---
 
-# 23. Shared State vs. Isolated State
+## 23. Shared State vs. Isolated State
 
 There is an important architectural choice.
 
-### Shared state
+#### Shared state
 
 All agents see the same evolving repository.
 ```text
@@ -1012,7 +1012,7 @@ Risks:
 * accidental interference
 * inconsistent intermediate states
 
-### Isolated state
+#### Isolated state
 
 Each agent works on a branch or workspace.
 ```text
@@ -1040,7 +1040,7 @@ This is another distributed-systems tradeoff.
 
 ---
 
-# 24. Multi-Agent Coding Systems and Git
+## 24. Multi-Agent Coding Systems and Git
 
 Version control becomes particularly useful.
 Imagine:
@@ -1073,11 +1073,11 @@ after integration.
 
 ---
 
-# 25. When Multi-Agent Systems Actually Make Sense
+## 25. When Multi-Agent Systems Actually Make Sense
 
 Multiple agents are particularly useful when at least one of the following is true.
 
-### 1. Tasks are naturally parallel
+#### 1. Tasks are naturally parallel
 
 ```text
 Research A
@@ -1085,7 +1085,7 @@ Research B
 Research C
 ```
 
-### 2. Tasks require different expertise
+#### 2. Tasks require different expertise
 
 ```text
 Developer
@@ -1093,7 +1093,7 @@ Security specialist
 Performance specialist
 ```
 
-### 3. Independent verification is valuable
+#### 3. Independent verification is valuable
 
 ```text
 Generator
@@ -1101,7 +1101,7 @@ Generator
 Independent critic
 ```
 
-### 4. The problem is too large for one context
+#### 4. The problem is too large for one context
 
 ```text
 Large repository
@@ -1109,7 +1109,7 @@ Large repository
 Subsystem agents
 ```
 
-### 5. Work has different time scales
+#### 5. Work has different time scales
 
 ```text
 Fast worker:
@@ -1120,46 +1120,46 @@ Background worker:
 documentation analysis
 ```
 
-### 6. Failure isolation matters
+#### 6. Failure isolation matters
 
 One agent can experiment without contaminating another's workspace.
 
 ---
 
-# 26. When Multi-Agent Systems Do Not Make Sense
+## 26. When Multi-Agent Systems Do Not Make Sense
 
 Avoid multiple agents when:
 
-### The task is small
+#### The task is small
 
 ```text
 Rename a variable.
 ```
 One agent is enough.
 
-### The subtasks are highly coupled
+#### The subtasks are highly coupled
 
 If every agent constantly needs every other agent's output, parallelism creates communication overhead.
 
-### The task is sequential by nature
+#### The task is sequential by nature
 
 Some reasoning must happen in a strict order.
 
-### There is no meaningful specialization
+#### There is no meaningful specialization
 
 Five identical agents may simply produce five similar answers.
 
-### Verification is already strong
+#### Verification is already strong
 
 If a deterministic test suite can reliably determine correctness, adding several critics may add little value.
 
-### Coordination dominates computation
+#### Coordination dominates computation
 
 If agents spend more effort communicating than solving the problem, the architecture is counterproductive.
 
 ---
 
-# 27. Amdahl's Law for Agents
+## 27. Amdahl's Law for Agents
 
 Parallel agent systems are constrained by the same principle as parallel computing.
 Suppose fraction $P$ of the workload can be parallelized.
@@ -1202,7 +1202,7 @@ Therefore:
 
 ---
 
-# 28. Token Economics
+## 28. Token Economics
 
 Multi-agent systems can become expensive quickly.
 Suppose one agent consumes:
@@ -1241,7 +1241,7 @@ The correct question is therefore:
 
 ---
 
-# 29. Agent Multiplication as Cargo Cult
+## 29. Agent Multiplication as Cargo Cult
 
 There is a recurring failure mode in AI engineering:
 ```text
@@ -1268,7 +1268,7 @@ The remedy is empirical evaluation.
 
 ---
 
-# 30. The Right Experimental Question
+## 30. The Right Experimental Question
 
 Do not ask:
 
@@ -1305,7 +1305,7 @@ This may not justify the architecture.
 
 ---
 
-# 31. The Agent Ablation Test
+## 31. The Agent Ablation Test
 
 Ablation is one of the best tools for evaluating multi-agent architectures.
 Start with:
@@ -1335,7 +1335,7 @@ The results tell you where additional agents stop providing meaningful returns.
 
 ---
 
-# 32. The Marginal Value of an Agent
+## 32. The Marginal Value of an Agent
 
 We can define the marginal benefit of agent $i$ as:
 $$
@@ -1362,7 +1362,7 @@ This gives a quantitative way to resist architectural fashion.
 
 ---
 
-# 33. Multi-Agent Systems Should Still Have a Verifier
+## 33. Multi-Agent Systems Should Still Have a Verifier
 
 One of the most important architectural principles is:
 ```text
@@ -1391,7 +1391,7 @@ It makes verification even more important.
 
 ---
 
-# 34. A Practical Multi-Agent Coding Architecture
+## 34. A Practical Multi-Agent Coding Architecture
 
 A reasonable first implementation is:
 ```text
@@ -1423,7 +1423,7 @@ The verifier is.
 
 ---
 
-# 35. A More Minimal Architecture
+## 35. A More Minimal Architecture
 
 However, start simpler.
 A surprisingly powerful architecture may be:
@@ -1450,7 +1450,7 @@ Now the second agent has a demonstrated purpose.
 
 ---
 
-# 36. Multi-Agent Systems as Organizational Design
+## 36. Multi-Agent Systems as Organizational Design
 
 There is a deeper analogy.
 Traditional engineering organizations divide work among:
@@ -1477,7 +1477,7 @@ A multi-agent system with ten tightly coupled agents can easily become a distrib
 
 ---
 
-# 37. Agent Boundaries Should Follow Information Boundaries
+## 37. Agent Boundaries Should Follow Information Boundaries
 
 A strong principle for decomposition is:
 
@@ -1502,9 +1502,9 @@ The latter may simply create distributed complexity.
 
 ---
 
-# 38. Build One
+## 38. Build One
 
-For the Day 19 project, build a simple **Developer + Critic** system.
+For the Chapter 19 project, build a simple **Developer + Critic** system.
 ```text
                 Specification
                      ↓
@@ -1543,7 +1543,7 @@ The Verifier should remain independent.
 
 ---
 
-# 39. Instrument the System
+## 39. Instrument the System
 
 Measure:
 ```text
@@ -1573,9 +1573,9 @@ This gives you an empirical answer to:
 
 ---
 
-# 40. The Deeper Principle
+## 40. The Deeper Principle
 
-The progression from Day 15 through Day 19 can now be summarized:
+The progression from Chapter 15 through Chapter 19 can now be summarized:
 ```text
 Coding Agent
      ↓
@@ -1605,7 +1605,7 @@ This is the correct engineering objective.
 
 ---
 
-# 41. Key Takeaways
+## 41. Key Takeaways
 
 1. **Multi-agent systems are not automatically better than single-agent systems.**
 2. **Use multiple agents when there is a concrete reason:** parallelism, specialization, independent verification, context isolation, or failure containment.
@@ -1682,7 +1682,7 @@ $$
     }
     }
 $$
-The deepest lesson of Day 19 is therefore not how to build multi-agent systems.
+The deepest lesson of Chapter 19 is therefore not how to build multi-agent systems.
 It is how to **justify not building one**.
 A single well-contextualized, well-specified agent with a strong verification loop will often outperform a complicated collection of loosely coordinated agents.
 The engineering maturity comes from knowing the difference.

@@ -1,20 +1,20 @@
-# Day 20 — Coding-Agent Safety
+# Chapter 20: Coding-Agent Safety
 
-The previous days focused on making coding agents more capable:
+The previous chapters focused on making coding agents more capable:
 
 ```text
-Day 15 — Coding agents
+Chapter 15 — Coding agents
         ↓
-Day 16 — Specification engineering
+Chapter 16 — Specification engineering
         ↓
-Day 17 — Context engineering
+Chapter 17 — Context engineering
         ↓
-Day 18 — Development loops
+Chapter 18 — Development loops
         ↓
-Day 19 — Multi-agent systems
+Chapter 19 — Multi-agent systems
 ```
 
-Day 20 introduces the corresponding constraint:
+Chapter 20 introduces the corresponding constraint:
 
 > **The more capable an agent becomes, the more carefully its authority must be engineered.**
 
@@ -42,11 +42,11 @@ This is fundamentally a security and systems-engineering problem.
 
 ---
 
-# 1. From Code Generation to Agency
+## 1. From Code Generation to Agency
 
 Consider five progressively more capable agents.
 
-### Level 1 — Filesystem
+#### Level 1 — Filesystem
 
 ```text
 Agent
@@ -58,7 +58,7 @@ The agent can modify source code.
 
 Damage is generally localized to the workspace.
 
-### Level 2 — Shell
+#### Level 2 — Shell
 
 ```text
 Agent
@@ -78,7 +78,7 @@ spawn processes
 change permissions
 ```
 
-### Level 3 — Network
+#### Level 3 — Network
 
 ```text
 Agent
@@ -97,7 +97,7 @@ call APIs
 communicate externally
 ```
 
-### Level 4 — Database
+#### Level 4 — Database
 
 ```text
 Agent
@@ -116,7 +116,7 @@ delete records
 change schemas
 ```
 
-### Level 5 — Cloud deployment
+#### Level 5 — Cloud deployment
 
 ```text
 Agent
@@ -147,7 +147,7 @@ It changes the set of actions the agent can cause in the world.
 
 ---
 
-# 2. Capability Is an Authority Boundary
+## 2. Capability Is an Authority Boundary
 
 A useful model is:
 
@@ -189,7 +189,7 @@ But agentic systems make this principle especially important because the agent i
 
 ---
 
-# 3. The Agent Is Not a Trusted Program
+## 3. The Agent Is Not a Trusted Program
 
 Traditional software usually executes a predetermined sequence of instructions.
 
@@ -235,11 +235,11 @@ Enforce the restriction outside the model.
 
 ---
 
-# 4. Instruction vs. Enforcement
+## 4. Instruction vs. Enforcement
 
 Compare:
 
-### Weak security
+#### Weak security
 
 ```text
 System prompt:
@@ -249,7 +249,7 @@ Never modify production.
 
 with:
 
-### Strong security
+#### Strong security
 
 ```text
 Agent
@@ -275,7 +275,7 @@ The security boundary decides.
 
 ---
 
-# 5. The Security Architecture
+## 5. The Security Architecture
 
 A robust coding agent should look more like:
 
@@ -318,7 +318,7 @@ It can enforce:
 
 ---
 
-# 6. Sandboxing
+## 6. Sandboxing
 
 The first major defense is **sandboxing**.
 
@@ -365,7 +365,7 @@ are inaccessible.
 
 ---
 
-# 7. Filesystem Isolation
+## 7. Filesystem Isolation
 
 A coding agent generally needs filesystem access.
 
@@ -398,7 +398,7 @@ The operating system or sandbox should enforce the boundary.
 
 ---
 
-# 8. Shell Access
+## 8. Shell Access
 
 Shell access is particularly powerful.
 
@@ -422,7 +422,7 @@ Therefore:
 
 Possible controls include:
 
-### Command allowlists
+#### Command allowlists
 
 ```text
 pytest
@@ -442,7 +442,7 @@ shutdown
 iptables
 ```
 
-### Argument restrictions
+#### Argument restrictions
 
 Even an allowed command can be dangerous.
 
@@ -468,7 +468,7 @@ $$
 
 ---
 
-# 9. Allowlists vs. Blocklists
+## 9. Allowlists vs. Blocklists
 
 A blocklist says:
 
@@ -500,7 +500,7 @@ The principle is:
 
 ---
 
-# 10. Network Access
+## 10. Network Access
 
 Network access introduces another dimension of risk.
 
@@ -535,7 +535,7 @@ Therefore network access should also be constrained.
 
 ---
 
-# 11. Network Allowlists
+## 11. Network Allowlists
 
 Instead of:
 
@@ -572,7 +572,7 @@ by default.
 
 ---
 
-# 12. Secrets Isolation
+## 12. Secrets Isolation
 
 One of the most important rules for coding agents is:
 
@@ -611,7 +611,7 @@ The agent never sees the raw credential.
 
 ---
 
-# 13. Credential Brokering
+## 13. Credential Brokering
 
 Instead of exposing:
 
@@ -646,7 +646,7 @@ This is much safer than giving the model broad cloud credentials.
 
 ---
 
-# 14. Database Safety
+## 14. Database Safety
 
 Database access deserves special attention because databases contain persistent state.
 
@@ -690,7 +690,7 @@ production DB
 
 ---
 
-# 15. Read vs. Write Authority
+## 15. Read vs. Write Authority
 
 Database permissions should distinguish:
 
@@ -724,7 +724,7 @@ This is another application of least privilege.
 
 ---
 
-# 16. Transaction Boundaries
+## 16. Transaction Boundaries
 
 Even authorized operations can fail.
 
@@ -764,7 +764,7 @@ This matters for agents because their behavior is inherently less predictable th
 
 ---
 
-# 17. Rollback
+## 17. Rollback
 
 A strong agentic environment should make changes reversible whenever possible.
 
@@ -818,7 +818,7 @@ This is vastly safer than trying to prevent every possible mistake.
 
 ---
 
-# 18. Defense in Depth
+## 18. Defense in Depth
 
 No single control should be trusted.
 
@@ -845,7 +845,7 @@ Security comes from multiple independent layers.
 
 ---
 
-# 19. Human Approval
+## 19. Human Approval
 
 Some operations should require explicit human approval.
 
@@ -873,7 +873,7 @@ This creates a risk-based autonomy model.
 
 ---
 
-# 20. Risk-Based Permissions
+## 20. Risk-Based Permissions
 
 A useful framework is:
 
@@ -906,11 +906,11 @@ The exact boundaries depend on the environment.
 
 ---
 
-# 21. Capability Levels
+## 21. Capability Levels
 
 We can formalize agent authority as capability levels.
 
-### Level 0 — Observation
+#### Level 0 — Observation
 
 ```text
 read files
@@ -918,7 +918,7 @@ inspect logs
 search repository
 ```
 
-### Level 1 — Local modification
+#### Level 1 — Local modification
 
 ```text
 edit source
@@ -926,7 +926,7 @@ create tests
 run local commands
 ```
 
-### Level 2 — External interaction
+#### Level 2 — External interaction
 
 ```text
 network
@@ -934,7 +934,7 @@ package installation
 external APIs
 ```
 
-### Level 3 — Persistent infrastructure
+#### Level 3 — Persistent infrastructure
 
 ```text
 database writes
@@ -942,7 +942,7 @@ cloud resources
 staging deployment
 ```
 
-### Level 4 — Production authority
+#### Level 4 — Production authority
 
 ```text
 production deployment
@@ -960,7 +960,7 @@ $$
 
 ---
 
-# 22. Production Should Be a Different Trust Domain
+## 22. Production Should Be a Different Trust Domain
 
 A particularly important architecture is:
 
@@ -992,7 +992,7 @@ Instead, production should be separated by trust boundaries.
 
 ---
 
-# 23. The Production Air Gap
+## 23. The Production Air Gap
 
 A very strong model is:
 
@@ -1031,7 +1031,7 @@ This is analogous to separating **code generation** from **release authority**.
 
 ---
 
-# 24. The Deployment Broker
+## 24. The Deployment Broker
 
 A deployment broker can expose a narrow interface:
 
@@ -1066,7 +1066,7 @@ This converts broad infrastructure authority into a constrained API.
 
 ---
 
-# 25. Tool Calls Should Be Policy Decisions
+## 25. Tool Calls Should Be Policy Decisions
 
 A useful abstraction is:
 
@@ -1115,7 +1115,7 @@ This is much stronger than asking the LLM whether it thinks the command is safe.
 
 ---
 
-# 26. Prompt Injection Becomes a Security Problem
+## 26. Prompt Injection Becomes a Security Problem
 
 Once agents have tools, untrusted content can influence actions.
 
@@ -1152,7 +1152,7 @@ Therefore untrusted content should never automatically gain authority.
 
 ---
 
-# 27. Authority Must Come From Outside the Context
+## 27. Authority Must Come From Outside the Context
 
 A document might say:
 
@@ -1180,7 +1180,7 @@ Authority must be established through explicit policy.
 
 ---
 
-# 28. The Agent Should Not Be Able to Escalate Privileges
+## 28. The Agent Should Not Be Able to Escalate Privileges
 
 A particularly dangerous failure mode is:
 
@@ -1216,7 +1216,7 @@ The model cannot grant itself additional authority.
 
 ---
 
-# 29. Ephemeral Credentials
+## 29. Ephemeral Credentials
 
 When elevated privileges are genuinely necessary, credentials should ideally be:
 
@@ -1249,7 +1249,7 @@ This is substantially safer than a permanent administrative credential.
 
 ---
 
-# 30. Auditability
+## 30. Auditability
 
 Every significant agent action should be logged.
 
@@ -1297,7 +1297,7 @@ This provides:
 
 ---
 
-# 31. Observability Is Part of Security
+## 31. Observability Is Part of Security
 
 Agent logs should capture not just what the agent did, but why the system allowed it.
 
@@ -1325,7 +1325,7 @@ In agentic systems, observability and security become closely related.
 
 ---
 
-# 32. The Principle of Blast-Radius Reduction
+## 32. The Principle of Blast-Radius Reduction
 
 One of the most useful security concepts for agents is **blast radius**.
 
@@ -1333,7 +1333,7 @@ Suppose an agent is compromised.
 
 What can it affect?
 
-### Bad architecture
+#### Bad architecture
 
 ```text
 Agent
@@ -1349,7 +1349,7 @@ Blast radius:
 potentially everything
 ```
 
-### Better architecture
+#### Better architecture
 
 ```text
 Agent
@@ -1379,7 +1379,7 @@ It is:
 
 ---
 
-# 33. Assume the Agent Will Eventually Fail
+## 33. Assume the Agent Will Eventually Fail
 
 A mature architecture begins with an adversarial assumption:
 
@@ -1406,9 +1406,9 @@ We design them assuming:
 
 ---
 
-# 34. Safety as an Invariant
+## 34. Safety as an Invariant
 
-This connects directly to Day 16's specification engineering.
+This connects directly to Chapter 16's specification engineering.
 
 Define safety invariants such as:
 
@@ -1447,7 +1447,7 @@ $$
 
 ---
 
-# 35. Safety Through Capability Restriction
+## 35. Safety Through Capability Restriction
 
 Suppose the agent has capability set:
 
@@ -1488,7 +1488,7 @@ That is least privilege applied to agentic systems.
 
 ---
 
-# 36. Safety Exercise
+## 36. Safety Exercise
 
 Design an agent that can modify and deploy a web application but **cannot destroy production**.
 
@@ -1538,7 +1538,7 @@ All privileged operations are audited.
 
 ---
 
-# 37. Attack the Architecture
+## 37. Attack the Architecture
 
 Do not stop after designing the safe system.
 
@@ -1546,7 +1546,7 @@ Try to break it.
 
 Ask:
 
-### Scenario 1
+#### Scenario 1
 
 The model generates:
 
@@ -1562,7 +1562,7 @@ Expected:
 sandbox/policy → DENY
 ```
 
-### Scenario 2
+#### Scenario 2
 
 The repository contains:
 
@@ -1579,7 +1579,7 @@ Expected:
 network policy + filesystem isolation → DENY
 ```
 
-### Scenario 3
+#### Scenario 3
 
 The agent requests production credentials.
 
@@ -1589,7 +1589,7 @@ Expected:
 credential broker → DENY
 ```
 
-### Scenario 4
+#### Scenario 4
 
 The agent attempts:
 
@@ -1603,7 +1603,7 @@ Expected:
 database authorization → DENY
 ```
 
-### Scenario 5
+#### Scenario 5
 
 The agent deploys a broken artifact.
 
@@ -1618,7 +1618,7 @@ This is the correct mindset.
 
 ---
 
-# 38. Safety Testing
+## 38. Safety Testing
 
 Create adversarial tests.
 
@@ -1668,7 +1668,7 @@ You are effectively creating a **security evaluation suite for the agent harness
 
 ---
 
-# 39. A Production-Safe Architecture
+## 39. A Production-Safe Architecture
 
 A robust architecture might look like:
 
@@ -1719,9 +1719,9 @@ The model never receives direct unrestricted authority.
 
 ---
 
-# 40. The Core Principle: Separate Intelligence From Authority
+## 40. The Core Principle: Separate Intelligence From Authority
 
-This is perhaps the deepest lesson of Day 20.
+This is perhaps the deepest lesson of Chapter 20.
 
 The model provides:
 
@@ -1759,7 +1759,7 @@ This separation is fundamental to safe agentic architecture.
 
 ---
 
-# 41. Key Takeaways
+## 41. Key Takeaways
 
 1. **Agent safety is primarily an authority-management problem.**
    Giving an agent a tool gives it a capability, and capabilities create risk.

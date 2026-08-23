@@ -1,4 +1,4 @@
-# Day 9 — Data Systems: Designing the State and Information Layer
+# Chapter 9: Data Systems: Designing the State and Information Layer
 
 Yesterday, the focus was architecture: components, boundaries, interfaces, dependencies, state, and scaling.
 
@@ -46,7 +46,7 @@ This distinction is fundamental.
 
 ---
 
-# 1. Data Architecture Is About Semantics
+## 1. Data Architecture Is About Semantics
 
 Different data systems solve different problems.
 
@@ -89,7 +89,7 @@ The requirements come first.
 
 ---
 
-# 2. The Data Model of an AI Application
+## 2. The Data Model of an AI Application
 
 Return to the Week 1 Personal Research Assistant.
 
@@ -158,7 +158,7 @@ It may simply reflect the fact that the application contains different kinds of 
 
 ---
 
-# 3. Relational Databases
+## 3. Relational Databases
 
 Relational databases remain the foundation for a large fraction of production AI applications.
 
@@ -225,7 +225,7 @@ The database can enforce some of these invariants.
 
 ---
 
-# 4. Why Relational Databases Are Particularly Important for AI Systems
+## 4. Why Relational Databases Are Particularly Important for AI Systems
 
 There is a temptation to assume that because AI applications use embeddings and unstructured text, relational databases are no longer central.
 
@@ -264,7 +264,7 @@ A relational database is often an excellent fit.
 
 ---
 
-# 5. Document Databases
+## 5. Document Databases
 
 Document databases store records as flexible documents, commonly represented as JSON-like structures.
 
@@ -318,7 +318,7 @@ It simply moves more of the responsibility into the application.
 
 ---
 
-# 6. Relational vs Document
+## 6. Relational vs Document
 
 The decision should be based on access patterns.
 
@@ -362,7 +362,7 @@ The question is:
 
 ---
 
-# 7. Vector Databases
+## 7. Vector Databases
 
 AI applications introduce a new access pattern:
 
@@ -410,7 +410,7 @@ A vector database or vector index provides infrastructure for performing these s
 
 ---
 
-# 8. Vector Search Is Not a Database Replacement
+## 8. Vector Search Is Not a Database Replacement
 
 One of the most important architectural lessons is:
 
@@ -474,7 +474,7 @@ If the vector index can be reconstructed from authoritative data, it becomes muc
 
 ---
 
-# 9. Hybrid Retrieval
+## 9. Hybrid Retrieval
 
 Real retrieval systems frequently combine multiple retrieval mechanisms.
 
@@ -515,7 +515,7 @@ then one index may not be sufficient.
 
 ---
 
-# 10. Caches
+## 10. Caches
 
 A cache is fundamentally different from a database.
 
@@ -547,7 +547,7 @@ You built a database with questionable durability.
 
 ---
 
-# 11. Cache Invalidation
+## 11. Cache Invalidation
 
 Caching introduces one of the oldest problems in computer science:
 
@@ -592,7 +592,7 @@ AI systems can therefore have surprisingly complicated cache invalidation proble
 
 ---
 
-# 12. Object Storage
+## 12. Object Storage
 
 Object storage is optimized for large immutable or semi-immutable objects.
 
@@ -642,7 +642,7 @@ Object Storage
 
 ---
 
-# 13. Why Object Storage Matters for AI
+## 13. Why Object Storage Matters for AI
 
 AI systems generate large artifacts.
 
@@ -671,7 +671,7 @@ This makes it an important architectural primitive for AI systems.
 
 ---
 
-# 14. Queues
+## 14. Queues
 
 A queue represents work that needs to be performed.
 
@@ -700,7 +700,7 @@ This is a powerful architectural boundary.
 
 ---
 
-# 15. Queues Are About Work, Not Facts
+## 15. Queues Are About Work, Not Facts
 
 This distinction is subtle but important.
 
@@ -730,7 +730,7 @@ An event may be retained so multiple systems can react independently.
 
 ---
 
-# 16. Event Streams
+## 16. Event Streams
 
 An event stream is a durable sequence of events.
 
@@ -765,7 +765,7 @@ This becomes valuable as systems grow.
 
 ---
 
-# 17. Event-Driven AI Systems
+## 17. Event-Driven AI Systems
 
 Imagine the research assistant emits:
 
@@ -803,11 +803,11 @@ This is one of the architectural benefits of events:
 
 ---
 
-# 18. Choosing the Right Data System
+## 18. Choosing the Right Data System
 
 A useful decision framework is to ask seven questions.
 
-### 1. What is the data?
+#### 1. What is the data?
 
 Structured records?
 
@@ -821,7 +821,7 @@ Events?
 
 Work items?
 
-### 2. What is the access pattern?
+#### 2. What is the access pattern?
 
 ```text
 lookup
@@ -834,13 +834,13 @@ stream
 queue
 ```
 
-### 3. What consistency is required?
+#### 3. What consistency is required?
 
 Does every reader need the newest value immediately?
 
 Or is eventual consistency acceptable?
 
-### 4. What latency is required?
+#### 4. What latency is required?
 
 ```text
 milliseconds
@@ -849,7 +849,7 @@ minutes
 hours
 ```
 
-### 5. How durable must the data be?
+#### 5. How durable must the data be?
 
 Can it be reconstructed?
 
@@ -857,7 +857,7 @@ Can it be lost?
 
 Must it survive regional failure?
 
-### 6. How much data will exist?
+#### 6. How much data will exist?
 
 Megabytes?
 
@@ -865,7 +865,7 @@ Terabytes?
 
 Petabytes?
 
-### 7. What happens when the system fails?
+#### 7. What happens when the system fails?
 
 Can the data be rebuilt?
 
@@ -877,7 +877,7 @@ These questions usually lead toward an appropriate technology.
 
 ---
 
-# 19. A Practical Decision Matrix
+## 19. A Practical Decision Matrix
 
 | Requirement       | Relational DB | Document DB | Vector DB | Cache | Object Storage | Queue | Event Stream |
 | ----------------- | ------------: | ----------: | --------: | ----: | -------------: | ----: | -----------: |
@@ -899,9 +899,9 @@ The important exercise is to understand **why** a technology receives a high or 
 
 ---
 
-# 20. The AI Architecture Challenge
+## 20. The AI Architecture Challenge
 
-Now comes the most important exercise of Day 9.
+Now comes the most important exercise of Chapter 9.
 
 Do not design the architecture yourself first.
 
@@ -968,25 +968,25 @@ The exercise begins when the agent finishes.
 
 ---
 
-# 21. Critique the Agent's Architecture
+## 21. Critique the Agent's Architecture
 
 Your role is now to attack the design.
 
 Ask:
 
-### Assumption 1
+#### Assumption 1
 
 Why does it need a vector database?
 
 Could PostgreSQL with a vector extension be sufficient?
 
-### Assumption 2
+#### Assumption 2
 
 Why does it need a document database?
 
 Could the relational schema handle the workload more simply?
 
-### Assumption 3
+#### Assumption 3
 
 Why is Redis required?
 
@@ -994,35 +994,35 @@ What data is actually being cached?
 
 What invalidates it?
 
-### Assumption 4
+#### Assumption 4
 
 Why is an event stream required?
 
 Would a queue be sufficient?
 
-### Assumption 5
+#### Assumption 5
 
 What is the system of record?
 
 If the vector index disappears, can the system reconstruct it?
 
-### Assumption 6
+#### Assumption 6
 
 What happens if the queue delivers the same job twice?
 
-### Assumption 7
+#### Assumption 7
 
 What happens if indexing succeeds but the database transaction fails?
 
-### Assumption 8
+#### Assumption 8
 
 What happens if the database succeeds but the event is never published?
 
-### Assumption 9
+#### Assumption 9
 
 What happens when the schema changes?
 
-### Assumption 10
+#### Assumption 10
 
 What happens when the system grows by 100×?
 
@@ -1030,7 +1030,7 @@ These questions expose architectural assumptions.
 
 ---
 
-# 22. AI-Generated Architecture Is Not Automatically Good Architecture
+## 22. AI-Generated Architecture Is Not Automatically Good Architecture
 
 This exercise introduces a critical engineering skill.
 
@@ -1086,7 +1086,7 @@ This is exactly the failure mode you are learning to detect.
 
 ---
 
-# 23. Architecture Review as Adversarial Reasoning
+## 23. Architecture Review as Adversarial Reasoning
 
 A strong architecture review should therefore proceed like a security review.
 
@@ -1134,7 +1134,7 @@ This turns architecture review into an engineering discipline rather than an aes
 
 ---
 
-# 24. The Data Lifecycle
+## 24. The Data Lifecycle
 
 One of the most useful ways to reason about data architecture is to follow a piece of data through its lifecycle.
 
@@ -1192,7 +1192,7 @@ This produces a much more precise architecture than simply listing technologies.
 
 ---
 
-# 25. The System of Record Principle
+## 25. The System of Record Principle
 
 Every important piece of information should have a clear authoritative source.
 
@@ -1237,7 +1237,7 @@ The principle is:
 
 ---
 
-# 26. Data Architecture and Reliability
+## 26. Data Architecture and Reliability
 
 Yesterday we discussed reliability at the architectural level.
 
@@ -1259,23 +1259,23 @@ Vector DB
 
 Now consider failures.
 
-### Database succeeds, queue fails
+#### Database succeeds, queue fails
 
 The document exists, but ingestion never starts.
 
-### Queue succeeds, worker crashes
+#### Queue succeeds, worker crashes
 
 The job must be retried.
 
-### Worker succeeds, acknowledgment fails
+#### Worker succeeds, acknowledgment fails
 
 The job may execute twice.
 
-### Vector DB fails
+#### Vector DB fails
 
 The document is stored but unavailable for semantic retrieval.
 
-### Embedding model changes
+#### Embedding model changes
 
 Existing embeddings may become incompatible with the new model.
 
@@ -1285,7 +1285,7 @@ This is why data architecture and reliability architecture cannot be separated.
 
 ---
 
-# 27. Data Versioning
+## 27. Data Versioning
 
 AI systems make versioning unusually important.
 
@@ -1352,7 +1352,7 @@ It is a **data architecture problem**.
 
 ---
 
-# 28. The Architecture You Should End the Day With
+## 28. The Architecture You Should End the Day With
 
 Your final design should look less like:
 
@@ -1412,7 +1412,7 @@ This is the core discipline.
 
 ---
 
-# 29. Key Takeaways
+## 29. Key Takeaways
 
 1. **Data architecture begins with data semantics, not technology selection.**
 
@@ -1465,7 +1465,7 @@ Engineer redesigns
 
 This is becoming one of the defining skills of AI-era engineering.
 
-The important lesson of Day 9 is therefore:
+The important lesson of Chapter 9 is therefore:
 
 > **Do not ask an AI which database to use. Ask it to design a data architecture—and then make it defend every architectural decision.**
 

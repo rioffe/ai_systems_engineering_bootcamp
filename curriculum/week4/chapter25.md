@@ -1,10 +1,10 @@
-# Day 25 — Build
+# Chapter 25: Build
 
 ## From Specification to Working AI System
 
-Day 24 defined the product.
+Chapter 24 defined the product.
 
-Day 25 builds it.
+Chapter 25 builds it.
 
 This is the point at which the AI engineering workflow changes from **design and specification** to **execution**.
 
@@ -42,7 +42,7 @@ This is a fundamentally different engineering skill.
 
 ---
 
-# 1. The New Development Loop
+## 1. The New Development Loop
 
 Traditional software development often looks like:
 
@@ -105,11 +105,11 @@ The human is responsible for controlling this loop.
 
 ---
 
-# 2. Your Role Changes
+## 2. Your Role Changes
 
-The Day 25 role division should be explicit.
+The Chapter 25 role division should be explicit.
 
-## The Coding Agent
+### The Coding Agent
 
 The agent is responsible for:
 
@@ -124,7 +124,7 @@ The agent is responsible for:
 * generating documentation,
 * running development commands.
 
-## You
+### You
 
 You are responsible for:
 
@@ -160,13 +160,13 @@ But the goal of the exercise is to learn to operate effectively at the higher le
 
 ---
 
-# 3. Start From the Specification
+## 3. Start From the Specification
 
-Do not begin Day 25 by opening an empty editor and asking:
+Do not begin Chapter 25 by opening an empty editor and asking:
 
 > "What should I build?"
 
-You already answered that question on Day 24.
+You already answered that question on Chapter 24.
 
 The specification is the source of truth.
 
@@ -198,7 +198,7 @@ If the agent begins making product decisions that were already resolved, the dev
 
 ---
 
-# 4. Establish the Repository
+## 4. Establish the Repository
 
 The first implementation step is to create a clean development environment.
 
@@ -246,7 +246,7 @@ The architecture should be reflected in the repository.
 
 ---
 
-# 5. Build the Vertical Slice First
+## 5. Build the Vertical Slice First
 
 A common mistake is asking the coding agent to implement the entire architecture before anything works.
 
@@ -294,7 +294,7 @@ Only after it works should additional capabilities be layered on.
 
 ---
 
-# 6. Why Vertical Slices Matter
+## 6. Why Vertical Slices Matter
 
 AI systems have many possible failure points:
 
@@ -354,7 +354,7 @@ $$
 
 ---
 
-# 7. Agent Delegation
+## 7. Agent Delegation
 
 The coding agent should receive tasks at an appropriate level of abstraction.
 
@@ -391,7 +391,7 @@ $$
 
 ---
 
-# 8. Give the Agent Boundaries
+## 8. Give the Agent Boundaries
 
 A powerful coding agent can make large changes.
 
@@ -399,7 +399,7 @@ That makes boundaries important.
 
 Explicitly define:
 
-### Files it may modify
+#### Files it may modify
 
 For example:
 
@@ -409,7 +409,7 @@ app/tools/
 tests/
 ```
 
-### Files it should not modify
+#### Files it should not modify
 
 For example:
 
@@ -419,15 +419,15 @@ production configuration/
 secrets/
 ```
 
-### Dependencies it may introduce
+#### Dependencies it may introduce
 
 Avoid uncontrolled dependency growth.
 
-### APIs it may call
+#### APIs it may call
 
 Restrict external access.
 
-### Commands it may execute
+#### Commands it may execute
 
 Avoid dangerous or unnecessary operations.
 
@@ -447,7 +447,7 @@ A coding agent is itself an agentic system.
 
 ---
 
-# 9. Observe the Agent's Work
+## 9. Observe the Agent's Work
 
 Do not treat the coding agent as a black box.
 
@@ -482,7 +482,7 @@ The coding process therefore becomes a test of the specification itself.
 
 ---
 
-# 10. Test Continuously
+## 10. Test Continuously
 
 Do not wait until the entire system is built before testing.
 
@@ -498,7 +498,7 @@ $$
 
 The testing hierarchy should include:
 
-### Unit tests
+#### Unit tests
 
 Test isolated components.
 
@@ -506,7 +506,7 @@ $$
 f(x)\rightarrow y
 $$
 
-### Integration tests
+#### Integration tests
 
 Test component interactions.
 
@@ -514,7 +514,7 @@ $$
 A\rightarrow B\rightarrow C
 $$
 
-### End-to-end tests
+#### End-to-end tests
 
 Test complete user workflows.
 
@@ -526,7 +526,7 @@ $$
 \text{Outcome}
 $$
 
-### AI evaluations
+#### AI evaluations
 
 Test probabilistic behavior against a golden dataset.
 
@@ -542,7 +542,7 @@ These layers answer different questions.
 
 ---
 
-# 11. Deterministic Tests Are Not Enough
+## 11. Deterministic Tests Are Not Enough
 
 Traditional software testing assumes deterministic behavior.
 
@@ -589,7 +589,7 @@ $$
 
 ---
 
-# 12. Build the Evaluation Harness During the Build
+## 12. Build the Evaluation Harness During the Build
 
 The evaluator role should not begin after implementation.
 
@@ -625,7 +625,7 @@ This creates an empirical development loop.
 
 ---
 
-# 13. The Agent Should Test Its Own Work
+## 13. The Agent Should Test Its Own Work
 
 An important pattern is:
 
@@ -665,7 +665,7 @@ $$
 
 ---
 
-# 14. Human Evaluation Remains Necessary
+## 14. Human Evaluation Remains Necessary
 
 The product owner should periodically inspect real outputs.
 
@@ -706,31 +706,31 @@ $$
 
 ---
 
-# 15. Architecture Review
+## 15. Architecture Review
 
 The architect role requires periodically stepping back from implementation details.
 
 Ask:
 
-### Is the architecture still aligned with the specification?
+#### Is the architecture still aligned with the specification?
 
-### Has the agent introduced unnecessary abstractions?
+#### Has the agent introduced unnecessary abstractions?
 
-### Are boundaries clear?
+#### Are boundaries clear?
 
-### Is state managed correctly?
+#### Is state managed correctly?
 
-### Are tools isolated?
+#### Are tools isolated?
 
-### Is context constructed deliberately?
+#### Is context constructed deliberately?
 
-### Are model calls observable?
+#### Are model calls observable?
 
-### Are failures recoverable?
+#### Are failures recoverable?
 
-### Is the system unnecessarily coupled to one provider?
+#### Is the system unnecessarily coupled to one provider?
 
-### Can individual components be evaluated independently?
+#### Can individual components be evaluated independently?
 
 AI coding agents frequently over-engineer.
 
@@ -757,7 +757,7 @@ $$
 
 ---
 
-# 16. Avoid Premature Generalization
+## 16. Avoid Premature Generalization
 
 One of the most common agent-generated design problems is building for hypothetical future requirements.
 
@@ -789,7 +789,7 @@ The principle is:
 
 ---
 
-# 17. Manage Context Deliberately
+## 17. Manage Context Deliberately
 
 Coding agents have context limitations just like application agents.
 
@@ -837,7 +837,7 @@ This is the same context-engineering principle applied to software development.
 
 ---
 
-# 18. Git Is Part of the Control System
+## 18. Git Is Part of the Control System
 
 Version control becomes particularly important when agents can make large changes quickly.
 
@@ -877,9 +877,9 @@ $$
 
 ---
 
-# 19. The Build Loop
+## 19. The Build Loop
 
-The complete Day 25 loop can be represented as:
+The complete Chapter 25 loop can be represented as:
 
 $$
 \boxed{
@@ -917,11 +917,11 @@ rather than typing implementation details.
 
 ---
 
-# 20. A Practical Build Sequence
+## 20. A Practical Build Sequence
 
 A full build day can follow this sequence.
 
-## Phase 1 — Repository setup
+### Phase 1 — Repository setup
 
 Establish:
 
@@ -931,7 +931,7 @@ Establish:
 * test framework,
 * application skeleton.
 
-## Phase 2 — Core data model
+### Phase 2 — Core data model
 
 Implement:
 
@@ -940,7 +940,7 @@ Implement:
 * persistence,
 * interfaces.
 
-## Phase 3 — Vertical slice
+### Phase 3 — Vertical slice
 
 Build:
 
@@ -952,11 +952,11 @@ $$
 \text{Output}
 $$
 
-## Phase 4 — Tool integration
+### Phase 4 — Tool integration
 
 Connect the required external systems.
 
-## Phase 5 — Context engineering
+### Phase 5 — Context engineering
 
 Implement:
 
@@ -965,7 +965,7 @@ Implement:
 * state,
 * prompt assembly.
 
-## Phase 6 — Agent behavior
+### Phase 6 — Agent behavior
 
 Implement:
 
@@ -974,7 +974,7 @@ Implement:
 * execution,
 * stopping conditions.
 
-## Phase 7 — Verification
+### Phase 7 — Verification
 
 Implement:
 
@@ -983,7 +983,7 @@ Implement:
 * error handling,
 * confidence/uncertainty mechanisms.
 
-## Phase 8 — Evaluation
+### Phase 8 — Evaluation
 
 Run:
 
@@ -992,11 +992,11 @@ Run:
 * golden datasets,
 * AI evaluations.
 
-## Phase 9 — UX
+### Phase 9 — UX
 
 Make the primary workflow usable by the target persona.
 
-## Phase 10 — Hardening
+### Phase 10 — Hardening
 
 Address:
 
@@ -1011,7 +1011,7 @@ This sequence deliberately prioritizes a working path over architectural complet
 
 ---
 
-# 21. Cost Is a First-Class Build Constraint
+## 21. Cost Is a First-Class Build Constraint
 
 AI systems have variable inference costs.
 
@@ -1065,7 +1065,7 @@ An MVP that works but costs \$50 per user action may not be a viable product.
 
 ---
 
-# 22. Reliability Is a System Property
+## 22. Reliability Is a System Property
 
 A model's benchmark score does not determine the reliability of the product.
 
@@ -1107,7 +1107,7 @@ The system must therefore be evaluated end-to-end.
 
 ---
 
-# 23. Failure Handling
+## 23. Failure Handling
 
 AI-native systems should assume that failure is normal.
 
@@ -1152,7 +1152,7 @@ The system should not silently continue when a critical dependency fails.
 
 ---
 
-# 24. Human Control
+## 24. Human Control
 
 The product owner must define where autonomy ends.
 
@@ -1170,14 +1170,14 @@ For the MVP, keep the agent within a narrow permission boundary.
 
 For example:
 
-### Allowed
+#### Allowed
 
 * read logs,
 * search tickets,
 * inspect deployments,
 * generate analysis.
 
-### Not allowed
+#### Not allowed
 
 * modify production systems,
 * deploy code,
@@ -1200,7 +1200,7 @@ Autonomy can increase later as evidence justifies it.
 
 ---
 
-# 25. The Agent as a Junior Engineer
+## 25. The Agent as a Junior Engineer
 
 A useful mental model is to treat the coding agent as an extremely fast but imperfect junior engineer.
 
@@ -1245,7 +1245,7 @@ The human architect must review consequential decisions.
 
 ---
 
-# 26. The Agent as a Compiler for Intent
+## 26. The Agent as a Compiler for Intent
 
 A more powerful mental model is to treat the coding agent as a compiler.
 
@@ -1303,21 +1303,21 @@ $$
 
 ---
 
-# 27. Build Metrics
+## 27. Build Metrics
 
-During Day 25, measure the development process itself.
+During Chapter 25, measure the development process itself.
 
 Useful metrics include:
 
-### Implementation velocity
+#### Implementation velocity
 
 How much functionality was implemented per unit time?
 
-### Agent success rate
+#### Agent success rate
 
 How often does the agent complete tasks without substantial human intervention?
 
-### Rework rate
+#### Rework rate
 
 How much generated code must be rewritten?
 
@@ -1331,15 +1331,15 @@ R_{\text{rework}}
 }
 $$
 
-### Test effectiveness
+#### Test effectiveness
 
 How many meaningful defects are caught automatically?
 
-### Specification quality
+#### Specification quality
 
 How often does the agent misunderstand requirements?
 
-### Human intervention
+#### Human intervention
 
 How much engineering time is required to guide the agent?
 
@@ -1347,7 +1347,7 @@ These metrics help determine whether AI coding is actually improving engineering
 
 ---
 
-# 28. The Real Objective of Day 25
+## 28. The Real Objective of Chapter 25
 
 The objective is not:
 
@@ -1389,15 +1389,15 @@ AI coding agents have the potential to dramatically increase this ratio.
 
 ---
 
-# 29. Day 25 Deliverable
+## 29. Chapter 25 Deliverable
 
 At the end of the day, you should have:
 
-### Working application
+#### Working application
 
 A functioning MVP implementing the core workflow.
 
-### Source repository
+#### Source repository
 
 With:
 
@@ -1406,7 +1406,7 @@ With:
 * tests,
 * documentation.
 
-### Evaluation harness
+#### Evaluation harness
 
 Including:
 
@@ -1414,11 +1414,11 @@ Including:
 * automated metrics,
 * representative test cases.
 
-### Architecture
+#### Architecture
 
 Documented and consistent with the implementation.
 
-### Metrics
+#### Metrics
 
 Including:
 
@@ -1427,7 +1427,7 @@ Including:
 * AI quality,
 * workflow success.
 
-### Known limitations
+#### Known limitations
 
 A written list of:
 
@@ -1437,7 +1437,7 @@ A written list of:
 * technical debt,
 * product assumptions.
 
-### Demo
+#### Demo
 
 A complete end-to-end demonstration:
 
@@ -1461,12 +1461,12 @@ The system should work on at least one realistic scenario from beginning to end.
 
 ---
 
-# 30. The Day 25 Build Checklist
+## 30. The Chapter 25 Build Checklist
 
 Before declaring the MVP complete, verify:
 
 * [ ] The primary user workflow works end-to-end.
-* [ ] The implementation matches the Day 24 specification.
+* [ ] The implementation matches the Chapter 24 specification.
 * [ ] The repository has a coherent architecture.
 * [ ] Core components have unit tests.
 * [ ] Critical integrations have integration tests.
@@ -1487,9 +1487,9 @@ Before declaring the MVP complete, verify:
 
 ---
 
-# 31. Key Takeaways
+## 31. Key Takeaways
 
-1. **Day 25 is the transition from specification to execution.**
+1. **Chapter 25 is the transition from specification to execution.**
    The product has been defined; now the system must be built.
 
 2. **The coding agent should perform most implementation work.**
@@ -1578,5 +1578,5 @@ $$
     }
 $$
 
-Day 25 therefore represents an important transition in the AI engineering discipline: **the engineer increasingly becomes the designer and governor of intelligent software-production systems, rather than the person who manually produces every implementation detail.**
+Chapter 25 therefore represents an important transition in the AI engineering discipline: **the engineer increasingly becomes the designer and governor of intelligent software-production systems, rather than the person who manually produces every implementation detail.**
 

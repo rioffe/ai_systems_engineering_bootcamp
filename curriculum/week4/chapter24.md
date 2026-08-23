@@ -1,10 +1,10 @@
-# Day 24 — MVP Design
+# Chapter 24: MVP Design
 
 ## From Product Hypothesis to an Executable Specification
 
-By Day 24, the objective changes again.
+By Chapter 24, the objective changes again.
 
-The previous days focused on identifying valuable problems and discovering what becomes possible when intelligence is cheap. Today the task is to turn one of those opportunities into a **concrete product specification that an engineering system can implement**.
+The previous chapters focused on identifying valuable problems and discovering what becomes possible when intelligence is cheap. Today the task is to turn one of those opportunities into a **concrete product specification that an engineering system can implement**.
 
 This is the bridge between product thinking and AI engineering.
 
@@ -40,7 +40,7 @@ The final specification should be sufficiently precise that a coding agent—or 
 
 ---
 
-# 1. What an MVP Actually Is
+## 1. What an MVP Actually Is
 
 MVP stands for **Minimum Viable Product**.
 
@@ -97,7 +97,7 @@ where $\tau$ represents the minimum evidence needed to test the product hypothes
 
 ---
 
-# 2. Choose One Idea
+## 2. Choose One Idea
 
 The first step is to choose **one** opportunity from the previous exercise.
 
@@ -135,7 +135,7 @@ This is sufficiently constrained to become an engineering problem.
 
 ---
 
-# 3. User Persona
+## 3. User Persona
 
 The persona describes the person actually using the system.
 
@@ -143,27 +143,27 @@ Avoid demographic descriptions that do not affect product behavior.
 
 For engineering purposes, a useful persona specifies:
 
-### Role
+#### Role
 
 Who performs the workflow?
 
-### Goals
+#### Goals
 
 What are they trying to accomplish?
 
-### Environment
+#### Environment
 
 What systems and tools do they already use?
 
-### Constraints
+#### Constraints
 
 What prevents them from solving the problem easily?
 
-### Expertise
+#### Expertise
 
 What do they already understand?
 
-### Success criteria
+#### Success criteria
 
 What would make them consider the product useful?
 
@@ -193,7 +193,7 @@ The persona therefore drives product requirements.
 
 ---
 
-# 4. Problem Statement
+## 4. Problem Statement
 
 A strong problem statement should be specific enough to test.
 
@@ -245,7 +245,7 @@ The MVP exists to determine whether the second workflow is materially better.
 
 ---
 
-# 5. Product Hypothesis
+## 5. Product Hypothesis
 
 Before designing the system, write the hypothesis explicitly.
 
@@ -272,7 +272,7 @@ This is important because an MVP is fundamentally an **experiment**.
 
 ---
 
-# 6. Workflow
+## 6. Workflow
 
 The workflow describes what happens from user intent to outcome.
 
@@ -285,11 +285,11 @@ $$
 
 For our example:
 
-### Step 1 — User identifies incident
+#### Step 1 — User identifies incident
 
 The engineer enters an incident ID or describes the incident.
 
-### Step 2 — System gathers context
+#### Step 2 — System gathers context
 
 The system retrieves:
 
@@ -300,19 +300,19 @@ The system retrieves:
 * tickets,
 * recent code changes.
 
-### Step 3 — System forms hypotheses
+#### Step 3 — System forms hypotheses
 
 The AI analyzes the evidence and identifies plausible causes.
 
-### Step 4 — System investigates
+#### Step 4 — System investigates
 
 The agent performs additional searches or tool calls.
 
-### Step 5 — System verifies
+#### Step 5 — System verifies
 
 The system checks whether proposed explanations are supported by evidence.
 
-### Step 6 — System generates report
+#### Step 6 — System generates report
 
 The system produces:
 
@@ -324,7 +324,7 @@ The system produces:
 * uncertainty,
 * recommended next steps.
 
-### Step 7 — Human reviews
+#### Step 7 — Human reviews
 
 The engineer accepts, rejects, or modifies the conclusions.
 
@@ -348,7 +348,7 @@ $$
 
 ---
 
-# 7. Product Requirements
+## 7. Product Requirements
 
 The next step is to convert the workflow into explicit requirements.
 
@@ -356,7 +356,7 @@ Requirements should describe **observable system behavior**, not implementation 
 
 For example:
 
-### Functional requirements
+#### Functional requirements
 
 The system must:
 
@@ -375,7 +375,7 @@ The system must:
 13. Allow human review.
 14. Preserve the investigation trace.
 
-### Non-functional requirements
+#### Non-functional requirements
 
 The system should:
 
@@ -407,7 +407,7 @@ The latter describes a user-visible property.
 
 ---
 
-# 8. Architecture
+## 8. Architecture
 
 Only after the workflow and requirements are defined should the architecture be specified.
 
@@ -478,7 +478,7 @@ This connects directly to the concepts developed earlier in the course.
 
 ---
 
-# 9. Context Engineering
+## 9. Context Engineering
 
 The architecture should not simply send every available piece of information to the model.
 
@@ -527,7 +527,7 @@ This is a central property of production AI systems.
 
 ---
 
-# 10. Tool Design
+## 10. Tool Design
 
 Agentic products require explicit tool boundaries.
 
@@ -565,11 +565,11 @@ $$
 
 The MVP should also distinguish between:
 
-### Read-only tools
+#### Read-only tools
 
 Safe investigation operations.
 
-### Mutating tools
+#### Mutating tools
 
 Actions that change external state.
 
@@ -579,7 +579,7 @@ This dramatically reduces risk.
 
 ---
 
-# 11. Structured Outputs
+## 11. Structured Outputs
 
 AI-native systems should avoid relying exclusively on free-form text.
 
@@ -624,7 +624,7 @@ Structured outputs improve:
 
 ---
 
-# 12. Verification
+## 12. Verification
 
 For AI products, generation is only half of the system.
 
@@ -640,27 +640,27 @@ $$
 
 For the incident investigator, verification might check:
 
-### Evidence grounding
+#### Evidence grounding
 
 Does each important claim have supporting evidence?
 
-### Temporal consistency
+#### Temporal consistency
 
 Does the proposed cause occur before the observed failure?
 
-### Source consistency
+#### Source consistency
 
 Do multiple sources support the explanation?
 
-### Contradiction detection
+#### Contradiction detection
 
 Does any evidence contradict the hypothesis?
 
-### Schema validity
+#### Schema validity
 
 Is the output structurally valid?
 
-### Confidence calibration
+#### Confidence calibration
 
 Does expressed confidence correspond reasonably to evidence strength?
 
@@ -682,11 +682,11 @@ $$
 
 ---
 
-# 13. Success Metrics vs. Evaluation Metrics
+## 13. Success Metrics vs. Evaluation Metrics
 
 These are different concepts and should not be conflated.
 
-## Success metrics
+### Success metrics
 
 Measure whether the **product creates value**.
 
@@ -725,7 +725,7 @@ The product has demonstrated a potentially meaningful workflow improvement.
 
 ---
 
-# 14. Evaluation Metrics
+## 14. Evaluation Metrics
 
 Evaluation metrics measure whether the **AI system performs correctly**.
 
@@ -761,7 +761,7 @@ Conversely, a product can create substantial value despite imperfect model-level
 
 ---
 
-# 15. Define the Evaluation Dataset Early
+## 15. Define the Evaluation Dataset Early
 
 Do not wait until after implementation to construct evaluations.
 
@@ -807,7 +807,7 @@ This creates a regression mechanism for the AI system.
 
 ---
 
-# 16. MVP Scope
+## 16. MVP Scope
 
 Scope is one of the most important engineering decisions.
 
@@ -815,7 +815,7 @@ The MVP should deliberately exclude functionality.
 
 For our example:
 
-### In scope
+#### In scope
 
 * one incident-management source,
 * one log source,
@@ -829,7 +829,7 @@ For our example:
 * evaluation harness,
 * observability.
 
-### Out of scope
+#### Out of scope
 
 * autonomous remediation,
 * multi-cloud support,
@@ -858,7 +858,7 @@ $$
 
 ---
 
-# 17. The MVP Boundary
+## 17. The MVP Boundary
 
 A useful technique is to define the system boundary explicitly.
 
@@ -893,7 +893,7 @@ This is particularly important for AI products because the number of possible in
 
 ---
 
-# 18. What Should the Coding Agent Receive?
+## 18. What Should the Coding Agent Receive?
 
 The final artifact of today's exercise is a **coding-agent specification**.
 
@@ -958,7 +958,7 @@ The specification becomes the interface between **product reasoning and implemen
 
 ---
 
-# 19. Specification as a Contract
+## 19. Specification as a Contract
 
 This is an important conceptual shift.
 
@@ -1012,7 +1012,7 @@ toward:
 
 ---
 
-# 20. Coding Agents Change the Economics of Specification
+## 20. Coding Agents Change the Economics of Specification
 
 When human engineers write every line of implementation, requirements can remain somewhat implicit because the engineer carries significant contextual knowledge.
 
@@ -1043,17 +1043,17 @@ That remains a human responsibility.
 
 ---
 
-# 21. Acceptance Criteria
+## 21. Acceptance Criteria
 
 Every major requirement should have an acceptance criterion.
 
 For example:
 
-### Requirement
+#### Requirement
 
 The system must provide evidence for important conclusions.
 
-### Acceptance criterion
+#### Acceptance criterion
 
 For every root-cause hypothesis in the golden evaluation dataset, the system must identify at least one correct supporting evidence item or explicitly classify the hypothesis as unsupported.
 
@@ -1087,9 +1087,9 @@ This is particularly powerful for AI systems because many requirements can other
 
 ---
 
-# 22. The Complete MVP Loop
+## 22. The Complete MVP Loop
 
-The entire Day 24 process can be represented as:
+The entire Chapter 24 process can be represented as:
 
 $$
 \boxed{
@@ -1139,13 +1139,13 @@ It is the first instrument for learning.
 
 ---
 
-# 23. Day 24 Exercise
+## 23. Chapter 24 Exercise
 
-Take **one** of the AI opportunities identified on Day 22 or Day 23.
+Take **one** of the AI opportunities identified on Chapter 22 or Chapter 23.
 
 Create a complete MVP specification containing the following sections.
 
-## 1. User Persona
+### 1. User Persona
 
 Define:
 
@@ -1156,7 +1156,7 @@ Define:
 * expertise,
 * success criteria.
 
-## 2. Problem Statement
+### 2. Problem Statement
 
 Describe:
 
@@ -1166,11 +1166,11 @@ Describe:
 * economic cost,
 * desired outcome.
 
-## 3. Product Hypothesis
+### 3. Product Hypothesis
 
 State what you believe the product will accomplish and what assumptions must be validated.
 
-## 4. Workflow
+### 4. Workflow
 
 Describe the complete workflow:
 
@@ -1184,7 +1184,7 @@ $$
 \text{Output}
 $$
 
-## 5. Product Requirements
+### 5. Product Requirements
 
 Separate:
 
@@ -1193,7 +1193,7 @@ Separate:
 * security requirements,
 * operational requirements.
 
-## 6. Architecture
+### 6. Architecture
 
 Specify:
 
@@ -1208,7 +1208,7 @@ Specify:
 * verification,
 * observability.
 
-## 7. Interfaces
+### 7. Interfaces
 
 Define:
 
@@ -1217,7 +1217,7 @@ Define:
 * structured outputs,
 * data models.
 
-## 8. Success Metrics
+### 8. Success Metrics
 
 Define product-level metrics such as:
 
@@ -1237,7 +1237,7 @@ $$
 \text{User Satisfaction}
 $$
 
-## 9. Evaluation Metrics
+### 9. Evaluation Metrics
 
 Define AI/system-level metrics such as:
 
@@ -1249,11 +1249,11 @@ Define AI/system-level metrics such as:
 * latency,
 * cost.
 
-## 10. Evaluation Dataset
+### 10. Evaluation Dataset
 
 Create a small golden dataset before implementation.
 
-## 11. MVP Scope
+### 11. MVP Scope
 
 Explicitly define:
 
@@ -1263,13 +1263,13 @@ and
 
 **Out of scope**.
 
-## 12. Acceptance Criteria
+### 12. Acceptance Criteria
 
 For each major requirement, specify a test that determines whether it has been satisfied.
 
 ---
 
-# 24. Final Deliverable: The Coding-Agent Specification
+## 24. Final Deliverable: The Coding-Agent Specification
 
 The final deliverable should be a document that can be handed directly to a coding agent.
 
@@ -1315,7 +1315,7 @@ That is the central skill being developed.
 
 ---
 
-# 25. Key Takeaways
+## 25. Key Takeaways
 
 1. **An MVP is the smallest complete system capable of testing a product hypothesis.**
    It is not simply the smallest amount of code.

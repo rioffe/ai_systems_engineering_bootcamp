@@ -1,4 +1,4 @@
-# Day 23 — AI-Native Product Design
+# Chapter 23: AI-Native Product Design
 
 ## Designing Products for a World Where Intelligence Is Cheap
 
@@ -36,7 +36,7 @@ This is the foundation of **AI-native product design**.
 
 ---
 
-# 1. AI-Native vs. AI-Enhanced Products
+## 1. AI-Native vs. AI-Enhanced Products
 
 An important distinction is between **AI-enhanced** and **AI-native** products.
 
@@ -92,7 +92,7 @@ The second formulation changes the architecture of the product itself.
 
 ---
 
-# 2. The Economic Transformation
+## 2. The Economic Transformation
 
 Historically, software systems have attempted to minimize the amount of human interaction required.
 
@@ -157,7 +157,7 @@ The application becomes less like a collection of commands and more like an **in
 
 ---
 
-# 3. Natural-Language Interfaces
+## 3. Natural-Language Interfaces
 
 The most obvious consequence is the natural-language interface.
 
@@ -218,7 +218,7 @@ The interface becomes multimodal and adaptive rather than purely graphical.
 
 ---
 
-# 4. Personalized Workflows
+## 4. Personalized Workflows
 
 Traditional software generally assumes a relatively fixed workflow.
 
@@ -282,7 +282,7 @@ This is fundamentally different from hard-coding every possible workflow.
 
 ---
 
-# 5. Autonomous Research
+## 5. Autonomous Research
 
 Research is particularly interesting because much of its cost comes from cognitive coordination.
 
@@ -345,7 +345,7 @@ The system moves from **information retrieval** toward **knowledge work executio
 
 ---
 
-# 6. Continuous Monitoring
+## 6. Continuous Monitoring
 
 Another major consequence of cheap intelligence is that software can continuously interpret streams of information.
 
@@ -395,7 +395,7 @@ This creates a new category of product:
 
 ---
 
-# 7. Adaptive Software
+## 7. Adaptive Software
 
 Traditional applications are largely static.
 
@@ -436,7 +436,7 @@ This creates the possibility of software that behaves less like a static tool an
 
 ---
 
-# 8. Natural-Language Programming
+## 8. Natural-Language Programming
 
 Programming itself is being transformed by the declining cost of machine intelligence.
 
@@ -514,7 +514,7 @@ It is:
 
 ---
 
-# 9. Multimodal Interaction
+## 9. Multimodal Interaction
 
 Human interaction is inherently multimodal.
 
@@ -574,7 +574,7 @@ This enables products that would be difficult to construct using traditional int
 
 ---
 
-# 10. The More Important Question: What Was Impossible Before?
+## 10. The More Important Question: What Was Impossible Before?
 
 The first-order question is:
 
@@ -619,7 +619,7 @@ This is the core economic mechanism behind AI-native products.
 
 ---
 
-# 11. The Long Tail of Intelligence
+## 11. The Long Tail of Intelligence
 
 Cheap intelligence changes the economics of the **long tail**.
 
@@ -655,7 +655,7 @@ Products can potentially support highly specialized workflows without requiring 
 
 ---
 
-# 12. From Applications to Intent Engines
+## 12. From Applications to Intent Engines
 
 Traditional applications are organized around functions.
 
@@ -715,11 +715,11 @@ $$
 
 ---
 
-# 13. AI-Native Product Architecture
+## 13. AI-Native Product Architecture
 
 An AI-native product typically requires several layers.
 
-### Intent layer
+#### Intent layer
 
 Determines what the user wants.
 
@@ -729,7 +729,7 @@ $$
 
 where $U$ is the user request and $C$ is context.
 
-### Planning layer
+#### Planning layer
 
 Determines how to accomplish the goal.
 
@@ -743,7 +743,7 @@ where:
 * $S$ = current state,
 * $T$ = available tools.
 
-### Execution layer
+#### Execution layer
 
 Carries out the plan.
 
@@ -753,7 +753,7 @@ $$
 
 where $\pi$ is the policy selecting actions.
 
-### Verification layer
+#### Verification layer
 
 Determines whether the result is acceptable.
 
@@ -761,7 +761,7 @@ $$
 V = f(\text{Output},\text{Goal},\text{Evidence})
 $$
 
-### Adaptation layer
+#### Adaptation layer
 
 Uses feedback to modify future behavior.
 
@@ -775,7 +775,7 @@ The resulting system is closer to an **adaptive control system** than a conventi
 
 ---
 
-# 14. The Product Becomes a Closed Loop
+## 14. The Product Becomes a Closed Loop
 
 Traditional software often has an open-loop interaction:
 
@@ -841,7 +841,7 @@ It is participating in the workflow.
 
 ---
 
-# 15. The Boundary Between Product and Agent
+## 15. The Boundary Between Product and Agent
 
 This raises an important question:
 
@@ -901,13 +901,13 @@ AI-native product design therefore requires understanding **agentic behavior as 
 
 ---
 
-# 16. New Product Categories
+## 16. New Product Categories
 
 Once intelligence becomes cheap, entirely new product categories become plausible.
 
 Consider systems such as:
 
-### Personal research organizations
+#### Personal research organizations
 
 Instead of a search engine, every individual could have a persistent research system that continuously investigates topics of interest.
 
@@ -921,7 +921,7 @@ $$
 \text{Alerts}
 $$
 
-### Personal software
+#### Personal software
 
 Instead of configuring a generic application, the user describes what they need and the system constructs the workflow.
 
@@ -931,7 +931,7 @@ $$
 \text{Generated Application}
 $$
 
-### Autonomous business operations
+#### Autonomous business operations
 
 A small company could have AI systems continuously monitoring:
 
@@ -949,7 +949,7 @@ $$
 \text{Actions}
 $$
 
-### Persistent personal assistants
+#### Persistent personal assistants
 
 Rather than responding only when queried, the system maintains context and proactively identifies useful actions.
 
@@ -969,7 +969,7 @@ Their economics depend fundamentally on cheap intelligence.
 
 ---
 
-# 17. The Design Principle: Remove Artificial Constraints
+## 17. The Design Principle: Remove Artificial Constraints
 
 A powerful AI-native design question is:
 
@@ -977,27 +977,27 @@ A powerful AI-native design question is:
 
 Examples include:
 
-### Constraint: Users must learn the interface
+#### Constraint: Users must learn the interface
 
 AI can interpret natural language.
 
-### Constraint: Every workflow must be predefined
+#### Constraint: Every workflow must be predefined
 
 AI can dynamically construct workflows.
 
-### Constraint: Users must manually search information
+#### Constraint: Users must manually search information
 
 AI can continuously retrieve and synthesize information.
 
-### Constraint: Software must support only common workflows
+#### Constraint: Software must support only common workflows
 
 AI can support long-tail specialized workflows.
 
-### Constraint: Humans must monitor every system
+#### Constraint: Humans must monitor every system
 
 AI can continuously monitor and escalate exceptions.
 
-### Constraint: Programming requires explicit implementation
+#### Constraint: Programming requires explicit implementation
 
 AI can translate high-level intent into executable code.
 
@@ -1019,7 +1019,7 @@ $$
 
 ---
 
-# 18. Exercise — Design the Impossible Product
+## 18. Exercise — Design the Impossible Product
 
 The goal of today's exercise is not to add AI features to existing software.
 
@@ -1027,15 +1027,15 @@ Instead, identify products that were previously impractical or impossible.
 
 For each idea, answer:
 
-### 1. What is the product?
+#### 1. What is the product?
 
 Describe it in one sentence.
 
-### 2. What human intelligence does it replace or amplify?
+#### 2. What human intelligence does it replace or amplify?
 
 Identify the cognitive work.
 
-### 3. Why was it previously impractical?
+#### 3. Why was it previously impractical?
 
 Was the limiting factor:
 
@@ -1047,15 +1047,15 @@ Was the limiting factor:
 * programming cost?
 * lack of multimodal understanding?
 
-### 4. What changed?
+#### 4. What changed?
 
 Identify the AI capability that changes the economics.
 
-### 5. What does the system do autonomously?
+#### 5. What does the system do autonomously?
 
 Specify the actions the system can perform without continuous human direction.
 
-### 6. What remains under human control?
+#### 6. What remains under human control?
 
 Define:
 
@@ -1065,17 +1065,17 @@ Define:
 * safety constraints,
 * stopping conditions.
 
-### 7. What new data or feedback does the system accumulate?
+#### 7. What new data or feedback does the system accumulate?
 
 Identify the learning loop.
 
-### 8. Why is this a product rather than a feature?
+#### 8. Why is this a product rather than a feature?
 
 Explain the complete workflow and user outcome.
 
 ---
 
-# 19. A Useful Design Framework
+## 19. A Useful Design Framework
 
 For each proposed product, construct the following model:
 
@@ -1103,7 +1103,7 @@ That question often reveals the genuinely novel product.
 
 For example:
 
-### Before AI
+#### Before AI
 
 $$
 \text{Research Question}
@@ -1115,7 +1115,7 @@ $$
 \text{Human Synthesis}
 $$
 
-### With AI
+#### With AI
 
 $$
 \text{Research Question}
@@ -1135,7 +1135,7 @@ It is that **a complete research workflow can operate at machine scale**.
 
 ---
 
-# 20. Product Design at the New Abstraction Level
+## 20. Product Design at the New Abstraction Level
 
 The deepest change introduced by AI-native systems is a change in the unit of abstraction.
 
@@ -1192,7 +1192,7 @@ The difference is that these engineering mechanisms now support systems that can
 
 ---
 
-# 21. Key Takeaways
+## 21. Key Takeaways
 
 1. **AI-native products are not simply existing products with AI features.**
    They redesign the product around the economics of cheap intelligence.

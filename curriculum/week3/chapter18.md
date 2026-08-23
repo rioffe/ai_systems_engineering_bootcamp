@@ -1,12 +1,12 @@
-# Day 18 — Agentic Development Loops
+# Chapter 18: Agentic Development Loops
 
-The previous days established three foundations of agentic software engineering:
+The previous chapters established three foundations of agentic software engineering:
 
-* **Day 15:** coding agents operate through a closed loop of reasoning, tool use, execution, and verification.
-* **Day 16:** specifications define what the agent is supposed to produce.
-* **Day 17:** context engineering determines what information the agent needs in order to reason effectively.
+* **Chapter 15:** coding agents operate through a closed loop of reasoning, tool use, execution, and verification.
+* **Chapter 16:** specifications define what the agent is supposed to produce.
+* **Chapter 17:** context engineering determines what information the agent needs in order to reason effectively.
 
-Day 18 brings these ideas together.
+Chapter 18 brings these ideas together.
 
 The central abstraction is the **agentic development loop**:
 
@@ -69,7 +69,7 @@ It is:
 
 ---
 
-# 1. From Code Generation to Iterative Engineering
+## 1. From Code Generation to Iterative Engineering
 
 A traditional LLM coding interaction often looks like:
 
@@ -136,7 +136,7 @@ Agentic development operationalizes this process.
 
 ---
 
-# 2. The Loop as a Control System
+## 2. The Loop as a Control System
 
 The development loop can be formalized as a feedback-control process.
 
@@ -208,7 +208,7 @@ with sufficiently high confidence.
 
 ---
 
-# 3. The Seven Stages
+## 3. The Seven Stages
 
 The canonical loop is:
 
@@ -232,7 +232,7 @@ Each stage has a distinct role.
 
 ---
 
-# 4. Stage 1 — SPEC
+## 4. Stage 1 — SPEC
 
 The loop begins with a specification.
 
@@ -259,13 +259,13 @@ The specification establishes the target.
 
 Without it, the agent cannot reliably determine whether its work is complete.
 
-This is why Day 16 matters.
+This is why Chapter 16 matters.
 
 The agentic loop is only as good as the target against which it is evaluated.
 
 ---
 
-# 5. Stage 2 — PLAN
+## 5. Stage 2 — PLAN
 
 The agent determines how to reach the desired state.
 
@@ -302,7 +302,7 @@ Agentic development generally benefits from the second approach.
 
 ---
 
-# 6. Stage 3 — IMPLEMENT
+## 6. Stage 3 — IMPLEMENT
 
 The agent now modifies the repository.
 
@@ -338,7 +338,7 @@ Large uncontrolled modifications make verification and debugging harder.
 
 ---
 
-# 7. Stage 4 — TEST
+## 7. Stage 4 — TEST
 
 The agent executes tests.
 
@@ -372,7 +372,7 @@ If a test fails immediately after a small change, the causal relationship is eas
 
 ---
 
-# 8. Stage 5 — VERIFY
+## 8. Stage 5 — VERIFY
 
 Testing is only one form of verification.
 
@@ -428,7 +428,7 @@ Testing is one verification mechanism, not the entire verification system.
 
 ---
 
-# 9. Stage 6 — FIX
+## 9. Stage 6 — FIX
 
 If verification fails, the agent receives evidence.
 
@@ -467,7 +467,7 @@ It needs the ability to **learn from the verifier's feedback within the current 
 
 ---
 
-# 10. Stage 7 — RETEST
+## 10. Stage 7 — RETEST
 
 The agent reruns verification.
 
@@ -532,7 +532,7 @@ verification
 
 ---
 
-# 11. Verifiers as Sensors
+## 11. Verifiers as Sensors
 
 A useful systems perspective is to think of verifiers as **sensors**.
 
@@ -571,7 +571,7 @@ Therefore, a robust agentic development system uses **multiple independent signa
 
 ---
 
-# 12. The Verifier Stack
+## 12. The Verifier Stack
 
 A mature verification pipeline might look like:
 
@@ -630,17 +630,17 @@ The result is a **multi-dimensional feedback system**.
 
 ---
 
-# 13. Why Feedback Quality Matters
+## 13. Why Feedback Quality Matters
 
 Consider two verifiers.
 
-### Weak verifier
+#### Weak verifier
 
 ```text
 FAILED
 ```
 
-### Strong verifier
+#### Strong verifier
 
 ```text
 test_query_respects_tenant_boundary FAILED
@@ -667,7 +667,7 @@ A good verifier therefore has high **diagnostic value**.
 
 ---
 
-# 14. The Difference Between Detection and Diagnosis
+## 14. The Difference Between Detection and Diagnosis
 
 An agentic system needs more than error detection.
 
@@ -715,7 +715,7 @@ This dramatically reduces the search space for the agent's next action.
 
 ---
 
-# 15. The Loop as Search
+## 15. The Loop as Search
 
 Agentic development can also be viewed as search.
 
@@ -767,11 +767,11 @@ It allows the agent to explore a solution space without requiring perfect reason
 
 ---
 
-# 16. Why Better Feedback Can Beat a Better Model
+## 16. Why Better Feedback Can Beat a Better Model
 
 Consider two systems.
 
-### System A
+#### System A
 
 ```text
 Excellent model
@@ -779,7 +779,7 @@ Excellent model
 weak tests
 ```
 
-### System B
+#### System B
 
 ```text
 slightly weaker model
@@ -801,7 +801,7 @@ Why?
 
 Because System B has a better mechanism for correcting errors.
 
-This leads to the central principle of Day 18:
+This leads to the central principle of Chapter 18:
 
 > **Don't make the model smarter. Make the feedback loop better.**
 
@@ -828,7 +828,7 @@ Improving any of these can improve the final system.
 
 ---
 
-# 17. Iteration Depth
+## 17. Iteration Depth
 
 A key variable is the number of iterations the agent can perform.
 
@@ -868,17 +868,17 @@ Therefore the loop needs **stopping conditions**.
 
 ---
 
-# 18. Stopping Conditions
+## 18. Stopping Conditions
 
 A robust agent should stop when:
 
-### Success
+#### Success
 
 ```text
 All acceptance criteria satisfied.
 ```
 
-### Budget exhausted
+#### Budget exhausted
 
 ```text
 Maximum iterations reached.
@@ -886,13 +886,13 @@ Maximum tokens reached.
 Maximum cost reached.
 ```
 
-### Progress stalls
+#### Progress stalls
 
 ```text
 No improvement across N iterations.
 ```
 
-### Error is unrecoverable
+#### Error is unrecoverable
 
 ```text
 Missing dependency
@@ -901,7 +901,7 @@ Insufficient permissions
 Contradictory specification
 ```
 
-### Human intervention required
+#### Human intervention required
 
 ```text
 Production deployment
@@ -927,7 +927,7 @@ Stopping conditions are part of agent engineering, not an afterthought.
 
 ---
 
-# 19. Progress Measurement
+## 19. Progress Measurement
 
 The agent should ideally measure whether it is actually improving.
 
@@ -983,7 +983,7 @@ lint errors
 
 ---
 
-# 20. Regression Control
+## 20. Regression Control
 
 One of the dangers of autonomous repair is that fixing one problem can create another.
 
@@ -1033,7 +1033,7 @@ This creates an important principle:
 
 ---
 
-# 21. Verification Should Be Independent
+## 21. Verification Should Be Independent
 
 A particularly important architectural principle is **independence**.
 
@@ -1073,7 +1073,7 @@ Deterministic verifiers are especially valuable because they do not share the mo
 
 ---
 
-# 22. LLM-as-Judge
+## 22. LLM-as-Judge
 
 Sometimes deterministic verification is impossible.
 
@@ -1117,7 +1117,7 @@ The general principle remains:
 
 ---
 
-# 23. Benchmarks as Verifiers
+## 23. Benchmarks as Verifiers
 
 Performance requirements require different feedback.
 
@@ -1159,7 +1159,7 @@ If the specification contains a requirement, the verification system should idea
 
 ---
 
-# 24. Security Scanners as Verifiers
+## 24. Security Scanners as Verifiers
 
 Security is another dimension that ordinary tests may miss.
 
@@ -1196,7 +1196,7 @@ This makes security analysis part of the development loop rather than a final ma
 
 ---
 
-# 25. Browser Tests and Simulators
+## 25. Browser Tests and Simulators
 
 For systems with external behavior, verification may involve simulated environments.
 
@@ -1240,7 +1240,7 @@ It is any mechanism that produces evidence about whether the system satisfies it
 
 ---
 
-# 26. The Autonomous Development Loop
+## 26. The Autonomous Development Loop
 
 A practical coding agent can therefore implement:
 
@@ -1297,7 +1297,7 @@ This is the architecture of an autonomous software-development loop.
 
 ---
 
-# 27. The Harness Must Control the Loop
+## 27. The Harness Must Control the Loop
 
 The model should not be solely responsible for deciding when the loop ends.
 
@@ -1337,7 +1337,7 @@ The harness supplies **control policy**.
 
 ---
 
-# 28. Autonomous Does Not Mean Unbounded
+## 28. Autonomous Does Not Mean Unbounded
 
 An autonomous loop should have bounded autonomy.
 
@@ -1380,7 +1380,7 @@ It is **appropriate autonomy within explicit boundaries**.
 
 ---
 
-# 29. The Development Loop as a Learning System
+## 29. The Development Loop as a Learning System
 
 The agent can improve within a task because each verification cycle generates information.
 
@@ -1416,9 +1416,9 @@ It is interacting with an environment and updating its beliefs based on observat
 
 ---
 
-# 30. The Most Important Design Principle
+## 30. The Most Important Design Principle
 
-The central lesson of Day 18 can now be stated precisely:
+The central lesson of Chapter 18 can now be stated precisely:
 
 > **Do not optimize only for the quality of the agent's first action. Optimize for the quality of the entire trajectory toward a verified state.**
 
@@ -1447,7 +1447,7 @@ It is the **development trajectory**.
 
 ---
 
-# 31. Exercise — Build an Autonomous Development Loop
+## 31. Exercise — Build an Autonomous Development Loop
 
 Extend the coding agent built on Days 15–17.
 
@@ -1544,13 +1544,13 @@ The goal is to understand that **different verifiers provide different forms of 
 
 ---
 
-# 32. A More Advanced Exercise — Improve the Loop Without Changing the Model
+## 32. A More Advanced Exercise — Improve the Loop Without Changing the Model
 
 Run the same task with the same model.
 
 Create three systems.
 
-### System A
+#### System A
 
 ```text
 LLM
@@ -1558,7 +1558,7 @@ LLM
 code
 ```
 
-### System B
+#### System B
 
 ```text
 LLM
@@ -1572,7 +1572,7 @@ feedback
 LLM
 ```
 
-### System C
+#### System C
 
 ```text
 LLM
@@ -1623,7 +1623,7 @@ This experiment demonstrates one of the central ideas of modern AI engineering:
 
 ---
 
-# 33. Key Takeaways
+## 33. Key Takeaways
 
 1. **Agentic development is fundamentally a feedback loop.**
 

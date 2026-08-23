@@ -1,23 +1,23 @@
-# Day 21 — The Agentic Software Project
+# Chapter 21: The Agentic Software Project
 
-Day 21 is the culmination of the first major phase of the bootcamp.
+Chapter 21 is the culmination of the first major phase of the bootcamp.
 
-The previous days developed the individual capabilities required for agentic software engineering:
+The previous chapters developed the individual capabilities required for agentic software engineering:
 
 ```text
-Day 15 — Coding agents
+Chapter 15 — Coding agents
         ↓
-Day 16 — Specification engineering
+Chapter 16 — Specification engineering
         ↓
-Day 17 — Context engineering
+Chapter 17 — Context engineering
         ↓
-Day 18 — Agentic development loops
+Chapter 18 — Agentic development loops
         ↓
-Day 19 — Multi-agent systems
+Chapter 19 — Multi-agent systems
         ↓
-Day 20 — Coding-agent safety
+Chapter 20 — Coding-agent safety
         ↓
-Day 21 — Agentic software project
+Chapter 21 — Agentic software project
 ```
 
 Until now, the exercises have isolated individual concepts.
@@ -40,7 +40,7 @@ That changes the engineer's role.
 
 ---
 
-# 1. The Traditional Development Model
+## 1. The Traditional Development Model
 
 The conventional workflow looks approximately like:
 
@@ -70,7 +70,7 @@ The engineer remains in the center of the implementation loop.
 
 ---
 
-# 2. The Agentic Development Model
+## 2. The Agentic Development Model
 
 With a capable coding agent, the workflow changes:
 
@@ -110,11 +110,11 @@ Redirect
 Architect
 ```
 
-This is the central exercise of Day 21.
+This is the central exercise of Chapter 21.
 
 ---
 
-# 3. The Week 1 Application Becomes the Target
+## 3. The Week 1 Application Becomes the Target
 
 Return to the application built during Week 1.
 
@@ -158,7 +158,7 @@ That makes the exercise much closer to real software engineering.
 
 ---
 
-# 4. Give the Agent Ownership of a Development Objective
+## 4. Give the Agent Ownership of a Development Objective
 
 Do not simply tell the agent:
 
@@ -182,11 +182,11 @@ Metrics
 Acceptance criteria
 ```
 
-This connects directly to Day 16.
+This connects directly to Chapter 16.
 
 ---
 
-# 5. The Engineer Becomes the Specification Layer
+## 5. The Engineer Becomes the Specification Layer
 
 A useful way to think about the new workflow is:
 
@@ -236,7 +236,7 @@ The second specification gives the agent a much more constrained search space.
 
 ---
 
-# 6. Start With Architecture, Not Code
+## 6. Start With Architecture, Not Code
 
 One of the most important rules for this exercise is:
 
@@ -271,7 +271,7 @@ The agent must construct a model of the system before changing it.
 
 ---
 
-# 7. Repository Understanding
+## 7. Repository Understanding
 
 A useful coding agent should be able to answer questions such as:
 
@@ -325,7 +325,7 @@ This map becomes part of the agent's working context.
 
 ---
 
-# 8. The First Assignment: Redesign
+## 8. The First Assignment: Redesign
 
 The first major task is:
 
@@ -362,7 +362,7 @@ Require the agent to explain:
 
 ---
 
-# 9. Architecture Decision Records
+## 9. Architecture Decision Records
 
 Require the agent to produce an ADR.
 
@@ -396,7 +396,7 @@ This forces the agent to reason about architecture rather than merely generate c
 
 ---
 
-# 10. The Second Assignment: Add Features
+## 10. The Second Assignment: Add Features
 
 Next, have the agent add meaningful capabilities.
 
@@ -436,7 +436,7 @@ The artifact is the complete engineering change.
 
 ---
 
-# 11. Feature Development Should Be Specification-Driven
+## 11. Feature Development Should Be Specification-Driven
 
 A useful interaction pattern is:
 
@@ -482,7 +482,7 @@ The planning stage provides a control point.
 
 ---
 
-# 12. The Third Assignment: Testing
+## 12. The Third Assignment: Testing
 
 Now explicitly ask the agent to improve the test suite.
 
@@ -509,9 +509,9 @@ The objective is **coverage of meaningful behavior**, not test-count maximizatio
 
 ---
 
-# 13. Tests as Executable Specification
+## 13. Tests as Executable Specification
 
-This connects Day 21 directly to specification engineering.
+This connects Chapter 21 directly to specification engineering.
 
 A requirement might state:
 
@@ -546,7 +546,7 @@ This creates a powerful feedback mechanism for the agent.
 
 ---
 
-# 14. The Fourth Assignment: Benchmark
+## 14. The Fourth Assignment: Benchmark
 
 Next, tell the agent:
 
@@ -578,7 +578,7 @@ Now the engineering tradeoff is visible.
 
 ---
 
-# 15. Benchmark Before Modification
+## 15. Benchmark Before Modification
 
 Always establish a baseline.
 
@@ -612,7 +612,7 @@ Then measure again.
 
 ---
 
-# 16. The Agent as an Optimization Loop
+## 16. The Agent as an Optimization Loop
 
 The workflow becomes:
 
@@ -638,7 +638,7 @@ This is a major conceptual shift.
 
 ---
 
-# 17. The Fifth Assignment: Bug Fixing
+## 17. The Fifth Assignment: Bug Fixing
 
 Now deliberately introduce bugs.
 
@@ -671,7 +671,7 @@ This tests actual engineering ability.
 
 ---
 
-# 18. Root Cause Analysis
+## 18. Root Cause Analysis
 
 A good agent should not merely patch symptoms.
 
@@ -715,7 +715,7 @@ This is substantially more valuable than:
 
 ---
 
-# 19. The Sixth Assignment: Documentation
+## 19. The Sixth Assignment: Documentation
 
 Documentation should also become part of the agent's responsibilities.
 
@@ -746,7 +746,7 @@ remain consistent.
 
 ---
 
-# 20. Documentation Drift as a Testable Property
+## 20. Documentation Drift as a Testable Property
 
 Documentation is often treated as secondary.
 
@@ -775,7 +775,7 @@ The agent can then repair documentation when implementation changes.
 
 ---
 
-# 21. Your Role Changes
+## 21. Your Role Changes
 
 The most important exercise is not actually what the agent does.
 
@@ -785,7 +785,7 @@ You should deliberately avoid becoming the primary coder.
 
 Instead, your role becomes:
 
-### Specify
+#### Specify
 
 Define:
 
@@ -797,7 +797,7 @@ interfaces
 acceptance criteria
 ```
 
-### Review
+#### Review
 
 Evaluate:
 
@@ -808,7 +808,7 @@ tradeoffs
 risks
 ```
 
-### Test
+#### Test
 
 Determine:
 
@@ -818,7 +818,7 @@ what can fail
 what evidence is required
 ```
 
-### Evaluate
+#### Evaluate
 
 Measure:
 
@@ -830,7 +830,7 @@ reliability
 security
 ```
 
-### Redirect
+#### Redirect
 
 When the agent goes down the wrong path:
 
@@ -841,7 +841,7 @@ clarify
 redirect
 ```
 
-### Architect
+#### Architect
 
 Decide:
 
@@ -855,7 +855,7 @@ invariants
 
 ---
 
-# 22. The Engineer as Control System
+## 22. The Engineer as Control System
 
 A useful abstraction is to think of yourself as the controller.
 
@@ -890,7 +890,7 @@ The specification defines the desired state.
 
 ---
 
-# 23. The Agent Is an Actuator
+## 23. The Agent Is an Actuator
 
 This is an important conceptual shift.
 
@@ -930,9 +930,9 @@ rather than manually specifying every implementation detail.
 
 ---
 
-# 24. The Agentic Development Loop
+## 24. The Agentic Development Loop
 
-By Day 21, your complete loop should look like:
+By Chapter 21, your complete loop should look like:
 
 ```text
               SPECIFICATION
@@ -966,7 +966,7 @@ The coding agent performs much of the execution.
 
 ---
 
-# 25. Human-in-the-Loop Does Not Mean Human-at-Every-Step
+## 25. Human-in-the-Loop Does Not Mean Human-at-Every-Step
 
 A common mistake is to interpret agentic development as:
 
@@ -1018,13 +1018,13 @@ The human operates at the level of **decisions and boundaries**, not keystrokes.
 
 ---
 
-# 26. Delegation Requires Clear Boundaries
+## 26. Delegation Requires Clear Boundaries
 
 You should explicitly define what the agent can decide.
 
 For example:
 
-### Agent may decide
+#### Agent may decide
 
 ```text
 implementation details
@@ -1034,7 +1034,7 @@ test structure
 local optimization
 ```
 
-### Engineer decides
+#### Engineer decides
 
 ```text
 public API changes
@@ -1050,9 +1050,9 @@ This creates a delegation boundary.
 
 ---
 
-# 27. The Agent Should Produce Evidence
+## 27. The Agent Should Produce Evidence
 
-One of the most important requirements for Day 21 is:
+One of the most important requirements for Chapter 21 is:
 
 > **Do not accept "done" as a status. Require evidence.**
 
@@ -1092,7 +1092,7 @@ The agent's output becomes an **engineering report**, not merely a claim.
 
 ---
 
-# 28. Evidence-Based Acceptance
+## 28. Evidence-Based Acceptance
 
 A useful acceptance structure is:
 
@@ -1118,7 +1118,7 @@ This makes the agent's work auditable.
 
 ---
 
-# 29. What You Should Not Accept
+## 29. What You Should Not Accept
 
 Do not accept:
 
@@ -1152,7 +1152,7 @@ $$
 
 ---
 
-# 30. A Full Project Assignment
+## 30. A Full Project Assignment
 
 Give the agent the following objective:
 
@@ -1160,7 +1160,7 @@ Give the agent the following objective:
 
 The agent must:
 
-### Architecture
+#### Architecture
 
 * analyze the existing architecture
 * identify weaknesses
@@ -1168,13 +1168,13 @@ The agent must:
 * produce ADRs
 * implement approved architectural changes
 
-### Features
+#### Features
 
 * implement at least two significant new capabilities
 * preserve existing public interfaces unless explicitly approved
 * update configuration and deployment
 
-### Testing
+#### Testing
 
 * add unit tests
 * add integration tests
@@ -1182,28 +1182,28 @@ The agent must:
 * improve evaluation coverage
 * add failure-mode tests
 
-### Performance
+#### Performance
 
 * establish baseline
 * benchmark changes
 * identify bottlenecks
 * optimize at least one subsystem
 
-### Reliability
+#### Reliability
 
 * add retries where appropriate
 * handle failures
 * improve observability
 * define stopping conditions
 
-### Security
+#### Security
 
 * inspect tool permissions
 * identify prompt-injection risks
 * verify secret isolation
 * test authorization boundaries
 
-### Documentation
+#### Documentation
 
 * update README
 * update architecture documentation
@@ -1213,7 +1213,7 @@ The agent must:
 
 ---
 
-# 31. The Agent's Deliverables
+## 31. The Agent's Deliverables
 
 Require a complete artifact set:
 
@@ -1249,17 +1249,17 @@ This is much closer to professional engineering practice than a code-generation 
 
 ---
 
-# 32. Evaluate the Agent, Not Just the Application
+## 32. Evaluate the Agent, Not Just the Application
 
 There are now two things to evaluate.
 
-### Application quality
+#### Application quality
 
 ```text
 Does the software work?
 ```
 
-### Agent quality
+#### Agent quality
 
 ```text
 Can the agent reliably modify the software?
@@ -1275,49 +1275,49 @@ Measure both.
 
 ---
 
-# 33. Agent Engineering Metrics
+## 33. Agent Engineering Metrics
 
 Useful metrics include:
 
-### Task success rate
+#### Task success rate
 
 $$
 P(\text{task completed successfully})
 $$
 
-### Intervention rate
+#### Intervention rate
 
 $$
 \frac{\text{human interventions}}
 {\text{agent tasks}}
 $$
 
-### First-pass success
+#### First-pass success
 
 $$
 P(\text{success without human correction})
 $$
 
-### Iterations per task
+#### Iterations per task
 
 $$
 N_{\text{iterations}}
 $$
 
-### Regression rate
+#### Regression rate
 
 $$
 P(\text{existing behavior broken})
 $$
 
-### Cost per successful task
+#### Cost per successful task
 
 $$
 \frac{\text{inference + infrastructure cost}}
 {\text{successful tasks}}
 $$
 
-### Time to verified completion
+#### Time to verified completion
 
 $$
 T_{\text{verified}}
@@ -1327,7 +1327,7 @@ These metrics allow you to evaluate whether the agent is actually becoming usefu
 
 ---
 
-# 34. Measure Human Leverage
+## 34. Measure Human Leverage
 
 One of the most interesting metrics is:
 
@@ -1361,7 +1361,7 @@ It is to increase the engineer's leverage.
 
 ---
 
-# 35. The Engineer Moves Up the Abstraction Stack
+## 35. The Engineer Moves Up the Abstraction Stack
 
 The progression looks approximately like:
 
@@ -1398,7 +1398,7 @@ rather than line-by-line typing.
 
 ---
 
-# 36. This Is Not "No-Code"
+## 36. This Is Not "No-Code"
 
 There is an important distinction.
 
@@ -1418,7 +1418,7 @@ In some respects, it increases.
 
 ---
 
-# 37. The Verification Burden Increases
+## 37. The Verification Burden Increases
 
 Suppose an engineer manually writes 500 lines of code.
 
@@ -1450,7 +1450,7 @@ must grow together.
 
 ---
 
-# 38. Specification Becomes a Force Multiplier
+## 38. Specification Becomes a Force Multiplier
 
 A poorly specified task:
 
@@ -1478,7 +1478,7 @@ The engineer's specification therefore becomes a form of **programming at a high
 
 ---
 
-# 39. The Agentic Engineer as a Systems Architect
+## 39. The Agentic Engineer as a Systems Architect
 
 The engineer's responsibilities increasingly become:
 
@@ -1506,7 +1506,7 @@ That is a major conceptual shift.
 
 ---
 
-# 40. The Meta-Level: Engineering the Engineering Process
+## 40. The Meta-Level: Engineering the Engineering Process
 
 Traditional software engineering asks:
 
@@ -1538,11 +1538,11 @@ The engineering object is now larger than the application itself.
 
 ---
 
-# 41. The Week 1 Project Revisited
+## 41. The Week 1 Project Revisited
 
 At the beginning of the bootcamp, the Personal Research Assistant was primarily an application.
 
-By Day 21, it becomes a testbed for an engineering methodology.
+By Chapter 21, it becomes a testbed for an engineering methodology.
 
 You now have:
 
@@ -1570,7 +1570,7 @@ This is the first complete **agentic software-development system** in the curric
 
 ---
 
-# 42. The Day 21 Challenge
+## 42. The Chapter 21 Challenge
 
 For the final challenge, impose one additional constraint:
 
@@ -1606,7 +1606,7 @@ This turns agent failure into an engineering diagnostic.
 
 ---
 
-# 43. Debug the Development System
+## 43. Debug the Development System
 
 This is one of the most important lessons.
 
@@ -1658,7 +1658,7 @@ Therefore:
 
 ---
 
-# 44. A Mature Day 21 Workflow
+## 44. A Mature Chapter 21 Workflow
 
 The final workflow should look something like:
 
@@ -1704,9 +1704,9 @@ The human controls the system and intervenes at meaningful decision boundaries.
 
 ---
 
-# 45. Key Takeaways
+## 45. Key Takeaways
 
-1. **Day 21 is the transition from learning agent capabilities to practicing agentic engineering.**
+1. **Chapter 21 is the transition from learning agent capabilities to practicing agentic engineering.**
 
 2. **The Week 1 application becomes the subject of autonomous evolution.**
    The agent should redesign it, add features, write tests, benchmark it, fix defects, and maintain documentation.
@@ -1805,7 +1805,7 @@ $$
     }
 $$
 
-16. **The deepest lesson of Day 21 is that AI-assisted development is not primarily about typing code faster.**
+16. **The deepest lesson of Chapter 21 is that AI-assisted development is not primarily about typing code faster.**
 
     It is about changing the unit of engineering work:
 
@@ -1834,7 +1834,7 @@ $$
 
 17. **The engineer becomes the architect of a software-producing system.**
 
-This is why Day 21 is such an important transition point in the bootcamp. You have spent the first three weeks learning how to make an agent capable, how to specify its work, how to provide context, how to create feedback loops, how to coordinate agents, and how to constrain their authority.
+This is why Chapter 21 is such an important transition point in the bootcamp. You have spent the first three weeks learning how to make an agent capable, how to specify its work, how to provide context, how to create feedback loops, how to coordinate agents, and how to constrain their authority.
 
 Now you put all of those ideas together.
 

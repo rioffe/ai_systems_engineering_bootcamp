@@ -1,4 +1,4 @@
-# Day 13 — Testing AI Systems
+# Chapter 13: Testing AI Systems
 
 Traditional software testing is built around a powerful assumption:
 
@@ -97,7 +97,7 @@ The goal is to establish that it **reliably behaves within an acceptable behavio
 
 ---
 
-# 1. The Testing Pyramid Still Exists
+## 1. The Testing Pyramid Still Exists
 
 AI systems do not replace traditional software testing.
 
@@ -143,7 +143,7 @@ The LLM should not be used where a deterministic assertion will do.
 
 ---
 
-# 2. Unit Tests
+## 2. Unit Tests
 
 Unit tests verify isolated components.
 
@@ -194,7 +194,7 @@ A useful principle is:
 
 ---
 
-# 3. Integration Tests
+## 3. Integration Tests
 
 Unit tests isolate components.
 
@@ -254,7 +254,7 @@ This distinction prevents fragile tests that fail merely because the model phras
 
 ---
 
-# 4. Property-Based Testing
+## 4. Property-Based Testing
 
 Property-based testing asks:
 
@@ -304,7 +304,7 @@ The deterministic security layer should reject those that violate its contract.
 
 ---
 
-# 5. Testing the Model Is Different
+## 5. Testing the Model Is Different
 
 Suppose the expected answer is:
 
@@ -347,7 +347,7 @@ rather than exact string equality.
 
 ---
 
-# 6. Evals
+## 6. Evals
 
 An **eval** is a systematic measurement of model or system behavior against a defined criterion.
 
@@ -395,7 +395,7 @@ The key insight is:
 
 ---
 
-# 7. The Evaluation Oracle Problem
+## 7. The Evaluation Oracle Problem
 
 Traditional testing depends on an oracle:
 
@@ -415,11 +415,11 @@ There may be hundreds of correct answers.
 
 You can therefore evaluate against:
 
-### Reference answers
+#### Reference answers
 
 A human-written ideal answer.
 
-### Rubrics
+#### Rubrics
 
 A set of required properties.
 
@@ -432,7 +432,7 @@ Must mention:
 + cascading failure
 ```
 
-### Structured facts
+#### Structured facts
 
 ```text
 required_concepts = {
@@ -441,11 +441,11 @@ required_concepts = {
 }
 ```
 
-### External verification
+#### External verification
 
 For factual questions, compare claims against authoritative sources.
 
-### LLM-as-judge
+#### LLM-as-judge
 
 Use another model to evaluate the response.
 
@@ -455,7 +455,7 @@ A mature evaluation system often combines them.
 
 ---
 
-# 8. LLM-as-Judge
+## 8. LLM-as-Judge
 
 One common technique is to use an LLM to evaluate another LLM.
 
@@ -503,7 +503,7 @@ Do not treat an LLM judge as an infallible oracle.
 
 ---
 
-# 9. Pairwise Evaluation
+## 9. Pairwise Evaluation
 
 Sometimes absolute scoring is difficult.
 
@@ -557,7 +557,7 @@ This provides evidence that Version 2 is better, though statistical uncertainty 
 
 ---
 
-# 10. Regression Testing
+## 10. Regression Testing
 
 A regression occurs when a change causes previously working behavior to become worse.
 
@@ -612,7 +612,7 @@ AI regression testing therefore requires multiple dimensions.
 
 ---
 
-# 11. The AI Regression Suite
+## 11. The AI Regression Suite
 
 This is today's core exercise.
 
@@ -676,7 +676,7 @@ cost
 
 ---
 
-# 12. Multi-Dimensional Pass/Fail
+## 12. Multi-Dimensional Pass/Fail
 
 A single score can hide important regressions.
 
@@ -720,7 +720,7 @@ because a system could score 92% overall while having a catastrophic safety fail
 
 ---
 
-# 13. Golden Datasets
+## 13. Golden Datasets
 
 A regression suite needs representative examples.
 
@@ -760,43 +760,43 @@ Otherwise the regression suite will systematically overestimate system quality.
 
 ---
 
-# 14. Test Categories
+## 14. Test Categories
 
 A mature AI test suite should include several classes.
 
-## Functional tests
+### Functional tests
 
 Does the system perform the requested task?
 
-## Behavioral tests
+### Behavioral tests
 
 Does it behave according to the specification?
 
-## Safety tests
+### Safety tests
 
 Does it refuse or constrain dangerous behavior?
 
-## Security tests
+### Security tests
 
 Can malicious inputs manipulate the system?
 
-## Performance tests
+### Performance tests
 
 Does it satisfy latency and throughput requirements?
 
-## Economic tests
+### Economic tests
 
 Does it stay within cost budgets?
 
-## Tool tests
+### Tool tests
 
 Does it select and invoke tools correctly?
 
-## Retrieval tests
+### Retrieval tests
 
 Does it retrieve the right evidence?
 
-## Regression tests
+### Regression tests
 
 Did a change make anything worse?
 
@@ -818,7 +818,7 @@ AI Test Coverage
 
 ---
 
-# 15. Adversarial Testing
+## 15. Adversarial Testing
 
 Normal tests ask:
 
@@ -858,7 +858,7 @@ Adversarial testing is particularly important because AI systems operate on inpu
 
 ---
 
-# 16. Fuzzing
+## 16. Fuzzing
 
 Traditional fuzzing generates large numbers of unusual inputs.
 
@@ -904,7 +904,7 @@ This is an important distinction:
 
 ---
 
-# 17. Metamorphic Testing
+## 17. Metamorphic Testing
 
 AI systems are particularly suitable for **metamorphic testing**.
 
@@ -958,7 +958,7 @@ Metamorphic tests are powerful because they do not require a single exact oracle
 
 ---
 
-# 18. Testing RAG Systems
+## 18. Testing RAG Systems
 
 RAG requires testing at multiple layers.
 
@@ -980,7 +980,7 @@ Citation
 
 Each stage can fail.
 
-### Retrieval tests
+#### Retrieval tests
 
 Measure:
 
@@ -992,7 +992,7 @@ $$
 \text{Precision@k}
 $$
 
-### Context tests
+#### Context tests
 
 Verify:
 
@@ -1003,7 +1003,7 @@ Verify:
 + context within budget
 ```
 
-### Generation tests
+#### Generation tests
 
 Measure:
 
@@ -1022,7 +1022,7 @@ You need to determine **where in the pipeline the failure occurred**.
 
 ---
 
-# 19. Testing Tool Use
+## 19. Testing Tool Use
 
 Agentic systems require another testing dimension:
 
@@ -1052,27 +1052,27 @@ even if the final answer looks reasonable.
 
 Therefore test:
 
-### Tool selection
+#### Tool selection
 
 Was the correct tool selected?
 
-### Tool arguments
+#### Tool arguments
 
 Were the arguments correct?
 
-### Tool ordering
+#### Tool ordering
 
 Were dependencies respected?
 
-### Authorization
+#### Authorization
 
 Was the action permitted?
 
-### Recovery
+#### Recovery
 
 What happened when the tool failed?
 
-### Side effects
+#### Side effects
 
 Did anything unintended happen?
 
@@ -1080,7 +1080,7 @@ A tool-call trace is often more informative than the final answer.
 
 ---
 
-# 20. Trace-Based Evaluation
+## 20. Trace-Based Evaluation
 
 For agents, the final output is only part of the behavior.
 
@@ -1150,7 +1150,7 @@ The systems are not equally reliable.
 
 ---
 
-# 21. Testing Non-Determinism
+## 21. Testing Non-Determinism
 
 Running the same test once is often insufficient.
 
@@ -1198,7 +1198,7 @@ This is one of the most fundamental differences between deterministic software t
 
 ---
 
-# 22. Statistical Thinking
+## 22. Statistical Thinking
 
 Suppose a model passes:
 
@@ -1246,7 +1246,7 @@ As the stakes increase, evaluation should therefore incorporate statistical unce
 
 ---
 
-# 23. Evaluation Drift
+## 23. Evaluation Drift
 
 The system can change without your code changing.
 
@@ -1293,7 +1293,7 @@ AI systems need **behavioral observability**.
 
 ---
 
-# 24. Evaluation Data Is a Product
+## 24. Evaluation Data Is a Product
 
 The quality of the evaluation dataset strongly determines the quality of the engineering process.
 
@@ -1348,7 +1348,7 @@ That makes it one of the most valuable assets in the project.
 
 ---
 
-# 25. Release Gates
+## 25. Release Gates
 
 The regression suite should become part of the deployment pipeline.
 
@@ -1392,7 +1392,7 @@ This turns evaluation into an engineering control rather than an analytics dashb
 
 ---
 
-# 26. The AI Regression Dashboard
+## 26. The AI Regression Dashboard
 
 A useful regression report might look like:
 
@@ -1436,7 +1436,7 @@ Tests: 94/100
 
 ---
 
-# 27. Testing the Test System
+## 27. Testing the Test System
 
 There is a subtle but critical problem.
 
@@ -1483,7 +1483,7 @@ It deserves testing like any other component.
 
 ---
 
-# 28. Testing the Entire Agent
+## 28. Testing the Entire Agent
 
 Now combine everything.
 
@@ -1509,7 +1509,7 @@ Response
 
 Build test cases covering:
 
-### Correct behavior
+#### Correct behavior
 
 ```text
 known answer
@@ -1517,19 +1517,19 @@ known document
 known tool
 ```
 
-### Uncertainty
+#### Uncertainty
 
 ```text
 answer not in corpus
 ```
 
-### Retrieval failures
+#### Retrieval failures
 
 ```text
 no relevant documents
 ```
 
-### Tool failures
+#### Tool failures
 
 ```text
 timeout
@@ -1537,7 +1537,7 @@ malformed response
 permission denied
 ```
 
-### Security
+#### Security
 
 ```text
 prompt injection
@@ -1545,7 +1545,7 @@ malicious document
 secret extraction
 ```
 
-### Performance
+#### Performance
 
 ```text
 large context
@@ -1553,7 +1553,7 @@ high concurrency
 long generation
 ```
 
-### Economics
+#### Economics
 
 ```text
 excessive model calls
@@ -1565,7 +1565,7 @@ The test system should determine not just whether the answer is correct, but whe
 
 ---
 
-# 29. The Testing Matrix
+## 29. The Testing Matrix
 
 A useful way to organize AI testing is as a matrix.
 
@@ -1588,7 +1588,7 @@ This prevents the common mistake of defining AI quality using one metric.
 
 ---
 
-# 30. Testing as a Feedback Loop
+## 30. Testing as a Feedback Loop
 
 The mature AI engineering process becomes:
 
@@ -1630,13 +1630,13 @@ That is especially important when the implementation is probabilistic.
 
 ---
 
-# 31. From Tests to Evals
+## 31. From Tests to Evals
 
 There is sometimes confusion between testing and evaluation.
 
 A useful distinction is:
 
-### Test
+#### Test
 
 Usually asks:
 
@@ -1651,7 +1651,7 @@ JSON conforms to schema
 Timeout terminates request
 ```
 
-### Eval
+#### Eval
 
 Usually asks:
 
@@ -1666,7 +1666,7 @@ Summarization quality = 4.4/5
 Tool selection accuracy = 98%
 ```
 
-### Red team
+#### Red team
 
 Asks:
 
@@ -1686,7 +1686,7 @@ AI assurance
 
 ---
 
-# 32. The Testing Mindset
+## 32. The Testing Mindset
 
 The naive question is:
 
@@ -1732,7 +1732,7 @@ It is to **measure and control it**.
 
 ---
 
-# 33. Key Takeaways
+## 33. Key Takeaways
 
 1. **AI testing is different because outputs are distributions, not fixed values.** The correct abstraction is behavioral acceptance rather than exact string equality.
 

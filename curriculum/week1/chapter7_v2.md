@@ -1,22 +1,22 @@
-# Day 7 — Week 1 Project
+# Chapter 7: Week 1 Project
 
-The first six days have built the pieces of an AI application:
+The first six chapters have built the pieces of an AI application:
 
 ```text
-Day 1 — The AI application stack
+Chapter 1 — The AI application stack
         ↓
-Day 2 — Context, prompting, structured outputs
+Chapter 2 — Context, prompting, structured outputs
         ↓
-Day 3 — Retrieval and external knowledge
+Chapter 3 — Retrieval and external knowledge
         ↓
-Day 4 — Evaluation
+Chapter 4 — Evaluation
         ↓
-Day 5 — Agentic workflows
+Chapter 5 — Agentic workflows
         ↓
-Day 6 — Production AI
+Chapter 6 — Production AI
 ```
 
-Day 7 brings those pieces together.
+Chapter 7 brings those pieces together.
 
 The goal is no longer to study an individual technique.
 
@@ -24,7 +24,7 @@ The goal is to **build a complete AI system**.
 
 The project for the end of Week 1 is a:
 
-# Personal Research Assistant
+## Personal Research Assistant
 
 The application should accept a user's documents and questions, retrieve relevant evidence, use external tools when necessary, maintain conversational context, reason over information, explicitly represent uncertainty, produce structured responses, measure its own quality, and operate as a deployable service.
 
@@ -34,7 +34,7 @@ It should be small enough to build in a week, but architecturally rich enough to
 
 ---
 
-# 1. The Goal
+## 1. The Goal
 
 Build a system that can answer questions such as:
 
@@ -102,7 +102,7 @@ That distinction is central to trustworthy AI.
 
 ---
 
-# 2. What You Are Building
+## 2. What You Are Building
 
 The completed system should contain at least these capabilities:
 
@@ -143,11 +143,11 @@ It is a small **AI information system**.
 
 ---
 
-# 3. Functional Requirements
+## 3. Functional Requirements
 
 The assistant must support the following capabilities.
 
-## 3.1 Ingest documents
+### 3.1 Ingest documents
 
 The user should be able to provide documents such as:
 
@@ -194,7 +194,7 @@ This metadata will later support citations.
 
 ---
 
-# 4. Document Chunking
+## 4. Document Chunking
 
 Do not simply split documents into arbitrary fixed-size strings.
 
@@ -235,7 +235,7 @@ with something more precise than:
 
 ---
 
-# 5. Retrieval
+## 5. Retrieval
 
 At query time:
 
@@ -298,7 +298,7 @@ It is to retrieve the **smallest useful set of evidence**.
 
 ---
 
-# 6. Conversational State
+## 6. Conversational State
 
 The assistant should remember the current research conversation.
 
@@ -358,7 +358,7 @@ retrieved evidence
 
 ---
 
-# 7. Tools
+## 7. Tools
 
 The assistant should have access to at least one external tool.
 
@@ -400,7 +400,7 @@ It can decide when external information is necessary.
 
 ---
 
-# 8. Source Hierarchy
+## 8. Source Hierarchy
 
 The assistant should understand that sources have different levels of authority.
 
@@ -436,7 +436,7 @@ The assistant must reason about evidence rather than treating retrieval results 
 
 ---
 
-# 9. Citations
+## 9. Citations
 
 Every factual answer derived from documents should cite its sources.
 
@@ -476,7 +476,7 @@ The final response can then render a user-friendly citation.
 
 ---
 
-# 10. Structured Outputs
+## 10. Structured Outputs
 
 The assistant should not return only free-form prose.
 
@@ -522,7 +522,7 @@ rather than treating the entire model response as opaque text.
 
 ---
 
-# 11. Uncertainty
+## 11. Uncertainty
 
 This is one of the most important requirements of the project.
 
@@ -569,7 +569,7 @@ The important point is that uncertainty should be **evidence-based**, not simply
 
 ---
 
-# 12. The Agent Loop
+## 12. The Agent Loop
 
 The core research loop can be:
 
@@ -618,7 +618,7 @@ The agent should never be allowed to search indefinitely.
 
 ---
 
-# 13. The Complete Architecture
+## 13. The Complete Architecture
 
 The final system should resemble:
 
@@ -689,11 +689,11 @@ This is the architecture diagram that should accompany the final submission.
 
 ---
 
-# 14. Layer Responsibilities
+## 14. Layer Responsibilities
 
 A useful engineering discipline is to define what each layer owns.
 
-## API
+### API
 
 Owns:
 
@@ -703,7 +703,7 @@ Owns:
 * API versioning
 * response formatting
 
-## Orchestrator
+### Orchestrator
 
 Owns:
 
@@ -715,7 +715,7 @@ Owns:
 * termination
 * policy enforcement
 
-## Model
+### Model
 
 Owns:
 
@@ -724,7 +724,7 @@ Owns:
 * synthesis
 * structured decision generation
 
-## RAG
+### RAG
 
 Owns:
 
@@ -733,7 +733,7 @@ Owns:
 * context construction
 * source metadata
 
-## Tools
+### Tools
 
 Own:
 
@@ -743,7 +743,7 @@ Own:
 * APIs
 * deterministic operations
 
-## Validation
+### Validation
 
 Owns:
 
@@ -752,7 +752,7 @@ Owns:
 * safety checks
 * output constraints
 
-## Evals
+### Evals
 
 Own:
 
@@ -760,7 +760,7 @@ Own:
 * regression detection
 * benchmark execution
 
-## Observability
+### Observability
 
 Owns:
 
@@ -773,7 +773,7 @@ This separation makes the system easier to reason about and test.
 
 ---
 
-# 15. Data Model
+## 15. Data Model
 
 A minimal persistent data model might include:
 
@@ -830,7 +830,7 @@ This metadata becomes the backbone of retrieval and citation.
 
 ---
 
-# 16. Document Ingestion Pipeline
+## 16. Document Ingestion Pipeline
 
 Build ingestion as a separate subsystem.
 
@@ -881,7 +881,7 @@ rather than blocking the request.
 
 ---
 
-# 17. Retrieval Pipeline
+## 17. Retrieval Pipeline
 
 At query time:
 
@@ -925,7 +925,7 @@ The rewritten query can then be used for retrieval.
 
 ---
 
-# 18. Context Construction
+## 18. Context Construction
 
 Do not simply concatenate the top-k chunks.
 
@@ -965,7 +965,7 @@ This does not replace security controls, but it provides an additional model-lev
 
 ---
 
-# 19. Research Planning
+## 19. Research Planning
 
 For complex questions, the assistant should be able to decompose the task.
 
@@ -999,7 +999,7 @@ This is much more reliable than asking one model call to perform the entire oper
 
 ---
 
-# 20. Claims as First-Class Objects
+## 20. Claims as First-Class Objects
 
 A powerful extension is to represent claims explicitly.
 
@@ -1039,7 +1039,7 @@ It also opens the door to more sophisticated evaluation.
 
 ---
 
-# 21. Evaluation Suite
+## 21. Evaluation Suite
 
 The project must include an evaluation suite.
 
@@ -1085,11 +1085,11 @@ A dataset might contain:
 
 ---
 
-# 22. Evaluation Dimensions
+## 22. Evaluation Dimensions
 
 Measure multiple dimensions.
 
-## Retrieval quality
+### Retrieval quality
 
 Did the system retrieve the right evidence?
 
@@ -1102,7 +1102,7 @@ MRR
 nDCG
 ```
 
-## Answer quality
+### Answer quality
 
 Measure:
 
@@ -1113,7 +1113,7 @@ completeness
 groundedness
 ```
 
-## Citation quality
+### Citation quality
 
 Measure:
 
@@ -1123,7 +1123,7 @@ citation completeness
 citation precision
 ```
 
-## Uncertainty
+### Uncertainty
 
 Measure whether the system:
 
@@ -1133,7 +1133,7 @@ detects contradictions
 avoids unsupported claims
 ```
 
-## Agent behavior
+### Agent behavior
 
 Measure:
 
@@ -1145,7 +1145,7 @@ loop rate
 termination success
 ```
 
-## Operational metrics
+### Operational metrics
 
 Measure:
 
@@ -1160,13 +1160,13 @@ The system should therefore have a multidimensional evaluation scorecard.
 
 ---
 
-# 23. Build Adversarial Evaluations
+## 23. Build Adversarial Evaluations
 
 Do not construct only easy questions.
 
 Include cases designed to break the system.
 
-### Missing evidence
+#### Missing evidence
 
 Ask about information not present in the documents.
 
@@ -1176,7 +1176,7 @@ Expected:
 insufficient evidence
 ```
 
-### Contradictory evidence
+#### Contradictory evidence
 
 Provide two documents with different conclusions.
 
@@ -1186,7 +1186,7 @@ Expected:
 identify conflict
 ```
 
-### Prompt injection
+#### Prompt injection
 
 Insert malicious instructions into a document.
 
@@ -1197,7 +1197,7 @@ treat as data
 do not execute instructions
 ```
 
-### Ambiguous question
+#### Ambiguous question
 
 Ask:
 
@@ -1210,7 +1210,7 @@ use conversational context
 or ask for clarification
 ```
 
-### Tool failure
+#### Tool failure
 
 Make web search unavailable.
 
@@ -1221,7 +1221,7 @@ recover
 or report limitation
 ```
 
-### Citation test
+#### Citation test
 
 Ask a question whose answer appears on exactly one page.
 
@@ -1236,7 +1236,7 @@ These tests are often more valuable than adding more features.
 
 ---
 
-# 24. Evaluation as a Development Loop
+## 24. Evaluation as a Development Loop
 
 The development process should become:
 
@@ -1294,7 +1294,7 @@ This is AI engineering as an empirical discipline.
 
 ---
 
-# 25. Observability
+## 25. Observability
 
 The application should expose operational metrics.
 
@@ -1352,7 +1352,7 @@ These numbers are illustrative; your application should measure actual values.
 
 ---
 
-# 26. Security Requirements
+## 26. Security Requirements
 
 The application should include:
 
@@ -1396,7 +1396,7 @@ This is an important production insight:
 
 ---
 
-# 27. Deployment
+## 27. Deployment
 
 The final application must be deployed.
 
@@ -1442,7 +1442,7 @@ Choose infrastructure appropriate to the scale of the project.
 
 ---
 
-# 28. Deployment Requirements
+## 28. Deployment Requirements
 
 The deployed application should have:
 
@@ -1475,7 +1475,7 @@ The distinction matters because a service can be running while its model or data
 
 ---
 
-# 29. Configuration
+## 29. Configuration
 
 Do not hard-code configuration such as:
 
@@ -1509,7 +1509,7 @@ This makes deployment and testing much easier.
 
 ---
 
-# 30. Failure Recovery
+## 30. Failure Recovery
 
 The final application should intentionally handle:
 
@@ -1567,11 +1567,11 @@ A controlled failure is much better than a hallucinated answer.
 
 ---
 
-# 31. Project Milestones
+## 31. Project Milestones
 
 A useful implementation sequence is:
 
-## Milestone 1 — Basic RAG
+### Milestone 1 — Basic RAG
 
 Build:
 
@@ -1593,7 +1593,7 @@ At this point the system should answer document questions.
 
 ---
 
-## Milestone 2 — Citations
+### Milestone 2 — Citations
 
 Add:
 
@@ -1607,7 +1607,7 @@ The assistant should cite evidence.
 
 ---
 
-## Milestone 3 — Conversational State
+### Milestone 3 — Conversational State
 
 Add:
 
@@ -1621,7 +1621,7 @@ The assistant should understand follow-up questions.
 
 ---
 
-## Milestone 4 — Tool Use
+### Milestone 4 — Tool Use
 
 Add web search.
 
@@ -1629,7 +1629,7 @@ The assistant should determine when external information is necessary.
 
 ---
 
-## Milestone 5 — Agent Loop
+### Milestone 5 — Agent Loop
 
 Add:
 
@@ -1651,7 +1651,7 @@ Bound the loop.
 
 ---
 
-## Milestone 6 — Structured Output
+### Milestone 6 — Structured Output
 
 Introduce a schema for:
 
@@ -1666,7 +1666,7 @@ Validate every response.
 
 ---
 
-## Milestone 7 — Evaluation
+### Milestone 7 — Evaluation
 
 Create the golden dataset.
 
@@ -1682,7 +1682,7 @@ tool behavior
 
 ---
 
-## Milestone 8 — Production Hardening
+### Milestone 8 — Production Hardening
 
 Add:
 
@@ -1701,7 +1701,7 @@ security
 
 ---
 
-## Milestone 9 — Deployment
+### Milestone 9 — Deployment
 
 Deploy the complete application.
 
@@ -1709,37 +1709,37 @@ Then test it from outside the development environment.
 
 ---
 
-# 32. The Architecture Review
+## 32. The Architecture Review
 
 Before declaring the project complete, explain the architecture to another engineer.
 
 You should be able to answer:
 
-### Why is retrieval separate from the model?
+#### Why is retrieval separate from the model?
 
 Because external knowledge should be independently managed, indexed, evaluated, and authorized.
 
-### Why does the orchestrator exist?
+#### Why does the orchestrator exist?
 
 Because application control flow, state, budgets, policies, and tool execution should not be delegated entirely to the model.
 
-### Why are tools behind an authorization layer?
+#### Why are tools behind an authorization layer?
 
 Because model intent is not authorization.
 
-### Why do documents contain metadata?
+#### Why do documents contain metadata?
 
 Because retrieval, citations, auditing, and access control depend on provenance.
 
-### Why is evaluation separate from observability?
+#### Why is evaluation separate from observability?
 
 Because observing execution does not tell you whether execution was correct.
 
-### Why are cost limits enforced at runtime?
+#### Why are cost limits enforced at runtime?
 
 Because agentic behavior can dynamically increase model and tool usage.
 
-### Why are source documents treated as untrusted?
+#### Why are source documents treated as untrusted?
 
 Because external content can contain prompt injections or malicious instructions.
 
@@ -1747,11 +1747,11 @@ If you cannot answer these questions, the architecture is not yet fully understo
 
 ---
 
-# 33. Final Deliverable
+## 33. Final Deliverable
 
 The project has three required deliverables.
 
-## 1. Working application
+### 1. Working application
 
 The application must:
 
@@ -1771,7 +1771,7 @@ The application must:
 
 ---
 
-## 2. Architecture diagram
+### 2. Architecture diagram
 
 The diagram should show:
 
@@ -1801,23 +1801,23 @@ It should also show the major data stores and external dependencies.
 
 ---
 
-## 3. Evaluation report
+### 3. Evaluation report
 
 The report should contain:
 
-### System description
+#### System description
 
 What did you build?
 
-### Architecture
+#### Architecture
 
 How does it work?
 
-### Evaluation methodology
+#### Evaluation methodology
 
 What dataset and tests did you use?
 
-### Results
+#### Results
 
 Include quantitative measurements.
 
@@ -1834,15 +1834,15 @@ p95 latency
 Average cost
 ```
 
-### Failure analysis
+#### Failure analysis
 
 Describe cases where the system failed.
 
-### Improvements
+#### Improvements
 
 What changes improved performance?
 
-### Remaining limitations
+#### Remaining limitations
 
 What does the system still get wrong?
 
@@ -1854,7 +1854,7 @@ It identifies the system's current failure envelope.
 
 ---
 
-# 34. What Makes This a Good Week 1 Project?
+## 34. What Makes This a Good Week 1 Project?
 
 The project intentionally combines almost every major concept introduced during the week.
 
@@ -1902,7 +1902,7 @@ This is precisely why AI engineering cannot be reduced to optimizing one compone
 
 ---
 
-# 35. The Real Objective
+## 35. The Real Objective
 
 The goal of this project is not to produce the world's best research assistant.
 
@@ -1944,7 +1944,7 @@ That loop is more important than any individual framework.
 
 ---
 
-# 36. Week 1 Capstone Review
+## 36. Week 1 Capstone Review
 
 At the beginning of the week, an AI application could be thought of as:
 
@@ -2004,9 +2004,9 @@ That is the central lesson of Week 1.
 
 ---
 
-# 37. Key Takeaways
+## 37. Key Takeaways
 
-## 1. Build the complete system, not an isolated demo
+### 1. Build the complete system, not an isolated demo
 
 The capstone should integrate:
 
@@ -2024,7 +2024,7 @@ deployment
 
 The value comes from seeing how these components interact.
 
-## 2. Retrieval is a system, not a database query
+### 2. Retrieval is a system, not a database query
 
 Good RAG requires:
 
@@ -2043,7 +2043,7 @@ evaluation
 
 Retrieval quality is one of the primary determinants of overall application quality.
 
-## 3. Provenance matters
+### 3. Provenance matters
 
 Every important claim should be traceable to evidence.
 
@@ -2059,7 +2059,7 @@ Where did that evidence originate?
 
 This makes the assistant auditable rather than merely plausible.
 
-## 4. Uncertainty is a feature
+### 4. Uncertainty is a feature
 
 A research assistant should know when it does not know.
 
@@ -2071,7 +2071,7 @@ The correct output is sometimes:
 
 rather than a confident fabrication.
 
-## 5. Agents require boundaries
+### 5. Agents require boundaries
 
 Planning and tool use make the system more capable.
 
@@ -2088,7 +2088,7 @@ tool validation
 termination conditions
 ```
 
-## 6. Evaluation must be built into the application
+### 6. Evaluation must be built into the application
 
 Do not wait until deployment to ask whether the system works.
 
@@ -2104,7 +2104,7 @@ Improve
 Evaluate
 ```
 
-## 7. Security must be architectural
+### 7. Security must be architectural
 
 Prompt injection, data exfiltration, unauthorized retrieval, and dangerous tool use cannot be solved reliably with prompts alone.
 
@@ -2118,7 +2118,7 @@ data isolation
 policy enforcement
 ```
 
-## 8. Observability makes AI systems engineerable
+### 8. Observability makes AI systems engineerable
 
 If you cannot inspect:
 
@@ -2135,7 +2135,7 @@ termination
 
 then diagnosing failures becomes guesswork.
 
-## 9. Production quality is multidimensional
+### 9. Production quality is multidimensional
 
 A system is not good merely because its answers are good.
 
@@ -2157,9 +2157,9 @@ $$
 
 Optimizing one dimension can degrade another.
 
-## 10. The capstone is a transition from learning components to engineering systems
+### 10. The capstone is a transition from learning components to engineering systems
 
-The most important achievement of Day 7 is not the research assistant itself.
+The most important achievement of Chapter 7 is not the research assistant itself.
 
 It is the ability to look at a problem and ask:
 

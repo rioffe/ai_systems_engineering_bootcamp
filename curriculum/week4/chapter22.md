@@ -1,4 +1,4 @@
-# Day 22 — Product Thinking
+# Chapter 22: Product Thinking
 
 ## From Technical Capability to Valuable Product
 
@@ -28,7 +28,7 @@ This chapter introduces the core concepts required to evaluate AI opportunities 
 
 ---
 
-# 1. Start With the User Problem
+## 1. Start With the User Problem
 
 The most common product mistake in AI is to start with the technology.
 
@@ -93,7 +93,7 @@ The latter approach frequently produces impressive demonstrations that nobody ne
 
 ---
 
-# 2. Jobs-to-be-Done
+## 2. Jobs-to-be-Done
 
 One of the most useful frameworks for product discovery is **Jobs-to-be-Done (JTBD)**.
 
@@ -157,7 +157,7 @@ The product definition and system architecture become connected.
 
 ---
 
-# 3. User Interviews
+## 3. User Interviews
 
 The engineer's intuition about what users need is frequently wrong.
 
@@ -199,7 +199,7 @@ The second question produces evidence about the actual workflow.
 
 ---
 
-# 4. Pain Points
+## 4. Pain Points
 
 Not every problem is a good product opportunity.
 
@@ -247,7 +247,7 @@ It is:
 
 ---
 
-# 5. Understand the Existing Workflow
+## 5. Understand the Existing Workflow
 
 AI products rarely replace a single isolated task.
 
@@ -303,7 +303,7 @@ This produces a **workflow decomposition** that can be mapped directly onto an A
 
 ---
 
-# 6. Where AI Actually Creates Leverage
+## 6. Where AI Actually Creates Leverage
 
 Not every software problem is an AI problem.
 
@@ -366,7 +366,7 @@ AI leverage is highest when the latter provides a substantial improvement in eco
 
 ---
 
-# 7. Willingness to Pay
+## 7. Willingness to Pay
 
 Usage and willingness to pay are different variables.
 
@@ -415,7 +415,7 @@ If that question cannot be answered, the product thesis is weak.
 
 ---
 
-# 8. Adoption Friction
+## 8. Adoption Friction
 
 A product can solve a real problem and still fail because adoption is difficult.
 
@@ -483,7 +483,7 @@ because the first architecture has a much higher adoption probability.
 
 ---
 
-# 9. Competitive Advantage
+## 9. Competitive Advantage
 
 An AI feature is not necessarily a durable business.
 
@@ -545,7 +545,7 @@ The resulting advantage is considerably stronger than simply having access to a 
 
 ---
 
-# 10. The AI Opportunity Equation
+## 10. The AI Opportunity Equation
 
 For today's exercise, we will use the following deliberately simple scoring model:
 
@@ -562,7 +562,7 @@ $$
 
 Each dimension can be scored, for example, from 1 to 10.
 
-### Pain
+#### Pain
 
 How costly is the problem?
 
@@ -575,13 +575,13 @@ Consider:
 * frustration,
 * lost revenue.
 
-### Frequency
+#### Frequency
 
 How often does the problem occur?
 
 A problem occurring once per year may be less valuable than a smaller problem occurring hundreds of times per day.
 
-### AI Leverage
+#### AI Leverage
 
 How much does AI change the economics or quality of the task?
 
@@ -629,7 +629,7 @@ The frequency and AI leverage dimensions matter.
 
 ---
 
-# 11. A More Complete Product Model
+## 11. A More Complete Product Model
 
 The basic equation is useful for discovery, but advanced product analysis should eventually incorporate additional variables.
 
@@ -670,7 +670,7 @@ Product thinking is fundamentally about making assumptions visible.
 
 ---
 
-# 12. Ten AI Opportunity Candidates
+## 12. Ten AI Opportunity Candidates
 
 For the exercise, identify ten problems rather than ten AI products.
 
@@ -712,7 +712,7 @@ It is to determine which problems deserve further investigation.
 
 ---
 
-# 13. Rank the Opportunities
+## 13. Rank the Opportunities
 
 Create a table like:
 
@@ -740,7 +740,7 @@ The next stage should involve actual users, workflow observation, competitive re
 
 ---
 
-# 14. From Opportunity to Product Hypothesis
+## 14. From Opportunity to Product Hypothesis
 
 A high-scoring opportunity should be converted into a testable hypothesis.
 
@@ -773,7 +773,7 @@ Each hypothesis can then be tested independently.
 
 ---
 
-# 15. Product Thinking Changes Engineering Priorities
+## 15. Product Thinking Changes Engineering Priorities
 
 This perspective also changes how we allocate engineering effort.
 
@@ -811,41 +811,41 @@ This is one of the central lessons of AI product engineering:
 
 ---
 
-# 16. Exercise — Find Ten AI Opportunities
+## 16. Exercise — Find Ten AI Opportunities
 
 Identify **10 real problems** that could plausibly benefit from AI.
 
 For each problem, document:
 
-### Problem
+#### Problem
 
 What is the user trying to accomplish?
 
-### Existing Workflow
+#### Existing Workflow
 
 How is the problem solved today?
 
-### Pain
+#### Pain
 
 What makes the current solution expensive, slow, error-prone, or frustrating?
 
-### Frequency
+#### Frequency
 
 How often does the problem occur?
 
-### AI Leverage
+#### AI Leverage
 
 What specifically becomes possible or substantially better because of AI?
 
-### Willingness to Pay
+#### Willingness to Pay
 
 Who receives the economic value, and why might they pay?
 
-### Adoption Friction
+#### Adoption Friction
 
 What could prevent users from adopting the solution?
 
-### Competitive Advantage
+#### Competitive Advantage
 
 What could make a solution difficult to copy?
 
@@ -864,7 +864,7 @@ Finally, select the **top three** and write a one-paragraph product hypothesis f
 
 ---
 
-# 17. Key Takeaways
+## 17. Key Takeaways
 
 1. **Start with problems, not AI capabilities.**
    An LLM, agent, or RAG system is a technology component, not a product.

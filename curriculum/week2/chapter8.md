@@ -1,4 +1,4 @@
-# Day 8 — Architecture: Designing AI Systems That Scale
+# Chapter 8: Architecture: Designing AI Systems That Scale
 
 In the first week, you learned how to build an AI application.
 
@@ -40,7 +40,7 @@ The point is to learn how to **reason about architectural consequences before th
 
 ---
 
-# 1. Architecture Is the Management of Change
+## 1. Architecture Is the Management of Change
 
 A useful definition of software architecture is:
 
@@ -50,7 +50,7 @@ This is more useful than thinking of architecture as boxes and arrows.
 
 Consider two implementations of the same research assistant.
 
-### System A
+#### System A
 
 ```text
                  +-------------+
@@ -98,7 +98,7 @@ This leads directly to the first architectural principle:
 
 ---
 
-# 2. Modularity
+## 2. Modularity
 
 Modularity means decomposing a system into components with relatively well-defined responsibilities.
 
@@ -160,11 +160,11 @@ A modular monolith can be substantially better engineered than a collection of p
 
 ---
 
-# 3. Cohesion and Coupling
+## 3. Cohesion and Coupling
 
 Two of the most important architectural concepts are **cohesion** and **coupling**.
 
-### Cohesion
+#### Cohesion
 
 Cohesion measures how strongly the responsibilities within a component belong together.
 
@@ -199,7 +199,7 @@ This is a classic "miscellaneous service."
 
 Its apparent simplicity hides architectural disorder.
 
-### Coupling
+#### Coupling
 
 Coupling measures how strongly components depend upon each other.
 
@@ -228,7 +228,7 @@ The architectural goal can therefore be summarized as:
 
 ---
 
-# 4. Interfaces Are Architectural Contracts
+## 4. Interfaces Are Architectural Contracts
 
 An interface defines what one component promises to another.
 
@@ -292,7 +292,7 @@ the change becomes substantially more localized.
 
 ---
 
-# 5. Dependency Inversion
+## 5. Dependency Inversion
 
 Dependency inversion is the natural extension of interface-driven architecture.
 
@@ -356,7 +356,7 @@ The core application logic remains unchanged.
 
 ---
 
-# 6. Service Boundaries
+## 6. Service Boundaries
 
 At some point, modularity becomes a question of **deployment boundaries**.
 
@@ -423,7 +423,7 @@ More importantly, ingestion can now scale independently from interactive queries
 
 ---
 
-# 7. APIs Define Architectural Boundaries
+## 7. APIs Define Architectural Boundaries
 
 An API is not merely a mechanism for HTTP communication.
 
@@ -497,7 +497,7 @@ and
 
 ---
 
-# 8. State Management
+## 8. State Management
 
 State is one of the most easily misunderstood aspects of AI architecture.
 
@@ -588,7 +588,7 @@ In most production systems, durable state should be externalized.
 
 ---
 
-# 9. Event-Driven Architecture
+## 9. Event-Driven Architecture
 
 Not every operation should happen synchronously.
 
@@ -657,7 +657,7 @@ They relocate it.
 
 ---
 
-# 10. Redesigning the Week 1 Application
+## 10. Redesigning the Week 1 Application
 
 Return to the Week 1 Personal Research Assistant.
 
@@ -741,7 +741,7 @@ It is an **AI system architecture**.
 
 ---
 
-# 11. What Happens at 1,000 Users?
+## 11. What Happens at 1,000 Users?
 
 The first scaling exercise is deliberately modest.
 
@@ -775,7 +775,7 @@ Request
 
 Now identify bottlenecks.
 
-### Model inference
+#### Model inference
 
 LLM calls may dominate:
 
@@ -796,7 +796,7 @@ Model Gateway
       +-- cost accounting
 ```
 
-### Retrieval
+#### Retrieval
 
 Repeated queries may generate redundant work.
 
@@ -813,15 +813,15 @@ Cache
   +-- miss ----> retrieval
 ```
 
-### Database
+#### Database
 
 Connection pools become important.
 
-### API
+#### API
 
 Rate limiting prevents one client from consuming the entire system.
 
-### Observability
+#### Observability
 
 You need to know whether latency comes from:
 
@@ -846,7 +846,7 @@ You cannot reliably operate what you cannot decompose.
 
 ---
 
-# 12. What Happens at 1 Million?
+## 12. What Happens at 1 Million?
 
 Now increase the scale by three orders of magnitude.
 
@@ -856,7 +856,7 @@ Reconsider the architecture.
 
 At 1 million users, new questions appear.
 
-### Capacity
+#### Capacity
 
 What is the peak requests-per-second?
 
@@ -874,7 +874,7 @@ The important number is not registered users.
 
 It is **concurrent workload**.
 
-### Cost
+#### Cost
 
 Suppose every request invokes an expensive model.
 
@@ -906,7 +906,7 @@ Potential mechanisms include:
 * token budgets
 * per-user quotas
 
-### Data
+#### Data
 
 At one million users, persistent state becomes substantial.
 
@@ -922,7 +922,7 @@ Index optimization
 Object storage
 ```
 
-### Reliability
+#### Reliability
 
 A single dependency failure becomes unacceptable.
 
@@ -952,7 +952,7 @@ The gateway becomes a resilience boundary.
 
 ---
 
-# 13. Scale Is More Than Throughput
+## 13. Scale Is More Than Throughput
 
 A common architectural mistake is defining scalability as:
 
@@ -960,7 +960,7 @@ A common architectural mistake is defining scalability as:
 
 There are at least four dimensions of scale.
 
-### Computational scale
+#### Computational scale
 
 Can the system process more work?
 
@@ -971,7 +971,7 @@ documents/sec
 jobs/sec
 ```
 
-### Data scale
+#### Data scale
 
 Can it manage more information?
 
@@ -984,13 +984,13 @@ artifacts
 logs
 ```
 
-### Organizational scale
+#### Organizational scale
 
 Can more engineers modify the system without constantly interfering with each other?
 
 This is where modularity becomes extremely important.
 
-### Complexity scale
+#### Complexity scale
 
 Can the system support more behaviors?
 
@@ -1016,7 +1016,7 @@ A system may scale computationally while failing organizationally or architectur
 
 ---
 
-# 14. Avoid Premature Microservices
+## 14. Avoid Premature Microservices
 
 The natural reaction to architecture discussions is often:
 
@@ -1062,7 +1062,7 @@ That is an architectural argument.
 
 ---
 
-# 15. Architecture as a Set of Tradeoffs
+## 15. Architecture as a Set of Tradeoffs
 
 There is no perfect architecture.
 
@@ -1088,13 +1088,13 @@ It is about understanding **which tradeoff is appropriate for the system's const
 
 ---
 
-# 16. The Architecture Review
+## 16. The Architecture Review
 
 For today's exercise, perform a formal architecture review of the Week 1 application.
 
 Document at least:
 
-### 1. Components
+#### 1. Components
 
 What are the major modules?
 
@@ -1110,41 +1110,41 @@ Evaluation
 Observability
 ```
 
-### 2. Interfaces
+#### 2. Interfaces
 
 What contracts exist between them?
 
-### 3. Dependencies
+#### 3. Dependencies
 
 Which components depend on which?
 
-### 4. State
+#### 4. State
 
 Where does every important piece of state live?
 
-### 5. Failure boundaries
+#### 5. Failure boundaries
 
 What happens if each dependency fails?
 
-### 6. Scaling dimensions
+#### 6. Scaling dimensions
 
 Which components scale independently?
 
-### 7. Synchronous versus asynchronous work
+#### 7. Synchronous versus asynchronous work
 
 Which operations must happen during the request?
 
 Which can become jobs?
 
-### 8. Cost centers
+#### 8. Cost centers
 
 Where does money get spent?
 
-### 9. Security boundaries
+#### 9. Security boundaries
 
 Where are authentication, authorization, secrets, and sensitive data handled?
 
-### 10. Evolution
+#### 10. Evolution
 
 What happens when you replace:
 
@@ -1163,11 +1163,11 @@ If replacing the model provider requires modifying 30 unrelated modules, the arc
 
 ---
 
-# 17. Exercise: Architecture Under Pressure
+## 17. Exercise: Architecture Under Pressure
 
 Take your Week 1 application and create three architectures.
 
-## Architecture A — Prototype
+### Architecture A — Prototype
 
 Design the smallest system that works.
 
@@ -1181,7 +1181,7 @@ Database
 LLM
 ```
 
-## Architecture B — 1,000 users
+### Architecture B — 1,000 users
 
 Introduce only the boundaries that become necessary.
 
@@ -1196,7 +1196,7 @@ Consider:
 * observability
 * model gateway
 
-## Architecture C — 1 million users
+### Architecture C — 1 million users
 
 Now reconsider everything.
 
@@ -1230,7 +1230,7 @@ The goal is to understand **why the architecture changes as the system's constra
 
 ---
 
-# 18. The Architectural Mindset
+## 18. The Architectural Mindset
 
 The progression from developer to systems engineer can be seen clearly here.
 
@@ -1272,7 +1272,7 @@ The architecture is therefore part of the AI system's **reliability mechanism**.
 
 ---
 
-# 19. Key Takeaways
+## 19. Key Takeaways
 
 1. **Architecture is fundamentally about managing change.**
    A good architecture makes important future changes cheap and local.
@@ -1307,7 +1307,7 @@ The architecture is therefore part of the AI system's **reliability mechanism**.
 12. **The best architecture is not the most sophisticated architecture.**
     It is the simplest architecture that provides the required reliability, scalability, security, cost structure, and ability to evolve.
 
-The central lesson of Day 8 is therefore:
+The central lesson of Chapter 8 is therefore:
 
 > **Architecture is the engineering discipline of deciding where complexity should live—and designing the system so that complexity does not spread everywhere.**
 

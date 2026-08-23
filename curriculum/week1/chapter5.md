@@ -1,4 +1,4 @@
-# Day 5 — Agentic Workflows
+# Chapter 5: Agentic Workflows
 
 The defining characteristic of an AI agent is not that it uses an LLM. It is that the LLM participates in a **closed-loop control system**.
 
@@ -68,11 +68,11 @@ That distinction matters. Agents are easy to prototype. Reliable agents are syst
 
 ---
 
-# 1. The Evolution from LLM Calls to Agents
+## 1. The Evolution from LLM Calls to Agents
 
 There is a natural progression in AI application architecture.
 
-## 1.1 Stage 1: Prompt → LLM
+### 1.1 Stage 1: Prompt → LLM
 
 The simplest application is a pure function:
 
@@ -106,7 +106,7 @@ It cannot discover information that was not provided to it. It cannot inspect th
 
 ---
 
-# 2. Stage 2: LLM + Tools
+## 2. Stage 2: LLM + Tools
 
 The next step is tool calling.
 
@@ -157,7 +157,7 @@ The LLM is no longer merely a generator. It is becoming a **decision-making comp
 
 ---
 
-# 3. Tool Calling Is an API Contract
+## 3. Tool Calling Is an API Contract
 
 Tool calling should be thought of as an API boundary, not as a magical capability of the model.
 
@@ -225,7 +225,7 @@ The tool determines **what actually happened**.
 
 ---
 
-# 4. Agents vs. Workflows
+## 4. Agents vs. Workflows
 
 The word *agent* is often used too loosely.
 
@@ -312,7 +312,7 @@ This is much closer to a control system than to a conventional function call.
 
 ---
 
-# 5. The Agent Loop
+## 5. The Agent Loop
 
 A minimal agent can be expressed with surprisingly little code.
 
@@ -338,7 +338,7 @@ The apparent simplicity is deceptive.
 
 Every line hides an engineering problem.
 
-### `llm(state)`
+#### `llm(state)`
 
 What exactly is state?
 
@@ -346,7 +346,7 @@ How much history should be supplied?
 
 What if the model emits invalid arguments?
 
-### `execute_tool(decision)`
+#### `execute_tool(decision)`
 
 Is the tool safe?
 
@@ -358,7 +358,7 @@ Can it spend money?
 
 Can it leak private information?
 
-### `update_state(...)`
+#### `update_state(...)`
 
 What information should be retained?
 
@@ -366,7 +366,7 @@ What should be discarded?
 
 How large can the state become?
 
-### `stopping_condition(...)`
+#### `stopping_condition(...)`
 
 What prevents infinite loops?
 
@@ -376,7 +376,7 @@ This is where agent engineering begins.
 
 ---
 
-# 6. State Is the Agent's Memory
+## 6. State Is the Agent's Memory
 
 An agent needs state.
 
@@ -434,7 +434,7 @@ The distinction becomes important as agents become long-running.
 
 ---
 
-# 7. Observation Is Different from Reasoning
+## 7. Observation Is Different from Reasoning
 
 A common architectural mistake is to treat tool output as though it were merely another prompt.
 
@@ -504,13 +504,13 @@ This trace is dramatically more useful than simply logging the final answer.
 
 ---
 
-# 8. Planning
+## 8. Planning
 
 Planning is the process of deciding what actions are required to accomplish the goal.
 
 There are several levels of planning.
 
-## Reactive planning
+### Reactive planning
 
 The model decides one action at a time:
 
@@ -526,7 +526,7 @@ observe
 
 This is often sufficient for simple tasks.
 
-## Explicit planning
+### Explicit planning
 
 The model first constructs a plan:
 
@@ -542,7 +542,7 @@ Plan
 
 Then the system executes it.
 
-## Hierarchical planning
+### Hierarchical planning
 
 Complex goals can be decomposed:
 
@@ -568,7 +568,7 @@ A planner should not necessarily have permission to execute every action it prop
 
 ---
 
-# 9. Reflection
+## 9. Reflection
 
 Reflection introduces another reasoning step after an action or after a completed task.
 
@@ -605,7 +605,7 @@ Therefore reflection should be treated as another component to evaluate—not as
 
 ---
 
-# 10. Loops and the Problem of Non-Termination
+## 10. Loops and the Problem of Non-Termination
 
 The agent loop introduces a problem that ordinary request/response applications largely avoid:
 
@@ -647,53 +647,53 @@ A production system therefore needs explicit stopping conditions.
 
 ---
 
-# 11. Stopping Conditions
+## 11. Stopping Conditions
 
 A robust agent usually has multiple termination mechanisms.
 
-### Goal completion
+#### Goal completion
 
 ```python
 if state.goal_complete:
     stop()
 ```
 
-### Maximum steps
+#### Maximum steps
 
 ```python
 if state.step_count >= MAX_STEPS:
     stop()
 ```
 
-### Token budget
+#### Token budget
 
 ```python
 if state.tokens_used >= MAX_TOKENS:
     stop()
 ```
 
-### Financial budget
+#### Financial budget
 
 ```python
 if state.cost >= MAX_COST:
     stop()
 ```
 
-### Time budget
+#### Time budget
 
 ```python
 if elapsed_time >= MAX_RUNTIME:
     stop()
 ```
 
-### Repeated-state detection
+#### Repeated-state detection
 
 ```python
 if state_hash in previous_states:
     stop()
 ```
 
-### Tool failure threshold
+#### Tool failure threshold
 
 ```python
 if consecutive_failures >= MAX_FAILURES:
@@ -710,7 +710,7 @@ The runtime should enforce it.
 
 ---
 
-# 12. Retries
+## 12. Retries
 
 Tools fail.
 
@@ -766,7 +766,7 @@ If a tool rejects an operation because the user lacks permission, retrying ten t
 
 ---
 
-# 13. Failure Recovery
+## 13. Failure Recovery
 
 A mature agent should be designed around failure rather than success.
 
@@ -820,7 +820,7 @@ The objective is:
 
 ---
 
-# 14. Delegation
+## 14. Delegation
 
 As agent systems become more sophisticated, one agent can delegate subtasks to other agents or specialized components.
 
@@ -869,7 +869,7 @@ Often, a deterministic workflow with one capable model is simpler and more relia
 
 ---
 
-# 15. Permissions: The Agent Is Not the User
+## 15. Permissions: The Agent Is Not the User
 
 One of the most important principles in agentic system design is:
 
@@ -922,7 +922,7 @@ This is analogous to traditional security architecture:
 
 ---
 
-# 16. Human-in-the-Loop
+## 16. Human-in-the-Loop
 
 For high-impact actions, the system may require explicit human approval.
 
@@ -953,7 +953,7 @@ The approval boundary should be determined by **action risk**, not by how sophis
 
 ---
 
-# 17. A Small Research Agent
+## 17. A Small Research Agent
 
 Now build a small agent that performs a useful end-to-end task.
 
@@ -1006,7 +1006,7 @@ The model receives tool definitions and can select among them.
 
 ---
 
-# 18. The Agent Runtime
+## 18. The Agent Runtime
 
 A minimal implementation might look like:
 
@@ -1055,7 +1055,7 @@ The purpose is to expose the architecture, not hide it behind an agent framework
 
 ---
 
-# 19. The Agent Prompt
+## 19. The Agent Prompt
 
 The model needs an explicit operational contract.
 
@@ -1093,7 +1093,7 @@ This distinction is critical.
 
 ---
 
-# 20. The Agent Trace
+## 20. The Agent Trace
 
 Suppose the question is:
 
@@ -1167,7 +1167,7 @@ This trace reveals something important:
 
 ---
 
-# 21. Deliberately Breaking the Agent
+## 21. Deliberately Breaking the Agent
 
 A useful engineering exercise is to make the system fail.
 
@@ -1175,7 +1175,7 @@ Do not immediately build the perfect agent.
 
 Instead, create failure modes and observe the system.
 
-## Failure 1: Tool returns an error
+### Failure 1: Tool returns an error
 
 Make `search()` fail 30% of the time.
 
@@ -1194,7 +1194,7 @@ Observe:
 
 ---
 
-## Failure 2: Empty results
+### Failure 2: Empty results
 
 Return:
 
@@ -1218,7 +1218,7 @@ This is a fundamental distinction between absence of evidence and evidence of ab
 
 ---
 
-## Failure 3: Malformed tool arguments
+### Failure 3: Malformed tool arguments
 
 Force the model to occasionally produce:
 
@@ -1244,7 +1244,7 @@ The model can then repair its action.
 
 ---
 
-# 22. Failure 4: Tool Returns Misleading Data
+## 22. Failure 4: Tool Returns Misleading Data
 
 This is particularly important.
 
@@ -1287,7 +1287,7 @@ It requires **evidence evaluation**.
 
 ---
 
-# 23. Failure 5: Infinite Loop
+## 23. Failure 5: Infinite Loop
 
 Create a tool that always returns:
 
@@ -1335,7 +1335,7 @@ and terminate when the agent is stuck.
 
 ---
 
-# 24. Failure 6: Contradictory Sources
+## 24. Failure 6: Contradictory Sources
 
 Give the agent two sources:
 
@@ -1362,7 +1362,7 @@ This is where agentic reasoning becomes significantly more interesting than simp
 
 ---
 
-# 25. Failure 7: Permission Violation
+## 25. Failure 7: Permission Violation
 
 Add a destructive tool:
 
@@ -1392,7 +1392,7 @@ If the model can persuade the runtime to bypass authorization, the system is arc
 
 ---
 
-# 26. Agent Reliability Is a Systems Problem
+## 26. Agent Reliability Is a Systems Problem
 
 At this point it should be clear why "agent engineering" is substantially more than prompt engineering.
 
@@ -1456,7 +1456,7 @@ The engineering problem is therefore one of **composing unreliable components in
 
 ---
 
-# 27. Observability
+## 27. Observability
 
 Agent systems require much richer observability than ordinary applications.
 
@@ -1525,7 +1525,7 @@ Without this information, debugging an agent becomes extremely difficult.
 
 ---
 
-# 28. Deterministic Infrastructure Around a Probabilistic Core
+## 28. Deterministic Infrastructure Around a Probabilistic Core
 
 A useful mental model is:
 
@@ -1581,11 +1581,11 @@ The strongest agentic architectures exploit both.
 
 ---
 
-# 29. Agentic Workflow vs. Autonomous Agent
+## 29. Agentic Workflow vs. Autonomous Agent
 
 It is useful to distinguish two ends of the spectrum.
 
-### Workflow
+#### Workflow
 
 ```text
 Developer defines control flow
@@ -1601,7 +1601,7 @@ Advantages:
 * easier to secure
 * easier to debug
 
-### Autonomous agent
+#### Autonomous agent
 
 ```text
 Developer defines objective + constraints
@@ -1637,7 +1637,7 @@ If the system genuinely needs to choose its own path through an uncertain enviro
 
 ---
 
-# 30. The Agent Design Spectrum
+## 30. The Agent Design Spectrum
 
 This produces a useful spectrum:
 
@@ -1673,7 +1673,7 @@ That tradeoff should be explicit.
 
 ---
 
-# 31. A More Robust Agent Runtime
+## 31. A More Robust Agent Runtime
 
 A production-oriented runtime might therefore look more like:
 
@@ -1737,7 +1737,7 @@ But it is only one component in the runtime.
 
 ---
 
-# 32. The Core Engineering Insight
+## 32. The Core Engineering Insight
 
 The progression from:
 
@@ -1812,23 +1812,23 @@ That is why agentic systems should be designed using ideas from both AI and syst
 
 ---
 
-# 33. Engineering Principles
+## 33. Engineering Principles
 
 Several principles emerge from this architecture.
 
-### 1. Treat tools as APIs
+#### 1. Treat tools as APIs
 
 Tool definitions should be explicit, typed, validated, and versioned.
 
-### 2. Keep authorization outside the model
+#### 2. Keep authorization outside the model
 
 The model can request an action. It cannot grant itself permission to execute it.
 
-### 3. Make state explicit
+#### 3. Make state explicit
 
 Do not allow critical state to exist only implicitly inside a prompt.
 
-### 4. Bound everything
+#### 4. Bound everything
 
 Set limits on:
 
@@ -1840,7 +1840,7 @@ Set limits on:
 * retries
 * context size
 
-### 5. Design failure paths first
+#### 5. Design failure paths first
 
 Ask:
 
@@ -1848,19 +1848,19 @@ Ask:
 
 for every tool and every transition.
 
-### 6. Make observations distinguishable from conclusions
+#### 6. Make observations distinguishable from conclusions
 
 A retrieved fact and the model's interpretation of that fact are not equivalent.
 
-### 7. Prefer workflows when possible
+#### 7. Prefer workflows when possible
 
 Do not introduce autonomy simply because the technology makes it possible.
 
-### 8. Instrument every step
+#### 8. Instrument every step
 
 An agent without traces is extremely difficult to debug.
 
-### 9. Evaluate the loop, not just the final answer
+#### 9. Evaluate the loop, not just the final answer
 
 Measure:
 
@@ -1873,13 +1873,13 @@ Measure:
 * latency
 * final answer quality
 
-### 10. Assume the model will eventually do something unexpected
+#### 10. Assume the model will eventually do something unexpected
 
 The runtime must remain safe when it does.
 
 ---
 
-# 34. Day 5 Laboratory
+## 34. Chapter 5 Laboratory
 
 The practical exercise for this day is deliberately small.
 
@@ -1948,7 +1948,7 @@ The objective is to understand what the framework is actually doing for you.
 
 ---
 
-# 35. What You Should Understand by the End of Day 5
+## 35. What You Should Understand by the End of Chapter 5
 
 By the end of this day, you should be able to look at an agentic application and decompose it into:
 
@@ -2031,7 +2031,7 @@ That is the subject of evaluation.
 
 ---
 
-# 36. Key Takeaways
+## 36. Key Takeaways
 
 1. **An agent is a control loop, not a single model call.** It repeatedly plans, acts, observes, and updates state until a termination condition is met.
 

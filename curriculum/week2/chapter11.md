@@ -1,4 +1,4 @@
-# Day 11 — Security
+# Chapter 11: Security
 
 AI systems change the security boundary.
 
@@ -62,7 +62,7 @@ The deterministic security architecture decides whether those actions are allowe
 
 ---
 
-# 1. The AI Security Boundary
+## 1. The AI Security Boundary
 
 Consider a conventional application:
 
@@ -136,7 +136,7 @@ These are different responsibilities.
 
 ---
 
-# 2. Authentication
+## 2. Authentication
 
 Authentication answers:
 
@@ -209,7 +209,7 @@ Without this chain, security investigations become difficult.
 
 ---
 
-# 3. Authorization
+## 3. Authorization
 
 Authorization answers:
 
@@ -291,7 +291,7 @@ The tool catalog itself therefore becomes a security boundary.
 
 ---
 
-# 4. Least Privilege
+## 4. Least Privilege
 
 The principle of least privilege says:
 
@@ -340,7 +340,7 @@ It is a mechanism for **containing model failure**.
 
 ---
 
-# 5. Secrets
+## 5. Secrets
 
 Secrets include:
 
@@ -401,7 +401,7 @@ This is a powerful general principle:
 
 ---
 
-# 6. Sandboxing
+## 6. Sandboxing
 
 Agents frequently need powerful capabilities.
 
@@ -458,7 +458,7 @@ It is to make compromise survivable.
 
 ---
 
-# 7. Prompt Injection
+## 7. Prompt Injection
 
 Prompt injection occurs when untrusted content influences the model's behavior in a way that conflicts with the application's intended instructions.
 
@@ -507,7 +507,7 @@ Prompt injection exploits this ambiguity.
 
 ---
 
-# 8. Indirect Prompt Injection
+## 8. Indirect Prompt Injection
 
 Direct prompt injection comes from the user.
 
@@ -566,7 +566,7 @@ Every external input should be considered untrusted.
 
 ---
 
-# 9. Tool Poisoning
+## 9. Tool Poisoning
 
 Tools are another attack surface.
 
@@ -614,7 +614,7 @@ A tool cannot grant itself additional permissions simply by returning text that 
 
 ---
 
-# 10. Data Leakage
+## 10. Data Leakage
 
 AI systems can leak data through many channels.
 
@@ -679,7 +679,7 @@ This turns vague privacy concerns into an architectural analysis.
 
 ---
 
-# 11. Supply-Chain Attacks
+## 11. Supply-Chain Attacks
 
 AI systems have unusually large software supply chains.
 
@@ -743,7 +743,7 @@ For agents, third-party tools deserve the same scrutiny as third-party code.
 
 ---
 
-# 12. Model Output Validation
+## 12. Model Output Validation
 
 LLM output should be treated as **untrusted input**.
 
@@ -807,7 +807,7 @@ The model does not get to skip these layers.
 
 ---
 
-# 13. Agent Security Architecture
+## 13. Agent Security Architecture
 
 A secure agent architecture should look something like:
 
@@ -863,7 +863,7 @@ The infrastructure decides.
 
 ---
 
-# 14. Policy as Code
+## 14. Policy as Code
 
 Security policies should be explicit and machine-enforced.
 
@@ -931,7 +931,7 @@ Security authorization
 
 ---
 
-# 15. Human Approval as a Security Boundary
+## 15. Human Approval as a Security Boundary
 
 Some actions should require explicit human authorization.
 
@@ -973,7 +973,7 @@ This produces a scalable security model without turning the system into an appro
 
 ---
 
-# 16. Prompt Injection Is Not Solved by a Better Prompt
+## 16. Prompt Injection Is Not Solved by a Better Prompt
 
 A common response to prompt injection is:
 
@@ -1027,7 +1027,7 @@ They should never be the only defense.
 
 ---
 
-# 17. The Confused Deputy Problem
+## 17. The Confused Deputy Problem
 
 Agent systems can create a classic security vulnerability known as the **confused deputy**.
 
@@ -1081,37 +1081,37 @@ and ensure the service cannot use its own elevated privileges to bypass the user
 
 ---
 
-# 18. Security Invariants
+## 18. Security Invariants
 
 A mature system should define explicit security invariants.
 
 Examples:
 
-### Invariant 1
+#### Invariant 1
 
 > The agent cannot access resources that the authenticated user cannot access.
 
-### Invariant 2
+#### Invariant 2
 
 > Model-generated text cannot directly authorize an external side effect.
 
-### Invariant 3
+#### Invariant 3
 
 > Tool outputs cannot expand the agent's permissions.
 
-### Invariant 4
+#### Invariant 4
 
 > Secrets cannot be returned to the model unless explicitly authorized.
 
-### Invariant 5
+#### Invariant 5
 
 > Every side-effecting action passes through policy enforcement.
 
-### Invariant 6
+#### Invariant 6
 
 > Agent execution occurs within bounded resource limits.
 
-### Invariant 7
+#### Invariant 7
 
 > Untrusted retrieved content cannot modify system-level policy.
 
@@ -1119,7 +1119,7 @@ These invariants are stronger than instructions because they are enforced by arc
 
 ---
 
-# 19. Attack Your Own System
+## 19. Attack Your Own System
 
 Security cannot be learned only by reading about attacks.
 
@@ -1127,7 +1127,7 @@ You must attack the system.
 
 Take the Week 1 Personal Research Assistant and construct adversarial inputs.
 
-### Attack 1 — Direct injection
+#### Attack 1 — Direct injection
 
 User:
 
@@ -1139,7 +1139,7 @@ Does the system leak anything?
 
 ---
 
-### Attack 2 — Indirect injection
+#### Attack 2 — Indirect injection
 
 Put this inside a retrieved document:
 
@@ -1153,7 +1153,7 @@ Does the agent follow the document?
 
 ---
 
-### Attack 3 — Tool poisoning
+#### Attack 3 — Tool poisoning
 
 Modify a tool result:
 
@@ -1166,7 +1166,7 @@ Does the agent obey?
 
 ---
 
-### Attack 4 — Privilege escalation
+#### Attack 4 — Privilege escalation
 
 Ask:
 
@@ -1178,7 +1178,7 @@ Does the policy layer prevent it?
 
 ---
 
-### Attack 5 — Secret extraction
+#### Attack 5 — Secret extraction
 
 Try:
 
@@ -1190,7 +1190,7 @@ Does the sandbox prevent access?
 
 ---
 
-### Attack 6 — Data exfiltration
+#### Attack 6 — Data exfiltration
 
 Place sensitive information in a document and instruct the agent to send it to an external endpoint.
 
@@ -1198,7 +1198,7 @@ Can the agent perform the operation?
 
 ---
 
-### Attack 7 — Command injection
+#### Attack 7 — Command injection
 
 For a coding agent:
 
@@ -1213,7 +1213,7 @@ Does execution occur inside a sandbox?
 
 ---
 
-### Attack 8 — Tool argument manipulation
+#### Attack 8 — Tool argument manipulation
 
 Ask the model to produce:
 
@@ -1228,7 +1228,7 @@ Does authorization happen after generation?
 
 ---
 
-### Attack 9 — Context poisoning
+#### Attack 9 — Context poisoning
 
 Flood the context with instructions designed to push legitimate system constraints out of attention.
 
@@ -1236,7 +1236,7 @@ Does the runtime preserve critical policy independently of the context window?
 
 ---
 
-### Attack 10 — Multi-step escalation
+#### Attack 10 — Multi-step escalation
 
 Do not try to break the system in one request.
 
@@ -1255,7 +1255,7 @@ This tests whether individual harmless permissions can be composed into a danger
 
 ---
 
-# 20. Security Testing
+## 20. Security Testing
 
 A serious AI system needs a security evaluation harness.
 
@@ -1310,7 +1310,7 @@ Security evaluation should therefore measure **blast radius**.
 
 ---
 
-# 21. Security and Reliability Are Connected
+## 21. Security and Reliability Are Connected
 
 The previous chapter focused on reliability.
 
@@ -1374,7 +1374,7 @@ The architectural philosophy is the same.
 
 ---
 
-# 22. Security as Specification
+## 22. Security as Specification
 
 Security requirements should be written as explicit, testable properties.
 
@@ -1416,7 +1416,7 @@ That makes security part of engineering rather than an after-the-fact audit.
 
 ---
 
-# 23. The Security Mindset
+## 23. The Security Mindset
 
 The naive question is:
 
@@ -1460,7 +1460,7 @@ The goal is to construct a system in which **model compromise does not imply sys
 
 ---
 
-# 24. Key Takeaways
+## 24. Key Takeaways
 
 1. **The LLM is not a security boundary.** Treat model-generated decisions and outputs as untrusted.
 

@@ -1,4 +1,4 @@
-# Day 12 — Performance and Economics
+# Chapter 12: Performance and Economics
 
 AI engineering is systems engineering under an unusual constraint:
 
@@ -75,7 +75,7 @@ It is to make them **economically efficient systems that satisfy explicit perfor
 
 ---
 
-# 1. Start With a Cost Model
+## 1. Start With a Cost Model
 
 The simplest useful model is:
 
@@ -171,13 +171,13 @@ The second system may be substantially better—but it must justify the addition
 
 ---
 
-# 2. Performance Is Multidimensional
+## 2. Performance Is Multidimensional
 
 "Performance" is not one number.
 
 Important metrics include:
 
-### Latency
+#### Latency
 
 How long does one request take?
 
@@ -185,7 +185,7 @@ $$
 L = t_{response} - t_{request}
 $$
 
-### Throughput
+#### Throughput
 
 How much work can the system perform per unit time?
 
@@ -193,19 +193,19 @@ $$
 Throughput = \frac{requests}{second}
 $$
 
-### Concurrency
+#### Concurrency
 
 How many requests are being processed simultaneously?
 
-### Utilization
+#### Utilization
 
 How much of the available compute capacity is actually being used?
 
-### Cost
+#### Cost
 
 How much does each request or task consume?
 
-### Quality
+#### Quality
 
 How useful or correct is the result?
 
@@ -222,7 +222,7 @@ The engineering task is to find the appropriate point in this multidimensional s
 
 ---
 
-# 3. Latency
+## 3. Latency
 
 For an AI application, end-to-end latency can be decomposed as:
 
@@ -288,7 +288,7 @@ This produces a fundamental optimization principle:
 
 ---
 
-# 4. Tail Latency
+## 4. Tail Latency
 
 Average latency is often misleading.
 
@@ -340,7 +340,7 @@ For interactive systems, p95 or p99 latency may be much more relevant than avera
 
 ---
 
-# 5. Time to First Token vs Time to Complete
+## 5. Time to First Token vs Time to Complete
 
 Streaming introduces another useful distinction.
 
@@ -384,7 +384,7 @@ For conversational systems, optimizing TTFT can therefore provide significant UX
 
 ---
 
-# 6. Throughput
+## 6. Throughput
 
 Latency asks:
 
@@ -428,7 +428,7 @@ These measurements expose where capacity is actually going.
 
 ---
 
-# 7. Batching
+## 7. Batching
 
 GPU hardware is optimized for parallel computation.
 
@@ -484,7 +484,7 @@ For offline processing, large batches may be ideal.
 
 ---
 
-# 8. Continuous Batching
+## 8. Continuous Batching
 
 Modern inference systems often use **continuous batching**.
 
@@ -520,7 +520,7 @@ For high-throughput inference, batching strategy can have a major effect on econ
 
 ---
 
-# 9. Concurrency
+## 9. Concurrency
 
 Concurrency is not the same as throughput.
 
@@ -562,7 +562,7 @@ It is:
 
 ---
 
-# 10. Context Length Is a Performance Variable
+## 10. Context Length Is a Performance Variable
 
 A common mistake is to think of context merely as an AI-quality parameter.
 
@@ -607,7 +607,7 @@ Context engineering is therefore also performance engineering.
 
 ---
 
-# 11. Context Compression
+## 11. Context Compression
 
 Suppose an agent accumulates:
 
@@ -671,7 +671,7 @@ $$
 
 ---
 
-# 12. Caching
+## 12. Caching
 
 Caching is one of the highest-leverage performance optimizations.
 
@@ -741,7 +741,7 @@ A cached answer is still subject to the same security and correctness requiremen
 
 ---
 
-# 13. Prefix and Prompt Caching
+## 13. Prefix and Prompt Caching
 
 Many AI requests share large common prefixes:
 
@@ -779,7 +779,7 @@ This is especially important for agent systems with large, stable system prompts
 
 ---
 
-# 14. Model Routing
+## 14. Model Routing
 
 One of the most powerful AI-specific optimizations is model routing.
 
@@ -817,11 +817,11 @@ This produces an important economic principle:
 
 ---
 
-# 15. Model Routing Example
+## 15. Model Routing Example
 
 Suppose we have two models.
 
-### Model A
+#### Model A
 
 ```text
 cheap
@@ -829,7 +829,7 @@ slow
 high quality
 ```
 
-### Model B
+#### Model B
 
 ```text
 expensive
@@ -902,7 +902,7 @@ $$
 
 ---
 
-# 16. Difficulty-Aware Routing
+## 16. Difficulty-Aware Routing
 
 The simplest routing strategy uses heuristics.
 
@@ -977,7 +977,7 @@ This can dramatically improve economics while preserving quality.
 
 ---
 
-# 17. Cascade Architectures
+## 17. Cascade Architectures
 
 Model routing can be implemented as a cascade.
 
@@ -1027,7 +1027,7 @@ Again:
 
 ---
 
-# 18. Quantization
+## 18. Quantization
 
 For self-hosted models, quantization can dramatically change the economics.
 
@@ -1082,7 +1082,7 @@ That must be measured empirically.
 
 ---
 
-# 19. KV Cache and Memory
+## 19. KV Cache and Memory
 
 For autoregressive transformer inference, the KV cache stores intermediate attention state for previously processed tokens.
 
@@ -1124,7 +1124,7 @@ This is why model serving requires thinking about **memory capacity and bandwidt
 
 ---
 
-# 20. GPU Utilization
+## 20. GPU Utilization
 
 A GPU that is only 20% utilized may indicate that inference is inefficient.
 
@@ -1180,7 +1180,7 @@ Never optimize based solely on intuition.
 
 ---
 
-# 21. Bottleneck Analysis
+## 21. Bottleneck Analysis
 
 Suppose your AI service has:
 
@@ -1221,7 +1221,7 @@ The general rule is:
 
 ---
 
-# 22. Parallelism
+## 22. Parallelism
 
 Agentic workflows often contain unnecessary sequential dependencies.
 
@@ -1273,7 +1273,7 @@ The agent graph should encode those dependencies explicitly.
 
 ---
 
-# 23. Speculative and Early-Exit Strategies
+## 23. Speculative and Early-Exit Strategies
 
 Performance can sometimes be improved by doing inexpensive work before expensive work.
 
@@ -1309,17 +1309,17 @@ The best model call is often:
 
 ---
 
-# 24. Economics of Agentic Workflows
+## 24. Economics of Agentic Workflows
 
 Consider three architectures.
 
-### Architecture A
+#### Architecture A
 
 ```text
 1 model call
 ```
 
-### Architecture B
+#### Architecture B
 
 ```text
 planner
@@ -1329,7 +1329,7 @@ tool
 model
 ```
 
-### Architecture C
+#### Architecture C
 
 ```text
 planner
@@ -1389,7 +1389,7 @@ The optimal architecture depends on the application.
 
 ---
 
-# 25. Cost Per Successful Task
+## 25. Cost Per Successful Task
 
 Raw cost per request can be misleading.
 
@@ -1445,7 +1445,7 @@ This is especially important for routing and agent systems.
 
 ---
 
-# 26. The Full Cost Model
+## 26. The Full Cost Model
 
 A realistic production cost model should include more than model tokens.
 
@@ -1497,11 +1497,11 @@ This is much closer to the real economics of an AI product.
 
 ---
 
-# 27. Optimization Order
+## 27. Optimization Order
 
 When optimizing an AI application, use a disciplined sequence.
 
-### First: eliminate unnecessary work
+#### First: eliminate unnecessary work
 
 ```text
 Do we need this model call?
@@ -1510,7 +1510,7 @@ Do we need this context?
 Do we need this verification step?
 ```
 
-### Second: reduce data
+#### Second: reduce data
 
 ```text
 Can retrieval return fewer documents?
@@ -1518,7 +1518,7 @@ Can context be compressed?
 Can outputs be shorter?
 ```
 
-### Third: reuse work
+#### Third: reuse work
 
 ```text
 Can we cache it?
@@ -1526,19 +1526,19 @@ Can we reuse embeddings?
 Can we cache prefixes?
 ```
 
-### Fourth: parallelize
+#### Fourth: parallelize
 
 ```text
 Can independent operations execute concurrently?
 ```
 
-### Fifth: route intelligently
+#### Fifth: route intelligently
 
 ```text
 Can a smaller model handle this task?
 ```
 
-### Sixth: optimize inference
+#### Sixth: optimize inference
 
 ```text
 batching
@@ -1554,7 +1554,7 @@ It is usually better to eliminate 50% of unnecessary model calls than to optimiz
 
 ---
 
-# 28. The Performance Experiment
+## 28. The Performance Experiment
 
 Take the Week 1 Personal Research Assistant.
 
@@ -1592,7 +1592,7 @@ Cost/task         $0.12
 
 Now optimize one dimension at a time.
 
-### Experiment 1 — Context reduction
+#### Experiment 1 — Context reduction
 
 Reduce:
 
@@ -1606,7 +1606,7 @@ Measure:
 * latency
 * cost
 
-### Experiment 2 — Caching
+#### Experiment 2 — Caching
 
 Add retrieval caching.
 
@@ -1619,7 +1619,7 @@ latency reduction
 cost reduction
 ```
 
-### Experiment 3 — Parallel retrieval
+#### Experiment 3 — Parallel retrieval
 
 Run independent retrieval operations concurrently.
 
@@ -1629,7 +1629,7 @@ Measure:
 P95 latency
 ```
 
-### Experiment 4 — Model routing
+#### Experiment 4 — Model routing
 
 Send simple requests to Model A.
 
@@ -1642,7 +1642,7 @@ cost
 fallback rate
 ```
 
-### Experiment 5 — Batching
+#### Experiment 5 — Batching
 
 Increase concurrency and batch size.
 
@@ -1661,11 +1661,11 @@ It is to understand **which engineering changes actually move the system's econo
 
 ---
 
-# 29. Build the Routing Strategy
+## 29. Build the Routing Strategy
 
 For today's exercise, start with the two-model scenario.
 
-## Model A
+### Model A
 
 ```text
 Cheap
@@ -1673,7 +1673,7 @@ Slow
 High quality
 ```
 
-## Model B
+### Model B
 
 ```text
 Expensive
@@ -1767,7 +1767,7 @@ This is the kind of reasoning expected from an AI systems engineer.
 
 ---
 
-# 30. The Performance Mindset
+## 30. The Performance Mindset
 
 The naive question is:
 
@@ -1821,7 +1821,7 @@ It makes them more economically consequential.
 
 ---
 
-# 31. Key Takeaways
+## 31. Key Takeaways
 
 1. **Performance and economics are architectural concerns.** Model calls consume real latency, compute, memory, quota, and money.
 

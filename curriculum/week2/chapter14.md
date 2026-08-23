@@ -1,8 +1,8 @@
-# Day 14 — Architecture Review
+# Chapter 14: Architecture Review
 
 Week 1 was about building an AI application.
 
-Day 14 is about something more important:
+Chapter 14 is about something more important:
 
 > **Learning to reason about the application as a system.**
 
@@ -34,7 +34,7 @@ to:
 
 ---
 
-# 1. What Is an Architecture Review?
+## 1. What Is an Architecture Review?
 
 An architecture review is a structured examination of a system against its requirements, constraints, risks, and operating environment.
 
@@ -83,13 +83,13 @@ It is a **risk-discovery mechanism**.
 
 ---
 
-# 2. Architecture Is a Set of Tradeoffs
+## 2. Architecture Is a Set of Tradeoffs
 
 There is rarely one objectively correct architecture.
 
 Consider two possible designs.
 
-### Design A
+#### Design A
 
 ```text
 Application
@@ -112,7 +112,7 @@ Disadvantages:
 * data leaves the environment
 * provider availability becomes a dependency
 
-### Design B
+#### Design B
 
 ```text
 Application
@@ -159,7 +159,7 @@ The architecture review makes those tradeoffs explicit.
 
 ---
 
-# 3. The Week 1 Application
+## 3. The Week 1 Application
 
 Recall the Personal Research Assistant:
 
@@ -199,7 +199,7 @@ Now we turn that prototype into an architecture.
 
 ---
 
-# 4. Deliverable 1 — Architecture Diagram
+## 4. Deliverable 1 — Architecture Diagram
 
 The first deliverable is the system architecture.
 
@@ -265,13 +265,13 @@ It is a compressed representation of the system's behavior.
 
 ---
 
-# 5. Architecture Views
+## 5. Architecture Views
 
 One diagram is often insufficient.
 
 A mature architecture review uses multiple views.
 
-### Logical view
+#### Logical view
 
 What components exist?
 
@@ -284,7 +284,7 @@ Tool Gateway
 Evaluator
 ```
 
-### Deployment view
+#### Deployment view
 
 Where do they run?
 
@@ -300,7 +300,7 @@ Inference infrastructure
 Databases
 ```
 
-### Data-flow view
+#### Data-flow view
 
 Where does information move?
 
@@ -320,7 +320,7 @@ Retriever
 LLM
 ```
 
-### Security view
+#### Security view
 
 Where are the trust boundaries?
 
@@ -342,7 +342,7 @@ Architecture review should ensure these views are mutually consistent.
 
 ---
 
-# 6. Architecture Boundaries
+## 6. Architecture Boundaries
 
 One of the most important architecture questions is:
 
@@ -396,39 +396,39 @@ even when both arrive as text.
 
 ---
 
-# 7. Architecture Review Questions
+## 7. Architecture Review Questions
 
 For every component, ask:
 
-### Responsibility
+#### Responsibility
 
 What does this component own?
 
-### Interface
+#### Interface
 
 What does it expose?
 
-### Dependencies
+#### Dependencies
 
 What does it depend on?
 
-### Failure mode
+#### Failure mode
 
 What happens when it fails?
 
-### Security boundary
+#### Security boundary
 
 What can it access?
 
-### Scaling behavior
+#### Scaling behavior
 
 What happens under load?
 
-### Cost
+#### Cost
 
 What does it cost?
 
-### Observability
+#### Observability
 
 How do we know it is working?
 
@@ -446,7 +446,7 @@ This table often exposes architectural weaknesses faster than the diagram.
 
 ---
 
-# 8. Deliverable 2 — API Specification
+## 8. Deliverable 2 — API Specification
 
 The architecture needs explicit interfaces.
 
@@ -510,7 +510,7 @@ For AI systems, also define:
 
 ---
 
-# 9. APIs Are Contracts
+## 9. APIs Are Contracts
 
 Consider an agent calling a tool:
 
@@ -552,7 +552,7 @@ A specified error becomes part of the workflow.
 
 ---
 
-# 10. AI APIs Need Behavioral Contracts
+## 10. AI APIs Need Behavioral Contracts
 
 Traditional APIs specify structure.
 
@@ -591,7 +591,7 @@ behavioral contract
 
 ---
 
-# 11. Deliverable 3 — Data Model
+## 11. Deliverable 3 — Data Model
 
 Next define what the system stores.
 
@@ -655,11 +655,11 @@ before returning document (d) to user (u).
 
 ---
 
-# 12. Separate State From Context
+## 12. Separate State From Context
 
 This is an important architectural distinction.
 
-### State
+#### State
 
 Information the system persists.
 
@@ -671,7 +671,7 @@ permissions
 workflow status
 ```
 
-### Context
+#### Context
 
 Information supplied to the model for a particular inference step.
 
@@ -701,7 +701,7 @@ This makes context management explicit and controllable.
 
 ---
 
-# 13. Data Lifecycle
+## 13. Data Lifecycle
 
 The review should trace data through its lifecycle:
 
@@ -740,7 +740,7 @@ This is where architecture, security, privacy, and compliance intersect.
 
 ---
 
-# 14. Deliverable 4 — Threat Model
+## 14. Deliverable 4 — Threat Model
 
 Security should not be an afterthought.
 
@@ -748,7 +748,7 @@ Perform a formal threat model.
 
 Start with assets.
 
-### Assets
+#### Assets
 
 ```text
 documents
@@ -762,7 +762,7 @@ conversation history
 
 Then identify actors.
 
-### Actors
+#### Actors
 
 ```text
 normal user
@@ -790,7 +790,7 @@ Now construct attack paths.
 
 ---
 
-# 15. AI-Specific Threat Model
+## 15. AI-Specific Threat Model
 
 A traditional application might have:
 
@@ -837,7 +837,7 @@ The architecture must therefore treat external content as untrusted.
 
 ---
 
-# 16. Threat Modeling Agents
+## 16. Threat Modeling Agents
 
 For every tool ask:
 
@@ -879,7 +879,7 @@ The architecture review should explicitly identify every privileged capability.
 
 ---
 
-# 17. Threat Modeling Method
+## 17. Threat Modeling Method
 
 For each threat, document:
 
@@ -915,9 +915,9 @@ The goal is to understand and control it.
 
 ---
 
-# 18. Deliverable 5 — Cost Model
+## 18. Deliverable 5 — Cost Model
 
-Now apply Day 12.
+Now apply Chapter 12.
 
 Estimate:
 
@@ -992,7 +992,7 @@ That changes the optimization strategy.
 
 ---
 
-# 19. Cost Sensitivity Analysis
+## 19. Cost Sensitivity Analysis
 
 Do not produce only one cost estimate.
 
@@ -1039,7 +1039,7 @@ This turns cost from an accounting number into an architectural variable.
 
 ---
 
-# 20. Deliverable 6 — Reliability Model
+## 20. Deliverable 6 — Reliability Model
 
 Now ask:
 
@@ -1087,7 +1087,7 @@ The reliability model identifies:
 
 ---
 
-# 21. Failure Dependency Graph
+## 21. Failure Dependency Graph
 
 Suppose:
 
@@ -1137,7 +1137,7 @@ The more dependencies you introduce, the more carefully you need to design failu
 
 ---
 
-# 22. Graceful Degradation
+## 22. Graceful Degradation
 
 Not every failure should cause total failure.
 
@@ -1176,7 +1176,7 @@ For each dependency:
 
 ---
 
-# 23. Failure Domains
+## 23. Failure Domains
 
 Identify independent failure domains.
 
@@ -1202,7 +1202,7 @@ This prevents false assumptions about redundancy.
 
 ---
 
-# 24. Agent Reliability
+## 24. Agent Reliability
 
 Agentic systems introduce another failure mode:
 
@@ -1258,7 +1258,7 @@ The agent is not allowed to negotiate these limits.
 
 ---
 
-# 25. Deliverable 7 — Evaluation Strategy
+## 25. Deliverable 7 — Evaluation Strategy
 
 The architecture review must explain:
 
@@ -1290,21 +1290,21 @@ The evaluation architecture might be:
 
 Define:
 
-### Functional metrics
+#### Functional metrics
 
 ```text
 task success
 answer correctness
 ```
 
-### Retrieval metrics
+#### Retrieval metrics
 
 ```text
 Recall@k
 Precision@k
 ```
 
-### Generation metrics
+#### Generation metrics
 
 ```text
 groundedness
@@ -1312,7 +1312,7 @@ citation accuracy
 completeness
 ```
 
-### Agent metrics
+#### Agent metrics
 
 ```text
 tool accuracy
@@ -1320,7 +1320,7 @@ steps/task
 failure recovery
 ```
 
-### System metrics
+#### System metrics
 
 ```text
 latency
@@ -1328,7 +1328,7 @@ cost
 availability
 ```
 
-### Safety metrics
+#### Safety metrics
 
 ```text
 attack success rate
@@ -1338,7 +1338,7 @@ data leakage rate
 
 ---
 
-# 26. Evaluation as an Architectural Component
+## 26. Evaluation as an Architectural Component
 
 Evaluation should not be treated as a notebook someone runs occasionally.
 
@@ -1376,7 +1376,7 @@ The evaluation suite prevents those failures from returning.
 
 ---
 
-# 27. Deliverable 8 — Performance Model
+## 27. Deliverable 8 — Performance Model
 
 Finally, model system performance.
 
@@ -1428,7 +1428,7 @@ Then identify bottlenecks.
 
 ---
 
-# 28. Capacity Planning
+## 28. Capacity Planning
 
 Suppose the system needs:
 
@@ -1480,13 +1480,13 @@ Then determine infrastructure requirements.
 
 ---
 
-# 29. Architecture Decision Records
+## 29. Architecture Decision Records
 
 An architecture review should produce explicit decisions.
 
 For example:
 
-### ADR-001 — Model provider
+#### ADR-001 — Model provider
 
 **Decision:** Use hosted Model A for general requests and Model B for escalation.
 
@@ -1517,7 +1517,7 @@ Architecture decisions should be recorded because future engineers otherwise see
 
 ---
 
-# 30. Architecture Review as a Decision Process
+## 30. Architecture Review as a Decision Process
 
 A useful review structure is:
 
@@ -1553,7 +1553,7 @@ This is much stronger than:
 
 ---
 
-# 31. The Architecture Review Document
+## 31. The Architecture Review Document
 
 The final deliverable should look something like:
 
@@ -1601,7 +1601,7 @@ This document should be something another engineer could use to understand and c
 
 ---
 
-# 32. The Architecture Review Meeting
+## 32. The Architecture Review Meeting
 
 Now simulate a real architecture review.
 
@@ -1609,7 +1609,7 @@ Have another engineer—or an AI agent—act as a skeptical reviewer.
 
 The reviewer should ask:
 
-### Architecture
+#### Architecture
 
 > Why is this component separate?
 
@@ -1617,7 +1617,7 @@ The reviewer should ask:
 
 > Where are the boundaries?
 
-### Security
+#### Security
 
 > What happens if retrieved content contains malicious instructions?
 
@@ -1625,7 +1625,7 @@ The reviewer should ask:
 
 > What prevents unauthorized tool calls?
 
-### Reliability
+#### Reliability
 
 > What happens if the model provider is unavailable?
 
@@ -1633,7 +1633,7 @@ The reviewer should ask:
 
 > What happens if the agent enters an infinite loop?
 
-### Performance
+#### Performance
 
 > What is the P95 latency?
 
@@ -1641,13 +1641,13 @@ The reviewer should ask:
 
 > What happens at 10x traffic?
 
-### Economics
+#### Economics
 
 > What is cost per successful task?
 
 > What happens if context length doubles?
 
-### Evaluation
+#### Evaluation
 
 > How do you know the system is correct?
 
@@ -1659,7 +1659,7 @@ A strong architecture should survive these questions.
 
 ---
 
-# 33. Architecture Review Is About Failure
+## 33. Architecture Review Is About Failure
 
 A useful mental model is:
 
@@ -1697,13 +1697,13 @@ It is defined by what happens when:
 * the model changes,
 * evaluation detects a regression.
 
-This is why architecture review belongs after the reliability, security, performance, and testing days.
+This is why architecture review belongs after the reliability, security, performance, and testing chapters.
 
 The individual disciplines now come together.
 
 ---
 
-# 34. From Developer to Systems Engineer
+## 34. From Developer to Systems Engineer
 
 A developer might think:
 
@@ -1759,7 +1759,7 @@ That is the transition.
 
 ---
 
-# 35. The Architecture as a Contract
+## 35. The Architecture as a Contract
 
 By the end of the review, you should be able to express the system as a collection of contracts:
 
@@ -1803,11 +1803,11 @@ Feedback
 
 ---
 
-# 36. The Final Architecture Review Exercise
+## 36. The Final Architecture Review Exercise
 
 Take the Week 1 Personal Research Assistant and produce all eight artifacts.
 
-## 1. Architecture diagram
+### 1. Architecture diagram
 
 Show:
 
@@ -1820,7 +1820,7 @@ Show:
 * storage
 * observability
 
-## 2. API specification
+### 2. API specification
 
 Define:
 
@@ -1833,7 +1833,7 @@ Define:
 * limits
 * versioning
 
-## 3. Data model
+### 3. Data model
 
 Define:
 
@@ -1846,7 +1846,7 @@ Define:
 * evaluations
 * permissions
 
-## 4. Threat model
+### 4. Threat model
 
 Identify:
 
@@ -1859,7 +1859,7 @@ Identify:
 * data leakage
 * supply-chain risks
 
-## 5. Cost model
+### 5. Cost model
 
 Estimate:
 
@@ -1872,7 +1872,7 @@ Estimate:
 * observability
 * cost per successful task
 
-## 6. Reliability model
+### 6. Reliability model
 
 Define:
 
@@ -1885,7 +1885,7 @@ Define:
 * agent limits
 * disaster recovery
 
-## 7. Evaluation strategy
+### 7. Evaluation strategy
 
 Define:
 
@@ -1899,7 +1899,7 @@ Define:
 * cost metrics
 * release gates
 
-## 8. Performance model
+### 8. Performance model
 
 Define:
 
@@ -1923,7 +1923,7 @@ If not:
 
 ---
 
-# 37. Key Takeaways
+## 37. Key Takeaways
 
 1. **Architecture review is the transition from implementation to systems engineering.** The question changes from "Can I build it?" to "Can I defend the design?"
 
@@ -1989,7 +1989,7 @@ Architecture
 >
 > An AI systems engineer reasons about **behavior across components, boundaries, failures, resources, and time**.
 
-By the end of Day 14, the Week 1 application should no longer be thought of as a collection of Python modules, prompts, APIs, and database calls.
+By the end of Chapter 14, the Week 1 application should no longer be thought of as a collection of Python modules, prompts, APIs, and database calls.
 
 It should be possible to describe it as a **system with explicit contracts, boundaries, failure modes, economics, performance characteristics, and evaluation criteria**.
 

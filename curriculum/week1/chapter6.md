@@ -1,6 +1,6 @@
-# Day 6 — Production AI
+# Chapter 6: Production AI
 
-The first five days established the conceptual foundation for building AI applications:
+The first five chapters established the conceptual foundation for building AI applications:
 
 * models are probabilistic components;
 * prompts are interfaces to model behavior;
@@ -60,7 +60,7 @@ The production challenge is building the **system around the model** so that it 
 
 ---
 
-# 1. The Prototype-to-Production Gap
+## 1. The Prototype-to-Production Gap
 
 Consider a prototype:
 
@@ -99,7 +99,7 @@ They are distributed-systems, security, reliability, and operations problems tha
 
 ---
 
-# 2. The Production AI Architecture
+## 2. The Production AI Architecture
 
 A useful high-level architecture is:
 
@@ -182,7 +182,7 @@ The important idea is that **the model is one dependency inside the application,
 
 ---
 
-# 3. API Architecture
+## 3. API Architecture
 
 The API is the boundary between the outside world and the AI system.
 
@@ -229,7 +229,7 @@ This separation becomes extremely valuable as the system evolves.
 
 ---
 
-# 4. Authentication vs. Authorization
+## 4. Authentication vs. Authorization
 
 These concepts are often confused.
 
@@ -280,13 +280,13 @@ that is merely a request.
 
 The authorization layer must determine whether the request is permitted.
 
-This is the same principle established for agentic tools on Day 5:
+This is the same principle established for agentic tools on Chapter 5:
 
 > **Model-generated intent is not authorization.**
 
 ---
 
-# 5. Rate Limiting
+## 5. Rate Limiting
 
 LLM requests are expensive and potentially long-running.
 
@@ -340,7 +340,7 @@ You may also need **model-level and workflow-level budgets**.
 
 ---
 
-# 6. Concurrency Limits
+## 6. Concurrency Limits
 
 Rate limiting controls request frequency.
 
@@ -380,7 +380,7 @@ Additional requests wait, queue, or receive a controlled overload response.
 
 ---
 
-# 7. Queues
+## 7. Queues
 
 Not every AI operation needs to happen synchronously.
 
@@ -434,7 +434,7 @@ Queues are particularly important for agentic systems because an agent may execu
 
 ---
 
-# 8. Retries and Backoff
+## 8. Retries and Backoff
 
 Production systems operate in an unreliable environment.
 
@@ -490,7 +490,7 @@ It is a failure mode.
 
 ---
 
-# 9. Idempotency
+## 9. Idempotency
 
 Retries introduce another problem.
 
@@ -527,7 +527,7 @@ This matters particularly when AI agents interact with systems that have externa
 
 ---
 
-# 10. Caching
+## 10. Caching
 
 LLM workloads contain substantial opportunities for caching.
 
@@ -560,23 +560,23 @@ But AI caching is more complicated than ordinary HTTP caching.
 
 Potential caches include:
 
-### Response cache
+#### Response cache
 
 Cache the final answer.
 
-### Retrieval cache
+#### Retrieval cache
 
 Cache search results.
 
-### Embedding cache
+#### Embedding cache
 
 Avoid recomputing embeddings for identical inputs.
 
-### Prompt-prefix cache
+#### Prompt-prefix cache
 
 Reuse repeated context where supported by the model infrastructure.
 
-### Tool-result cache
+#### Tool-result cache
 
 Cache expensive external operations.
 
@@ -592,7 +592,7 @@ A response containing private user data must never accidentally become a globall
 
 ---
 
-# 11. Secrets Management
+## 11. Secrets Management
 
 API keys should never appear in:
 
@@ -650,7 +650,7 @@ The model requests the capability without receiving the credential.
 
 ---
 
-# 12. Privacy
+## 12. Privacy
 
 AI applications can process unusually sensitive information.
 
@@ -706,7 +706,7 @@ The data-flow architecture determines the privacy properties.
 
 ---
 
-# 13. Logging
+## 13. Logging
 
 Logs answer:
 
@@ -770,7 +770,7 @@ Sensitive payload
 
 ---
 
-# 14. Metrics
+## 14. Metrics
 
 Logs describe individual events.
 
@@ -778,7 +778,7 @@ Metrics describe system behavior at scale.
 
 Useful production AI metrics include:
 
-### Reliability
+#### Reliability
 
 ```text
 request success rate
@@ -788,7 +788,7 @@ timeout rate
 retry rate
 ```
 
-### Performance
+#### Performance
 
 ```text
 p50 latency
@@ -798,7 +798,7 @@ time-to-first-token
 time-to-completion
 ```
 
-### AI behavior
+#### AI behavior
 
 ```text
 tool-call success
@@ -809,7 +809,7 @@ hallucination rate
 task completion rate
 ```
 
-### Economics
+#### Economics
 
 ```text
 tokens/request
@@ -823,7 +823,7 @@ AI systems require both conventional infrastructure metrics and model-specific q
 
 ---
 
-# 15. Tracing
+## 15. Tracing
 
 Metrics tell you that something is wrong.
 
@@ -883,7 +883,7 @@ This can reveal pathological behavior such as unnecessary searches or repeated t
 
 ---
 
-# 16. Prompt Injection
+## 16. Prompt Injection
 
 One of the most important security problems in AI applications is prompt injection.
 
@@ -935,7 +935,7 @@ The application therefore needs architectural defenses.
 
 ---
 
-# 17. Treat Retrieved Content as Untrusted Input
+## 17. Treat Retrieved Content as Untrusted Input
 
 A critical principle is:
 
@@ -976,7 +976,7 @@ But only the trusted control plane should determine what the system is authorize
 
 ---
 
-# 18. Data Exfiltration
+## 18. Data Exfiltration
 
 Prompt injection becomes particularly dangerous when combined with tools.
 
@@ -1032,7 +1032,7 @@ The safest architecture assumes that model behavior can eventually be manipulate
 
 ---
 
-# 19. Least Privilege
+## 19. Least Privilege
 
 Agents should have the minimum capabilities necessary to perform their tasks.
 
@@ -1079,7 +1079,7 @@ If the agent is compromised, the blast radius is limited.
 
 ---
 
-# 20. Tool Sandboxing
+## 20. Tool Sandboxing
 
 Some tools are inherently dangerous.
 
@@ -1115,7 +1115,7 @@ Every tool should have a defined security boundary.
 
 ---
 
-# 21. Cost Controls
+## 21. Cost Controls
 
 AI systems introduce a new operational dimension:
 
@@ -1182,7 +1182,7 @@ It is a **runtime safety constraint**.
 
 ---
 
-# 22. Model Routing
+## 22. Model Routing
 
 Production systems do not necessarily need to use the most capable model for every operation.
 
@@ -1232,13 +1232,13 @@ A cheap model that fails frequently can be more expensive than a larger model th
 
 ---
 
-# 23. Evaluation in Production
+## 23. Evaluation in Production
 
 Evaluation is not only an offline development activity.
 
 Production systems should continuously measure quality.
 
-The architecture from earlier days therefore becomes:
+The architecture from earlier chapters therefore becomes:
 
 ```text
                    Request
@@ -1261,7 +1261,7 @@ The architecture from earlier days therefore becomes:
 
 Evaluation can happen:
 
-### Offline
+#### Offline
 
 Before deployment:
 
@@ -1273,7 +1273,7 @@ model version
 evaluation
 ```
 
-### Online
+#### Online
 
 After deployment:
 
@@ -1285,7 +1285,7 @@ sampled evaluation
 quality metrics
 ```
 
-### Human evaluation
+#### Human evaluation
 
 For high-value applications:
 
@@ -1312,7 +1312,7 @@ Production evaluation needs to capture the multidimensional nature of quality.
 
 ---
 
-# 24. Observability + Evaluation
+## 24. Observability + Evaluation
 
 These two concepts should be connected but not confused.
 
@@ -1353,11 +1353,11 @@ Together they provide the basis for engineering improvement.
 
 ---
 
-# 25. Failure Modes in Production
+## 25. Failure Modes in Production
 
 A production AI system should be tested against failures deliberately.
 
-### Model provider unavailable
+#### Model provider unavailable
 
 ```text
 Model
@@ -1372,7 +1372,7 @@ Questions:
 * queue?
 * return degraded response?
 
-### Retrieval unavailable
+#### Retrieval unavailable
 
 ```text
 RAG
@@ -1394,7 +1394,7 @@ or refuse to answer?
 
 The correct behavior depends on the application's requirements.
 
-### Tool failure
+#### Tool failure
 
 A tool may return:
 
@@ -1406,7 +1406,7 @@ A tool may return:
 
 The agent should not interpret that as valid data.
 
-### Rate-limit exhaustion
+#### Rate-limit exhaustion
 
 The system should distinguish:
 
@@ -1422,17 +1422,17 @@ provider rate limit
 
 because the recovery strategies differ.
 
-### Malicious input
+#### Malicious input
 
 Prompt injection should be treated as an expected adversarial condition.
 
-### Cost runaway
+#### Cost runaway
 
 An agent should terminate when its budget is exhausted.
 
 ---
 
-# 26. Graceful Degradation
+## 26. Graceful Degradation
 
 Production systems should have defined degraded modes.
 
@@ -1474,7 +1474,7 @@ The key is to define degradation explicitly.
 
 ---
 
-# 27. Multi-Provider Architecture
+## 27. Multi-Provider Architecture
 
 Depending on requirements, a production system may use multiple model providers:
 
@@ -1520,7 +1520,7 @@ The abstraction should be thin enough to preserve provider-specific capabilities
 
 ---
 
-# 28. Deployment Architecture
+## 28. Deployment Architecture
 
 A realistic deployment might look like:
 
@@ -1560,7 +1560,7 @@ The architectural responsibilities do not.
 
 ---
 
-# 29. Version Everything
+## 29. Version Everything
 
 AI systems have many moving parts.
 
@@ -1601,7 +1601,7 @@ Without versioning, reproducing a production failure becomes extremely difficult
 
 ---
 
-# 30. The AI System as a Distributed System
+## 30. The AI System as a Distributed System
 
 At this point, a useful mental model is:
 
@@ -1641,7 +1641,7 @@ The intersection creates the real engineering challenge.
 
 ---
 
-# 31. A Production Request Lifecycle
+## 31. A Production Request Lifecycle
 
 Consider a user asking:
 
@@ -1699,9 +1699,9 @@ That complexity is justified because each layer exists to control a specific cla
 
 ---
 
-# 32. Security Exercise: Build the Attack
+## 32. Security Exercise: Build the Attack
 
-A useful Day 6 exercise is not merely to implement security defenses.
+A useful Chapter 6 exercise is not merely to implement security defenses.
 
 Try to break the system.
 
@@ -1763,7 +1763,7 @@ The architecture should remain safe even when the model behaves incorrectly.
 
 ---
 
-# 33. Cost-Control Exercise
+## 33. Cost-Control Exercise
 
 Build an agent that can:
 
@@ -1806,7 +1806,7 @@ They are **system safety constraints**.
 
 ---
 
-# 34. Production Readiness Checklist
+## 34. Production Readiness Checklist
 
 Before calling an AI application production-ready, ask:
 
@@ -1871,9 +1871,9 @@ If many answers are "no," the system is still a prototype.
 
 ---
 
-# 35. Key Takeaways
+## 35. Key Takeaways
 
-## 1. The model is only one component
+### 1. The model is only one component
 
 A production AI application is not:
 
@@ -1899,7 +1899,7 @@ security
 
 ---
 
-## 2. Production AI is distributed systems engineering
+### 2. Production AI is distributed systems engineering
 
 The hard problems include:
 
@@ -1917,7 +1917,7 @@ The LLM adds probabilistic behavior on top of these problems.
 
 ---
 
-## 3. Never let the model define its own authority
+### 3. Never let the model define its own authority
 
 The model can propose:
 
@@ -1935,7 +1935,7 @@ Authorization belongs outside the model.
 
 ---
 
-## 4. Treat external content as hostile
+### 4. Treat external content as hostile
 
 Web pages, documents, emails, search results, and tool outputs should be considered **untrusted input**.
 
@@ -1943,7 +1943,7 @@ Prompt injection is fundamentally an input-security problem.
 
 ---
 
-## 5. Least privilege limits the blast radius
+### 5. Least privilege limits the blast radius
 
 Give agents only the tools and permissions they actually need.
 
@@ -1951,7 +1951,7 @@ A compromised or manipulated agent should not automatically have access to your 
 
 ---
 
-## 6. Bound agent behavior
+### 6. Bound agent behavior
 
 Every autonomous system should have limits on:
 
@@ -1969,7 +1969,7 @@ Unbounded autonomy is an operational liability.
 
 ---
 
-## 7. Observability is part of the architecture
+### 7. Observability is part of the architecture
 
 For every important request, you should be able to determine:
 
@@ -1988,7 +1988,7 @@ If you cannot answer those questions, operating the system at scale will be diff
 
 ---
 
-## 8. Evaluation and observability solve different problems
+### 8. Evaluation and observability solve different problems
 
 Observability tells you:
 
@@ -2002,7 +2002,7 @@ You need both.
 
 ---
 
-## 9. Security cannot be delegated to prompting
+### 9. Security cannot be delegated to prompting
 
 A prompt saying:
 
@@ -2027,7 +2027,7 @@ The model should operate inside those boundaries.
 
 ---
 
-## 10. Cost is a runtime constraint
+### 10. Cost is a runtime constraint
 
 Agentic systems can dynamically increase their own computational cost.
 
@@ -2041,7 +2041,7 @@ Cost controls belong in the execution path, not merely in the finance dashboard.
 
 ---
 
-## 11. Production AI is controlled probabilistic computation
+### 11. Production AI is controlled probabilistic computation
 
 The central architecture of the first week can now be summarized as:
 
@@ -2103,27 +2103,27 @@ That division of responsibility is one of the most important patterns in modern 
 
 ---
 
-# 36. The Production Mindset
+## 36. The Production Mindset
 
-The progression across the first six days is now visible:
+The progression across the first six chapters is now visible:
 
 ```text
-Day 1
+Chapter 1
 LLMs as probabilistic components
         ↓
-Day 2
+Chapter 2
 Context, prompts, structured outputs
         ↓
-Day 3
+Chapter 3
 Retrieval and external knowledge
         ↓
-Day 4
+Chapter 4
 Evaluation and measurement
         ↓
-Day 5
+Chapter 5
 Agents, tools, state, and control loops
         ↓
-Day 6
+Chapter 6
 Production systems, security, reliability,
 observability, and economics
 ```
@@ -2142,7 +2142,7 @@ At the beginning, the central question was:
 
 > "How do I get the model to produce a good answer?"
 
-By Day 6, the question has become:
+By Chapter 6, the question has become:
 
 > **"How do I build a system in which a probabilistic model can reliably perform useful work under real-world constraints?"**
 

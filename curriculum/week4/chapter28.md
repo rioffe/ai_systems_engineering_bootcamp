@@ -1,4 +1,4 @@
-# Day 28 — Final Evaluation
+# Chapter 28: Final Evaluation
 
 A production AI system is not finished when the implementation works. It is finished when you can **demonstrate, with evidence, that the system works well enough for its intended users, under its intended operating conditions, at an acceptable cost and risk**.
 
@@ -26,7 +26,7 @@ A system can have excellent model accuracy but poor latency. It can be technical
 
 ---
 
-# 1. Evaluation Is an Engineering Activity
+## 1. Evaluation Is an Engineering Activity
 
 Evaluation should not be treated as a demonstration performed at the end of development.
 
@@ -79,7 +79,7 @@ The product is not.
 
 ---
 
-# 2. Define the Evaluation Contract
+## 2. Define the Evaluation Contract
 
 Before running the final evaluation, define explicit acceptance criteria.
 
@@ -110,11 +110,11 @@ Without explicit thresholds, evaluation degenerates into subjective judgment.
 
 ---
 
-# 3. Technical Evaluation
+## 3. Technical Evaluation
 
 The first layer evaluates the engineering system surrounding the AI.
 
-# 4. Functionality
+## 4. Functionality
 
 Start with the basic question:
 
@@ -177,7 +177,7 @@ This is why system-level evaluation matters.
 
 ---
 
-# 5. Reliability
+## 5. Reliability
 
 Reliability asks whether the system continues functioning under realistic operating conditions.
 
@@ -223,7 +223,7 @@ The final evaluation should therefore measure not merely whether failures occur,
 
 ---
 
-# 6. Latency
+## 6. Latency
 
 Latency is a first-class product metric.
 
@@ -278,7 +278,7 @@ Then determine where the latency is actually coming from.
 
 ---
 
-# 7. Cost
+## 7. Cost
 
 Measure the economics of the complete system.
 
@@ -338,7 +338,7 @@ $$
 
 ---
 
-# 8. Scalability
+## 8. Scalability
 
 A prototype can work perfectly for ten users and fail catastrophically for ten thousand.
 
@@ -375,7 +375,7 @@ The evaluation should identify the point at which:
 
 ---
 
-# 9. Security
+## 9. Security
 
 AI applications introduce security problems that conventional application testing does not fully capture.
 
@@ -417,7 +417,7 @@ $$
 
 ---
 
-# 10. AI Evaluation
+## 10. AI Evaluation
 
 Technical correctness is necessary but insufficient.
 
@@ -433,7 +433,7 @@ The major dimensions are:
 
 ---
 
-# 11. Accuracy
+## 11. Accuracy
 
 Accuracy depends on the application.
 
@@ -477,7 +477,7 @@ This is often more informative than a single "answer quality" score.
 
 ---
 
-# 12. Hallucination
+## 12. Hallucination
 
 Hallucination measures whether the system asserts information that is unsupported or false.
 
@@ -531,7 +531,7 @@ It is **correctly calibrated behavior**.
 
 ---
 
-# 13. Groundedness
+## 13. Groundedness
 
 Groundedness asks:
 
@@ -582,7 +582,7 @@ A citation that exists but does not actually support the claim is not a successf
 
 ---
 
-# 14. Robustness
+## 14. Robustness
 
 A robust AI system should not collapse when inputs move slightly outside the benchmark distribution.
 
@@ -630,7 +630,7 @@ A smaller $\Delta P$ generally indicates greater robustness.
 
 ---
 
-# 15. Tool-Use Success
+## 15. Tool-Use Success
 
 For agentic applications, model quality cannot be evaluated independently from tool behavior.
 
@@ -665,7 +665,7 @@ The failure may have occurred at any of four different layers.
 
 ---
 
-# 16. Product Evaluation
+## 16. Product Evaluation
 
 The third layer asks the question engineers most often under-measure:
 
@@ -682,7 +682,7 @@ Evaluate:
 
 ---
 
-# 17. User Value
+## 17. User Value
 
 The primary product metric is whether the system improves a real user outcome.
 
@@ -727,7 +727,7 @@ User value should ultimately be expressed in terms of a meaningful outcome.
 
 ---
 
-# 18. Usability
+## 18. Usability
 
 AI systems introduce unusual usability problems.
 
@@ -775,7 +775,7 @@ Users should trust the system when it is reliable and question it when uncertain
 
 ---
 
-# 19. Adoption
+## 19. Adoption
 
 A product can pass every laboratory test and still fail in the market.
 
@@ -798,7 +798,7 @@ If they repeatedly return because the product solves a real problem, that demons
 
 ---
 
-# 20. Differentiation
+## 20. Differentiation
 
 Finally, determine whether the system has a reason to exist.
 
@@ -843,7 +843,7 @@ The durable advantage therefore tends to reside above the model.
 
 ---
 
-# 21. The Evaluation Matrix
+## 21. The Evaluation Matrix
 
 The final evaluation should combine all three dimensions into one matrix.
 
@@ -871,7 +871,7 @@ This matrix prevents a common engineering failure:
 
 ---
 
-# 22. Build an Evaluation Scorecard
+## 22. Build an Evaluation Scorecard
 
 At the end of the project, produce a scorecard.
 
@@ -901,7 +901,7 @@ That is the difference between a prototype demonstration and an engineering eval
 
 ---
 
-# 23. Evaluate the System Under Failure
+## 23. Evaluate the System Under Failure
 
 The final evaluation should deliberately attempt to break the system.
 
@@ -926,7 +926,7 @@ Then test each class.
 
 Examples:
 
-### Model failures
+#### Model failures
 
 * malformed output
 * refusal
@@ -934,7 +934,7 @@ Examples:
 * context loss
 * incorrect reasoning
 
-### Retrieval failures
+#### Retrieval failures
 
 * no results
 * wrong results
@@ -942,21 +942,21 @@ Examples:
 * stale results
 * adversarial documents
 
-### Tool failures
+#### Tool failures
 
 * timeout
 * invalid response
 * unavailable service
 * malformed data
 
-### Infrastructure failures
+#### Infrastructure failures
 
 * database unavailable
 * model API unavailable
 * network failure
 * queue saturation
 
-### User failures
+#### User failures
 
 * ambiguous requests
 * invalid inputs
@@ -985,25 +985,25 @@ is well engineered.
 
 ---
 
-# 24. From Evaluation to Release Decision
+## 24. From Evaluation to Release Decision
 
 The final evaluation should result in an explicit decision.
 
 A useful classification is:
 
-### Ship
+#### Ship
 
 All critical requirements pass.
 
-### Ship with known limitations
+#### Ship with known limitations
 
 The system passes safety and reliability requirements, but has documented non-critical limitations.
 
-### Continue development
+#### Continue development
 
 One or more important requirements fail.
 
-### Do not ship
+#### Do not ship
 
 There is a critical security, reliability, correctness, or user-value failure.
 
@@ -1013,7 +1013,7 @@ The purpose of evaluation is to inform action.
 
 ---
 
-# 25. The Final Engineering Principle
+## 25. The Final Engineering Principle
 
 The most important lesson of this entire curriculum is that **AI engineering is systems engineering under uncertainty**.
 
@@ -1066,7 +1066,7 @@ Only when the answer to all four is satisfactory do we have a production-ready A
 
 ---
 
-# 26. Key Takeaways
+## 26. Key Takeaways
 
 1. **Final evaluation must be system-level.** Model benchmarks alone cannot establish production readiness.
 

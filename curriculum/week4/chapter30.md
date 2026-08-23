@@ -1,4 +1,4 @@
-# Day 30 — The AI Engineer's Future
+# Chapter 30: The AI Engineer's Future
 
 The final day should not introduce another framework, model, API, or technique.
 
@@ -6,7 +6,7 @@ It should answer a larger question:
 
 > **What does it mean to be an AI engineer now?**
 
-The preceding twenty-nine days have been about building systems:
+The preceding twenty-nine chapters have been about building systems:
 
 * applications
 * retrieval pipelines
@@ -18,7 +18,7 @@ The preceding twenty-nine days have been about building systems:
 * verification systems
 * products
 
-Day 30 steps back and asks what these technologies collectively imply for software engineering.
+Chapter 30 steps back and asks what these technologies collectively imply for software engineering.
 
 The central thesis is:
 
@@ -30,7 +30,7 @@ It means the abstraction level at which engineers operate is moving upward.
 
 ---
 
-# 1. What Has Changed?
+## 1. What Has Changed?
 
 The traditional software-development loop was approximately:
 
@@ -92,11 +92,11 @@ The engineer becomes the designer of the **software-production system**.
 
 ---
 
-# 2. From Writing Code to Specifying Systems
+## 2. From Writing Code to Specifying Systems
 
 Consider two engineers.
 
-### Engineer A
+#### Engineer A
 
 Receives a feature request and manually implements:
 
@@ -106,7 +106,7 @@ Receives a feature request and manually implements:
 * tests
 * deployment configuration
 
-### Engineer B
+#### Engineer B
 
 Defines:
 
@@ -152,7 +152,7 @@ $$
 
 ---
 
-# 3. The Specification Becomes a First-Class Artifact
+## 3. The Specification Becomes a First-Class Artifact
 
 When humans write every line of implementation, the source code itself contains much of the engineering intent.
 
@@ -196,7 +196,7 @@ A precise specification constrains the agent's search space.
 
 ---
 
-# 4. Context Becomes Part of Programming
+## 4. Context Becomes Part of Programming
 
 Traditional programming largely assumes that the programmer possesses the relevant context.
 
@@ -233,7 +233,7 @@ That is a fundamentally different question.
 
 ---
 
-# 5. Context Is an Engineering Resource
+## 5. Context Is an Engineering Resource
 
 The agent's effective context can be thought of as:
 
@@ -283,7 +283,7 @@ The engineer increasingly becomes responsible for constructing this information 
 
 ---
 
-# 6. Agents Change the Unit of Work
+## 6. Agents Change the Unit of Work
 
 Traditional software engineering operates primarily at the level of:
 
@@ -315,7 +315,7 @@ Instead, the engineer manages a **closed-loop production process**.
 
 ---
 
-# 7. The Agentic Software Loop
+## 7. The Agentic Software Loop
 
 A mature coding agent should not simply:
 
@@ -353,7 +353,7 @@ The agent becomes a participant in the development process.
 
 ---
 
-# 8. Verification Becomes More Important, Not Less
+## 8. Verification Becomes More Important, Not Less
 
 As code generation becomes cheaper, verification becomes more valuable.
 
@@ -383,7 +383,7 @@ Therefore automated verification becomes central.
 
 ---
 
-# 9. The Verification Stack
+## 9. The Verification Stack
 
 A sophisticated AI development system may verify generated software at multiple levels:
 
@@ -419,7 +419,7 @@ This produces an important principle:
 
 ---
 
-# 10. The Engineer Becomes the Designer of the Verification System
+## 10. The Engineer Becomes the Designer of the Verification System
 
 This is one of the deepest changes.
 
@@ -449,7 +449,7 @@ The human handles ambiguity, trade-offs, and high-level judgment.
 
 ---
 
-# 11. The Emerging Architecture
+## 11. The Emerging Architecture
 
 A future software-development system may look like:
 
@@ -493,7 +493,7 @@ Verification determines whether the transformation is acceptable.
 
 ---
 
-# 12. The Agent Swarm
+## 12. The Agent Swarm
 
 As tasks become more complex, one agent may not be sufficient.
 
@@ -532,7 +532,7 @@ The architecture becomes a computational organization.
 
 ---
 
-# 13. Agent Swarms Are Not Automatically Better
+## 13. Agent Swarms Are Not Automatically Better
 
 More agents introduce:
 
@@ -560,11 +560,11 @@ Agent architecture should be justified by measurable improvement.
 
 ---
 
-# 14. The Human Role Moves Up the Abstraction Stack
+## 14. The Human Role Moves Up the Abstraction Stack
 
 The evolution can be viewed as:
 
-### Traditional
+#### Traditional
 
 ```text
 Human
@@ -572,7 +572,7 @@ Human
 Code
 ```
 
-### AI-assisted
+#### AI-assisted
 
 ```text
 Human
@@ -584,7 +584,7 @@ AI
 Code
 ```
 
-### Agentic
+#### Agentic
 
 ```text
 Human
@@ -602,7 +602,7 @@ Tests
 Repair
 ```
 
-### Mature agentic engineering
+#### Mature agentic engineering
 
 ```text
 Human
@@ -630,7 +630,7 @@ This is perhaps the most important conceptual shift of the entire curriculum.
 
 ---
 
-# 15. What Does Not Change?
+## 15. What Does Not Change?
 
 It would be a mistake to conclude that traditional software engineering becomes irrelevant.
 
@@ -668,11 +668,11 @@ AI increases the value of engineering knowledge because it increases the volume 
 
 ---
 
-# 16. The Four Skills Revisited
+## 16. The Four Skills Revisited
 
 The curriculum can now be understood as four layers.
 
-## 16.1 AI Application Engineering
+### 16.1 AI Application Engineering
 
 Build systems around models.
 
@@ -691,7 +691,7 @@ The question is:
 
 ---
 
-## 16.2 Software Engineering
+### 16.2 Software Engineering
 
 Build reliable software.
 
@@ -712,7 +712,7 @@ The question is:
 
 ---
 
-## 16.3 Coding Agents
+### 16.3 Coding Agents
 
 Use AI to produce software.
 
@@ -733,7 +733,7 @@ The question is:
 
 ---
 
-## 16.4 Shaping the Build
+### 16.4 Shaping the Build
 
 This is the highest-level skill.
 
@@ -755,7 +755,7 @@ The question becomes:
 
 ---
 
-# 17. The Emerging Hierarchy
+## 17. The Emerging Hierarchy
 
 These skills can be represented as:
 
@@ -816,7 +816,7 @@ It is to **combine technical depth with higher-level control**.
 
 ---
 
-# 18. One Project, Not Thirty Tutorials
+## 18. One Project, Not Thirty Tutorials
 
 The strongest way to learn this material is not to build thirty unrelated toy applications.
 
@@ -824,13 +824,13 @@ Build **one evolving system**.
 
 For example:
 
-# Personal Research Assistant
+## Personal Research Assistant
 
-This is the same system used as the running example through Weeks 1 to 3: it begins as a simple AI application and progressively evolves into an agentic software system. By Day 30 the Personal Research Assistant has grown into the AI Research & Engineering Agent.
+This is the same system used as the running example through Weeks 1 to 3: it begins as a simple AI application and progressively evolves into an agentic software system. By Chapter 30 the Personal Research Assistant has grown into the AI Research & Engineering Agent.
 
 ---
 
-## Week 1 — Make It Work
+### Week 1 — Make It Work
 
 Build:
 
@@ -853,7 +853,7 @@ At the end of Week 1, you have a functional AI application.
 
 ---
 
-## Week 2 — Make It Robust
+### Week 2 — Make It Robust
 
 Now engineer the system.
 
@@ -885,7 +885,7 @@ It becomes an engineered application.
 
 ---
 
-## Week 3 — Make the Agent Build It
+### Week 3 — Make the Agent Build It
 
 Now introduce coding agents.
 
@@ -927,7 +927,7 @@ Rather, make the development process increasingly **agentic and closed-loop**.
 
 ---
 
-## Week 4 — Make It Valuable
+### Week 4 — Make It Valuable
 
 Now move beyond engineering.
 
@@ -970,15 +970,15 @@ $$
 
 ---
 
-# 19. The Technical Stack
+## 19. The Technical Stack
 
 A curriculum should teach enough infrastructure to make these ideas concrete without turning into an encyclopedia of tools.
 
 A deliberately narrow stack is preferable.
 
-## Language
+### Language
 
-### Python
+#### Python
 
 Use Python for:
 
@@ -988,7 +988,7 @@ Use Python for:
 * data processing
 * model integration
 
-### TypeScript
+#### TypeScript
 
 Use TypeScript for:
 
@@ -1003,7 +1003,7 @@ It is understanding the boundary between AI systems and conventional application
 
 ---
 
-# 20. Models
+## 20. Models
 
 Use multiple model providers.
 
@@ -1034,7 +1034,7 @@ The abstractions remain more stable.
 
 ---
 
-# 21. AI Infrastructure
+## 21. AI Infrastructure
 
 Learn the underlying mechanisms rather than hiding everything behind frameworks.
 
@@ -1061,7 +1061,7 @@ The rule is:
 
 ---
 
-# 22. Application Infrastructure
+## 22. Application Infrastructure
 
 The production stack should include conventional engineering infrastructure:
 
@@ -1093,7 +1093,7 @@ It adds another probabilistic component to the architecture.
 
 ---
 
-# 23. Coding Agents
+## 23. Coding Agents
 
 Use at least two different coding agents.
 
@@ -1125,7 +1125,7 @@ The transferable skill is understanding the loop itself.
 
 ---
 
-# 24. What Not to Teach
+## 24. What Not to Teach
 
 A one-month curriculum can easily become an enormous catalog of technologies.
 
@@ -1161,7 +1161,7 @@ $$
 
 ---
 
-# 25. Evaluation Becomes the Backbone
+## 25. Evaluation Becomes the Backbone
 
 The curriculum should be unusually rigorous about evaluation.
 
@@ -1183,7 +1183,7 @@ A beautiful demo with no evidence is weak.
 
 ---
 
-# 26. Evidence Over Claims
+## 26. Evidence Over Claims
 
 Consider the statement:
 
@@ -1224,7 +1224,7 @@ If a claim cannot be measured directly, define an operational proxy.
 
 ---
 
-# 27. The AI Systems Track
+## 27. The AI Systems Track
 
 For an advanced engineer, the curriculum can extend below the application layer.
 
@@ -1261,7 +1261,7 @@ rather than treating model inference as an opaque API call.
 
 ---
 
-# 28. The Agent Systems Track
+## 28. The Agent Systems Track
 
 A second advanced track focuses on agent architecture.
 
@@ -1290,7 +1290,7 @@ This is a much deeper question than prompt engineering.
 
 ---
 
-# 29. The AI Economics Track
+## 29. The AI Economics Track
 
 The final track connects engineering to product economics.
 
@@ -1335,29 +1335,29 @@ AI engineering therefore increasingly requires **economic reasoning**.
 
 ---
 
-# 30. The Real Curriculum
+## 30. The Real Curriculum
 
 The entire month can ultimately be compressed into four questions.
 
-### 1. Can you build an AI application?
+#### 1. Can you build an AI application?
 
 $$
 \boxed{\text{AI Application Engineering}}
 $$
 
-### 2. Can you make it reliable?
+#### 2. Can you make it reliable?
 
 $$
 \boxed{\text{Software Engineering}}
 $$
 
-### 3. Can you make AI build software?
+#### 3. Can you make AI build software?
 
 $$
 \boxed{\text{Agentic Engineering}}
 $$
 
-### 4. Can you decide what should be built?
+#### 4. Can you decide what should be built?
 
 $$
 \boxed{\text{Product and Systems Judgment}}
@@ -1367,7 +1367,7 @@ The fourth is the highest-leverage capability.
 
 ---
 
-# 31. The Future Development Loop
+## 31. The Future Development Loop
 
 The traditional loop was:
 
@@ -1437,7 +1437,7 @@ But the loop becomes much larger.
 
 ---
 
-# 32. What Becomes Scarce?
+## 32. What Becomes Scarce?
 
 When AI makes software generation cheaper, the economics of engineering change.
 
@@ -1445,23 +1445,23 @@ If code generation becomes abundant, code itself becomes less scarce.
 
 Other resources become more valuable.
 
-### Good specifications
+#### Good specifications
 
 Because agents need precise objectives.
 
-### Good context
+#### Good context
 
 Because agents need relevant information.
 
-### Good architecture
+#### Good architecture
 
 Because generated code still has to fit into a coherent system.
 
-### Good evaluation
+#### Good evaluation
 
 Because generated artifacts must be distinguished from correct artifacts.
 
-### Good judgment
+#### Good judgment
 
 Because someone must decide whether the system is actually solving the right problem.
 
@@ -1477,7 +1477,7 @@ The bottleneck moves from creation toward judgment.
 
 ---
 
-# 33. The Engineer as a Control-System Designer
+## 33. The Engineer as a Control-System Designer
 
 There is an even deeper interpretation.
 
@@ -1513,9 +1513,9 @@ The engineer increasingly designs the **feedback loop** rather than directly per
 
 ---
 
-# 34. The Engineer as System Designer
+## 34. The Engineer as System Designer
 
-This leads to the central idea of Day 30:
+This leads to the central idea of Chapter 30:
 
 > **The AI engineer increasingly designs the system that produces software.**
 
@@ -1554,7 +1554,7 @@ That is a fundamentally different level of abstraction.
 
 ---
 
-# 35. But Humans Still Matter
+## 35. But Humans Still Matter
 
 The future should not be interpreted as:
 
@@ -1582,7 +1582,7 @@ The human remains responsible for deciding whether that implementation should ex
 
 ---
 
-# 36. The Ultimate Shift: From Implementation to Intent
+## 36. The Ultimate Shift: From Implementation to Intent
 
 The deepest transformation is therefore:
 
@@ -1616,7 +1616,7 @@ It potentially **raises the level at which rigor is required**.
 
 ---
 
-# 37. The Final Principle
+## 37. The Final Principle
 
 The future AI engineer should not be thought of as:
 
@@ -1652,7 +1652,7 @@ That is the direction of travel.
 
 ---
 
-# 38. Key Takeaways
+## 38. Key Takeaways
 
 1. **The software-development loop is changing.** Code generation increasingly sits inside a larger loop of specification, context, agents, verification, evaluation, and human judgment.
 

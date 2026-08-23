@@ -1,4 +1,4 @@
-# Day 17 — Agent Context Management
+# Chapter 17: Agent Context Management
 
 As coding agents become more capable, one of the most important engineering problems is no longer simply:
 
@@ -30,15 +30,15 @@ $$
 }
 $$
 
-Day 16 showed how specifications constrain the space of acceptable solutions.
+Chapter 16 showed how specifications constrain the space of acceptable solutions.
 
-Day 17 focuses on the other side of the equation:
+Chapter 17 focuses on the other side of the equation:
 
 > **What information does the agent need in order to reason correctly about that specification?**
 
 ---
 
-# 1. The Context Problem
+## 1. The Context Problem
 
 Consider a repository:
 
@@ -130,7 +130,7 @@ These are engineering decisions.
 
 ---
 
-# 2. Context Is Not the Same as State
+## 2. Context Is Not the Same as State
 
 One of the most important distinctions in agent architecture is:
 
@@ -190,7 +190,7 @@ It should preserve **state** and reconstruct **context** as needed.
 
 ---
 
-# 3. Context as a Limited Budget
+## 3. Context as a Limited Budget
 
 Context is a finite resource.
 
@@ -250,7 +250,7 @@ If 80% of the context is consumed by irrelevant repository files, there may be i
 
 ---
 
-# 4. Context Selection
+## 4. Context Selection
 
 The first major operation is **selection**.
 
@@ -303,7 +303,7 @@ The quality of context selection depends on how well the agent identifies this s
 
 ---
 
-# 5. Repository Maps
+## 5. Repository Maps
 
 A **repository map** is a compressed structural representation of a codebase.
 
@@ -347,7 +347,7 @@ It functions somewhat like a symbol table or architectural index.
 
 ---
 
-# 6. Context Selection as Retrieval
+## 6. Context Selection as Retrieval
 
 Context management is closely related to retrieval.
 
@@ -399,7 +399,7 @@ Coding-agent context management retrieves **software artifacts and state**.
 
 ---
 
-# 7. Context Selection Is More Than Retrieval
+## 7. Context Selection Is More Than Retrieval
 
 Pure retrieval is insufficient.
 
@@ -451,7 +451,7 @@ The agent needs both **semantic relevance** and **structural relevance**.
 
 ---
 
-# 8. Context Compression
+## 8. Context Compression
 
 Even relevant context may be too large.
 
@@ -503,7 +503,7 @@ Therefore, context compression should be **task-aware**.
 
 ---
 
-# 9. Summaries
+## 9. Summaries
 
 Summaries are one form of context compression.
 
@@ -553,7 +553,7 @@ The second preserves actionable state.
 
 ---
 
-# 10. Scratchpads
+## 10. Scratchpads
 
 Agents also need temporary working memory.
 
@@ -602,7 +602,7 @@ The agent needs both, but they should not be treated as identical.
 
 ---
 
-# 11. Documentation as Context
+## 11. Documentation as Context
 
 Documentation is often one of the highest-value sources of context.
 
@@ -647,7 +647,7 @@ Documentation therefore provides **semantic context that source code alone may n
 
 ---
 
-# 12. Tests as Context
+## 12. Tests as Context
 
 Tests are another critical source of context.
 
@@ -687,7 +687,7 @@ The agent should often inspect tests **before modifying implementation**.
 
 ---
 
-# 13. Task Decomposition
+## 13. Task Decomposition
 
 Large tasks create another context problem.
 
@@ -724,7 +724,7 @@ Task decomposition is therefore a **context-management technique**, not merely a
 
 ---
 
-# 14. Context Hierarchies
+## 14. Context Hierarchies
 
 A powerful architecture is hierarchical context.
 
@@ -747,7 +747,7 @@ A powerful architecture is hierarchical context.
 
 For example:
 
-### Global
+#### Global
 
 ```text
 System architecture
@@ -755,19 +755,19 @@ Security model
 Coding standards
 ```
 
-### Subsystem
+#### Subsystem
 
 ```text
 Authentication architecture
 ```
 
-### Component
+#### Component
 
 ```text
 OAuth service
 ```
 
-### Task
+#### Task
 
 ```text
 Fix redirect URI handling
@@ -779,7 +779,7 @@ This is much more scalable than putting everything into one giant prompt.
 
 ---
 
-# 15. Context Windows Are Not Infinite Memory
+## 15. Context Windows Are Not Infinite Memory
 
 A common misconception is:
 
@@ -789,27 +789,27 @@ This is incorrect.
 
 Even very large context windows introduce problems:
 
-### Cost
+#### Cost
 
 More tokens mean higher inference cost.
 
-### Latency
+#### Latency
 
 Processing larger contexts takes longer.
 
-### Attention dilution
+#### Attention dilution
 
 Relevant information competes with irrelevant information.
 
-### Retrieval failure
+#### Retrieval failure
 
 The important fact may be present but difficult to identify.
 
-### Instruction interference
+#### Instruction interference
 
 Large amounts of historical material may contain outdated or contradictory information.
 
-### State ambiguity
+#### State ambiguity
 
 The model may not know which version of a fact is authoritative.
 
@@ -827,7 +827,7 @@ It is **context utility**.
 
 ---
 
-# 16. Context Utility
+## 16. Context Utility
 
 We can define a conceptual utility function:
 
@@ -878,7 +878,7 @@ It is:
 
 ---
 
-# 17. Context Drift
+## 17. Context Drift
 
 Long-running agents can suffer from **context drift**.
 
@@ -924,7 +924,7 @@ This creates a **stable task anchor**.
 
 ---
 
-# 18. Stale Context
+## 18. Stale Context
 
 Context can also become stale.
 
@@ -977,7 +977,7 @@ The harness can then invalidate or refresh stale context.
 
 ---
 
-# 19. Authority and Source Hierarchy
+## 19. Authority and Source Hierarchy
 
 Not all context should have equal authority.
 
@@ -1027,7 +1027,7 @@ This becomes increasingly important as agents consume large amounts of heterogen
 
 ---
 
-# 20. Context Construction as a Pipeline
+## 20. Context Construction as a Pipeline
 
 A sophisticated context manager can be modeled as:
 
@@ -1072,7 +1072,7 @@ This is why context engineering increasingly resembles a conventional software s
 
 ---
 
-# 21. The Agent's Context Is a Designed Artifact
+## 21. The Agent's Context Is a Designed Artifact
 
 In traditional programming, developers explicitly construct data structures.
 
@@ -1120,7 +1120,7 @@ It is a **constructed execution environment for reasoning**.
 
 ---
 
-# 22. The Context Engineering Loop
+## 22. The Context Engineering Loop
 
 Context itself should be iterative.
 
@@ -1178,7 +1178,7 @@ It is **managing its own information acquisition** through tools.
 
 ---
 
-# 23. Context and Agent Reliability
+## 23. Context and Agent Reliability
 
 Why does context matter so much?
 
@@ -1230,7 +1230,7 @@ It simply did not receive the information required to solve it.
 
 ---
 
-# 24. The Context Engineering Objective
+## 24. The Context Engineering Objective
 
 We can formulate the problem more formally.
 
@@ -1276,7 +1276,7 @@ This formulation makes clear why context management is an engineering discipline
 
 ---
 
-# 25. Experiment — How Much Context Does an Agent Need?
+## 25. Experiment — How Much Context Does an Agent Need?
 
 Run the same coding task under five conditions.
 
@@ -1291,7 +1291,7 @@ Use the same:
 
 Only vary context.
 
-## Experiment A — Entire Repository
+### Experiment A — Entire Repository
 
 Give the agent everything.
 
@@ -1302,7 +1302,7 @@ All documentation
 All configuration
 ```
 
-## Experiment B — Relevant Files Only
+### Experiment B — Relevant Files Only
 
 Provide only the files believed to be relevant.
 
@@ -1312,7 +1312,7 @@ tests
 direct dependencies
 ```
 
-## Experiment C — Architecture Summary
+### Experiment C — Architecture Summary
 
 Provide:
 
@@ -1325,7 +1325,7 @@ dependency relationships
 
 but minimize source code.
 
-## Experiment D — Tests
+### Experiment D — Tests
 
 Provide:
 
@@ -1334,7 +1334,7 @@ relevant implementation
 relevant tests
 ```
 
-## Experiment E — Full Engineered Context
+### Experiment E — Full Engineered Context
 
 Provide:
 
@@ -1369,7 +1369,7 @@ The best context may not be the largest context.
 
 ---
 
-# 26. A Useful Context-Engineering Heuristic
+## 26. A Useful Context-Engineering Heuristic
 
 For most coding tasks, prioritize information approximately in this order:
 
@@ -1426,7 +1426,7 @@ Context construction should therefore be **task-aware**.
 
 ---
 
-# 27. Context Engineering as an Emerging Discipline
+## 27. Context Engineering as an Emerging Discipline
 
 At this point, the implications become clear.
 
@@ -1464,7 +1464,7 @@ Context engineering therefore sits at the intersection of several disciplines.
 
 ---
 
-# 28. From Prompt Engineering to Context Engineering
+## 28. From Prompt Engineering to Context Engineering
 
 The progression can be viewed as:
 
@@ -1494,7 +1494,7 @@ A strong coding agent needs all of them.
 
 ---
 
-# 29. The Deeper Insight: Context Is Part of the Program
+## 29. The Deeper Insight: Context Is Part of the Program
 
 In conventional software:
 
@@ -1539,9 +1539,9 @@ This is a major conceptual shift.
 
 ---
 
-# 30. Exercise — Build a Context Manager
+## 30. Exercise — Build a Context Manager
 
-Extend the coding agent from Day 15.
+Extend the coding agent from Chapter 15.
 
 Instead of giving the model arbitrary repository information, build a context-management layer.
 
@@ -1590,7 +1590,7 @@ That is the core problem of context engineering.
 
 ---
 
-# 31. Key Takeaways
+## 31. Key Takeaways
 
 1. **Context is one of the primary resources of an AI agent.**
    Model capability alone is insufficient; the model must receive the right information.

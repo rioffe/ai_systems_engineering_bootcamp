@@ -1,4 +1,4 @@
-# Day 29 — Architecture and Product Review
+# Chapter 29: Architecture and Product Review
 
 A strong AI engineer must be able to do more than build a working system.
 
@@ -34,7 +34,7 @@ The presentation should tell a coherent story from user problem to engineering s
 
 ---
 
-# 1. The Architecture Review as an Engineering Artifact
+## 1. The Architecture Review as an Engineering Artifact
 
 An architecture review serves several purposes simultaneously.
 
@@ -54,7 +54,7 @@ The central question is:
 
 These are different questions.
 
-### Building the right system
+#### Building the right system
 
 This is primarily a product question:
 
@@ -66,7 +66,7 @@ $$
 \text{Product}
 $$
 
-### Building the system correctly
+#### Building the system correctly
 
 This is primarily an engineering question:
 
@@ -90,7 +90,7 @@ The review should expose both classes of failure.
 
 ---
 
-# 2. The 30-Minute Structure
+## 2. The 30-Minute Structure
 
 A useful allocation is:
 
@@ -120,7 +120,7 @@ The architecture exists to serve the product.
 
 ---
 
-# 3. Section 1 — Problem
+## 3. Section 1 — Problem
 
 The presentation begins with the problem, not the technology.
 
@@ -150,7 +150,7 @@ The first describes a problem.
 
 ---
 
-## 3.1 Quantify the Problem
+### 3.1 Quantify the Problem
 
 Whenever possible, quantify the baseline.
 
@@ -192,7 +192,7 @@ $$
 
 ---
 
-# 4. Section 2 — Product
+## 4. Section 2 — Product
 
 Now answer:
 
@@ -228,7 +228,7 @@ The latter belongs in the architecture section.
 
 ---
 
-# 5. Product Scope
+## 5. Product Scope
 
 Explicitly define what the product does **and does not do**.
 
@@ -245,7 +245,7 @@ $$
 
 For example:
 
-### Does
+#### Does
 
 * search documents
 * answer questions
@@ -253,7 +253,7 @@ For example:
 * summarize findings
 * maintain conversation state
 
-### Does not
+#### Does not
 
 * make autonomous high-stakes decisions
 * modify source documents
@@ -264,7 +264,7 @@ This prevents architecture discussions from being disconnected from product requ
 
 ---
 
-# 6. Section 3 — Architecture
+## 6. Section 3 — Architecture
 
 Now answer:
 
@@ -299,7 +299,7 @@ A good architecture diagram should make the major flows obvious.
 
 ---
 
-# 7. Architecture Should Explain Decisions
+## 7. Architecture Should Explain Decisions
 
 Do not merely show components.
 
@@ -314,25 +314,25 @@ For each major component, answer:
 
 For example:
 
-### Retrieval
+#### Retrieval
 
 Why retrieval?
 
 Because the model's parametric knowledge is insufficient for the application's private or dynamic data.
 
-### Reranking
+#### Reranking
 
 Why reranking?
 
 Because initial semantic retrieval provides high recall but insufficient precision for the generation context.
 
-### Structured output
+#### Structured output
 
 Why structured output?
 
 Because downstream software requires machine-readable results rather than unconstrained natural language.
 
-### Tool calling
+#### Tool calling
 
 Why tools?
 
@@ -342,7 +342,7 @@ This transforms the architecture diagram from a collection of boxes into an engi
 
 ---
 
-# 8. Architecture Trade-offs
+## 8. Architecture Trade-offs
 
 Every meaningful architectural decision has trade-offs.
 
@@ -388,7 +388,7 @@ That is an engineering decision.
 
 ---
 
-# 9. Section 4 — AI System
+## 9. Section 4 — AI System
 
 Now answer:
 
@@ -418,7 +418,7 @@ If deterministic code can solve a problem more reliably, quickly, cheaply, and p
 
 ---
 
-# 10. AI System Decomposition
+## 10. AI System Decomposition
 
 Explain the AI system as a set of responsibilities.
 
@@ -439,27 +439,27 @@ $$
 
 For each component, explain its role.
 
-### Model
+#### Model
 
 What capability does the model provide?
 
-### Context
+#### Context
 
 What information is placed into the model's context?
 
-### Retrieval
+#### Retrieval
 
 How is relevant external knowledge selected?
 
-### Tools
+#### Tools
 
 What actions or deterministic computations can the system perform?
 
-### Memory
+#### Memory
 
 What information persists across interactions?
 
-### Verification
+#### Verification
 
 How does the system determine whether the result is acceptable?
 
@@ -467,7 +467,7 @@ This decomposition makes it possible to distinguish **model intelligence** from 
 
 ---
 
-# 11. Why AI Rather Than Conventional Software?
+## 11. Why AI Rather Than Conventional Software?
 
 A strong review should explicitly justify the AI boundary.
 
@@ -515,7 +515,7 @@ This hybrid architecture is often more reliable than allowing the model to contr
 
 ---
 
-# 12. Section 5 — Evaluation
+## 12. Section 5 — Evaluation
 
 Now answer:
 
@@ -555,7 +555,7 @@ Then evaluate the complete workflow.
 
 ---
 
-# 13. Baselines Matter
+## 13. Baselines Matter
 
 A result is difficult to interpret without a baseline.
 
@@ -581,7 +581,7 @@ Now the engineering improvements become meaningful.
 
 ---
 
-# 14. Section 6 — Economics
+## 14. Section 6 — Economics
 
 Answer:
 
@@ -627,7 +627,7 @@ This allows the team to reason about the economics of deployment.
 
 ---
 
-# 15. Economics Are Part of Architecture
+## 15. Economics Are Part of Architecture
 
 Cost should not be treated as a finance issue that appears after architecture is complete.
 
@@ -681,7 +681,7 @@ This is why model selection, context engineering, retrieval, caching, routing, a
 
 ---
 
-# 16. Section 7 — Failures
+## 16. Section 7 — Failures
 
 This may be the most important section of the presentation.
 
@@ -728,7 +728,7 @@ $$
 
 ---
 
-# 17. Failure Is a Design Property
+## 17. Failure Is a Design Property
 
 A mature system is not defined by having no failures.
 
@@ -792,7 +792,7 @@ $$
 
 ---
 
-# 18. Section 8 — Roadmap
+## 18. Section 8 — Roadmap
 
 The final question is:
 
@@ -813,14 +813,14 @@ $$
 
 Potential roadmap categories include:
 
-### Product
+#### Product
 
 * additional workflows
 * better UX
 * integrations
 * personalization
 
-### AI
+#### AI
 
 * better retrieval
 * improved prompting
@@ -829,7 +829,7 @@ Potential roadmap categories include:
 * improved tool selection
 * stronger verification
 
-### Infrastructure
+#### Infrastructure
 
 * caching
 * scaling
@@ -837,14 +837,14 @@ Potential roadmap categories include:
 * observability
 * reliability
 
-### Economics
+#### Economics
 
 * cheaper models
 * fewer model calls
 * smaller context
 * intelligent routing
 
-### Security
+#### Security
 
 * stronger isolation
 * permission controls
@@ -859,7 +859,7 @@ If users rarely use a particular feature, building more features may be the wron
 
 ---
 
-# 19. The Roadmap Should Follow the Bottleneck
+## 19. The Roadmap Should Follow the Bottleneck
 
 One of the most useful engineering principles is:
 
@@ -893,18 +893,18 @@ The bottleneck may be product-market fit.
 
 ---
 
-# 20. Architecture Review Questions
+## 20. Architecture Review Questions
 
 During the presentation, reviewers should be able to ask questions such as:
 
-### Product
+#### Product
 
 * Who is the primary user?
 * What problem is being solved?
 * How important is the problem?
 * What is the measurable outcome?
 
-### Architecture
+#### Architecture
 
 * Why was this architecture chosen?
 * What alternatives were considered?
@@ -912,7 +912,7 @@ During the presentation, reviewers should be able to ask questions such as:
 * What are the major dependencies?
 * What happens when each dependency fails?
 
-### AI
+#### AI
 
 * Why is AI necessary?
 * Which components are probabilistic?
@@ -920,7 +920,7 @@ During the presentation, reviewers should be able to ask questions such as:
 * How is context constructed?
 * How is model output verified?
 
-### Evaluation
+#### Evaluation
 
 * What is the baseline?
 * What is the evaluation dataset?
@@ -928,14 +928,14 @@ During the presentation, reviewers should be able to ask questions such as:
 * Where does the system fail?
 * How do you know the evaluation itself is valid?
 
-### Economics
+#### Economics
 
 * What does one request cost?
 * What happens at 10x or 100x traffic?
 * What is the largest cost driver?
 * What architectural decisions affect cost?
 
-### Product
+#### Product
 
 * Do users actually use it?
 * Do they come back?
@@ -946,7 +946,7 @@ These questions should be anticipated rather than discovered for the first time 
 
 ---
 
-# 21. The Presentation Should Tell One Story
+## 21. The Presentation Should Tell One Story
 
 The strongest presentations have a clear causal structure:
 
@@ -984,9 +984,9 @@ That is much stronger than presenting eight disconnected sections.
 
 ---
 
-# 22. The Architecture Review as a Design Audit
+## 22. The Architecture Review as a Design Audit
 
-At the end of Day 29, the team should be able to step back from the implementation and evaluate the entire system.
+At the end of Chapter 29, the team should be able to step back from the implementation and evaluate the entire system.
 
 The review should expose whether there is alignment between:
 
@@ -1008,27 +1008,27 @@ Misalignment is a powerful diagnostic signal.
 
 For example:
 
-### Problem → Product mismatch
+#### Problem → Product mismatch
 
 The product does not actually address the user's highest-value problem.
 
-### Product → Architecture mismatch
+#### Product → Architecture mismatch
 
 The architecture is optimized for capabilities users do not need.
 
-### Architecture → AI mismatch
+#### Architecture → AI mismatch
 
 AI is being used where deterministic software would be superior.
 
-### AI → Evaluation mismatch
+#### AI → Evaluation mismatch
 
 The team measures benchmark performance rather than actual task success.
 
-### Evaluation → Economics mismatch
+#### Evaluation → Economics mismatch
 
 The system achieves excellent quality at an economically unsustainable cost.
 
-### Economics → Product mismatch
+#### Economics → Product mismatch
 
 The product creates insufficient value to justify its operating cost.
 
@@ -1036,9 +1036,9 @@ These mismatches are often more important than individual implementation bugs.
 
 ---
 
-# 23. From Project to Engineering Judgment
+## 23. From Project to Engineering Judgment
 
-The deeper purpose of Day 29 is not presentation skill.
+The deeper purpose of Chapter 29 is not presentation skill.
 
 It is **engineering judgment**.
 
@@ -1082,7 +1082,7 @@ They can discuss token budgets and inference latency, but they can also explain 
 
 ---
 
-# 24. Key Takeaways
+## 24. Key Takeaways
 
 1. **An architecture review is an engineering argument, not a feature tour.**
 

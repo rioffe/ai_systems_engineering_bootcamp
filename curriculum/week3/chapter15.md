@@ -1,4 +1,4 @@
-# Day 15 — How Coding Agents Work
+# Chapter 15: How Coding Agents Work
 
 Coding agents are among the clearest examples of the transition from **LLM-as-a-component** to **LLM-as-a-system controller**.
 
@@ -55,7 +55,7 @@ It is:
 
 ---
 
-# 1. The Coding Agent as a Control System
+## 1. The Coding Agent as a Control System
 
 A useful abstraction is to model a coding agent as a feedback controller.
 
@@ -139,7 +139,7 @@ That distinction explains why coding-agent performance depends on much more than
 
 ---
 
-# 2. The Agent Harness
+## 2. The Agent Harness
 
 The **agent harness** is the software surrounding the LLM.
 
@@ -200,7 +200,7 @@ This is analogous to a CPU inside an operating system. The CPU performs computat
 
 ---
 
-# 3. Context Management
+## 3. Context Management
 
 The first major challenge is **context**.
 
@@ -277,7 +277,7 @@ The effective context is therefore dynamically constructed rather than staticall
 
 ---
 
-# 4. Tool Use
+## 4. Tool Use
 
 A coding agent needs access to the external world.
 
@@ -366,7 +366,7 @@ Tool design is consequently an important form of **agent engineering**.
 
 ---
 
-# 5. Planning
+## 5. Planning
 
 A coding task often requires multiple dependent actions.
 
@@ -395,7 +395,7 @@ A coding agent therefore needs some form of planning.
 
 Planning may be:
 
-### Explicit
+#### Explicit
 
 The agent constructs a visible plan:
 
@@ -408,11 +408,11 @@ Plan:
 5. Run test suite
 ```
 
-### Implicit
+#### Implicit
 
 The model simply reasons about the next best action at each step.
 
-### Hierarchical
+#### Hierarchical
 
 A high-level task is decomposed into subtasks:
 
@@ -439,7 +439,7 @@ This matters because software environments are only partially known before execu
 
 ---
 
-# 6. Execution
+## 6. Execution
 
 Execution converts reasoning into environmental changes.
 
@@ -520,7 +520,7 @@ The quality of the final result depends not only on the quality of individual ac
 
 ---
 
-# 7. Verification
+## 7. Verification
 
 Verification is arguably the most important architectural component.
 
@@ -532,7 +532,7 @@ Therefore:
 
 Verification mechanisms include:
 
-### Deterministic checks
+#### Deterministic checks
 
 ```text
 pytest
@@ -544,7 +544,7 @@ cargo check
 go test
 ```
 
-### Build verification
+#### Build verification
 
 ```text
 compile
@@ -554,7 +554,7 @@ container build
 deployment validation
 ```
 
-### Behavioral verification
+#### Behavioral verification
 
 ```text
 unit tests
@@ -562,7 +562,7 @@ integration tests
 end-to-end tests
 ```
 
-### Static analysis
+#### Static analysis
 
 ```text
 type checking
@@ -571,7 +571,7 @@ security scanning
 dependency analysis
 ```
 
-### Repository-specific checks
+#### Repository-specific checks
 
 ```text
 API compatibility
@@ -580,7 +580,7 @@ migration checks
 golden tests
 ```
 
-### Human verification
+#### Human verification
 
 For high-risk changes, a human remains part of the loop.
 
@@ -610,7 +610,7 @@ That feedback can then become input to the next reasoning step.
 
 ---
 
-# 8. Feedback and Iteration
+## 8. Feedback and Iteration
 
 The basic coding-agent loop is therefore:
 
@@ -679,7 +679,7 @@ The system's capability emerges partly from **error detection and recovery**, no
 
 ---
 
-# 9. Compaction
+## 9. Compaction
 
 Agent trajectories can become extremely long.
 
@@ -751,7 +751,7 @@ It is a form of **state management**.
 
 ---
 
-# 10. Subagents
+## 10. Subagents
 
 Complex coding tasks can be decomposed among specialized agents.
 
@@ -807,7 +807,7 @@ They are useful when the problem has enough **structural separability** to justi
 
 ---
 
-# 11. Permissions
+## 11. Permissions
 
 Coding agents can potentially perform dangerous operations.
 
@@ -848,11 +848,11 @@ Production deployment      no
 
 Permissions can be:
 
-### Static
+#### Static
 
 A fixed sandbox determines what the agent can do.
 
-### Dynamic
+#### Dynamic
 
 The agent requests authorization for sensitive operations.
 
@@ -864,7 +864,7 @@ User:
 Approve / Reject
 ```
 
-### Policy-based
+#### Policy-based
 
 The harness evaluates the action against predefined rules.
 
@@ -876,7 +876,7 @@ The harness must enforce the boundary independently of the model's intentions.
 
 ---
 
-# 12. The Repository as the Agent's Environment
+## 12. The Repository as the Agent's Environment
 
 A useful way to understand coding agents is to treat the repository as an **external environment**.
 
@@ -915,7 +915,7 @@ That is often rational.
 
 ---
 
-# 13. Why Tests Become Part of the Agent's Reasoning System
+## 13. Why Tests Become Part of the Agent's Reasoning System
 
 In conventional development, tests are often treated as a final validation mechanism.
 
@@ -970,7 +970,7 @@ Consequently, engineering the verification system can improve agent performance 
 
 ---
 
-# 14. Coding Agents as Search Systems
+## 14. Coding Agents as Search Systems
 
 Another useful perspective is to view coding as a search problem.
 
@@ -1032,7 +1032,7 @@ The stronger the verifier, the more efficiently the system can eliminate incorre
 
 ---
 
-# 15. The Full Architecture
+## 15. The Full Architecture
 
 Putting everything together gives a more realistic architecture:
 
@@ -1124,7 +1124,7 @@ The model is essential, but it is only one component.
 
 ---
 
-# 16. What Actually Determines Coding-Agent Quality?
+## 16. What Actually Determines Coding-Agent Quality?
 
 It is tempting to rank coding agents by model benchmark scores alone.
 
@@ -1148,7 +1148,7 @@ $$
 
 Consider two systems using the same model.
 
-### System A
+#### System A
 
 ```text
 LLM
@@ -1158,7 +1158,7 @@ generate patch
 return
 ```
 
-### System B
+#### System B
 
 ```text
 LLM
@@ -1196,7 +1196,7 @@ This is one of the most important lessons of agent engineering:
 
 ---
 
-# 17. Exercise — Build a Minimal Coding Agent
+## 17. Exercise — Build a Minimal Coding Agent
 
 For this day's project, build a small coding agent around a repository.
 
@@ -1287,7 +1287,7 @@ That is the fundamental conceptual transition.
 
 ---
 
-# 18. Key Takeaways
+## 18. Key Takeaways
 
 1. **A coding agent is not an LLM.**
    It is an LLM embedded inside a runtime that provides context, tools, state, permissions, execution, and verification.

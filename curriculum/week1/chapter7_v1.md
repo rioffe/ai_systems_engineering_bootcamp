@@ -1,19 +1,19 @@
-# Day 7 — Week 1 Project
+# Chapter 7: Week 1 Project
 
-# Build a Complete AI Application
+## Build a Complete AI Application
 
-The first six days have introduced the major components of modern AI application engineering:
+The first six chapters have introduced the major components of modern AI application engineering:
 
 ```text
-Day 1 → Models and the AI application stack
-Day 2 → Context, prompting, and structured outputs
-Day 3 → Retrieval and external knowledge
-Day 4 → Evaluation
-Day 5 → Agentic workflows
-Day 6 → Production engineering
+Chapter 1 → Models and the AI application stack
+Chapter 2 → Context, prompting, and structured outputs
+Chapter 3 → Retrieval and external knowledge
+Chapter 4 → Evaluation
+Chapter 5 → Agentic workflows
+Chapter 6 → Production engineering
 ```
 
-Day 7 is where these pieces become one system.
+Chapter 7 is where these pieces become one system.
 
 The goal is not to build another chatbot.
 
@@ -21,7 +21,7 @@ The goal is to build a **complete AI application** that combines retrieval, reas
 
 The project is:
 
-# Personal Research Assistant
+## Personal Research Assistant
 
 The assistant should allow a user to provide a collection of documents and then ask questions about them.
 
@@ -55,7 +55,7 @@ The objective is to demonstrate that you understand the **entire AI application 
 
 ---
 
-# 1. The System You Are Building
+## 1. The System You Are Building
 
 At a high level:
 
@@ -107,7 +107,7 @@ It is a system.
 
 ---
 
-# 2. The User Experience
+## 2. The User Experience
 
 The user should be able to:
 
@@ -161,11 +161,11 @@ The system should understand that "that" refers to the previously discussed arch
 
 ---
 
-# 3. Functional Requirements
+## 3. Functional Requirements
 
 The minimum application should implement nine capabilities.
 
-## 3.1 Document ingestion
+### 3.1 Document ingestion
 
 The system should accept documents such as:
 
@@ -210,7 +210,7 @@ Metadata becomes important later for citations and filtering.
 
 ---
 
-# 4. Document Chunking
+## 4. Document Chunking
 
 Chunking is one of the first places where seemingly simple implementation decisions affect retrieval quality.
 
@@ -259,7 +259,7 @@ The goal is to create **retrievable units of meaningful information**.
 
 ---
 
-# 5. Retrieval
+## 5. Retrieval
 
 When the user asks a question:
 
@@ -301,7 +301,7 @@ The model should then receive the evidence with enough metadata to produce citat
 
 ---
 
-# 6. Retrieval Should Be a First-Class Component
+## 6. Retrieval Should Be a First-Class Component
 
 Do not hide retrieval inside a single function called:
 
@@ -337,7 +337,7 @@ Without these boundaries, diagnosing RAG failures becomes difficult.
 
 ---
 
-# 7. Question Answering
+## 7. Question Answering
 
 The basic question-answering pipeline should be:
 
@@ -383,7 +383,7 @@ It should optimize for producing an answer that is **supported by available evid
 
 ---
 
-# 8. Citation
+## 8. Citation
 
 Every factual claim based on retrieved material should be traceable to a source.
 
@@ -425,7 +425,7 @@ A useful citation identifies:
 
 ---
 
-# 9. Citation Correctness
+## 9. Citation Correctness
 
 Do not assume that generating citations means the system is grounded.
 
@@ -457,7 +457,7 @@ Citation correctness
 
 ---
 
-# 10. Conversational State
+## 10. Conversational State
 
 The assistant must support follow-up questions.
 
@@ -514,7 +514,7 @@ Persistent State
 
 ---
 
-# 11. Tools
+## 11. Tools
 
 The assistant should have access to tools beyond document retrieval.
 
@@ -552,7 +552,7 @@ This transforms the application from a static RAG chatbot into an **agentic rese
 
 ---
 
-# 12. Tool Selection
+## 12. Tool Selection
 
 The model should not blindly call every available tool.
 
@@ -595,7 +595,7 @@ An agent that gets the correct answer after ten unnecessary searches is not nece
 
 ---
 
-# 13. Uncertainty
+## 13. Uncertainty
 
 One of the defining features of a research assistant should be explicit uncertainty.
 
@@ -641,7 +641,7 @@ That is a successful outcome.
 
 ---
 
-# 14. Structured Outputs
+## 14. Structured Outputs
 
 The assistant should not return an arbitrary block of text internally.
 
@@ -681,7 +681,7 @@ Structured output is particularly important because the system now has downstrea
 
 ---
 
-# 15. The Orchestration Layer
+## 15. The Orchestration Layer
 
 The orchestration layer is the core of the application.
 
@@ -724,7 +724,7 @@ It should also enforce budgets and permissions.
 
 ---
 
-# 16. Agent Loop
+## 16. Agent Loop
 
 The core execution loop might be:
 
@@ -773,9 +773,9 @@ The runtime controls the boundaries.
 
 ---
 
-# 17. Security
+## 17. Security
 
-The application should incorporate the production security principles from Day 6.
+The application should incorporate the production security principles from Chapter 6.
 
 At minimum:
 
@@ -816,7 +816,7 @@ The model should never have direct access to:
 
 ---
 
-# 18. Multi-Tenant Data Isolation
+## 18. Multi-Tenant Data Isolation
 
 Even a "personal" research assistant should be designed with data isolation in mind.
 
@@ -849,7 +849,7 @@ This is one of the most important production principles in the project.
 
 ---
 
-# 19. Evaluation Suite
+## 19. Evaluation Suite
 
 The project is incomplete without evaluation.
 
@@ -870,45 +870,45 @@ For example:
 
 The dataset should contain different categories.
 
-### Retrieval questions
+#### Retrieval questions
 
 Can the system find the correct evidence?
 
-### Synthesis questions
+#### Synthesis questions
 
 Can it combine information from multiple documents?
 
-### Multi-hop questions
+#### Multi-hop questions
 
 Does it need several retrieval steps?
 
-### Unanswerable questions
+#### Unanswerable questions
 
 Does it correctly say that evidence is insufficient?
 
-### Ambiguous questions
+#### Ambiguous questions
 
 Does it ask for clarification or represent uncertainty?
 
-### Adversarial questions
+#### Adversarial questions
 
 Can malicious documents manipulate the system?
 
-### Tool questions
+#### Tool questions
 
 Does it choose the correct tool?
 
-### Conversational questions
+#### Conversational questions
 
 Does it correctly maintain context?
 
 ---
 
-# 20. Evaluation Metrics
+## 20. Evaluation Metrics
 
 At minimum, measure:
 
-### Retrieval
+#### Retrieval
 
 $$
 \text{Recall@K}
@@ -916,37 +916,37 @@ $$
 
 Did the relevant evidence appear in the top (K) results?
 
-### Answer correctness
+#### Answer correctness
 
 Does the answer match the reference?
 
-### Groundedness
+#### Groundedness
 
 Are claims supported by retrieved evidence?
 
-### Citation correctness
+#### Citation correctness
 
 Do citations actually support claims?
 
-### Completeness
+#### Completeness
 
 Did the answer address all important parts of the question?
 
-### Hallucination rate
+#### Hallucination rate
 
 How often does the system make unsupported claims?
 
-### Tool-call success
+#### Tool-call success
 
 How often does the agent correctly select and invoke tools?
 
-### Task completion
+#### Task completion
 
 How often does the complete workflow accomplish the requested objective?
 
 ---
 
-# 21. Evaluation Matrix
+## 21. Evaluation Matrix
 
 A useful evaluation report might look like:
 
@@ -966,7 +966,7 @@ The exact targets are less important than establishing measurable acceptance cri
 
 ---
 
-# 22. Evaluation the Evaluator
+## 22. Evaluation the Evaluator
 
 Because some evaluations may themselves use LLMs, the evaluation system also needs validation.
 
@@ -996,7 +996,7 @@ Evaluation infrastructure is itself a system that requires testing.
 
 ---
 
-# 23. Observability
+## 23. Observability
 
 Every request should generate a trace.
 
@@ -1044,7 +1044,7 @@ This allows you to debug both correctness and performance.
 
 ---
 
-# 24. Metrics Dashboard
+## 24. Metrics Dashboard
 
 Expose at least:
 
@@ -1088,7 +1088,7 @@ The principle is.
 
 ---
 
-# 25. Failure Injection
+## 25. Failure Injection
 
 A critical part of the project is deliberately breaking the system.
 
@@ -1096,62 +1096,62 @@ Do not stop after demonstrating the happy path.
 
 Introduce:
 
-### Retrieval failure
+#### Retrieval failure
 
 ```text
 Vector DB unavailable
 ```
 
-### Model failure
+#### Model failure
 
 ```text
 Provider returns 503
 ```
 
-### Tool failure
+#### Tool failure
 
 ```text
 Web search times out
 ```
 
-### Empty retrieval
+#### Empty retrieval
 
 ```text
 No relevant documents
 ```
 
-### Malicious document
+#### Malicious document
 
 ```text
 Prompt injection
 ```
 
-### Contradictory documents
+#### Contradictory documents
 
 ```text
 Source A → 100
 Source B → 130
 ```
 
-### Context overflow
+#### Context overflow
 
 ```text
 Retrieved context exceeds model budget
 ```
 
-### Invalid model output
+#### Invalid model output
 
 ```text
 Malformed structured response
 ```
 
-### Conversation explosion
+#### Conversation explosion
 
 ```text
 Very long conversation history
 ```
 
-### Cost runaway
+#### Cost runaway
 
 ```text
 Agent exceeds model/tool budget
@@ -1161,7 +1161,7 @@ The system should fail **predictably**.
 
 ---
 
-# 26. Graceful Failure
+## 26. Graceful Failure
 
 A good research assistant should not simply return:
 
@@ -1199,7 +1199,7 @@ The system should make uncertainty and operational failure explicit.
 
 ---
 
-# 27. Deployment
+## 27. Deployment
 
 The final system should be deployable.
 
@@ -1255,7 +1255,7 @@ The requirement is to demonstrate that the application can run outside your deve
 
 ---
 
-# 28. Configuration and Secrets
+## 28. Configuration and Secrets
 
 The deployed system should use environment-specific configuration.
 
@@ -1305,7 +1305,7 @@ from both.
 
 ---
 
-# 29. Performance Engineering
+## 29. Performance Engineering
 
 Measure the complete request latency.
 
@@ -1345,7 +1345,7 @@ This is another reason observability must be built into the application from the
 
 ---
 
-# 30. Cost Engineering
+## 30. Cost Engineering
 
 Calculate the economics of the application.
 
@@ -1399,7 +1399,7 @@ The average may look acceptable while a small number of pathological requests cr
 
 ---
 
-# 31. Architecture Diagram Deliverable
+## 31. Architecture Diagram Deliverable
 
 Your first deliverable is an architecture diagram.
 
@@ -1448,13 +1448,13 @@ The diagram should communicate the architecture to another engineer without requ
 
 ---
 
-# 32. Evaluation Report Deliverable
+## 32. Evaluation Report Deliverable
 
 The second major deliverable is an evaluation report.
 
 It should contain:
 
-## Dataset
+### Dataset
 
 Describe:
 
@@ -1464,7 +1464,7 @@ Describe:
 * adversarial examples;
 * unanswerable examples.
 
-## Metrics
+### Metrics
 
 Report:
 
@@ -1476,7 +1476,7 @@ Report:
 * tool success;
 * task completion.
 
-## Failure Analysis
+### Failure Analysis
 
 Do not report only aggregate numbers.
 
@@ -1514,7 +1514,7 @@ This demonstrates engineering maturity.
 
 ---
 
-# 33. Ablation Experiments
+## 33. Ablation Experiments
 
 A particularly valuable extension is to measure how each architectural component affects performance.
 
@@ -1559,7 +1559,7 @@ The point is to understand **which architectural decisions actually improve the 
 
 ---
 
-# 34. What Counts as a Successful Project?
+## 34. What Counts as a Successful Project?
 
 The project is successful when another engineer can clone the repository, configure the necessary dependencies, start the application, upload documents, ask questions, inspect citations, and observe the system operating.
 
@@ -1588,7 +1588,7 @@ It needs to be **complete**.
 
 ---
 
-# 35. Suggested Repository Structure
+## 35. Suggested Repository Structure
 
 A clean repository might look like:
 
@@ -1639,11 +1639,11 @@ The separation of concerns is.
 
 ---
 
-# 36. Testing Strategy
+## 36. Testing Strategy
 
 The project should have multiple levels of testing.
 
-## Unit tests
+### Unit tests
 
 Test deterministic components:
 
@@ -1656,7 +1656,7 @@ cost calculation
 citation formatting
 ```
 
-## Integration tests
+### Integration tests
 
 Test:
 
@@ -1667,11 +1667,11 @@ API → orchestrator
 orchestrator → state
 ```
 
-## Evaluation tests
+### Evaluation tests
 
 Test the system against the golden dataset.
 
-## Security tests
+### Security tests
 
 Test:
 
@@ -1683,7 +1683,7 @@ malicious documents
 secret leakage
 ```
 
-## Failure tests
+### Failure tests
 
 Test:
 
@@ -1701,7 +1701,7 @@ The surrounding infrastructure should be tested as deterministically as possible
 
 ---
 
-# 37. The Final Demonstration
+## 37. The Final Demonstration
 
 The final demonstration should tell a coherent story.
 
@@ -1766,11 +1766,11 @@ The demonstration should end with the architecture and evaluation report.
 
 ---
 
-# 38. Stretch Goals
+## 38. Stretch Goals
 
 Once the core application works, several extensions become valuable.
 
-### Hybrid retrieval
+#### Hybrid retrieval
 
 Combine:
 
@@ -1780,39 +1780,39 @@ vector search
 BM25 / keyword search
 ```
 
-### Reranking
+#### Reranking
 
 Add a cross-encoder or model-based reranker.
 
-### Query decomposition
+#### Query decomposition
 
 Break complex questions into subqueries.
 
-### Multi-hop research
+#### Multi-hop research
 
 Allow the agent to iteratively gather evidence.
 
-### Source quality ranking
+#### Source quality ranking
 
 Prefer primary sources over secondary sources.
 
-### Document graphs
+#### Document graphs
 
 Represent relationships between documents, entities, and claims.
 
-### Long-term memory
+#### Long-term memory
 
 Persist useful research findings across conversations.
 
-### Background research
+#### Background research
 
 Allow long-running research jobs through a queue.
 
-### Streaming
+#### Streaming
 
 Stream intermediate status or final generation to the user.
 
-### Human feedback
+#### Human feedback
 
 Allow users to mark answers:
 
@@ -1827,7 +1827,7 @@ Feed these labels into the evaluation system.
 
 ---
 
-# 39. The Deeper Lesson
+## 39. The Deeper Lesson
 
 The Personal Research Assistant is deliberately chosen because it exposes nearly every important problem in modern AI application engineering.
 
@@ -1879,9 +1879,9 @@ That makes this an unusually good capstone project.
 
 ---
 
-# 40. Key Takeaways
+## 40. Key Takeaways
 
-## 1. Build the whole system
+### 1. Build the whole system
 
 The purpose of the project is not to demonstrate one AI technique.
 
@@ -1903,7 +1903,7 @@ into one coherent application.
 
 ---
 
-## 2. RAG is not the application
+### 2. RAG is not the application
 
 A vector database plus an LLM is only one subsystem.
 
@@ -1925,7 +1925,7 @@ Observability
 
 ---
 
-## 3. Grounding requires evidence, not merely citations
+### 3. Grounding requires evidence, not merely citations
 
 A citation is useful only if it actually supports the claim.
 
@@ -1943,7 +1943,7 @@ independently.
 
 ---
 
-## 4. Uncertainty is a feature
+### 4. Uncertainty is a feature
 
 A trustworthy research assistant must be capable of saying:
 
@@ -1953,7 +1953,7 @@ The ability to abstain is an important part of system quality.
 
 ---
 
-## 5. State turns question answering into an application
+### 5. State turns question answering into an application
 
 Conversation history, research context, document collections, and user state must be managed explicitly.
 
@@ -1961,7 +1961,7 @@ State is part of the application architecture.
 
 ---
 
-## 6. Tools turn the assistant into an agent
+### 6. Tools turn the assistant into an agent
 
 Once the system can decide:
 
@@ -1987,7 +1987,7 @@ That requires:
 
 ---
 
-## 7. Evaluation is not optional
+### 7. Evaluation is not optional
 
 A system that "looks good" in a demo has not been validated.
 
@@ -2006,7 +2006,7 @@ security
 
 ---
 
-## 8. Observability makes the system engineerable
+### 8. Observability makes the system engineerable
 
 Every important request should be traceable.
 
@@ -2018,7 +2018,7 @@ Without that information, improvement becomes guesswork.
 
 ---
 
-## 9. Security belongs below the model
+### 9. Security belongs below the model
 
 Prompt instructions are not authorization mechanisms.
 
@@ -2038,15 +2038,15 @@ outside the model.
 
 ---
 
-## 10. The deliverable is more than an application
+### 10. The deliverable is more than an application
 
 The final submission consists of three artifacts:
 
-### 1. Working application
+#### 1. Working application
 
 A deployed Personal Research Assistant that actually works end to end.
 
-### 2. Architecture diagram
+#### 2. Architecture diagram
 
 A clear representation of:
 
@@ -2068,7 +2068,7 @@ Evals
 Observability
 ```
 
-### 3. Evaluation report
+#### 3. Evaluation report
 
 Evidence showing:
 
@@ -2083,7 +2083,7 @@ Did the change improve the system?
 
 ---
 
-# 41. Week 1 Capstone: The Transition to AI Engineering
+## 41. Week 1 Capstone: The Transition to AI Engineering
 
 The first week began with a simple abstraction:
 

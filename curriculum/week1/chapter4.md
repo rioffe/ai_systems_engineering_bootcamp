@@ -1,8 +1,8 @@
-# Day 4 — Evals
+# Chapter 4: Evals
 
 ## The Evaluation Loop Is the Core of AI Engineering
 
-If Day 2 established that **context is part of the program**, and Day 3 established that **retrieval is an information-retrieval system**, Day 4 introduces the mechanism that makes both of those systems engineerable:
+If Chapter 2 established that **context is part of the program**, and Chapter 3 established that **retrieval is an information-retrieval system**, Chapter 4 introduces the mechanism that makes both of those systems engineerable:
 
 **evaluation.**
 
@@ -72,7 +72,7 @@ This is the beginning of **eval-driven development**.
 
 ---
 
-# 1. Why AI Systems Need Evals
+## 1. Why AI Systems Need Evals
 
 Consider an AI assistant that answers questions over company documentation.
 
@@ -125,7 +125,7 @@ This is why evaluation must be treated as a first-class engineering subsystem.
 
 ---
 
-# 2. The Evaluation Harness
+## 2. The Evaluation Harness
 
 The basic architecture is:
 
@@ -179,7 +179,7 @@ That is fundamentally different from manually trying the application and decidin
 
 ---
 
-# 3. Golden Datasets
+## 3. Golden Datasets
 
 The foundation of offline evaluation is the **golden dataset**.
 
@@ -219,7 +219,7 @@ It becomes the equivalent of a regression-test suite for probabilistic software.
 
 ---
 
-# 4. What Makes a Good Evaluation Dataset?
+## 4. What Makes a Good Evaluation Dataset?
 
 A dataset should not simply contain random examples.
 
@@ -227,7 +227,7 @@ It should represent the application's actual failure surface.
 
 A useful dataset contains several categories.
 
-## Normal Cases
+### Normal Cases
 
 The common requests users make.
 
@@ -237,7 +237,7 @@ The common requests users make.
 "How do I reset my password?"
 ```
 
-## Boundary Cases
+### Boundary Cases
 
 Inputs near decision boundaries.
 
@@ -247,7 +247,7 @@ Inputs near decision boundaries.
 
 where the answer depends on a subtle condition.
 
-## Difficult Cases
+### Difficult Cases
 
 Questions requiring:
 
@@ -257,7 +257,7 @@ Questions requiring:
 * ambiguous language
 * conflicting evidence
 
-## Adversarial Cases
+### Adversarial Cases
 
 Inputs designed to expose vulnerabilities.
 
@@ -265,7 +265,7 @@ Inputs designed to expose vulnerabilities.
 Ignore the previous instructions...
 ```
 
-## Negative Cases
+### Negative Cases
 
 Questions the system should refuse to answer or identify as unsupported.
 
@@ -273,7 +273,7 @@ Questions the system should refuse to answer or identify as unsupported.
 "What was the CEO's private home address?"
 ```
 
-## Regression Cases
+### Regression Cases
 
 Previously observed failures.
 
@@ -293,7 +293,7 @@ The system becomes progressively harder to break in the same way twice.
 
 ---
 
-# 5. Deterministic Tests
+## 5. Deterministic Tests
 
 Not every AI behavior requires an LLM evaluator.
 
@@ -346,17 +346,17 @@ Use probabilistic evaluators only where necessary.
 
 ---
 
-# 6. LLM-as-Judge
+## 6. LLM-as-Judge
 
 Many AI outputs cannot be evaluated with exact string comparison.
 
 Consider:
 
-### Expected
+#### Expected
 
 > Revenue increased substantially in Q3, driven primarily by enterprise subscriptions.
 
-### Generated
+#### Generated
 
 > Enterprise subscriptions were the main driver of the strong Q3 revenue growth.
 
@@ -410,7 +410,7 @@ Therefore:
 
 ---
 
-# 7. Human Evaluation
+## 7. Human Evaluation
 
 Human evaluation remains important for difficult or high-value tasks.
 
@@ -458,7 +458,7 @@ Use the cheapest reliable evaluation method available for each property.
 
 ---
 
-# 8. Pairwise Evaluation
+## 8. Pairwise Evaluation
 
 Sometimes asking:
 
@@ -517,13 +517,13 @@ This is often a more stable judgment.
 
 ---
 
-# 9. Rubric-Based Evaluation
+## 9. Rubric-Based Evaluation
 
 For more complex applications, define an explicit rubric.
 
 For example:
 
-### Answer Quality Rubric
+#### Answer Quality Rubric
 
 | Dimension    | 0                  | 1                        | 2                |
 | ------------ | ------------------ | ------------------------ | ---------------- |
@@ -559,7 +559,7 @@ That tells the engineer where to investigate.
 
 ---
 
-# 10. Accuracy
+## 10. Accuracy
 
 Accuracy is the most intuitive metric.
 
@@ -608,7 +608,7 @@ This is why evaluation metrics must match the application.
 
 ---
 
-# 11. Precision and Recall
+## 11. Precision and Recall
 
 For retrieval and classification, precision and recall are often more informative.
 
@@ -640,7 +640,7 @@ Metrics encode the application's notion of failure.
 
 ---
 
-# 12. Groundedness
+## 12. Groundedness
 
 For RAG systems, one of the most important properties is **groundedness**.
 
@@ -681,7 +681,7 @@ Groundedness is especially important because LLMs are optimized to produce plaus
 
 ---
 
-# 13. Relevance
+## 13. Relevance
 
 A response can be factually correct but still be a poor answer.
 
@@ -705,7 +705,7 @@ This matters because increasing context and increasing answer length can sometim
 
 ---
 
-# 14. Completeness
+## 14. Completeness
 
 Completeness asks:
 
@@ -749,7 +749,7 @@ A system can be factually accurate about every statement it makes and still fail
 
 ---
 
-# 15. Hallucination Rate
+## 15. Hallucination Rate
 
 Hallucination can be measured as unsupported factual content.
 
@@ -785,7 +785,7 @@ LLMs can generate plausible-looking numbers that are completely absent from the 
 
 ---
 
-# 16. Tool-Call Success
+## 16. Tool-Call Success
 
 Agentic systems introduce another class of metrics.
 
@@ -827,7 +827,7 @@ The **trajectory** matters.
 
 ---
 
-# 17. Latency
+## 17. Latency
 
 Quality is not the only metric.
 
@@ -867,7 +867,7 @@ For production systems, users experience the tail.
 
 ---
 
-# 18. Cost
+## 18. Cost
 
 AI applications have an economic dimension.
 
@@ -927,7 +927,7 @@ Evaluation therefore becomes a multidimensional optimization problem.
 
 ---
 
-# 19. The Evaluation Vector
+## 19. The Evaluation Vector
 
 Instead of thinking about application quality as one number, think of it as a vector:
 
@@ -981,7 +981,7 @@ The evaluation suite must encode the actual requirements of the system.
 
 ---
 
-# 20. Evaluation Is a Dataset Problem
+## 20. Evaluation Is a Dataset Problem
 
 An evaluation harness is only as good as its evaluation dataset.
 
@@ -1026,7 +1026,7 @@ The principle is:
 
 ---
 
-# 21. Stratified Evaluation
+## 21. Stratified Evaluation
 
 Aggregate metrics can hide important failures.
 
@@ -1065,7 +1065,7 @@ This produces a much more informative picture.
 
 ---
 
-# 22. Regression Testing
+## 22. Regression Testing
 
 Now comes the most important experiment.
 
@@ -1122,7 +1122,7 @@ This is precisely what evaluation should tell you.
 
 ---
 
-# 23. Regression Reports
+## 23. Regression Reports
 
 A useful regression report might look like:
 
@@ -1152,7 +1152,7 @@ That is a meaningful engineering tradeoff.
 
 ---
 
-# 24. Regression Gates
+## 24. Regression Gates
 
 Once the evaluation harness exists, it can become part of CI/CD.
 
@@ -1192,7 +1192,7 @@ The important idea is that **AI changes can become testable deployment artifacts
 
 ---
 
-# 25. But Don't Over-Automate Evaluation
+## 25. But Don't Over-Automate Evaluation
 
 There is a temptation to create one giant score:
 
@@ -1242,7 +1242,7 @@ This is analogous to safety constraints in traditional engineering.
 
 ---
 
-# 26. Evaluator Validation
+## 26. Evaluator Validation
 
 LLM-as-judge creates a second-order evaluation problem:
 
@@ -1290,7 +1290,7 @@ This creates an important recursive principle:
 
 ---
 
-# 27. Pairwise Evaluation for Model Selection
+## 27. Pairwise Evaluation for Model Selection
 
 Suppose you are deciding between two models:
 
@@ -1341,7 +1341,7 @@ Again, the key requirement is a stable evaluation set.
 
 ---
 
-# 28. Production Evaluation
+## 28. Production Evaluation
 
 Offline evaluation is essential, but it cannot capture everything.
 
@@ -1387,7 +1387,7 @@ The evaluation dataset becomes a living representation of the system's known fai
 
 ---
 
-# 29. Evals Change How You Engineer
+## 29. Evals Change How You Engineer
 
 Without evaluations, an engineer tends to optimize through intuition:
 
@@ -1429,7 +1429,7 @@ This is much closer to scientific experimentation than traditional feature devel
 
 ---
 
-# 30. Evals as the Equivalent of Unit Tests
+## 30. Evals as the Equivalent of Unit Tests
 
 There is an important analogy with traditional software.
 
@@ -1464,7 +1464,7 @@ The evaluation determines whether the contract was satisfied.
 
 ---
 
-# 31. Evals as the Missing Abstraction
+## 31. Evals as the Missing Abstraction
 
 Traditional software engineering has several layers:
 
@@ -1502,9 +1502,9 @@ This is perhaps the most important conceptual shift of the week.
 
 ---
 
-# 32. The Day 4 Exercise
+## 32. The Chapter 4 Exercise
 
-Build a small evaluation harness around the RAG system from Day 3.
+Build a small evaluation harness around the RAG system from Chapter 3.
 
 Start with perhaps 50–100 evaluation cases.
 
@@ -1552,27 +1552,27 @@ Then deliberately modify the system.
 
 For example:
 
-### Experiment 1
+#### Experiment 1
 
 Change chunk size.
 
-### Experiment 2
+#### Experiment 2
 
 Remove reranking.
 
-### Experiment 3
+#### Experiment 3
 
 Change $k$.
 
-### Experiment 4
+#### Experiment 4
 
 Add query expansion.
 
-### Experiment 5
+#### Experiment 5
 
 Change the LLM.
 
-### Experiment 6
+#### Experiment 6
 
 Change context ordering.
 
@@ -1584,7 +1584,7 @@ Let the harness tell you what changed.
 
 ---
 
-# 33. Deliberately Introduce a Regression
+## 33. Deliberately Introduce a Regression
 
 This is a particularly important exercise.
 
@@ -1624,7 +1624,7 @@ Local optimization does not necessarily produce global optimization.
 
 ---
 
-# 34. Failure Analysis
+## 34. Failure Analysis
 
 When a test fails, preserve the entire trace.
 
@@ -1672,7 +1672,7 @@ It tells you which subsystem to change.
 
 ---
 
-# 35. The Evaluation Matrix
+## 35. The Evaluation Matrix
 
 A mature evaluation suite should not be a single list of questions.
 
@@ -1701,9 +1701,9 @@ rather than merely:
 
 ---
 
-# 36. The Central Lesson
+## 36. The Central Lesson
 
-By Day 4, the architecture of the AI application should look very different from the simple model-centric picture we started with.
+By Chapter 4, the architecture of the AI application should look very different from the simple model-centric picture we started with.
 
 We began with:
 
@@ -1753,7 +1753,7 @@ This is the point where AI engineering starts to look much more like software en
 
 ---
 
-# 37. The Deeper Principle
+## 37. The Deeper Principle
 
 The traditional software mindset says:
 
@@ -1783,9 +1783,9 @@ This is the appropriate abstraction for probabilistic software.
 
 ---
 
-# 38. Day 4 Engineering Checklist
+## 38. Chapter 4 Engineering Checklist
 
-By the end of Day 4, you should understand:
+By the end of Chapter 4, you should understand:
 
 * Why AI applications need dedicated evaluation systems
 * How to construct a golden dataset
@@ -1821,7 +1821,7 @@ the system is not yet ready for serious engineering.
 
 ---
 
-# 39. Key Takeaways
+## 39. Key Takeaways
 
 1. **Evals are the foundation of reliable AI engineering.** Without them, application development becomes guesswork.
 
@@ -1847,7 +1847,7 @@ the system is not yet ready for serious engineering.
 
 12. **Evaluation should run continuously.** Model changes, prompt changes, retrieval changes, and context changes should all be measurable.
 
-The central equation for Day 4 is therefore:
+The central equation for Chapter 4 is therefore:
 
 $$
 \boxed{

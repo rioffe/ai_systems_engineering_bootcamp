@@ -1,4 +1,4 @@
-# Day 2 — Context Engineering
+# Chapter 2: Context Engineering
 
 ## From Prompting to Context Engineering
 
@@ -54,7 +54,7 @@ The rest of the system determines what the model actually sees.
 
 ---
 
-# 1. The Context Is the Program
+## 1. The Context Is the Program
 
 Traditional software executes an explicitly defined program:
 
@@ -107,7 +107,7 @@ The context is effectively the **runtime environment for the model**.
 
 ---
 
-# 2. What Actually Belongs in Context?
+## 2. What Actually Belongs in Context?
 
 A production system typically constructs context from several sources.
 
@@ -132,7 +132,7 @@ where $\oplus$ represents some application-specific composition operation.
 
 These components are not interchangeable.
 
-## System Context
+### System Context
 
 System context defines the behavioral contract of the model.
 
@@ -150,7 +150,7 @@ System instructions should generally be stable and carefully controlled.
 
 They are part of the application architecture, not user-generated data.
 
-## User Context
+### User Context
 
 The user provides the immediate task.
 
@@ -160,7 +160,7 @@ For example:
 
 The request itself is insufficient if the model does not have access to the relevant customer data.
 
-## Historical Context
+### Historical Context
 
 Conversation history provides continuity.
 
@@ -176,7 +176,7 @@ The final message, “Tokyo and Kyoto,” is semantically dependent on the previ
 
 History therefore provides context—but it is not necessarily the same thing as application state.
 
-## Retrieved Context
+### Retrieved Context
 
 Retrieval introduces external information relevant to the current task:
 
@@ -192,7 +192,7 @@ LLM
 
 This is the foundation of many retrieval-augmented generation systems.
 
-## Tool Context
+### Tool Context
 
 Tools produce observations.
 
@@ -223,7 +223,7 @@ The context changes as the agent interacts with the world.
 
 ---
 
-# 3. Context Windows Are a Resource
+## 3. Context Windows Are a Resource
 
 Every model has a finite context capacity.
 
@@ -263,7 +263,7 @@ A model having a million-token context does not imply that every million tokens 
 
 ---
 
-# 4. The Instruction Hierarchy
+## 4. The Instruction Hierarchy
 
 Not all context has equal authority.
 
@@ -318,7 +318,7 @@ This distinction becomes particularly important for **prompt injection**.
 
 ---
 
-# 5. Retrieval: Giving the Model the Right Information
+## 5. Retrieval: Giving the Model the Right Information
 
 Suppose an organization has:
 
@@ -364,7 +364,7 @@ An excellent generator cannot fully compensate for a broken retriever.
 
 ---
 
-# 6. Relevance vs. Completeness
+## 6. Relevance vs. Completeness
 
 Retrieval introduces a fundamental tradeoff.
 
@@ -392,7 +392,7 @@ This is **context pollution**.
 
 The retrieval problem therefore has two competing objectives:
 
-### Recall
+#### Recall
 
 Did we retrieve the information necessary to answer the question?
 
@@ -400,7 +400,7 @@ $$
 Recall = \frac{\text{relevant items retrieved}}{\text{all relevant items}}
 $$
 
-### Precision
+#### Precision
 
 How much of what we retrieved was actually relevant?
 
@@ -416,7 +416,7 @@ Production retrieval systems therefore rarely optimize for one metric in isolati
 
 ---
 
-# 7. Context Pollution
+## 7. Context Pollution
 
 Context pollution occurs when irrelevant information enters the model's working context.
 
@@ -461,7 +461,7 @@ The same is true for LLMs.
 
 ---
 
-# 8. The Long-Context Problem
+## 8. The Long-Context Problem
 
 Long context creates another failure mode.
 
@@ -510,7 +510,7 @@ It is not a context-management strategy.
 
 ---
 
-# 9. Context Compression
+## 9. Context Compression
 
 As conversations and agent trajectories grow, the system eventually needs to compress information.
 
@@ -562,7 +562,7 @@ The engineering question becomes:
 
 A useful distinction is:
 
-### Lossy information
+#### Lossy information
 
 Information that is unlikely to matter later.
 
@@ -573,7 +573,7 @@ Examples:
 * intermediate reasoning
 * obsolete details
 
-### Durable information
+#### Durable information
 
 Information that may matter across future interactions.
 
@@ -589,7 +589,7 @@ Compression should preserve the latter.
 
 ---
 
-# 10. State Is Not Context
+## 10. State Is Not Context
 
 This distinction is subtle and extremely important.
 
@@ -644,7 +644,7 @@ Conversation history is not a database.
 
 ---
 
-# 11. Memory
+## 11. Memory
 
 Memory is essentially a structured mechanism for deciding what information should survive beyond the current context.
 
@@ -686,7 +686,7 @@ Memory therefore belongs to application architecture, not merely model behavior.
 
 ---
 
-# 12. Context Construction as a Compiler
+## 12. Context Construction as a Compiler
 
 A useful way to think about context engineering is to treat the context builder like a compiler.
 
@@ -734,7 +734,7 @@ The pipeline around it does not have to be.
 
 ---
 
-# 13. The Context Engineering Pipeline
+## 13. The Context Engineering Pipeline
 
 A basic production architecture can therefore be expressed as:
 
@@ -754,7 +754,7 @@ Structured output
 
 Each stage has a distinct responsibility.
 
-## Intent Analysis
+### Intent Analysis
 
 Determine what the user is actually asking.
 
@@ -774,7 +774,7 @@ might become:
 }
 ```
 
-## Context Retrieval
+### Context Retrieval
 
 Use the intent to retrieve relevant information.
 
@@ -788,7 +788,7 @@ Potential sources:
 * application state
 * memory
 
-## Context Construction
+### Context Construction
 
 Select and organize the retrieved information.
 
@@ -803,11 +803,11 @@ This stage can:
 * label sources
 * enforce token budgets
 
-## LLM
+### LLM
 
 The model performs the reasoning task over the constructed context.
 
-## Structured Output
+### Structured Output
 
 The model returns a machine-readable result.
 
@@ -827,7 +827,7 @@ The structured output can then be validated and consumed by deterministic softwa
 
 ---
 
-# 14. Context Budgets
+## 14. Context Budgets
 
 A useful production abstraction is to assign explicit budgets to context.
 
@@ -878,7 +878,7 @@ Now context engineering becomes measurable engineering rather than prompt folklo
 
 ---
 
-# 15. An Experimental System
+## 15. An Experimental System
 
 The first implementation exercise should be deliberately simple.
 
@@ -930,7 +930,7 @@ Now the system can be evaluated automatically.
 
 ---
 
-# 16. Start With Easy Questions
+## 16. Start With Easy Questions
 
 The first questions should require only one document.
 
@@ -972,7 +972,7 @@ This establishes the baseline.
 
 ---
 
-# 17. Increase the Difficulty
+## 17. Increase the Difficulty
 
 The second class of questions should require multiple documents.
 
@@ -1015,7 +1015,7 @@ This is where context engineering begins to become interesting.
 
 ---
 
-# 18. Retrieval Metrics
+## 18. Retrieval Metrics
 
 For a known set of relevant documents, measure retrieval quality explicitly using three fundamental metrics:
 
@@ -1073,7 +1073,7 @@ Those are completely different engineering problems.
 
 ---
 
-# 19. Answer Accuracy
+## 19. Answer Accuracy
 
 Retrieval metrics are not sufficient.
 
@@ -1089,7 +1089,7 @@ $$
 
 Possible evaluation approaches include:
 
-### Exact Match
+#### Exact Match
 
 Useful for deterministic answers.
 
@@ -1098,11 +1098,11 @@ Expected: 5000
 Generated: 5000
 ```
 
-### Semantic Similarity
+#### Semantic Similarity
 
 Useful when multiple phrasings are acceptable.
 
-### Structured Evaluation
+#### Structured Evaluation
 
 Ask an evaluator to classify:
 
@@ -1114,7 +1114,7 @@ Ask an evaluator to classify:
 }
 ```
 
-### Reference-Based Evaluation
+#### Reference-Based Evaluation
 
 Compare the generated answer against a known reference answer and evidence set.
 
@@ -1136,7 +1136,7 @@ That is dangerous.
 
 ---
 
-# 20. Hallucination Rate
+## 20. Hallucination Rate
 
 A particularly important metric is unsupported assertion rate.
 
@@ -1169,7 +1169,7 @@ The exact implementation can vary, but the principle is important:
 
 ---
 
-# 21. Context Engineering Creates an Eval Loop
+## 21. Context Engineering Creates an Eval Loop
 
 At this point, the architecture becomes:
 
@@ -1211,9 +1211,9 @@ That is engineering.
 
 ---
 
-# 22. The Most Important Insight
+## 22. The Most Important Insight
 
-The central lesson of Day 2 is not how to construct a better prompt.
+The central lesson of Chapter 2 is not how to construct a better prompt.
 
 It is this:
 
@@ -1249,7 +1249,7 @@ But the engineering system surrounding it determines whether that model becomes 
 
 ---
 
-# 23. Day 2 Engineering Checklist
+## 23. Chapter 2 Engineering Checklist
 
 By the end of this exercise, you should be able to answer:
 
@@ -1276,7 +1276,7 @@ And that distinction becomes increasingly important as the system grows.
 
 ---
 
-# 24. Key Takeaways
+## 24. Key Takeaways
 
 1. **Context engineering is broader than prompt engineering.** It governs the entire information environment presented to the model.
 

@@ -1,4 +1,4 @@
-# Day 27 — Production Hardening
+# Chapter 27: Production Hardening
 
 ## From Prototype to Production System
 
@@ -14,7 +14,7 @@ $$
 \text{Revise}
 $$
 
-Day 27 addresses the next problem:
+Chapter 27 addresses the next problem:
 
 > **Can this system be trusted to operate as a real service?**
 
@@ -53,7 +53,7 @@ $$
 
 ---
 
-# 1. Production Is a Different Engineering Problem
+## 1. Production Is a Different Engineering Problem
 
 A prototype may work perfectly during a demonstration.
 
@@ -94,7 +94,7 @@ A feature that works once is not necessarily production-ready.
 
 ---
 
-# 2. The Production Boundary
+## 2. The Production Boundary
 
 Before hardening, explicitly define what the production system contains.
 
@@ -132,7 +132,7 @@ The system should have explicit ownership for each boundary.
 
 ---
 
-# 3. Authentication
+## 3. Authentication
 
 The first production requirement is knowing **who is accessing the system**.
 
@@ -168,7 +168,7 @@ Authentication should be enforced at the system boundary.
 
 ---
 
-# 4. Authorization
+## 4. Authorization
 
 Authentication is not enough.
 
@@ -214,7 +214,7 @@ The application must decide whether that action is permitted.
 
 ---
 
-# 5. Authentication and Authorization Must Be Outside the Model
+## 5. Authentication and Authorization Must Be Outside the Model
 
 Consider an agent with a tool:
 
@@ -252,7 +252,7 @@ Prompt instructions are not access control.
 
 ---
 
-# 6. Input Validation
+## 6. Input Validation
 
 Production systems must assume that inputs are malformed.
 
@@ -288,7 +288,7 @@ For AI applications, validation should occur both before and after model interac
 
 ---
 
-# 7. Prompt Injection
+## 7. Prompt Injection
 
 AI systems introduce a new attack surface:
 
@@ -316,7 +316,7 @@ The exact implementation varies, but the principle is consistent:
 
 ---
 
-# 8. Data Exfiltration
+## 8. Data Exfiltration
 
 A more dangerous attack combines prompt injection with tools.
 
@@ -353,7 +353,7 @@ Give each component only the permissions it requires.
 
 ---
 
-# 9. Secrets Management
+## 9. Secrets Management
 
 Production applications require credentials.
 
@@ -399,7 +399,7 @@ unless explicitly required and carefully controlled.
 
 ---
 
-# 10. Error Handling
+## 10. Error Handling
 
 Prototype code often assumes:
 
@@ -432,13 +432,13 @@ Each important failure mode should have an explicit strategy.
 
 ---
 
-# 11. Failure Taxonomy
+## 11. Failure Taxonomy
 
 Create a failure taxonomy.
 
 For example:
 
-### User errors
+#### User errors
 
 $$
 E_U
@@ -446,7 +446,7 @@ $$
 
 Invalid input, unauthorized request, unsupported operation.
 
-### Dependency errors
+#### Dependency errors
 
 $$
 E_D
@@ -454,7 +454,7 @@ $$
 
 LLM provider unavailable, database outage, API timeout.
 
-### AI errors
+#### AI errors
 
 $$
 E_A
@@ -462,7 +462,7 @@ $$
 
 Malformed output, hallucination, failed tool selection.
 
-### System errors
+#### System errors
 
 $$
 E_S
@@ -486,7 +486,7 @@ This makes failure behavior deliberate rather than accidental.
 
 ---
 
-# 12. Retries
+## 12. Retries
 
 Retries can improve reliability.
 
@@ -530,7 +530,7 @@ $$
 
 ---
 
-# 13. Timeouts
+## 13. Timeouts
 
 Every external operation needs a timeout.
 
@@ -574,7 +574,7 @@ Timeouts should exist at multiple levels:
 
 ---
 
-# 14. Rate Limiting
+## 14. Rate Limiting
 
 Production systems need resource protection.
 
@@ -610,7 +610,7 @@ For AI systems, rate limiting also protects against unexpected inference costs.
 
 ---
 
-# 15. Cost Controls
+## 15. Cost Controls
 
 AI introduces a variable cost per request.
 
@@ -653,7 +653,7 @@ A production system should therefore enforce:
 
 ---
 
-# 16. The Cost Guardrail
+## 16. The Cost Guardrail
 
 Define:
 
@@ -696,7 +696,7 @@ This is an important difference between a prototype and a production agent.
 
 ---
 
-# 17. Observability
+## 17. Observability
 
 You cannot operate what you cannot observe.
 
@@ -714,15 +714,15 @@ $$
 
 Each answers a different question.
 
-### Logs
+#### Logs
 
 > What happened?
 
-### Metrics
+#### Metrics
 
 > How often and how much?
 
-### Traces
+#### Traces
 
 > Where did the request spend time and what components did it traverse?
 
@@ -730,7 +730,7 @@ For AI systems, observability must extend into model behavior.
 
 ---
 
-# 18. AI-Specific Observability
+## 18. AI-Specific Observability
 
 Record appropriate metadata such as:
 
@@ -765,7 +765,7 @@ This is essential when debugging an agentic system.
 
 ---
 
-# 19. Logging
+## 19. Logging
 
 Logs should answer:
 
@@ -809,11 +809,11 @@ Observability itself must respect privacy.
 
 ---
 
-# 20. Metrics
+## 20. Metrics
 
 Useful production metrics include:
 
-### Reliability
+#### Reliability
 
 $$
 \boxed{
@@ -823,13 +823,13 @@ $$
 }
 $$
 
-### Latency
+#### Latency
 
 $$
 T_{p50}, T_{p95}, T_{p99}
 $$
 
-### Availability
+#### Availability
 
 $$
 \boxed{
@@ -839,14 +839,14 @@ $$
 }
 $$
 
-### AI quality
+#### AI quality
 
 * groundedness,
 * task success,
 * tool-call success,
 * hallucination rate.
 
-### Economics
+#### Economics
 
 * cost/request,
 * tokens/request,
@@ -857,7 +857,7 @@ Metrics turn the system from a black box into an observable service.
 
 ---
 
-# 21. Evaluation in Production
+## 21. Evaluation in Production
 
 Offline evaluation is necessary but insufficient.
 
@@ -888,7 +888,7 @@ The objective is to detect degradation after deployment.
 
 ---
 
-# 22. Evaluation Must Be Versioned
+## 22. Evaluation Must Be Versioned
 
 AI behavior depends on more than code.
 
@@ -931,7 +931,7 @@ becomes difficult to diagnose.
 
 ---
 
-# 23. Regression Testing
+## 23. Regression Testing
 
 Every meaningful change should trigger evaluation.
 
@@ -967,7 +967,7 @@ Improving one capability may damage another.
 
 ---
 
-# 24. Deployment
+## 24. Deployment
 
 Deployment turns the application into a service.
 
@@ -998,7 +998,7 @@ The deployment system should define:
 
 ---
 
-# 25. CI/CD
+## 25. CI/CD
 
 A minimal continuous integration pipeline might be:
 
@@ -1034,17 +1034,17 @@ But every production system needs a reproducible path from source code to deploy
 
 ---
 
-# 26. Health Checks
+## 26. Health Checks
 
 Production services should expose health information.
 
 At minimum, distinguish between:
 
-### Liveness
+#### Liveness
 
 > Is the process alive?
 
-### Readiness
+#### Readiness
 
 > Can it actually serve requests?
 
@@ -1066,7 +1066,7 @@ This distinction becomes important for automated deployment and recovery.
 
 ---
 
-# 27. Graceful Degradation
+## 27. Graceful Degradation
 
 Production AI systems should not assume every dependency is always available.
 
@@ -1110,7 +1110,7 @@ $$
 
 ---
 
-# 28. Security Is a System Property
+## 28. Security Is a System Property
 
 Security cannot be added as a final checkbox.
 
@@ -1153,7 +1153,7 @@ The level of autonomy determines the required security controls.
 
 ---
 
-# 29. Least Privilege
+## 29. Least Privilege
 
 Every component should receive only the permissions it needs.
 
@@ -1195,7 +1195,7 @@ $$
 
 ---
 
-# 30. Multi-Tenancy and Data Isolation
+## 30. Multi-Tenancy and Data Isolation
 
 If multiple users or organizations use the system, data boundaries become critical.
 
@@ -1233,41 +1233,41 @@ where access constraints are enforced before data reaches the model.
 
 ---
 
-# 31. Documentation
+## 31. Documentation
 
 Production systems require documentation because future operators cannot rely on the original developer's memory.
 
 At minimum document:
 
-### Architecture
+#### Architecture
 
 How the system works.
 
-### Setup
+#### Setup
 
 How to run it.
 
-### Configuration
+#### Configuration
 
 Required environment variables and settings.
 
-### Deployment
+#### Deployment
 
 How to deploy.
 
-### Operations
+#### Operations
 
 How to monitor and troubleshoot.
 
-### Evaluation
+#### Evaluation
 
 How quality is measured.
 
-### Security
+#### Security
 
 Threat model and security controls.
 
-### Failure recovery
+#### Failure recovery
 
 What to do when major dependencies fail.
 
@@ -1275,7 +1275,7 @@ Documentation is part of the system.
 
 ---
 
-# 32. Runbooks
+## 32. Runbooks
 
 A particularly useful form of documentation is the **runbook**.
 
@@ -1285,7 +1285,7 @@ A runbook answers:
 
 For example:
 
-### Model provider outage
+#### Model provider outage
 
 1. Confirm provider status.
 2. Inspect error rate.
@@ -1296,7 +1296,7 @@ For example:
 
 Similarly:
 
-### Database outage
+#### Database outage
 
 $$
 Detect
@@ -1314,17 +1314,17 @@ The goal is to reduce dependence on tribal knowledge.
 
 ---
 
-# 33. Production Readiness Checklist
+## 33. Production Readiness Checklist
 
 Before deployment, verify:
 
-### Identity
+#### Identity
 
 * [ ] Authentication implemented.
 * [ ] Authorization enforced.
 * [ ] Tenant boundaries verified.
 
-### Security
+#### Security
 
 * [ ] Secrets externalized.
 * [ ] Input validation implemented.
@@ -1332,7 +1332,7 @@ Before deployment, verify:
 * [ ] Tool permissions minimized.
 * [ ] Sensitive data handling documented.
 
-### Reliability
+#### Reliability
 
 * [ ] Timeouts implemented.
 * [ ] Retries bounded.
@@ -1340,7 +1340,7 @@ Before deployment, verify:
 * [ ] Graceful degradation defined.
 * [ ] Health checks implemented.
 
-### AI safety and quality
+#### AI safety and quality
 
 * [ ] Golden evaluation set exists.
 * [ ] Regression evaluations run.
@@ -1348,7 +1348,7 @@ Before deployment, verify:
 * [ ] Uncertainty handled.
 * [ ] Agent step limits enforced.
 
-### Observability
+#### Observability
 
 * [ ] Structured logs.
 * [ ] Metrics.
@@ -1356,14 +1356,14 @@ Before deployment, verify:
 * [ ] Request IDs.
 * [ ] AI-specific telemetry.
 
-### Economics
+#### Economics
 
 * [ ] Token usage measured.
 * [ ] Cost/request measured.
 * [ ] Rate limits implemented.
 * [ ] Budgets/quotas defined.
 
-### Deployment
+#### Deployment
 
 * [ ] Reproducible builds.
 * [ ] CI/CD.
@@ -1371,7 +1371,7 @@ Before deployment, verify:
 * [ ] Smoke tests.
 * [ ] Rollback mechanism.
 
-### Documentation
+#### Documentation
 
 * [ ] Architecture documented.
 * [ ] Setup documented.
@@ -1381,7 +1381,7 @@ Before deployment, verify:
 
 ---
 
-# 34. Production SLOs
+## 34. Production SLOs
 
 Once the system is real, define service objectives.
 
@@ -1417,7 +1417,7 @@ The important principle is:
 
 ---
 
-# 35. The Production Feedback Loop
+## 35. The Production Feedback Loop
 
 Production deployment creates a new loop:
 
@@ -1437,7 +1437,7 @@ $$
 }
 $$
 
-This connects directly to Day 26.
+This connects directly to Chapter 26.
 
 User testing was:
 
@@ -1461,7 +1461,7 @@ $$
 
 ---
 
-# 36. The AI Application as a Control System
+## 36. The AI Application as a Control System
 
 At this point, the architecture can be understood as a feedback control system.
 
@@ -1507,7 +1507,7 @@ This is one of the most useful ways to think about production AI engineering.
 
 ---
 
-# 37. Prototype vs. Production
+## 37. Prototype vs. Production
 
 The distinction can now be summarized:
 
@@ -1530,13 +1530,13 @@ It is changing the **operational contract** of the system.
 
 ---
 
-# 38. Day 27 Exercise
+## 38. Chapter 27 Exercise
 
-Take the MVP from Day 26 and make it production-ready.
+Take the MVP from Chapter 26 and make it production-ready.
 
 Work through the following sequence.
 
-## Step 1 — Threat model
+### Step 1 — Threat model
 
 Identify:
 
@@ -1546,7 +1546,7 @@ Identify:
 * attack surfaces,
 * privileged operations.
 
-## Step 2 — Identity
+### Step 2 — Identity
 
 Implement:
 
@@ -1554,7 +1554,7 @@ Implement:
 * authorization,
 * tenant isolation where necessary.
 
-## Step 3 — Reliability
+### Step 3 — Reliability
 
 Implement:
 
@@ -1564,7 +1564,7 @@ Implement:
 * error handling,
 * graceful degradation.
 
-## Step 4 — AI guardrails
+### Step 4 — AI guardrails
 
 Implement:
 
@@ -1574,7 +1574,7 @@ Implement:
 * structured-output validation,
 * uncertainty handling.
 
-## Step 5 — Observability
+### Step 5 — Observability
 
 Implement:
 
@@ -1584,7 +1584,7 @@ Implement:
 * request IDs,
 * AI telemetry.
 
-## Step 6 — Evaluation
+### Step 6 — Evaluation
 
 Automate:
 
@@ -1592,7 +1592,7 @@ Automate:
 * regression tests,
 * quality metrics.
 
-## Step 7 — Economics
+### Step 7 — Economics
 
 Measure:
 
@@ -1604,7 +1604,7 @@ Measure:
 
 Add limits where appropriate.
 
-## Step 8 — Deployment
+### Step 8 — Deployment
 
 Create:
 
@@ -1618,7 +1618,7 @@ $$
 \text{Deploy}
 $$
 
-## Step 9 — Documentation
+### Step 9 — Documentation
 
 Write:
 
@@ -1628,7 +1628,7 @@ Write:
 * operational runbook,
 * known limitations.
 
-## Step 10 — Production simulation
+### Step 10 — Production simulation
 
 Before exposing the system broadly, deliberately test:
 
@@ -1642,51 +1642,51 @@ Before exposing the system broadly, deliberately test:
 
 ---
 
-# 39. Day 27 Deliverable
+## 39. Chapter 27 Deliverable
 
 The final deliverable is not merely a deployed application.
 
 It is a **production-ready AI system package** containing:
 
-### Application
+#### Application
 
 A functioning deployed system.
 
-### Security model
+#### Security model
 
 Authentication, authorization, permissions, and threat model.
 
-### Observability
+#### Observability
 
 Logs, metrics, traces, and AI-specific telemetry.
 
-### Evaluation system
+#### Evaluation system
 
 Golden datasets, regression tests, and quality metrics.
 
-### Reliability mechanisms
+#### Reliability mechanisms
 
 Timeouts, retries, error handling, and graceful degradation.
 
-### Cost controls
+#### Cost controls
 
 Budgets, rate limits, quotas, and usage monitoring.
 
-### Deployment pipeline
+#### Deployment pipeline
 
 Reproducible build and deployment process.
 
-### Documentation
+#### Documentation
 
 Architecture, setup, operations, and recovery procedures.
 
-### Production criteria
+#### Production criteria
 
 Explicit SLOs and acceptance thresholds.
 
 ---
 
-# 40. Key Takeaways
+## 40. Key Takeaways
 
 1. **A prototype demonstrates that a system can work; production engineering demonstrates that it can be trusted to keep working.**
 
@@ -1797,5 +1797,5 @@ $$
     }
 $$
 
-Day 27 therefore completes the transition from **AI application development to AI systems engineering**. The objective is no longer merely to build something intelligent. It is to build a system whose behavior can be **controlled, measured, secured, evaluated, recovered, and operated at scale**.
+Chapter 27 therefore completes the transition from **AI application development to AI systems engineering**. The objective is no longer merely to build something intelligent. It is to build a system whose behavior can be **controlled, measured, secured, evaluated, recovered, and operated at scale**.
 

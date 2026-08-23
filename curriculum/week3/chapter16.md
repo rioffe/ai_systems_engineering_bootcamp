@@ -1,6 +1,6 @@
-# Day 16 — Specification Engineering
+# Chapter 16: Specification Engineering
 
-If Day 15 was about understanding **how coding agents execute software-engineering work**, Day 16 addresses a deeper question:
+If Chapter 15 was about understanding **how coding agents execute software-engineering work**, Chapter 16 addresses a deeper question:
 
 > **What exactly should the agent build?**
 
@@ -30,7 +30,7 @@ This is the central idea of **specification engineering**:
 
 ---
 
-# 1. From Requirements to Specifications
+## 1. From Requirements to Specifications
 
 Traditional software engineering often begins with requirements:
 
@@ -103,7 +103,7 @@ This is a much more precise formulation.
 
 ---
 
-# 2. Why Vague Prompts Fail
+## 2. Why Vague Prompts Fail
 
 Consider:
 
@@ -160,7 +160,7 @@ A precise specification reduces this ambiguity.
 
 ---
 
-# 3. Specification as a Constraint System
+## 3. Specification as a Constraint System
 
 One useful way to think about a specification is as a collection of constraints.
 
@@ -209,13 +209,13 @@ A specification converts subjective expectations into **observable properties**.
 
 ---
 
-# 4. Requirements
+## 4. Requirements
 
 Requirements describe what the system must accomplish.
 
 A useful distinction is between different classes of requirements.
 
-## Functional requirements
+### Functional requirements
 
 What the system does.
 
@@ -228,7 +228,7 @@ The system shall answer natural-language queries.
 The system shall return citations.
 ```
 
-## Non-functional requirements
+### Non-functional requirements
 
 How the system must behave.
 
@@ -238,7 +238,7 @@ Availability > 99.9%.
 Maximum document size = 100 MB.
 ```
 
-## Security requirements
+### Security requirements
 
 ```text
 All API endpoints require authentication.
@@ -246,7 +246,7 @@ Users may access only documents belonging to their tenant.
 Secrets must not be stored in source control.
 ```
 
-## Operational requirements
+### Operational requirements
 
 ```text
 Every query must emit a trace ID.
@@ -270,7 +270,7 @@ while completely failing:
 
 ---
 
-# 5. Invariants
+## 5. Invariants
 
 An invariant is a property that must remain true throughout system operation.
 
@@ -317,7 +317,7 @@ The second statement eliminates entire classes of otherwise plausible implementa
 
 ---
 
-# 6. Acceptance Criteria
+## 6. Acceptance Criteria
 
 Acceptance criteria answer:
 
@@ -365,7 +365,7 @@ Even better, define an automated test.
 
 ---
 
-# 7. Interfaces
+## 7. Interfaces
 
 Interfaces define how components interact.
 
@@ -418,12 +418,12 @@ This is an important principle:
 
 ---
 
-# 8. Constraints
+## 8. Constraints
 
 Constraints limit the solution space.
 They may include:
 
-### Technology constraints
+#### Technology constraints
 
 ```text
 Python 3.12+
@@ -431,33 +431,33 @@ PostgreSQL
 FastAPI
 ```
 
-### Resource constraints
+#### Resource constraints
 
 ```text
 <= 2 GB memory
 <= 4 CPU cores
 ```
 
-### Performance constraints
+#### Performance constraints
 
 ```text
 P95 latency < 500 ms
 ```
 
-### Cost constraints
+#### Cost constraints
 
 ```text
 LLM inference cost < $0.01/query
 ```
 
-### Security constraints
+#### Security constraints
 
 ```text
 No plaintext credentials.
 Tenant isolation required.
 ```
 
-### Deployment constraints
+#### Deployment constraints
 
 ```text
 Must run in Kubernetes.
@@ -468,7 +468,7 @@ Constraints are especially important for AI agents because otherwise they may op
 
 ---
 
-# 9. Tests as Executable Specifications
+## 9. Tests as Executable Specifications
 
 One of the most powerful forms of specification is the **executable specification**.
 Instead of:
@@ -515,7 +515,7 @@ The specification and verifier therefore form a feedback pair.
 
 ---
 
-# 10. Architecture Decision Records
+## 10. Architecture Decision Records
 
 Not every decision should become an implementation constraint.
 Sometimes multiple implementations satisfy the requirements.
@@ -573,7 +573,7 @@ The layers reinforce one another.
 
 ---
 
-# 11. Specification Engineering vs. Prompt Engineering
+## 11. Specification Engineering vs. Prompt Engineering
 
 These concepts should not be confused.
 
@@ -626,7 +626,7 @@ The specification becomes the durable artifact.
 
 ---
 
-# 12. Specification as an Interface Between Humans and Agents
+## 12. Specification as an Interface Between Humans and Agents
 
 There is a deeper architectural implication.
 Traditional software engineering has interfaces between:
@@ -668,7 +668,7 @@ That is a much more scalable interaction model.
 
 ---
 
-# 13. The Specification-to-Implementation Pipeline
+## 13. The Specification-to-Implementation Pipeline
 
 A mature agentic workflow can look like:
 ```text
@@ -716,7 +716,7 @@ It participates in the entire development loop.
 
 ---
 
-# 14. Measuring the Value of Specification
+## 14. Measuring the Value of Specification
 
 The most important experiment for this day is empirical.
 Take one software task.
@@ -726,13 +726,13 @@ For example:
 
 Give the agent two different specifications.
 
-## Prompt A — Vague
+### Prompt A — Vague
 ```text
 Build me a RAG application.
 It should ingest documents and answer questions about them.
 ```
 
-## Prompt B — Precise
+### Prompt B — Precise
 ```text
 Build a Python 3.12 RAG service.
 Requirements:
@@ -763,12 +763,12 @@ The second specification sharply reduces ambiguity.
 
 ---
 
-# 15. The Experiment
+## 15. The Experiment
 
 Run the same agent under both conditions.
 Measure at least:
 
-### Correctness
+#### Correctness
 
 $$
 Accuracy =
@@ -776,7 +776,7 @@ Accuracy =
 {\text{requirements}}
 $$
 
-### Test success
+#### Test success
 
 $$
 PassRate =
@@ -784,7 +784,7 @@ PassRate =
 {\text{tests}}
 $$
 
-### Rework
+#### Rework
 
 Measure:
 ```text
@@ -793,7 +793,7 @@ number of failed test runs
 number of reverted edits
 ```
 
-### Efficiency
+#### Efficiency
 
 Measure:
 ```text
@@ -803,7 +803,7 @@ wall-clock time
 LLM cost
 ```
 
-### Specification compliance
+#### Specification compliance
 
 Create a checklist:
 ```text
@@ -814,7 +814,7 @@ Requirement 4 yes
 ...
 ```
 
-### Architectural compliance
+#### Architectural compliance
 
 Evaluate:
 ```text
@@ -843,7 +843,7 @@ The experiment turns specification engineering from an abstract idea into a meas
 
 ---
 
-# 16. Specification Quality Is an Engineering Variable
+## 16. Specification Quality Is an Engineering Variable
 
 This experiment should lead to a broader conclusion.
 Suppose agent capability is:
@@ -870,7 +870,7 @@ The system architecture determines how much capability can actually be extracted
 
 ---
 
-# 17. From Requirements Engineering to Specification Engineering
+## 17. From Requirements Engineering to Specification Engineering
 
 Traditional requirements engineering remains essential.
 But agentic development expands its scope.
@@ -904,9 +904,9 @@ This convergence is one of the defining characteristics of AI-assisted software 
 
 ---
 
-# 18. The Deeper Idea: Specification as Search-Space Reduction
+## 18. The Deeper Idea: Specification as Search-Space Reduction
 
-Return to the coding-agent model from Day 15.
+Return to the coding-agent model from Chapter 15.
 The agent is searching through possible repository states:
 $$
 S_0 \rightarrow S_1 \rightarrow S_2 \rightarrow \cdots \rightarrow S_n
@@ -943,7 +943,7 @@ The agent does not need to discover every design decision if the specification h
 
 ---
 
-# 19. Exercise — Specification A vs. Specification B
+## 19. Exercise — Specification A vs. Specification B
 
 Choose a problem substantial enough to expose ambiguity.
 For example:
@@ -952,7 +952,7 @@ For example:
 
 Create two specifications.
 
-### Version A
+#### Version A
 
 Use only a few sentences.
 Do not specify:
@@ -964,7 +964,7 @@ Do not specify:
 * failure behavior
 * tests
 
-### Version B
+#### Version B
 
 Specify:
 
@@ -1007,11 +1007,11 @@ Finally ask:
 
 > **How much of the agent's apparent coding ability was actually specification quality?**
 
-That is the central lesson of Day 16.
+That is the central lesson of Chapter 16.
 
 ---
 
-# 20. Key Takeaways
+## 20. Key Takeaways
 
 1. **Specification engineering is the discipline of converting intent into a precise, testable system contract.**
 2. **A vague request creates a large solution space.**

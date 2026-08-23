@@ -1,4 +1,4 @@
-# Day 3 — Retrieval-Augmented Generation
+# Chapter 3: Retrieval-Augmented Generation
 
 ## RAG Is an Information Retrieval System
 
@@ -58,7 +58,7 @@ And every stage should therefore be measurable.
 
 ---
 
-# 1. Why RAG Exists
+## 1. Why RAG Exists
 
 An LLM's pretrained knowledge has several limitations.
 
@@ -98,11 +98,11 @@ This is a profound architectural shift.
 
 ---
 
-# 2. RAG as a Two-Stage System
+## 2. RAG as a Two-Stage System
 
 At the highest level, RAG contains two fundamentally different problems.
 
-## Retrieval
+### Retrieval
 
 Find relevant evidence:
 
@@ -116,7 +116,7 @@ where:
 * $D$ is the corpus
 * $D'$ is the retrieved subset
 
-## Generation
+### Generation
 
 Generate an answer using that evidence:
 
@@ -137,7 +137,7 @@ A system that does not measure them separately is difficult to improve.
 
 ---
 
-# 3. Embeddings
+## 3. Embeddings
 
 The most common RAG architecture begins with embeddings.
 
@@ -169,7 +169,7 @@ This allows retrieval based on **semantic similarity** rather than exact lexical
 
 ---
 
-# 4. Semantic Search
+## 4. Semantic Search
 
 Given a query vector:
 
@@ -233,7 +233,7 @@ The retrieval problem is therefore more complicated than nearest-neighbor search
 
 ---
 
-# 5. Chunking
+## 5. Chunking
 
 Documents are rarely indexed as complete files.
 
@@ -293,7 +293,7 @@ This is why **chunk quality matters as much as retrieval quality**.
 
 ---
 
-# 6. Chunking Is Information Architecture
+## 6. Chunking Is Information Architecture
 
 There is no universally correct chunk size.
 
@@ -313,7 +313,7 @@ The optimal chunk size therefore depends on the structure of the source material
 
 For example:
 
-### Legal documents
+#### Legal documents
 
 Section-aware chunking may be appropriate.
 
@@ -323,19 +323,19 @@ Article
       → Subsection
 ```
 
-### Source code
+#### Source code
 
 Function- or class-level chunks may be better.
 
-### Technical documentation
+#### Technical documentation
 
 Heading-aware chunks can preserve conceptual boundaries.
 
-### Tables
+#### Tables
 
 A row or table may need to remain intact.
 
-### Financial reports
+#### Financial reports
 
 A number without its associated heading, date, or units may be meaningless.
 
@@ -356,7 +356,7 @@ A production system should instead ask:
 
 ---
 
-# 7. Metadata
+## 7. Metadata
 
 Text alone is often insufficient.
 
@@ -377,7 +377,7 @@ A retrieved chunk should carry metadata such as:
 
 Metadata enables several important operations.
 
-## Filtering
+### Filtering
 
 For example:
 
@@ -385,7 +385,7 @@ For example:
 department = "Finance"
 ```
 
-## Recency
+### Recency
 
 Prefer:
 
@@ -393,15 +393,15 @@ $$
 \text{updated\_at} > 2026\text{-}01\text{-}01
 $$
 
-## Authorization
+### Authorization
 
 Only retrieve documents the current user is permitted to see.
 
-## Ranking
+### Ranking
 
 A newer policy may be preferable to an older one.
 
-## Citation
+### Citation
 
 Metadata identifies the source that supports the answer.
 
@@ -411,7 +411,7 @@ It is part of the retrieval system.
 
 ---
 
-# 8. Hybrid Retrieval
+## 8. Hybrid Retrieval
 
 Vector search is not always the best retrieval mechanism.
 
@@ -442,7 +442,7 @@ $$
 
 The two retrieval mechanisms have complementary strengths.
 
-### Semantic retrieval
+#### Semantic retrieval
 
 Good for:
 
@@ -450,7 +450,7 @@ Good for:
 * conceptual similarity
 * natural-language questions
 
-### Lexical retrieval
+#### Lexical retrieval
 
 Good for:
 
@@ -467,7 +467,7 @@ This is one reason sophisticated RAG systems often use multiple retrieval signal
 
 ---
 
-# 9. Reranking
+## 9. Reranking
 
 The initial retriever is usually optimized for speed.
 
@@ -514,7 +514,7 @@ That separation is extremely useful.
 
 ---
 
-# 10. Query Expansion
+## 10. Query Expansion
 
 The user's query may not contain the terminology used in the corpus.
 
@@ -574,7 +574,7 @@ It is finding the right operating point.
 
 ---
 
-# 11. Multi-Query Retrieval
+## 11. Multi-Query Retrieval
 
 A related technique is **multi-query retrieval**.
 
@@ -620,7 +620,7 @@ Therefore query expansion and multi-query retrieval must also be evaluated.
 
 ---
 
-# 12. Contextual Retrieval
+## 12. Contextual Retrieval
 
 A chunk often loses meaning when removed from its original document.
 
@@ -656,7 +656,7 @@ This can substantially improve retrieval for fragmented documents.
 
 ---
 
-# 13. Citation Generation
+## 13. Citation Generation
 
 A RAG system should ideally answer:
 
@@ -710,7 +710,7 @@ This makes citations a structured property of the output rather than a formattin
 
 ---
 
-# 14. RAG Failure Mode #1: Bad Chunk Boundaries
+## 14. RAG Failure Mode #1: Bad Chunk Boundaries
 
 The first experiment should deliberately break chunking.
 
@@ -755,7 +755,7 @@ It is part of the retrieval model.
 
 ---
 
-# 15. RAG Failure Mode #2: Irrelevant Documents
+## 15. RAG Failure Mode #2: Irrelevant Documents
 
 Populate the corpus with documents that contain similar terminology but do not answer the question.
 
@@ -793,7 +793,7 @@ A retriever that optimizes recall without considering downstream context quality
 
 ---
 
-# 16. RAG Failure Mode #3: Conflicting Documents
+## 16. RAG Failure Mode #3: Conflicting Documents
 
 Now create:
 
@@ -845,7 +845,7 @@ It may be the newest authoritative document.
 
 ---
 
-# 17. RAG Failure Mode #4: Outdated Documents
+## 17. RAG Failure Mode #4: Outdated Documents
 
 Suppose the corpus contains:
 
@@ -898,7 +898,7 @@ The architectural lesson does not.
 
 ---
 
-# 18. RAG Failure Mode #5: Adversarial Documents
+## 18. RAG Failure Mode #5: Adversarial Documents
 
 Now insert a document containing:
 
@@ -944,7 +944,7 @@ RAG therefore creates a security boundary as well as an information-retrieval pr
 
 ---
 
-# 19. RAG Failure Mode #6: Questions Requiring Multiple Documents
+## 19. RAG Failure Mode #6: Questions Requiring Multiple Documents
 
 The most interesting questions often cannot be answered from one chunk.
 
@@ -999,7 +999,7 @@ This is one of the places where RAG begins to overlap with agentic reasoning.
 
 ---
 
-# 20. Measuring Retrieval
+## 20. Measuring Retrieval
 
 A RAG system should expose retrieval metrics independently of generation metrics.
 
@@ -1049,7 +1049,7 @@ The final system must also measure answer quality.
 
 ---
 
-# 21. End-to-End Metrics
+## 21. End-to-End Metrics
 
 A useful evaluation stack looks like:
 
@@ -1101,7 +1101,7 @@ This is why instrumentation matters.
 
 ---
 
-# 22. Build the First RAG System
+## 22. Build the First RAG System
 
 The implementation exercise should begin with a deliberately minimal system.
 
@@ -1153,7 +1153,7 @@ This turns architecture changes into measurable experiments.
 
 ---
 
-# 23. The Retrieval–Generation Boundary
+## 23. The Retrieval–Generation Boundary
 
 One of the most useful conceptual boundaries in RAG is:
 
@@ -1188,7 +1188,7 @@ This separation also allows different engineering teams or components to evolve 
 
 ---
 
-# 24. RAG Is a Probabilistic Information System
+## 24. RAG Is a Probabilistic Information System
 
 The deepest lesson from this exercise is that RAG is not simply a feature that you “add” to an LLM application.
 
@@ -1234,7 +1234,7 @@ Therefore, each stage requires measurement.
 
 ---
 
-# 25. RAG and Traditional Search
+## 25. RAG and Traditional Search
 
 There is an important conceptual connection between RAG and traditional search engines.
 
@@ -1274,7 +1274,7 @@ This is why provenance and citations matter.
 
 ---
 
-# 26. The Engineering Loop
+## 26. The Engineering Loop
 
 A mature RAG development loop looks like:
 
@@ -1325,7 +1325,7 @@ This process transforms RAG development from trial-and-error prompting into syst
 
 ---
 
-# 27. Day 3 Engineering Checklist
+## 27. Chapter 3 Engineering Checklist
 
 By the end of this exercise, you should understand:
 
@@ -1355,7 +1355,7 @@ If you cannot answer that question from telemetry and evaluation data, the syste
 
 ---
 
-# 28. Key Takeaways
+## 28. Key Takeaways
 
 1. **RAG is not “embeddings + vector database.”** It is a multi-stage information-retrieval and generation system.
 

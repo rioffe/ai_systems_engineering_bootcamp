@@ -1,4 +1,4 @@
-# Day 1 — The New AI Application Stack
+# Chapter 1: The New AI Application Stack
 
 Traditional software engineering begins with deterministic computation.
 
@@ -39,7 +39,7 @@ It is a component whose behavior depends on:
 
 This changes the nature of application engineering.
 
-The central idea of Day 1 is:
+The central idea of Chapter 1 is:
 
 > **Treat the LLM as an engineering component, not as an oracle.**
 
@@ -51,7 +51,7 @@ The first project of the bootcamp is therefore intentionally small:
 
 ---
 
-# 1. The New Application Stack
+## 1. The New Application Stack
 
 A conventional application stack might look like:
 
@@ -123,7 +123,7 @@ That distinction will become increasingly important throughout the bootcamp.
 
 ---
 
-# 2. Foundation Models
+## 2. Foundation Models
 
 A foundation model is a large pretrained model capable of performing many downstream tasks.
 
@@ -175,7 +175,7 @@ The application must therefore constrain, observe, and evaluate its behavior.
 
 ---
 
-# 3. Models Are Components With Contracts
+## 3. Models Are Components With Contracts
 
 An engineer does not treat a database as:
 
@@ -212,11 +212,11 @@ This is the beginning of **model engineering**.
 
 ---
 
-# 4. APIs Versus Local Models
+## 4. APIs Versus Local Models
 
 One of the first architectural decisions is whether inference happens through a remote API or locally.
 
-## API-based inference
+### API-based inference
 
 ```text
 Application
@@ -249,7 +249,7 @@ Costs include:
 * rate limits
 * external availability
 
-## Local inference
+### Local inference
 
 ```text
 Application
@@ -289,7 +289,7 @@ The correct question is:
 
 ---
 
-# 5. The Model Gateway
+## 5. The Model Gateway
 
 Even a small AI application benefits from thinking in terms of a model abstraction.
 
@@ -331,7 +331,7 @@ The model gateway becomes an architectural control point.
 
 ---
 
-# 6. Tokens
+## 6. Tokens
 
 LLMs generally do not consume raw strings directly.
 
@@ -378,7 +378,7 @@ total = 4,050 tokens
 
 ---
 
-# 7. Context Windows
+## 7. Context Windows
 
 The model operates within a context window.
 
@@ -415,11 +415,11 @@ More context is not necessarily better.
 
 A large amount of irrelevant context can make the system less reliable.
 
-This will become a major theme in Day 2.
+This will become a major theme in Chapter 2.
 
 ---
 
-# 8. Prompting Is Interface Design
+## 8. Prompting Is Interface Design
 
 Prompting is often treated as an informal art.
 
@@ -463,7 +463,7 @@ That means prompts must eventually be tested and evaluated.
 
 ---
 
-# 9. Structured Outputs
+## 9. Structured Outputs
 
 One of the most important techniques in production AI engineering is constraining model output.
 
@@ -522,7 +522,7 @@ This is one of the first places where probabilistic computation is transformed i
 
 ---
 
-# 10. Tool Calling
+## 10. Tool Calling
 
 An LLM by itself cannot directly perform arbitrary external operations.
 
@@ -587,7 +587,7 @@ Tool calling therefore turns an LLM from a text generator into a component of an
 
 ---
 
-# 11. Multimodal Models
+## 11. Multimodal Models
 
 Modern foundation models increasingly operate across multiple modalities.
 
@@ -639,7 +639,7 @@ The engineering principle remains unchanged:
 
 ---
 
-# 12. Inference Parameters
+## 12. Inference Parameters
 
 Models expose parameters that affect generation behavior.
 
@@ -682,7 +682,7 @@ If changing temperature changes application behavior, temperature is effectively
 
 ---
 
-# 13. Determinism Is Not Binary
+## 13. Determinism Is Not Binary
 
 A common misconception is:
 
@@ -723,7 +723,7 @@ This is why AI systems must be evaluated at the **system level**, not only the m
 
 ---
 
-# 14. Model Selection
+## 14. Model Selection
 
 There is rarely one universally best model.
 
@@ -762,7 +762,7 @@ The correct model therefore depends on the workload.
 
 ---
 
-# 15. The Quality-Cost-Latency Triangle
+## 15. The Quality-Cost-Latency Triangle
 
 A useful first approximation is:
 
@@ -801,7 +801,7 @@ Not a benchmark leaderboard decision.
 
 ---
 
-# 16. Measure Before Choosing
+## 16. Measure Before Choosing
 
 Suppose you have three candidate models:
 
@@ -861,7 +861,7 @@ This is much stronger than:
 
 ---
 
-# 17. Model Routing
+## 17. Model Routing
 
 Once you think in terms of models as components, another possibility appears:
 
@@ -894,7 +894,7 @@ The economic impact can be substantial at scale.
 
 ---
 
-# 18. Latency Is a System Property
+## 18. Latency Is a System Property
 
 Model latency is not the same thing as application latency.
 
@@ -943,7 +943,7 @@ Architecture therefore determines latency.
 
 ---
 
-# 19. Streaming
+## 19. Streaming
 
 Streaming changes the user-perceived latency profile.
 
@@ -982,7 +982,7 @@ These are different metrics.
 
 ---
 
-# 20. Cost Is a First-Class Metric
+## 20. Cost Is a First-Class Metric
 
 For API models, cost is often approximately related to:
 
@@ -1047,7 +1047,7 @@ A seemingly harmless prompt design decision can therefore become an architectura
 
 ---
 
-# 21. The Model Playground
+## 21. The Model Playground
 
 The first mini-project should be deliberately small.
 
@@ -1085,11 +1085,11 @@ The interface should make models comparable.
 
 ---
 
-# 22. Required Capabilities
+## 22. Required Capabilities
 
 The playground should support:
 
-### Multiple models
+#### Multiple models
 
 For example:
 
@@ -1102,7 +1102,7 @@ Local Model
 
 The exact providers are less important than having genuinely different inference characteristics.
 
-### Streaming
+#### Streaming
 
 Display tokens as they arrive.
 
@@ -1114,7 +1114,7 @@ total generation time
 tokens/sec
 ```
 
-### Token accounting
+#### Token accounting
 
 Track:
 
@@ -1124,7 +1124,7 @@ output tokens
 total tokens
 ```
 
-### Cost estimation
+#### Cost estimation
 
 Given provider pricing:
 
@@ -1137,7 +1137,7 @@ output_tokens x output_price
 
 Store the pricing information separately from application logic so it can be updated.
 
-### Output comparison
+#### Output comparison
 
 Given the same prompt:
 
@@ -1151,7 +1151,7 @@ Prompt
 
 display the outputs side by side.
 
-### Structured output
+#### Structured output
 
 Allow the user to specify a schema:
 
@@ -1167,7 +1167,7 @@ and require the model to produce valid output.
 
 ---
 
-# 23. Instrumentation
+## 23. Instrumentation
 
 Do not merely display the answer.
 
@@ -1203,7 +1203,7 @@ You are trying to understand:
 
 ---
 
-# 24. Build a Common Model Interface
+## 24. Build a Common Model Interface
 
 A useful abstraction might look conceptually like:
 
@@ -1233,7 +1233,7 @@ Benchmark
     +-- Local Model
 ```
 
-This is the first practical application of the architecture concepts from Day 8.
+This is the first practical application of the architecture concepts from Chapter 8.
 
 You are deliberately separating:
 
@@ -1247,7 +1247,7 @@ provider implementation
 
 ---
 
-# 25. Make the Playground a Scientific Instrument
+## 25. Make the Playground a Scientific Instrument
 
 A good benchmark is reproducible.
 
@@ -1287,7 +1287,7 @@ Now you have experimental data.
 
 ---
 
-# 26. Compare Outputs Carefully
+## 26. Compare Outputs Carefully
 
 Output comparison is more difficult than it first appears.
 
@@ -1317,17 +1317,17 @@ You may need:
 
 This is the beginning of evaluation engineering.
 
-For Day 1, however, simply preserve the outputs and measurements.
+For Chapter 1, however, simply preserve the outputs and measurements.
 
 Later chapters will build the evaluation machinery around them.
 
 ---
 
-# 27. Structured Output as a Boundary
+## 27. Structured Output as a Boundary
 
 One particularly important experiment is to compare:
 
-### Unconstrained output
+#### Unconstrained output
 
 ```text
 Prompt
@@ -1339,7 +1339,7 @@ Free-form text
 
 with:
 
-### Structured output
+#### Structured output
 
 ```text
 Prompt
@@ -1370,17 +1370,17 @@ Model quality is task-dependent.
 
 ---
 
-# 28. Failure Modes to Explore
+## 28. Failure Modes to Explore
 
 Do not build the playground and only test successful cases.
 
 Try to break it.
 
-### Invalid JSON
+#### Invalid JSON
 
 Ask for a strict schema and see whether the model complies.
 
-### Very long prompts
+#### Very long prompts
 
 Observe:
 
@@ -1389,7 +1389,7 @@ Observe:
 * degradation
 * context limits
 
-### Large outputs
+#### Large outputs
 
 Observe:
 
@@ -1397,23 +1397,23 @@ Observe:
 * truncation
 * cost
 
-### Streaming failures
+#### Streaming failures
 
 What happens if the connection breaks halfway through generation?
 
-### Provider failure
+#### Provider failure
 
 What happens if the API returns an error?
 
-### Rate limiting
+#### Rate limiting
 
 What happens when the provider returns a quota error?
 
-### Timeout
+#### Timeout
 
 What happens if inference takes too long?
 
-### Model mismatch
+#### Model mismatch
 
 What happens if one model does not support a requested capability?
 
@@ -1421,7 +1421,7 @@ These failures will become important later when you build production systems.
 
 ---
 
-# 29. The First Architectural Lesson
+## 29. The First Architectural Lesson
 
 At the end of this exercise, you should have discovered something subtle.
 
@@ -1464,7 +1464,7 @@ The hard part is:
 
 ---
 
-# 30. From Model API to AI System
+## 30. From Model API to AI System
 
 The conceptual progression is:
 
@@ -1516,7 +1516,7 @@ This is the beginning of AI systems engineering.
 
 ---
 
-# 31. Key Takeaways
+## 31. Key Takeaways
 
 1. **An LLM is an engineering component, not an oracle.**
 

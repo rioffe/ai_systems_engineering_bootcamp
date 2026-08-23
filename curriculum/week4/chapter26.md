@@ -1,10 +1,10 @@
-# Day 26 — User Testing
+# Chapter 26: User Testing
 
 ## From Working System to Validated Product
 
-Day 25 produced a working MVP.
+Chapter 25 produced a working MVP.
 
-Day 26 asks the more important question:
+Chapter 26 asks the more important question:
 
 > **Does anyone actually want it?**
 
@@ -46,7 +46,7 @@ Behavior is stronger evidence than opinion.
 
 ---
 
-# 1. The Product Is Now an Experimental System
+## 1. The Product Is Now an Experimental System
 
 At this stage, stop thinking of the MVP primarily as software.
 
@@ -87,7 +87,7 @@ to:
 
 ---
 
-# 2. Why AI Products Require Special User Testing
+## 2. Why AI Products Require Special User Testing
 
 Traditional software has predictable behavior.
 
@@ -130,31 +130,31 @@ User testing helps distinguish these failure modes.
 
 ---
 
-# 3. What You Are Trying to Discover
+## 3. What You Are Trying to Discover
 
 During testing, focus on six categories.
 
-## 1. Confusion
+### 1. Confusion
 
 Where does the user not understand what to do?
 
-## 2. Trust
+### 2. Trust
 
 Where does the user doubt the system?
 
-## 3. AI failure
+### 3. AI failure
 
 Where does the system produce incorrect or misleading results?
 
-## 4. Latency
+### 4. Latency
 
 Where does waiting interrupt the workflow?
 
-## 5. Control
+### 5. Control
 
 Where does the user want to intervene?
 
-## 6. Value
+### 6. Value
 
 Which capabilities actually matter?
 
@@ -178,13 +178,13 @@ $$
 
 ---
 
-# 4. Recruit the Right Users
+## 4. Recruit the Right Users
 
 The quality of user testing depends heavily on participant selection.
 
 Do not simply test with friends.
 
-Ideally, users should resemble the target persona defined on Day 24.
+Ideally, users should resemble the target persona defined on Chapter 24.
 
 For example, if the product is an AI incident investigator, test with:
 
@@ -201,7 +201,7 @@ A user who regularly performs the target task can identify problems that a gener
 
 ---
 
-# 5. Test the Existing Workflow
+## 5. Test the Existing Workflow
 
 Do not immediately teach users how the new product works.
 
@@ -243,7 +243,7 @@ where $U$ represents the user's perceived or measured utility.
 
 ---
 
-# 6. Give Users Tasks, Not Explanations
+## 6. Give Users Tasks, Not Explanations
 
 A common mistake is presenting a product and explaining every feature.
 
@@ -274,7 +274,7 @@ This reveals:
 
 ---
 
-# 7. The Think-Aloud Technique
+## 7. The Think-Aloud Technique
 
 A useful user-testing technique is **think-aloud testing**.
 
@@ -308,7 +308,7 @@ If they differ substantially, the interface or workflow needs improvement.
 
 ---
 
-# 8. Observe Behavior, Not Just Opinions
+## 8. Observe Behavior, Not Just Opinions
 
 User statements are useful, but behavior is often more informative.
 
@@ -352,7 +352,7 @@ Useful behavioral signals include:
 
 ---
 
-# 9. Where Users Get Confused
+## 9. Where Users Get Confused
 
 Confusion is valuable data.
 
@@ -386,7 +386,7 @@ This converts vague feedback into an actionable product defect.
 
 ---
 
-# 10. Trust Is a First-Class Metric
+## 10. Trust Is a First-Class Metric
 
 Trust is especially important for AI systems.
 
@@ -423,7 +423,7 @@ A highly capable system can still fail if users cannot determine when it is reli
 
 ---
 
-# 11. Trust Calibration
+## 11. Trust Calibration
 
 The objective is not maximum trust.
 
@@ -431,7 +431,7 @@ It is **appropriate trust**.
 
 Two failure modes exist.
 
-### Under-trust
+#### Under-trust
 
 The system is correct, but users ignore it.
 
@@ -439,7 +439,7 @@ $$
 T_{\text{user}} < T_{\text{appropriate}}
 $$
 
-### Over-trust
+#### Over-trust
 
 The system is unreliable, but users believe it.
 
@@ -470,7 +470,7 @@ where perceived reliability is aligned with actual reliability.
 
 ---
 
-# 12. Where the AI Fails
+## 12. Where the AI Fails
 
 User testing should intentionally expose failures.
 
@@ -514,7 +514,7 @@ Both are necessary.
 
 ---
 
-# 13. Latency Is Part of the Product
+## 13. Latency Is Part of the Product
 
 Latency is not merely an infrastructure metric.
 
@@ -580,7 +580,7 @@ Users often experience tail latency rather than average latency.
 
 ---
 
-# 14. Streaming and Progressive Disclosure
+## 14. Streaming and Progressive Disclosure
 
 Long-running AI operations do not necessarily need to feel slow.
 
@@ -614,7 +614,7 @@ The system should not simulate progress merely to make the UI feel responsive.
 
 ---
 
-# 15. Users Want Control
+## 15. Users Want Control
 
 One of the most important discoveries in AI product design is that users frequently want **selective autonomy**.
 
@@ -664,7 +664,7 @@ $$
 
 ---
 
-# 16. The Control Surface
+## 16. The Control Surface
 
 An AI product should provide users with appropriate control surfaces.
 
@@ -693,7 +693,7 @@ This becomes especially important when the AI takes multiple actions.
 
 ---
 
-# 17. What Users Actually Value
+## 17. What Users Actually Value
 
 This is perhaps the most important observation.
 
@@ -733,7 +733,7 @@ This is one of the reasons user testing should happen early.
 
 ---
 
-# 18. The "Magic Moment"
+## 18. The "Magic Moment"
 
 Many AI products have a moment when the value becomes obvious.
 
@@ -759,7 +759,7 @@ The MVP should increasingly optimize around the workflow that produces it.
 
 ---
 
-# 19. The "Oh, That's Useless" Moment
+## 19. The "Oh, That's Useless" Moment
 
 The opposite discovery is equally valuable.
 
@@ -790,7 +790,7 @@ First identify the underlying cause.
 
 ---
 
-# 20. Separate UX Problems From AI Problems
+## 20. Separate UX Problems From AI Problems
 
 This distinction is critical.
 
@@ -833,7 +833,7 @@ Do not solve a product problem with a better model.
 
 ---
 
-# 21. User Testing Is an Instrumentation Problem
+## 21. User Testing Is an Instrumentation Problem
 
 You cannot learn from users if you cannot observe the system.
 
@@ -875,11 +875,11 @@ This allows qualitative observations to be combined with quantitative evidence.
 
 ---
 
-# 22. Combine Qualitative and Quantitative Evidence
+## 22. Combine Qualitative and Quantitative Evidence
 
 Neither is sufficient alone.
 
-### Qualitative
+#### Qualitative
 
 Provides:
 
@@ -888,7 +888,7 @@ Provides:
 * what they distrust,
 * what they find confusing.
 
-### Quantitative
+#### Quantitative
 
 Provides:
 
@@ -925,7 +925,7 @@ Now the problem becomes measurable.
 
 ---
 
-# 23. Rank Problems by Severity
+## 23. Rank Problems by Severity
 
 Do not treat every piece of feedback equally.
 
@@ -964,7 +964,7 @@ This prevents the team from spending an entire day fixing cosmetic issues while 
 
 ---
 
-# 24. Do Not Build Every Requested Feature
+## 24. Do Not Build Every Requested Feature
 
 Users will request features.
 
@@ -1008,7 +1008,7 @@ The solution may not require a Slack integration at all.
 
 ---
 
-# 25. Revise the Product Hypothesis
+## 25. Revise the Product Hypothesis
 
 After user testing, return to the original hypothesis.
 
@@ -1036,7 +1036,7 @@ This is exactly what the MVP was designed to accomplish.
 
 ---
 
-# 26. The Product Development Loop
+## 26. The Product Development Loop
 
 The complete loop becomes:
 
@@ -1078,7 +1078,7 @@ Each user-testing cycle provides information about the shape of (U(P)).
 
 ---
 
-# 27. Do Not Optimize Too Early
+## 27. Do Not Optimize Too Early
 
 One of the biggest engineering traps is polishing before validation.
 
@@ -1124,15 +1124,15 @@ $$
 \text{Evidence}
 $$
 
-This is the core principle of Day 26.
+This is the core principle of Chapter 26.
 
 ---
 
-# 28. The User-Testing Session
+## 28. The User-Testing Session
 
 A practical session can follow this structure.
 
-## Before the session
+### Before the session
 
 Define:
 
@@ -1143,7 +1143,7 @@ Define:
 * metrics,
 * hypotheses.
 
-## During the session
+### During the session
 
 Observe:
 
@@ -1158,7 +1158,7 @@ Observe:
 9. What do they ignore?
 10. What creates obvious value?
 
-## After the session
+### After the session
 
 Record:
 
@@ -1173,7 +1173,7 @@ Avoid relying on memory.
 
 ---
 
-# 29. Example Observation Log
+## 29. Example Observation Log
 
 A useful format is:
 
@@ -1188,9 +1188,9 @@ This transforms user testing from informal conversation into engineering data.
 
 ---
 
-# 30. Day 26 Exercise
+## 30. Chapter 26 Exercise
 
-Take the MVP built on Day 25.
+Take the MVP built on Chapter 25.
 
 Put it in front of **real target users**.
 
@@ -1198,15 +1198,15 @@ Ideally conduct several sessions rather than relying on a single participant.
 
 For each user:
 
-### Step 1 — Establish the baseline
+#### Step 1 — Establish the baseline
 
 Observe how they currently solve the problem.
 
-### Step 2 — Give them a realistic task
+#### Step 2 — Give them a realistic task
 
 Do not explain the solution unnecessarily.
 
-### Step 3 — Observe
+#### Step 3 — Observe
 
 Record:
 
@@ -1218,7 +1218,7 @@ Record:
 * latency,
 * control requirements.
 
-### Step 4 — Measure
+#### Step 4 — Measure
 
 Capture:
 
@@ -1230,7 +1230,7 @@ Capture:
 * AI acceptance,
 * manual fallback.
 
-### Step 5 — Interview
+#### Step 5 — Interview
 
 Ask:
 
@@ -1242,7 +1242,7 @@ Ask:
 * What would you pay for?
 * What would prevent you from adopting it?
 
-### Step 6 — Rank findings
+#### Step 6 — Rank findings
 
 Classify each issue as:
 
@@ -1255,7 +1255,7 @@ Classify each issue as:
 * trust,
 * control.
 
-### Step 7 — Revise
+#### Step 7 — Revise
 
 Select the highest-value changes.
 
@@ -1273,67 +1273,67 @@ $$
 
 ---
 
-# 31. The Deliverable
+## 31. The Deliverable
 
-By the end of Day 26, produce a **User Testing Report** containing:
+By the end of Chapter 26, produce a **User Testing Report** containing:
 
-## 1. Participants
+### 1. Participants
 
 Who tested the product and why they represent the target user.
 
-## 2. Tasks
+### 2. Tasks
 
 What users were asked to accomplish.
 
-## 3. Observations
+### 3. Observations
 
 What actually happened.
 
-## 4. AI Failures
+### 4. AI Failures
 
 Where the system produced incorrect, misleading, or low-value behavior.
 
-## 5. UX Problems
+### 5. UX Problems
 
 Where users became confused or blocked.
 
-## 6. Trust Problems
+### 6. Trust Problems
 
 Where users questioned system reliability.
 
-## 7. Latency Problems
+### 7. Latency Problems
 
 Where waiting materially affected behavior.
 
-## 8. Control Requirements
+### 8. Control Requirements
 
 Where users wanted more or less autonomy.
 
-## 9. Value Signals
+### 9. Value Signals
 
 What users repeatedly found useful.
 
-## 10. Metrics
+### 10. Metrics
 
 Quantitative measures of workflow performance.
 
-## 11. Prioritized Changes
+### 11. Prioritized Changes
 
 Ranked by expected impact.
 
-## 12. Revised Product Hypothesis
+### 12. Revised Product Hypothesis
 
 State what you now believe about the product.
 
-## 13. Revised MVP
+### 13. Revised MVP
 
 Document what changes in the product as a result.
 
 ---
 
-# 32. The Deeper Engineering Lesson
+## 32. The Deeper Engineering Lesson
 
-Day 26 teaches a principle that extends far beyond UX:
+Chapter 26 teaches a principle that extends far beyond UX:
 
 > **Software quality is not the same thing as product value.**
 
@@ -1370,7 +1370,7 @@ The engineering objective is to find the intersection.
 
 ---
 
-# 33. Why This Matters More for AI
+## 33. Why This Matters More for AI
 
 AI makes software development dramatically cheaper.
 
@@ -1406,7 +1406,7 @@ This makes product discovery increasingly important as AI coding capability impr
 
 ---
 
-# 34. The New Engineering Discipline
+## 34. The New Engineering Discipline
 
 The emerging workflow is:
 
@@ -1448,7 +1448,7 @@ $$
 
 ---
 
-# 35. Key Takeaways
+## 35. Key Takeaways
 
 1. **Put the product in front of real users as early as possible.**
 
@@ -1522,5 +1522,5 @@ $$
     }
 $$
 
-Day 26 therefore completes an important transition. Day 24 defined the product, Day 25 built the product, and Day 26 exposes the product to reality. **The real product-development loop begins when users interact with what you built.**
+Chapter 26 therefore completes an important transition. Chapter 24 defined the product, Chapter 25 built the product, and Chapter 26 exposes the product to reality. **The real product-development loop begins when users interact with what you built.**
 
