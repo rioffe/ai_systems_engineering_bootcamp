@@ -824,9 +824,9 @@ Build **one evolving system**.
 
 For example:
 
-# AI Research & Engineering Agent
+# Personal Research Assistant
 
-The project begins as a simple AI application and progressively becomes an agentic software system.
+This is the same system used as the running example through Weeks 1 to 3: it begins as a simple AI application and progressively evolves into an agentic software system. By Day 30 the Personal Research Assistant has grown into the AI Research & Engineering Agent.
 
 ---
 
