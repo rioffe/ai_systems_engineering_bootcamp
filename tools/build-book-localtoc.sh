@@ -22,6 +22,9 @@
 #   TITLE="..." AUTHOR="..." tools/build-book-localtoc.sh
 #   LOCAL_DEPTH=2 tools/build-book-localtoc.sh    -> sections only (default 3)
 #
+#   INTRO=0 tools/build-book-localtoc.sh            -> omit the Introduction front
+#                                                    matter (default: on)
+#
 # Why latexmk, not xelatex: a per-chapter \tableofcontents needs several LaTeX
 # passes for the cross-references (page numbers) to stabilise.  pandoc runs its
 # pdf engine only once, so we use the latexmk engine -- which iterates to a fixed
@@ -68,6 +71,16 @@ PY
 if [ -z "$chapters" ]; then
         echo "build-book-localtoc: no chapter*.md files found under $CURRIC" >&2
         exit 1
+fi
+
+# ---- optionally prepend the book's Introduction as front matter -----------
+# The Introduction (curriculum/introduction.md) is assembled exactly like a
+# chapter -- its own title page, a per-chapter local "Contents" (if it has
+# ## subsections), then its body -- and it lands top-level in the master
+# "Contents" list.  Opt out with INTRO=0.
+intro="$CURRIC/introduction.md"
+if [ "${INTRO:-1}" != 0 ] && [ -f "$intro" ]; then
+        chapters="$intro"$'\n'"$chapters"
 fi
 
 total="$(printf '%s\n' "$chapters" | grep -c .)"
