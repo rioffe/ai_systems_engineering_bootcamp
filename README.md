@@ -80,6 +80,6 @@ This project — the curriculum, books, and accompanying tooling — is released
 - Deed: https://creativecommons.org/licenses/by/4.0/
 - Legal code: https://creativecommons.org/licenses/by/4.0/legalcode
 
-> **Copyright © 2025 Robert Ioffe — <https://github.com/rioffe>**
+> **Copyright © 2026 Robert Ioffe — <https://github.com/rioffe>**
 
 You are free to use, share, and adapt this material for any purpose, **including commercial**, provided you give **appropriate credit** to Robert Ioffe (<https://github.com/rioffe>), include a link to the license, and indicate if changes were made (and in no way that suggests the author endorses your use).
