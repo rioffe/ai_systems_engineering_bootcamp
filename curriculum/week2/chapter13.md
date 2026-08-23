@@ -25,40 +25,40 @@ AI systems change this model.
 An LLM may produce multiple valid outputs for the same input:
 
 ```text
-                    ┌── Output A
-                    │
-Input ──> Model ─────┼── Output B
-                    │
-                    ├── Output C
-                    │
-                    └── Output D
+                    +-- Output A
+                    |
+Input --> Model -----+-- Output B
+                    |
+                    +-- Output C
+                    |
+                    +-- Output D
 ```
 
 The correct abstraction is therefore:
 
-[
+$$
 P(y \mid x, c, m, s)
-]
+$$
 
 where:
 
-* (x) = input
-* (c) = context
-* (m) = model
-* (s) = system state
-* (y) = possible output
+* $x$ = input
+* $c$ = context
+* $m$ = model
+* $s$ = system state
+* $y$ = possible output
 
 Testing is no longer simply:
 
-[
+$$
 f(x)=y
-]
+$$
 
 It becomes:
 
-[
+$$
 P(Y \mid X,C,M,S) \in \text{acceptable behavior}
-]
+$$
 
 This does **not** mean AI systems cannot be tested rigorously.
 
@@ -107,18 +107,18 @@ A mature AI application might have:
 
 ```text
                     Production
-                       ▲
-                       │
+                       ^
+                       |
                  Red teaming
-                       │
+                       |
                   AI evaluations
-                       │
+                       |
                Integration tests
-                       │
+                       |
                   Unit tests
-                       │
+                       |
                Property tests
-                       │
+                       |
               Deterministic logic
 ```
 
@@ -243,11 +243,11 @@ The integration contract should therefore focus on structural properties.
 For example:
 
 ```text
-✓ retrieval was called
-✓ only authorized documents were retrieved
-✓ tool call conforms to schema
-✓ unauthorized tool was rejected
-✓ final response contains required fields
++ retrieval was called
++ only authorized documents were retrieved
++ tool call conforms to schema
++ unauthorized tool was rejected
++ final response contains required fields
 ```
 
 This distinction prevents fragile tests that fail merely because the model phrased something differently.
@@ -264,27 +264,27 @@ Instead of enumerating only specific examples, generate many inputs and test inv
 
 For example, for a context manager:
 
-[
+$$
 tokens(context) \leq budget
-]
+$$
 
 For an authorization system:
 
-[
+$$
 Unauthorized(action) \Rightarrow Denied(action)
-]
+$$
 
 For a cost limiter:
 
-[
+$$
 Cost(execution) \leq Budget
-]
+$$
 
 For an agent runtime:
 
-[
+$$
 Steps(execution) \leq MaxSteps
-]
+$$
 
 These properties are extremely valuable for AI systems because the model introduces enormous input and output variability.
 
@@ -339,9 +339,9 @@ Unacceptable:
 
 The evaluator is checking a property:
 
-[
+$$
 Correct(answer, reference)=True
-]
+$$
 
 rather than exact string equality.
 
@@ -370,9 +370,9 @@ output
 
 and an evaluator computes:
 
-[
+$$
 score = E(input, output, expected\ behavior)
-]
+$$
 
 Examples of evaluation dimensions include:
 
@@ -427,9 +427,9 @@ For example:
 
 ```text
 Must mention:
-✓ bounded waiting
-✓ resource exhaustion
-✓ cascading failure
++ bounded waiting
++ resource exhaustion
++ cascading failure
 ```
 
 ### Structured facts
@@ -521,15 +521,15 @@ and ask:
 
 This produces:
 
-[
+$$
 A > B
-]
+$$
 
 or:
 
-[
+$$
 B > A
-]
+$$
 
 Pairwise evaluation can be useful for comparing:
 
@@ -622,21 +622,21 @@ The pipeline should look like:
 
 ```text
                      100 test cases
-                           │
-                           ▼
+                           |
+                           v
                     System under test
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
+                           |
+              +------------+------------+
+              |            |            |
            Quality       Safety       Tools
-              │            │            │
-              ├────────────┼────────────┤
-              │            │            │
+              |            |            |
+              +------------+------------|
+              |            |            |
            Latency        Cost       Grounding
-              │            │            │
-              └────────────┼────────────┘
-                           │
-                           ▼
+              |            |            |
+              +------------+------------+
+                           |
+                           v
                     PASS / FAIL
 ```
 
@@ -685,17 +685,17 @@ Instead, define separate gates.
 For example:
 
 ```text
-Quality       ≥ 90%
-Groundedness  ≥ 95%
-Safety        ≥ 99%
-Tool accuracy ≥ 98%
-P95 latency   ≤ 5 sec
-Cost/task     ≤ $0.10
+Quality       >= 90%
+Groundedness  >= 95%
+Safety        >= 99%
+Tool accuracy >= 98%
+P95 latency   <= 5 sec
+Cost/task     <= $0.10
 ```
 
 Then:
 
-[
+$$
 PASS =
 Q \ge Q_{min}
 \land
@@ -708,7 +708,7 @@ T \ge T_{min}
 L \le L_{max}
 \land
 C \le C_{max}
-]
+$$
 
 This is much stronger than:
 
@@ -747,12 +747,12 @@ A useful distribution is:
 
 ```text
                  Golden Dataset
-                       │
-       ┌───────────────┼───────────────┐
-       │               │               │
+                       |
+       +---------------+---------------+
+       |               |               |
     Typical          Edge          Adversarial
      cases           cases            cases
-       │               │               │
+       |               |               |
    common use       unusual          attacks
 ```
 
@@ -804,16 +804,16 @@ This gives us:
 
 ```text
 AI Test Coverage
-│
-├── functionality
-├── behavior
-├── safety
-├── security
-├── performance
-├── economics
-├── tools
-├── retrieval
-└── regressions
+|
++-- functionality
++-- behavior
++-- safety
++-- security
++-- performance
++-- economics
++-- tools
++-- retrieval
++-- regressions
 ```
 
 ---
@@ -894,9 +894,9 @@ Generate thousands of variations attempting to convince the model to invoke the 
 
 The deterministic authorization layer should continue to enforce:
 
-[
+$$
 Unauthorized(tool) \Rightarrow DENY
-]
+$$
 
 This is an important distinction:
 
@@ -939,9 +939,9 @@ The semantic result should be substantially unchanged.
 
 This creates a metamorphic relation:
 
-[
+$$
 f(T(x)) \approx f(x)
-]
+$$
 
 where (T) is a transformation that should preserve the relevant semantics.
 
@@ -984,23 +984,23 @@ Each stage can fail.
 
 Measure:
 
-[
-Recall@k
-]
+$$
+\text{Recall@k}
+$$
 
-[
-Precision@k
-]
+$$
+\text{Precision@k}
+$$
 
 ### Context tests
 
 Verify:
 
 ```text
-✓ relevant documents included
-✓ irrelevant documents excluded
-✓ source metadata preserved
-✓ context within budget
++ relevant documents included
++ irrelevant documents excluded
++ source metadata preserved
++ context within budget
 ```
 
 ### Generation tests
@@ -1008,10 +1008,10 @@ Verify:
 Measure:
 
 ```text
-✓ answer correctness
-✓ groundedness
-✓ citation accuracy
-✓ unsupported claims
++ answer correctness
++ groundedness
++ citation accuracy
++ unsupported claims
 ```
 
 A RAG system is therefore not tested simply by asking:
@@ -1174,9 +1174,9 @@ Run 5 → PASS
 
 The observed success rate is:
 
-[
-\hat{p} = \frac{4}{5}=80%
-]
+$$
+\hat{p} = \frac{4}{5}=80\%
+$$
 
 The important question becomes:
 
@@ -1184,15 +1184,15 @@ The important question becomes:
 
 For stochastic systems, evaluation should often measure:
 
-[
+$$
 P(success)
-]
+$$
 
 rather than simply:
 
-[
+$$
 success \in {0,1}
-]
+$$
 
 This is one of the most fundamental differences between deterministic software testing and AI evaluation.
 
@@ -1226,11 +1226,11 @@ The result depends on:
 
 For a binomial estimate:
 
-[
+$$
 \hat{p}=\frac{k}{n}
-]
+$$
 
-but uncertainty around (\hat{p}) matters.
+but uncertainty around $\hat{p}$ matters.
 
 If you test:
 
@@ -1379,11 +1379,11 @@ A release should fail automatically if critical metrics regress.
 For example:
 
 ```text
-Quality        93% → 94%     ✓
-Groundedness   97% → 96%     ✓
-Safety         99.8% → 97.2% ✗
-P95 latency    4.1 → 4.4 s   ✓
-Cost/task      $0.07 → $0.06 ✓
+Quality        93% → 94%     +
+Groundedness   97% → 96%     +
+Safety         99.8% → 97.2% x
+P95 latency    4.1 → 4.4 s   +
+Cost/task      $0.07 → $0.06 +
 ```
 
 The release is blocked because safety crossed its threshold.
@@ -1398,7 +1398,7 @@ A useful regression report might look like:
 
 ```text
 AI Regression Suite
-─────────────────────────────────────────
+-----------------------------------------
 
 Tests                         100
 Passed                         94
@@ -1594,30 +1594,30 @@ The mature AI engineering process becomes:
 
 ```text
                  Specification
-                      │
-                      ▼
+                      |
+                      v
                  Test cases
-                      │
-                      ▼
+                      |
+                      v
                   Build system
-                      │
-                      ▼
+                      |
+                      v
                    Evaluate
-                      │
-             ┌────────┴────────┐
-             │                 │
+                      |
+             +--------+--------+
+             |                 |
            PASS              FAIL
-             │                 │
-             ▼                 ▼
+             |                 |
+             v                 v
           Release          Diagnose
-                               │
-                               ▼
+                               |
+                               v
                              Fix
-                               │
-                               ▼
+                               |
+                               v
                            New test
-                               │
-                               └───────►
+                               |
+                               +------->
 ```
 
 Notice the role of the test suite.
@@ -1646,7 +1646,7 @@ Examples:
 
 ```text
 Unauthorized tool → DENY
-Context ≤ 8,000 tokens
+Context <= 8,000 tokens
 JSON conforms to schema
 Timeout terminates request
 ```
@@ -1801,14 +1801,14 @@ For deterministic software, testing asks whether the implementation produces the
 
 For AI systems, testing asks something more ambitious:
 
-[
+$$
 \boxed{
 P(\text{acceptable behavior}\mid
 \text{input, context, model, state})
 \geq
 \text{required threshold}
 }
-]
+$$
 
 That shift—from **exact-output verification** to **behavioral assurance**—is one of the defining changes in AI engineering.
 
