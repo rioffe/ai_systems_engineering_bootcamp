@@ -74,13 +74,16 @@ if [ -z "$chapters" ]; then
 fi
 
 # ---- optionally prepend the book's Introduction as front matter -----------
-# The Introduction (curriculum/introduction.md) is assembled exactly like a
-# chapter -- its own title page, a per-chapter local "Contents" (if it has
-# ## subsections), then its body -- and it lands top-level in the master
-# "Contents" list.  Opt out with INTRO=0.
+# The Introduction (curriculum/introduction.md) is assembled at the top of the
+# document -- its own title page, then its body -- and it lands top-level in the
+# master "Contents" list.  Unlike real chapters, however, it is front matter: it
+# gets NO per-chapter local "Contents" page (even though it has a ## subsection).
+# Opt out of the Introduction entirely with INTRO=0.
 intro="$CURRIC/introduction.md"
+NOLOCAL=""
 if [ "${INTRO:-1}" != 0 ] && [ -f "$intro" ]; then
         chapters="$intro"$'\n'"$chapters"
+        NOLOCAL="$intro"
 fi
 
 total="$(printf '%s\n' "$chapters" | grep -c .)"
@@ -114,6 +117,7 @@ cat > "$ASMPY" <<'PY'
 import re, sys
 
 LIST, DEPTH = sys.argv[1], sys.argv[2]
+NOLOCAL = sys.argv[3] if len(sys.argv) > 3 else ""
 HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
 SUBSECTION = re.compile(r"^#{2,4}\s+\S")      # ## .. #### => a local-TOC entry
 BLOCK = (
@@ -131,7 +135,8 @@ for n, path in enumerate(paths):
         src = f.read().splitlines()
 
      # a chapter earns a local TOC page only if it has ## /### subsections
-    has_subs = any(SUBSECTION.match(l) for l in src)
+    is_nolocal = NOLOCAL != "" and path == NOLOCAL
+    has_subs = any(SUBSECTION.match(l) for l in src) and not is_nolocal
 
      # locate the chapter's first H1 (# "Chapter N: ...")
     h1 = 0
@@ -153,7 +158,7 @@ for n, path in enumerate(paths):
 sys.stdout.write("\n\n".join(out) + "\n")
 PY
 
-python3 "$ASMPY" "$LIST" "$LOCAL_DEPTH" > "$SRC"
+python3 "$ASMPY" "$LIST" "$LOCAL_DEPTH" "$NOLOCAL" > "$SRC"
 
 if [ ! -s "$SRC" ]; then
         echo "build-book-localtoc: assembled source is empty" >&2
