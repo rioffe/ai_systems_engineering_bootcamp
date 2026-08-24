@@ -55,6 +55,19 @@ fi
 # ~/.cache/puppeteer; fall back to a system Chrome/Chromium/Edge via
 # PUPPETEER_EXECUTABLE_PATH (an already-exported value is always respected).
 if [ "${#MERMAID_FLAG[@]}" -gt 0 ]; then
+    # mermaid-filter defaults to a low-DPI PNG (800px, scale=1) that looks
+    # fuzzy in PDFs. Default to vector output (crisp at any zoom) with a
+    # high-scale raster fallback, but always respect a value the user set.
+    if [ -z "${MERMAID_FILTER_FORMAT:-}" ]; then
+        MERMAID_FILTER_FORMAT="pdf"
+        export MERMAID_FILTER_FORMAT
+        echo "mermaid: defaulting MERMAID_FILTER_FORMAT=pdf (vector; crisp at any zoom)"
+    fi
+    if [ -z "${MERMAID_FILTER_SCALE:-}" ]; then
+        MERMAID_FILTER_SCALE="3"
+        export MERMAID_FILTER_SCALE
+        echo "mermaid: defaulting MERMAID_FILTER_SCALE=3 (high-res raster fallback)"
+    fi
     # mmdc -> puppeteer needs a Chromium binary. A pinned rev is often
     # missing from ~/.cache/puppeteer, so fall back to a system browser.
     # An already-exported PUPPETEER_EXECUTABLE_PATH is always respected.
