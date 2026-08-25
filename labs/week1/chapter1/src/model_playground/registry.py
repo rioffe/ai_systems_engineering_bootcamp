@@ -4,7 +4,7 @@ Pricing lives ONLY in the registry (I-003); cost_usd is derived, never hard-code
 in the UI or worker. For local Ollama the per-1k prices default to 0.0 (no vendor
 bill, R-06) and remain configurable so a nominal compute cost can be booked in.
 
-Discovery (R-16 / E-13): the app tries Ollama's /api/tags; on any failure it falls
+Discovery (R-16 / E-13): the app tries Ollama's model-list endpoint; on any failure it falls
 back to the built-in MockModel registry. The real GUI uses a reachable Ollama when
 there is one; tests inject a registry or force a dead OLLAMA_HOST (T-16).
 """
@@ -72,7 +72,7 @@ def discover_registry(
     client: OllamaClient | None = None,
 ) -> tuple[ModelRegistry, bool]:
     # Always register the mock variants first, so a run is possible even with no
-    # Ollama; then try Ollama /api/tags to add each locally-pulled model. On any
+    # Ollama; then try Ollama's model-list call to add each locally-pulled model. On any
     # failure the mock-only registry stands and used_fallback=True (E-13); the UI
     # states this via a banner. No crash, no hang.
     reg = build_default_registry()

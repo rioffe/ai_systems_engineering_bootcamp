@@ -145,6 +145,7 @@ class OllamaModel(Model):
         self._require_nonempty(messages)
         return self._client.chat(
             self._name,
+            messages,
             self._parse_kwargs(temperature, top_p, max_tokens, seed),
             stream=False,
         )
@@ -153,6 +154,7 @@ class OllamaModel(Model):
         self._require_nonempty(messages)
         yield from self._client.stream_chat(
             self._name,
+            messages,
             self._parse_kwargs(temperature, top_p, max_tokens, seed),
         )
 

@@ -208,7 +208,7 @@ class MainWindow(QMainWindow):
         self._active = False
 
         self._build_ui()
-        self._validate()
+        self._update_running()
 
         # --------------------------------------------------------- UI layout
 
@@ -285,7 +285,6 @@ class MainWindow(QMainWindow):
         self.chk_structured = QCheckBox("Structured output (validate JSON)")
         self.chk_sequential = QCheckBox("Sequential (one model at a time)")
         self.chk_stream.setChecked(True)
-        self.chk_structured.setChecked(True)
         box.addWidget(self.chk_stream)
         box.addWidget(self.chk_structured)
         box.addWidget(self.chk_sequential)
