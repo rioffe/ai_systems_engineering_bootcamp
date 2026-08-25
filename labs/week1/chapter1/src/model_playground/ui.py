@@ -249,6 +249,12 @@ class MainWindow(QMainWindow):
         self._panel_stack.setWidget(self._panel_stack_inner)
         panel_group.setContentsMargins(0, 0, 0, 0)
         panel_layout = QVBoxLayout(panel_group)
+        # The group box paints its title in the top frame region; keep the
+        # panels filling the column's width horizontally, but reserve the title
+        # height up top so the first panel doesn't render over ``Models
+        # (side by side)``.
+        title_h = panel_group.fontMetrics().height()
+        panel_layout.setContentsMargins(0, title_h + 8, 0, 0)
         panel_layout.addWidget(self._panel_stack)
 
         splitter = QHBoxLayout()
