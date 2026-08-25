@@ -125,9 +125,9 @@ class ModelPanel(QWidget):
         self._render_text()
 
     def append_thinking(self, delta: str) -> None:
-         # Reasoning models (e.g. gemma4) stream chain-of-thought in its own
-         # channel; surface it above the answer so a "thinking only" response is
-         # still visible rather than a blank panel.
+        # Reasoning models (e.g. gemma4) stream chain-of-thought in its own
+        # channel; surface it above the answer so a "thinking only" response is
+        # still visible rather than a blank panel.
         self.thinking += delta
         self._render_text()
 
@@ -152,22 +152,6 @@ class ModelPanel(QWidget):
     def set_structured(self, result: ValidationResult) -> None:
         self.structured = result
         self._render_structured()
-
-    def set_skipped(self) -> None:
-        # A registered model that is not part of the current run: terminal, no
-        # metrics shown, so the grid stays settled and consistent.
-        self.status = "SKIPPED"
-        self.done = True
-        self.metrics = None
-        self.structured = None
-        self.text = ""
-        self.thinking = ""
-        self.pill.setText("SKIPPED")
-        self.pill.setStyleSheet(self._pill_style("SKIPPED"))
-        self._render_metrics()
-        self._render_structured()
-        self.lbl_error.setText("")
-        self.text_edit.clear()
 
     def _render_metrics(self) -> None:
         m = self.metrics
@@ -211,7 +195,6 @@ class ModelPanel(QWidget):
             "STREAMING": "#8d6e6e",
             "PENDING": "gray",
             "IDLE": "gray",
-            "SKIPPED": "gray",
         }
         return base + f"color: {colors.get(status, 'gray')};"
 
@@ -235,6 +218,7 @@ class MainWindow(QMainWindow):
             self.registry, self._used_fallback = discover_registry(ollama_host)
 
         self._panels: dict[str, ModelPanel] = {}
+        self._active_panel_ids: list[str] = []
         self._workers: dict[str, RunWorker] = {}
         self._total = 0
         self._finished = 0
@@ -242,16 +226,30 @@ class MainWindow(QMainWindow):
         self._active = False
 
         self._build_ui()
-        self._precreate_panels()
+        self._sync_panels()
         self._update_running()
 
-    def _precreate_panels(self) -> None:
-        # Populate the side-by-side grid at launch with one panel per pre-selected
-        # model (SPEC section 5.1), so the right column is never an empty box.
-        for mid, box in self._model_boxes.items():
-            if box.isChecked() and mid not in self._panels:
+    def _sync_panels(self, active: list[str] | None = None) -> None:
+        # The checkbox state is also set while the controls are being built,
+        # before the scroll area exists; return until the UI is ready.
+        if not hasattr(self, "_panel_stack_inner_layout"):
+            return
+        # The side-by-side grid shows exactly the checked models (SPEC
+        # section 5.1): create a panel for each in checklist order, then
+        # show only the checked ones so an unselected model does not linger
+        # as a stale placeholder.
+        for mid in self._model_boxes:
+            if mid not in self._panels:
                 spec = self.registry.get(mid)
                 self.add_panel(mid, spec.display_label)
+        active = (
+            active
+            if active is not None
+            else [mid for mid, box in self._model_boxes.items() if box.isChecked()]
+        )
+        for mid, panel in self._panels.items():
+            panel.setVisible(mid in active)
+        self._active_panel_ids = list(active)
 
         # --------------------------------------------------------- UI layout
 
@@ -346,6 +344,7 @@ class MainWindow(QMainWindow):
             box_key.setChecked(spec.model.model_id in ("mock/fast", "mock/slow"))
             self._model_boxes[spec.model.model_id] = box_key
             box_key.stateChanged.connect(self._validate)
+            box_key.stateChanged.connect(lambda *_: self._sync_panels())
             box.addWidget(box_key)
 
         row = QHBoxLayout()
@@ -370,7 +369,9 @@ class MainWindow(QMainWindow):
     def add_panel(self, model_id: str, label: str) -> None:
         panel = ModelPanel(model_id, label, streaming=self.chk_stream.isChecked())
         self._panels[model_id] = panel
-        self._panel_stack_inner_layout.insertWidget(0, panel)
+        # insert above the trailing stretch so panels keep checklist order
+        pos = self._panel_stack_inner_layout.count() - 1
+        self._panel_stack_inner_layout.insertWidget(pos, panel)
 
         # --------------------------------------------------------- validation
 
@@ -449,16 +450,15 @@ class MainWindow(QMainWindow):
             return
         self._total = len(selected)
         self._finished = 0
-        # Reset every shown panel; unselected ones are marked SKIPPED so the grid
-        # stays settled and consistent even when a model is not in this run.
-        for panel_id, panel in list(self._panels.items()):
-            if panel_id not in selected:
-                panel.set_skipped()
-                continue
+        # Show exactly the selected models (creating any that are missing)
+        # and reset them; unselected panels are hidden rather than shown as
+        # a stale SKIPPED placeholder.
         for mid in selected:
             spec = self.registry.get(mid)
             if mid not in self._panels:
                 self.add_panel(mid, spec.display_label)
+        self._sync_panels(selected)
+        for mid in selected:
             self._panels[mid].reset(self._streaming)
 
         if self._sequential:
@@ -509,8 +509,8 @@ class MainWindow(QMainWindow):
             panel.pill.setStyleSheet("color: #8d6e6e;")
 
     def _on_thinking(self, panel_id: str, delta: str) -> None:
-          # Chain-of-thought for a reasoning model; mark the panel as streaming
-          # so the user sees progress even when the answer is still pending.
+        # Chain-of-thought for a reasoning model; mark the panel as streaming
+        # so the user sees progress even when the answer is still pending.
         panel = self._panels.get(panel_id)
         if panel is not None:
             panel.append_thinking(delta)
@@ -568,15 +568,15 @@ class MainWindow(QMainWindow):
 
     def _refresh_cost_task(self) -> None:
         values = [
-            p.metrics.cost_usd for p in self._panels.values() if p.metrics is not None
+            p.metrics.cost_usd for p in self.panels().values() if p.metrics is not None
         ]
         total_cost = sum(values)
         success = sum(
             1
-            for panel in self._panels.values()
+            for panel in self.panels().values()
             if panel.metrics is not None and panel.metrics.status in SUCCESS_STATUSES
         )
-        settled = sum(1 for p in self._panels.values() if p.done)
+        settled = sum(1 for p in self.panels().values() if p.done)
         value = cost_per_success_task(total_cost, success)
         self.lbl_cost_task.setText(
             f"cost/task: ${value:.4f}    ({success} ok / {settled} settled)"
@@ -591,7 +591,7 @@ class MainWindow(QMainWindow):
             self.lbl_banner.setStyleSheet("color: #2e7d32;")
 
     def panels(self) -> dict[str, ModelPanel]:
-        return self._panels
+        return {mid: self._panels[mid] for mid in self._active_panel_ids}
 
     def live_workers(self) -> list[RunWorker]:
         return list(self._workers.values())
