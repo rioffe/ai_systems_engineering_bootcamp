@@ -136,6 +136,21 @@ class ModelPanel(QWidget):
         self.structured = result
         self._render_structured()
 
+    def set_skipped(self) -> None:
+        # A registered model that is not part of the current run: terminal, no
+        # metrics shown, so the grid stays settled and consistent.
+        self.status = "SKIPPED"
+        self.done = True
+        self.metrics = None
+        self.structured = None
+        self.text = ""
+        self.pill.setText("SKIPPED")
+        self.pill.setStyleSheet(self._pill_style("SKIPPED"))
+        self._render_metrics()
+        self._render_structured()
+        self.lbl_error.setText("")
+        self.text_edit.clear()
+
     def _render_metrics(self) -> None:
         m = self.metrics
         if m is None:
@@ -178,6 +193,7 @@ class ModelPanel(QWidget):
             "STREAMING": "#8d6e6e",
             "PENDING": "gray",
             "IDLE": "gray",
+            "SKIPPED": "gray",
         }
         return base + f"color: {colors.get(status, 'gray')};"
 
@@ -208,7 +224,16 @@ class MainWindow(QMainWindow):
         self._active = False
 
         self._build_ui()
+        self._precreate_panels()
         self._update_running()
+
+    def _precreate_panels(self) -> None:
+        # Populate the side-by-side grid at launch with one panel per pre-selected
+        # model (SPEC section 5.1), so the right column is never an empty box.
+        for mid, box in self._model_boxes.items():
+            if box.isChecked() and mid not in self._panels:
+                spec = self.registry.get(mid)
+                self.add_panel(mid, spec.display_label)
 
         # --------------------------------------------------------- UI layout
 
@@ -234,7 +259,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
 
     def _build_controls(self) -> QWidget:
-        box = QVBoxLayout()
+        w = QWidget()
+        box = QVBoxLayout(w)
 
         self.lbl_banner = QLabel("")
         box.addWidget(self.lbl_banner)
@@ -315,7 +341,7 @@ class MainWindow(QMainWindow):
         self.lbl_cost_task = QLabel("cost/task: --")
         box.addWidget(self.lbl_cost_task)
 
-        return QWidget()
+        return w
 
     def add_panel(self, model_id: str, label: str) -> None:
         panel = ModelPanel(model_id, label, streaming=self.chk_stream.isChecked())
@@ -399,11 +425,17 @@ class MainWindow(QMainWindow):
             return
         self._total = len(selected)
         self._finished = 0
-        for panel_id in selected:
-            spec = self.registry.get(panel_id)
-            if panel_id not in self._panels:
-                self.add_panel(panel_id, spec.display_label)
-            self._panels[panel_id].reset(self._streaming)
+        # Reset every shown panel; unselected ones are marked SKIPPED so the grid
+        # stays settled and consistent even when a model is not in this run.
+        for panel_id, panel in list(self._panels.items()):
+            if panel_id not in selected:
+                panel.set_skipped()
+                continue
+        for mid in selected:
+            spec = self.registry.get(mid)
+            if mid not in self._panels:
+                self.add_panel(mid, spec.display_label)
+            self._panels[mid].reset(self._streaming)
 
         if self._sequential:
             self._queued = selected

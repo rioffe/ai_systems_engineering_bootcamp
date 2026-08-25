@@ -35,9 +35,14 @@ def test_t02_httpx_imports_only_in_ollama():
 def test_t02_no_vendor_sdk_named_anywhere():
     sources = _module_sources()
     vendors = ["openai", "anthropic", "cohere", "azure.ai", "google.generativeai"]
+    # Match each vendor as a standalone identifier, not a bare substring: a bare
+    # `v in text` spuriously flags coincidental substrings (e.g. the word
+    # "coherent" contains "cohere") while still catching a real reference.
     for text in sources.values():
         for v in vendors:
-            assert v not in text, f"vendor SDK named: {v}"
+            pat = r"(?<![A-Za-z0-9_])" + re.escape(v) + r"(?![A-Za-z0-9_])"
+            m = re.search(pat, text)
+            assert m is None, f"vendor SDK named: {v}"
 
 
 def test_t02_provider_shape_leaks_only_in_ollama():
