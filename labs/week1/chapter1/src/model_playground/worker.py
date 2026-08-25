@@ -45,6 +45,7 @@ from .types import Message, Usage
 
 class RunWorker(QThread):
     token = pyqtSignal(str, str)
+    token_thinking = pyqtSignal(str, str)
     metrics_ready = pyqtSignal(str, object)
     structured = pyqtSignal(str, object)
     crashed = pyqtSignal(str, str)
@@ -159,6 +160,8 @@ class RunWorker(QThread):
             )
             return
         self.token.emit(model_id, resp.text)
+        if getattr(resp, "thinking", ""):
+            self.token_thinking.emit(model_id, resp.thinking)
         # non-streaming: t_first_token None => TTFT == total latency (E-04 / I-004).
         self._finish(COMPLETED, t_request, None, resp.usage or Usage(0, 0), p_in, p_out)
 
@@ -185,6 +188,13 @@ class RunWorker(QThread):
                     error=f"exceeded {self._timeout_s}s",
                 )
                 return
+            # A reasoning model (e.g. gemma4) streams chain-of-thought in the
+            # `thinking` channel while `content` stays empty; count it toward
+            # first-token timing (I-005) or TPS / TTFT would read 0 for it.
+            if chunk.thinking:
+                if t_first is None:
+                    t_first = time.monotonic()
+                self.token_thinking.emit(model_id, chunk.thinking)
             if chunk.delta:
                 if t_first is None:
                     t_first = time.monotonic()

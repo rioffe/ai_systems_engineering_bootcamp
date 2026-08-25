@@ -91,6 +91,9 @@ class StreamChunk:
     delta: str
     finished: bool
     usage: Usage | None = None
+    # A reasoning model (e.g. gemma4) streams its chain-of-thought in a separate
+    # `thinking` channel while `content` stays empty; empty for non-thinking models.
+    thinking: str = ""
 
 
 @dataclass(slots=True)
@@ -100,3 +103,5 @@ class ModelResponse:
     text: str
     usage: Usage
     model_id: str
+    # Chain-of-thought for reasoning models; "" for models that don't think.
+    thinking: str = ""

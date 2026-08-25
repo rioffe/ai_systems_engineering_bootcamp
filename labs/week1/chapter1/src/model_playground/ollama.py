@@ -45,10 +45,12 @@ def _options(params: GenerationParams) -> dict:
     return base
 
 
-def _best_effort_usage(text_parts: list[str]) -> Usage:
-    # E-15 fallback when a stream ends without a usable `done` line: a rough
-    # whitespace token count of the accumulated text; 0 prompt tokens.
-    return Usage(0, len("".join(text_parts).split()))
+def _best_effort_usage(text_parts: list[str], thinking_parts: list[str] | None = None) -> Usage:
+    # E-15 fallback when a stream ends without a usable `done` line, or a reasoning
+    # model put every token in the thinking channel: a rough whitespace count of the
+    # accumulated text plus thinking; 0 prompt tokens.
+    text = "".join(text_parts) + "".join(thinking_parts or [])
+    return Usage(0, len(text.split()))
 
 
 class OllamaClient:
@@ -102,11 +104,13 @@ class OllamaClient:
                 f"Ollama /api/chat HTTP {resp.status_code}: {resp.text[:200]}"
             )
         data = resp.json()
-        text = (data.get("message") or {}).get("content") or ""
+        message = data.get("message") or {}
+        text = message.get("content") or ""
+        thinking = message.get("thinking") or ""
         usage = Usage(
             int(data.get("prompt_eval_count") or 0), int(data.get("eval_count") or 0)
         )
-        return ModelResponse(text=text, usage=usage, model_id=model)
+        return ModelResponse(text=text, thinking=thinking, usage=usage, model_id=model)
 
     def stream_chat(self, model, messages, params):
         payload = self._payload(model, messages, params, True)
@@ -122,6 +126,7 @@ class OllamaClient:
             if resp.status_code != 200:
                 raise OllamaError(f"Ollama /api/chat HTTP {resp.status_code}")
             text_parts: list[str] = []
+            thinking_parts: list[str] = []
             usage: Usage | None = None
             for raw_line in resp.iter_lines():
                 if not raw_line or raw_line.strip() == "":
@@ -131,11 +136,13 @@ class OllamaClient:
                 except json.JSONDecodeError:
                     continue
                 delta = ""
+                thinking = ""
                 message = obj.get("message")
                 if isinstance(message, dict):
                     delta = message.get("content") or ""
-                if delta:
-                    text_parts.append(delta)
+                    thinking = message.get("thinking") or ""
+                if thinking:
+                    thinking_parts.append(thinking)
                 if obj.get("done"):
                     try:
                         usage = Usage(
@@ -143,12 +150,14 @@ class OllamaClient:
                             int(obj.get("eval_count") or 0),
                         )
                     except (TypeError, ValueError):
-                        usage = _best_effort_usage(text_parts)
-                    yield StreamChunk(delta, True, usage)
+                        usage = _best_effort_usage(text_parts, thinking_parts)
+                    yield StreamChunk(delta, True, usage, thinking)
                     return
-                if delta:
-                    yield StreamChunk(delta, False, None)
-            yield StreamChunk("", True, usage or _best_effort_usage(text_parts))
+                if delta or thinking:
+                    if delta:
+                        text_parts.append(delta)
+                    yield StreamChunk(delta, False, None, thinking)
+            yield StreamChunk("", True, usage or _best_effort_usage(text_parts, thinking_parts))
 
     @staticmethod
     def _payload(model, messages, params, stream) -> dict:

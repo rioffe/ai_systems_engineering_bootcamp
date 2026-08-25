@@ -60,6 +60,7 @@ class ModelPanel(QWidget):
         self.label_text = label
         self.status = "PENDING"
         self.text = ""
+        self.thinking = ""
         self.metrics: RunMetrics | None = None
         self.structured: ValidationResult | None = None
         self.streaming = streaming
@@ -108,6 +109,7 @@ class ModelPanel(QWidget):
         self.streaming = streaming
         self.status = "PENDING"
         self.text = ""
+        self.thinking = ""
         self.metrics = None
         self.structured = None
         self.done = False
@@ -120,7 +122,22 @@ class ModelPanel(QWidget):
 
     def append_text(self, delta: str) -> None:
         self.text += delta
-        self.text_edit.setPlainText(self.text)
+        self._render_text()
+
+    def append_thinking(self, delta: str) -> None:
+         # Reasoning models (e.g. gemma4) stream chain-of-thought in its own
+         # channel; surface it above the answer so a "thinking only" response is
+         # still visible rather than a blank panel.
+        self.thinking += delta
+        self._render_text()
+
+    def _render_text(self) -> None:
+        parts: list[str] = []
+        if self.thinking:
+            parts.append("(thinking)\n" + self.thinking)
+        if self.text:
+            parts.append(self.text)
+        self.text_edit.setPlainText("\n\n".join(parts))
 
     def set_metrics(self, metrics: RunMetrics) -> None:
         self.metrics = metrics
@@ -144,6 +161,7 @@ class ModelPanel(QWidget):
         self.metrics = None
         self.structured = None
         self.text = ""
+        self.thinking = ""
         self.pill.setText("SKIPPED")
         self.pill.setStyleSheet(self._pill_style("SKIPPED"))
         self._render_metrics()
@@ -474,6 +492,7 @@ class MainWindow(QMainWindow):
         )
         self._panels[panel_id].status = "PENDING"
         worker.token.connect(self._on_token)
+        worker.token_thinking.connect(self._on_thinking)
         worker.metrics_ready.connect(self._on_metrics)
         worker.structured.connect(self._on_structured)
         worker.crashed.connect(self._on_crashed)
@@ -485,6 +504,16 @@ class MainWindow(QMainWindow):
         panel = self._panels.get(panel_id)
         if panel is not None:
             panel.append_text(delta)
+            panel.status = "STREAMING"
+            panel.pill.setText("STREAMING")
+            panel.pill.setStyleSheet("color: #8d6e6e;")
+
+    def _on_thinking(self, panel_id: str, delta: str) -> None:
+          # Chain-of-thought for a reasoning model; mark the panel as streaming
+          # so the user sees progress even when the answer is still pending.
+        panel = self._panels.get(panel_id)
+        if panel is not None:
+            panel.append_thinking(delta)
             panel.status = "STREAMING"
             panel.pill.setText("STREAMING")
             panel.pill.setStyleSheet("color: #8d6e6e;")
