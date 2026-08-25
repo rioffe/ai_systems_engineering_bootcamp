@@ -1,0 +1,43 @@
+[project]
+name = "model-playground"
+version = "0.1.0"
+description = "PyQt5 + uv inference substrate: run one prompt through multiple LLMs side by side, measuring latency (TTFT/TPS), token usage, cost, and validated structured output."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+
+# Runtime dependencies (see SPEC.md §10 "Dependencies & Environment" for rationale)
+dependencies = [
+    "PyQt5>=5.15,<6",
+    "httpx>=0.27",
+    "jsonschema>=4.21",
+]
+
+[project.scripts]
+model-playground = "model_playground.app:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-qt>=4",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/model_playground"]
+
+[tool.uv]
+# Project is a source layout under src/
+package = true
+
+[tool.pytest.ini_options]
+# GUI tests use Qt's offscreen platform via tests/conftest.py (SPEC E-10).
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+# The worker's top-level `except Exception` is intentional: it must surface any
+# fault to the UI (SPEC E-07) rather than let the thread abort silently.
+ignore = ["BLE001"]

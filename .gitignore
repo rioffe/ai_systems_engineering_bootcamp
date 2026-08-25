@@ -10,3 +10,9 @@ curriculum/week1/fix_unicode.py
 # Vim swap files
 *.swp
 *.swo
+
+# Python (labs / playgrounds)
+__pycache__/
+*.pyc
+.venv/
+.ruff_cache/
