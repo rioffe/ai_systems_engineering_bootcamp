@@ -135,20 +135,20 @@ stages with a terminal outcome. A failure at any stage terminates **that case** 
 leaves other cases in the suite running (one question never poisons the next).
 
 ```
-        +-------+  start   +-----------+ ok   +-----------+ ok   +-----------+
+        +-------+  start    +-----------+ ok   +-----------+ ok   +-----------+
         | IDLE  | --------> | RETRIEVING| ---> | CONTEXTING| ---> | GENERATING| ---> ...
-        +---+---+           +-----+-----+       +-----+-----+       +-----+-----+
-            ^                       | err              | err             | err/timeout
-            |                       v                  v                 v
-            |                 +-----------------+ +-------+         +--------+
-            +---------------------------------- | RETRIEVAL|   | CONTEXT|  | GENERATION|  (terminal,
-  all settled |  terminal: SCORED/PARTIAL/ERROR  |  ERROR  |   | ERROR |  | ERROR   |   failure_stage set,
-            |                                    +-------+   +-------+  +---------+   per R-12)
+        +---+---+           +-----+-----+      +-----+-----+      +-----+-----+
+            ^                       | err            | err             | err/timeout
+            |                       v                v                 v
+            |                       +----------+   +--------+     +-----------+
+            +---------------------- | RETRIEVAL|   | CONTEXT|     | GENERATION|  (terminal,
+  all settled |  terminal: SCORED/PARTIAL/ERROR    |  ERROR |     | ERROR     |  | ERROR   |   failure_stage set,
+            |                       +----------+   +--------+     +-----------+   per R-12)
             |                                                         
 ```
 
 | State | Meaning | Terminal? |
-| ------- | --------- | ----------- |
+| ------- | ----------------------- | ----- |
 | `IDLE` | Case scheduled; not yet started. | no |
 | `RETRIEVING` | BM25 `search(query, k)` running over the corpus. | no |
 | `CONTEXTING` | `build_context(scored, token_budget)` — dedupe/rank/truncate/label. | no |
@@ -206,24 +206,25 @@ The **deterministic** stages (retrieve, context, metrics) and the **probabilisti
 ```python
 @dataclass
 class Document:
-    doc_id: str            # stable id, e.g. "policy-17", "travel-03", "001"  (must equal the §15 filename stem when loaded from documents/)
+    doc_id: str           # stable id, e.g. "policy-17", "travel-03", "001"  (must equal 
+                          # the §15 filename stem when loaded from documents/)
     text: str             # full document text
     domain: str | None = None   # coarse category used for distractor grouping + provenance labels
 
 def load_corpus(path: str) -> list[Document]:
      """Load `documents/NNN.txt` (or a single .jsonl) into Document[]. doc_id =
-    filename stem by default. Raises on a malformed entry (E-01). Pure, no LLM/network.""
+    filename stem by default. Raises on a malformed entry (E-01). Pure, no LLM/network."""
 
 def generate_corpus_and_questions(out_dir: str, n_docs: int = 100, n_questions: int = 25,
                                  seed: int = 42) -> None:
      """Deterministically write the 100-doc corpus under out_dir/documents/ AND a
     grounded `questions.json` (§15) with the §17 tiers. Seeded => reproducible (R-15).
-    Ground truth (question<->relevant_documents) is fixed at generation time.""
+    Ground truth (question<->relevant_documents) is fixed at generation time."""
 ```
 
 ### C-02 Retrieval (BM25, deterministic — R-02, R-17)
 
-```
+```python
 class BM25Retriever:
     def __init__(self, documents: list[Document], *, k1: float = 1.5, b: float = 0.75,
                  stop_words: frozenset[str] | None = None) -> None: ...
@@ -292,11 +293,11 @@ class Question:
 @dataclass
 class Answer:
     q_id: str
-    text: str                    # the free-form answer (Answer.answer)
-    confidence: float            # [0,1]
-    sources: list[str]           # doc_ids the model claims to cite; must be a subset of context.provenance (I-003)
-    usage: "Usage"               # ch1 C-01 Usage (prompt/completion tokens, total), for observability
-    status: str                  # "COMPLETED" | "ERROR"  (parse/validation exhausted)
+    text: str          # the free-form answer (Answer.answer)
+    confidence: float  # [0,1]
+    sources: list[str] # doc_ids the model claims to cite; must be a subset of context.provenance (I-003)
+    usage: "Usage"     # ch1 C-01 Usage (prompt/completion tokens, total), for observability
+    status: str        # "COMPLETED" | "ERROR"  (parse/validation exhausted)
 
 # §19/§20 verdict schema (produced by the JUDGE LLM, schema-validated):
 #   { "correct": bool, "supported": bool, "complete": bool,
@@ -430,7 +431,7 @@ def aggregate(rows: list[RunMetrics]) -> AggregateMetrics:
 ```
 
 **§18 worked example (the T-suite pins this):** `expected = {D3, D17, D42}`, `retrieved =
-[D3, D17, D88, D91]$\Rightarrow$`TP=2, FP=2, FN=1`, $Precision = 2/4 = 0.50$, $Recall = \frac{2}{3} \approx 0.667$,
+[D3, D17, D88, D91]` $\Rightarrow TP=2, FP=2, FN=1, Precision = 2/4 = 0.50, Recall = \frac{2}{3} \approx 0.667$,
 $F1 = \frac{2PR}{P+R} \approx 0.571$. This exact tuple is asserted by T-05.
 
 ---
@@ -475,21 +476,21 @@ Reuses the **same** `retrieval/context/model/judgment/metrics` modules; the only
 `QThread` worker + widgets. Layout:
 
 ```
-+--------------------------------------------------------------------------+
++----------------------------------------------------------------------------+
 | RAG Eval Harness — context = the program (ch2 §1)                          |
-+------------------------------+-------------------------------------------+
-| QUESTION (QPlainTextEdit)      | RETRIEVAL (ranked) | ANSWER + VERDICT |
++--------------------------------+-------------------------------------------+
+| QUESTION (QPlainTextEdit)      | RETRIEVAL (ranked) |     ANSWER + VERDICT |
 | model / k / budget / tiers spin|  doc_id  score | ctx | text | confidence | [Run] [Cancel] |
-|  [Run] state label            |  [001]  3.42 | Y   | ... | sources: []   | verdict pills: |
-| banner (Ollama/mode)          |  [023]  2.10 | Y   | ... |             | correct Y/N  |
-|                                |  [88]  0.90 | N   | ... |             | supported Y/N |
+|  [Run] state label             |  [001]  3.42 | Y   | ... | sources: []   | verdict pills: |
+| banner (Ollama/mode)           |  [023]  2.10 | Y   | ... |               | correct Y/N    |
+|                                |  [88]   0.90 | N   | ... |               | supported Y/N  |
 |   [BM25 rank list with scores, truncation badge; | complete Y/N  | halluc rate |
 |    token budget bar |           |            | + per-case metrics (precision/recall/f1, tokens, latency) |
-+------------------------------+-------------------------------------------+
++------------------------------+---------------------------------------------+
 ```
 
-GUI controls validate like ch1 §5.2 (non-empty question; `k` `1..100`, `budget` `>= 1",
-tiers $\geq 1$ selected;`Cancel` enables only while running). On `Run` the pipeline executes off-thread (E-16); the panel shows the ranked BM25 list **with scores**, a truncation badge when `Context.truncated`, the grounded answer with its cited`sources`, and the judge verdict pills. **One question at a time** (R-13) — no batch/multi-turn.
+GUI controls validate like ch1 §5.2 (non-empty question; $k \in[1,100]$, $budget \geq 1$,
+$tiers \geq 1$ selected; `Cancel` enables only while running). On `Run` the pipeline executes off-thread (E-16); the panel shows the ranked BM25 list **with scores**, a truncation badge when `Context.truncated`, the grounded answer with its cited `sources`, and the judge verdict pills. **One question at a time** (R-13) — no batch/multi-turn.
 
 ---
 
@@ -517,7 +518,7 @@ tiers $\geq 1$ selected;`Cancel` enables only while running). On `Run` the pipel
 ## 7. Constraints (precise and measurable)
 
 | ID | Constraint | Measurement |
-| ---- | ------------ | ------------- |
+| ---- | ---------------- | ----- |
 | **K-01** | The test suite runs **fully offline** (no Ollama, no network, no model download) in `< 90`s on a dev box; it never imports or contacts the Ollama daemon. | T-14 |
 | **K-02** | Retrieval + context + metrics (the deterministic boundary) run for the **entire 100-doc / 25-question default dataset** in `< 5`s with the `MockLLM` double. | smoke / T-13 |
 | **K-03** | Default parameters: `k=5`, `token_budget=2000`, `k1=1.5`, `b=0.75`, `max_retries=2`, `timeout_s=60`, `seed=42`. All overridable via CLI flags (§5.1). | T-13 |
@@ -569,7 +570,7 @@ the GUI path is offscreen; the only *real* model call is the **manual smoke** (�
 ### 9.1 Corpus and question dataset (§15, §17)
 
 | ID | Criterion |
-| ---- | ----------- |
+| ---- | --------------- |
 | **T-01** | `gen-corpus --n-docs 100 --n-questions 25 --seed 42` writes exactly 100 distinct `documents/NNN.txt` and a `questions.json` of 25 questions, each with `question`, `gold_answer`, non-empty `relevant_docs` (ids $\subseteq$ corpus), and a `tier` $\in$ the four §17 tiers; **two invocations with the same seed produce byte-identical files** (R-15). |
 | **T-01a** | `load_corpus` + `load_questions` accept the generated artifacts and raise on a blank/missing `relevant_docs` or a `relevant_docs` id absent from the corpus (E-15, I-013). |
 | **T-01b** | The 25-question set has a **non-trivial per-tier distribution** (each tier present, with a `distractor` question whose `relevant_docs` are *also* present as lexically-similar-but-irrelevant docs in the corpus). |
@@ -577,16 +578,16 @@ the GUI path is offscreen; the only *real* model call is the **manual smoke** (�
 ### 9.2 Retrieval (deterministic — R-02, R-17, no LLM)
 
 | ID | Criterion |
-| ---- | ----------- |
+| ---- | --------------- |
 | **T-04** | **Determinism (I-002):** `BM25Retriever(corpus).search(q, k)` is byte-identical across two builds with the **same** corpus + params; the tie-break (doc_id asc, then score desc) is respected by a crafted duplicate-score corpus. |
-| **T-05a** | **The §18 worked example (I-001):** `retrieval_pr(expected={D3,D17,D42}, retrieved=[D3,D17,D88,D91])` $\Rightarrow$ `TP=2, FP=2, FN=1`, $Precision = 0.50$, $Recall \approx 0.667$, $F1 \approx 0.571$. |
+| **T-05a** | **The §18 worked example (I-001):** `retrieval_pr(expected={D3,D17,D42}, retrieved=[D3,D17,D88,D91])` $\Rightarrow TP=2, FP=2, FN=1$, $Precision = 0.50$, $Recall \approx 0.667$, $F1 \approx 0.571$. |
 | **T-05b** | **Guards (I-007):** empty `retrieved` $\Rightarrow$ `precision=None`; all-irrelevant $\Rightarrow$ `precision=0.0`; `P+R==0` $\Rightarrow$ `f1=0.0` (no `inf`/`nan`). |
 | **T-05c** | **Ranking sanity:** on a seeded corpus a `question`'s `relevant_docs` appear in the top `k` of their own search (recall $\approx 1$) for the `easy`/`multi` tiers — the *hard* and *distractor* tiers are *allowed* to miss, but never crash. |
 
 ### 9.3 Context + budgets (deterministic — R-03, §14, §3)
 
 | ID | Criterion |
-| ---- | ----------- |
+| ---- | --------------- |
 | **T-06** | **Budget (I-004/I-006):** `build_context(scored, token_budget=N)` always yields `Context.tokens <= N`; `truncated=True` **iff** a doc was dropped. A crafted `token_budget` smaller than the top doc forces `truncated=True` with a non-empty prompt (E-05). |
 | **T-06a** | **Dedupe (E-06/I-004):** a two-doc dedupe of identical text keeps the **highest-rank** instance and sets `truncated=True`. |
 | **T-06b** | **Provenance:** every id in `Context.provenance` $\subseteq$ the included `docs\", and`est_tokens` is the **same formula** used by the builder and by the report (I-005). |
@@ -594,7 +595,7 @@ the GUI path is offscreen; the only *real* model call is the **manual smoke** (�
 ### 9.4 LLM + Judge + Metrics (offline, `MockLLM` + `MockJudge` — R-05/06/07/08/09)
 
 | ID | Criterion |
-| ---- | ----------- |
+| ---- | --------------- |
 | **T-08** | **Schema gate (I-010):** the answer schema rejects an out-of-range `confidence` (e.g. `1.5`) and a missing `required` field; a malformed verdict is likewise rejected; both retry up to `max_retries` then set `status="ERROR"`. Only `jsonschema`-valid objects reach `COMPLETED`/`JUDGED`. |
 | **T-08a** | **MockJudge determinism + hallucination math (R-09):** for a crafted case whose `MockLLM` answer contains one claim absent from the context, `MockJudge` reports `unsupported_claims` and `total_factual_claims` such that `hallucination_rate = unsupported/total`; `MockJudge` is bitwise-reproducible under a fixed seed (R-15). `<hallucination rate with an all-supported answer = 0.0; with zero total claims = 0.0 (I-007).>` |
 | **T-08b** | **Aggregate (I-012/R-08):** over a synthetic row-set, `aggregate` yields the exact mean `precision/recall/f1/answer_accuracy` over the **non-None** rows only; `by_tier` has one sub-aggregate per tier present. |
@@ -610,7 +611,7 @@ the GUI path is offscreen; the only *real* model call is the **manual smoke** (�
 ### 9.6 Structure / architecture (ch1 T-02 analog — I-009, R-17)
 
 | ID | Criterion |
-| ---- | ----------- |
+| ---- | --------------- |
 | **T-02** | **LLM-is-only-in-two-places (I-009):** a source scan of `retrieval.py`, `context.py`, `metrics.py`, and `corpus.py` finds **no** reference to `OllamaClient`, `LLM`, `Judge`, `Ollama`, `httpx`, or any model name. (`httpx`/`OllamaClient` appear only in `model.py`/`judgment.py`.) The suite imports and runs with zero external services (I-011/R-14). |
 | **T-14** | **Offline full-suite (K-01, I-011):** `uv run pytest` (default) passes with no Ollama daemon, no network, and no model — all cases drive `MockLLM`+`MockJudge`. |
 | **T-15** | **Ground-truth integrity (E-15, I-013):** `load_questions` raises on a `relevant_docs` id absent from the loaded corpus; the CLI exits `3` in that case (asserted via a synthetic corrupt `questions.json`). |
