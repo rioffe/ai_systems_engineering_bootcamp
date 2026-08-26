@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from .types import Context, ScoredDoc
 
+
 # O-2 token estimate. Approximate by design (a real tokenizer would leak a model into the
 # deterministic boundary, contradicting I-009 -- Q-04): ceil(chars / 4) ~ 4 chars/token.
 # Empty text -> 0.

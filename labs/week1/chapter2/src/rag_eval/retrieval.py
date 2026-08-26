@@ -32,9 +32,32 @@ _NUMERIC = re.compile(r"^\d+$")
 # a deterministic frozenset so behaviour is reproducible (I-002).
 DEFAULT_STOP_WORDS: frozenset[str] = frozenset(
     {
-        "a", "an", "the", "and", "or", "but", "if", "then", "of", "to", "in", "on",
-        "for", "with", "from", "that", "this", "is", "are", "was", "were", "be",
-        "by", "as", "at", "it",
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "but",
+        "if",
+        "then",
+        "of",
+        "to",
+        "in",
+        "on",
+        "for",
+        "with",
+        "from",
+        "that",
+        "this",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "by",
+        "as",
+        "at",
+        "it",
     }
 )
 

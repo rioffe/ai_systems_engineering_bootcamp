@@ -27,6 +27,7 @@ from typing import Any
 
 from .types import Document, Question
 
+
 # A corpus/question artifact that is unusable. The offending path/message is carried so the
 # CLI can surface it with exit code 3 (§5.1 / E-01 / E-15 / T-15).
 class CorpusError(ValueError):
@@ -48,7 +49,7 @@ def load_corpus(
     ``*.txt``) with ``doc_id = filename stem``. `path`/`jsonl` that is a ``.jsonl`` or
     ``.json`` document file loads line(s) of ``{doc_id, text, domain?}``. A malformed entry
     raises ``CorpusError`` (E-01) with the offending path unless ``strict=False`` (skip).
-        """
+    """
     target = jsonl or path or docs_dir
     if target is None:
         target = "documents"
@@ -67,7 +68,7 @@ def load_corpus(
 def _load_txt_dir(directory: str, *, strict: bool = True) -> list[Document]:
     files = sorted(
         f for f in os.listdir(directory) if f.endswith(".txt") and not f.startswith(".")
-        )
+    )
     if not files:
         raise CorpusError(f"no .txt documents found in {directory!r}")
     docs: list[Document] = []
@@ -76,7 +77,7 @@ def _load_txt_dir(directory: str, *, strict: bool = True) -> list[Document]:
         try:
             with open(full, encoding="utf-8") as handle:
                 text = handle.read()
-        except OSError as exc:   # unreadable file (E-01)
+        except OSError as exc:  # unreadable file (E-01)
             if not strict:
                 continue
             raise CorpusError(f"cannot read {full}: {exc}") from exc
@@ -101,7 +102,9 @@ def _load_jsonl(path: str, *, strict: bool = True) -> list[Document]:
             except json.JSONDecodeError as exc:
                 if not strict:
                     continue
-                raise CorpusError(f"{path}:{lineno} malformed JSON (E-01): {exc}") from exc
+                raise CorpusError(
+                    f"{path}:{lineno} malformed JSON (E-01): {exc}"
+                ) from exc
             _emit_doc(obj, path, lineno, docs, strict)
     return docs
 
@@ -125,7 +128,9 @@ def _emit_doc(obj, origin, index, out, strict) -> None:
     if not isinstance(obj, dict):
         if not strict:
             return
-        raise CorpusError(f"{origin}: expected a document object, got {type(obj).__name__}")
+        raise CorpusError(
+            f"{origin}: expected a document object, got {type(obj).__name__}"
+        )
     doc_id = str(obj.get("doc_id", index + 1))
     text = obj.get("text", "")
     if not str(text).strip():
@@ -155,10 +160,12 @@ def load_questions(
     ``relevant_docs`` id must exist in the corpus; a blank/missing ``relevant_docs`` or an
     id **absent** from the corpus is a load-time ``CorpusError`` (fail fast, not a silent
     0-recall). Pass ``allow_dangling=True`` (or leave `corpus` None) to skip that check.
-        """
+    """
     target = jsonl or dataset_jsonl or dataset or path or "questions.json"
     records = _load_question_records(target, strict=strict)
-    corpus_ids: set[str] | None = {d.doc_id for d in corpus} if corpus is not None else None
+    corpus_ids: set[str] | None = (
+        {d.doc_id for d in corpus} if corpus is not None else None
+    )
 
     questions: list[Question] = []
     for i, rec in enumerate(records, start=1):
@@ -174,7 +181,7 @@ def load_questions(
             if missing:
                 raise CorpusError(
                     f"{origin}: relevant_docs {missing!r} absent from the corpus (I-013/E-15/T-15)"
-            )
+                )
         questions.append(q)
     return questions
 
@@ -191,7 +198,9 @@ def _load_question_records(target: str, *, strict: bool = True) -> list[dict]:
                 except json.JSONDecodeError as exc:
                     if not strict:
                         continue
-                    raise CorpusError(f"{target}:{lineno} malformed JSON (E-01): {exc}") from exc
+                    raise CorpusError(
+                        f"{target}:{lineno} malformed JSON (E-01): {exc}"
+                    ) from exc
         return out
     try:
         with open(target, encoding="utf-8") as handle:
@@ -209,7 +218,9 @@ def _build_question(rec, origin, fallback_index, strict):
     if not isinstance(rec, dict):
         if not strict:
             return None
-        raise CorpusError(f"{origin}: expected a question object, got {type(rec).__name__}")
+        raise CorpusError(
+            f"{origin}: expected a question object, got {type(rec).__name__}"
+        )
     q_id = str(rec.get("q_id", f"q{fallback_index:03d}"))
     text = rec.get("question", "")
     if not str(text).strip():
@@ -234,12 +245,33 @@ def _build_question(rec, origin, fallback_index, strict):
 # Six domains x six subjects = 36 grounded "cells"; the corpus fills the 100 docs across them
 # and the question set is drawn from them with seeded, reproducible choice (R-15).
 DOMAINS = {
-    "policy": ["reimbursement", "travel", "expense", "procurement", "leave", "overtime"],
-    "travel": ["hotel", "airfare", "per_diem", "visa", "ground_transport", "international"],
+    "policy": [
+        "reimbursement",
+        "travel",
+        "expense",
+        "procurement",
+        "leave",
+        "overtime",
+    ],
+    "travel": [
+        "hotel",
+        "airfare",
+        "per_diem",
+        "visa",
+        "ground_transport",
+        "international",
+    ],
     "finance": ["credit_limit", "budget", "invoice", "payroll", "refund", "grant"],
     "ops": ["on_call", "incident", "deployment", "retention", "backup", "capacity"],
     "security": ["password", "two_factor", "access", "encryption", "audit", "breach"],
-    "hr": ["onboarding", "compensation", "benefits", "termination", "promotion", "conduct"],
+    "hr": [
+        "onboarding",
+        "compensation",
+        "benefits",
+        "termination",
+        "promotion",
+        "conduct",
+    ],
 }
 DOMAIN_NAMES = sorted(DOMAINS)
 SCOPES = ["all staff", "executives", "new hires", "contractors", "managers"]
@@ -253,7 +285,9 @@ def _doc_text(i, rng, domain=None, subject=None, scope=None, amount=None, year=N
     if scope is None:
         scope = SCOPES[(i - 1) % len(SCOPES)]
     if amount is None:
-        amount = 1000 + (i - 1) * 50   # unique per doc, so grounded questions stay distinct
+        amount = (
+            1000 + (i - 1) * 50
+        )  # unique per doc, so grounded questions stay distinct
     if year is None:
         year = YEARS[(i - 1) % len(YEARS)]
     stem = f"{i:03d}"
@@ -275,12 +309,12 @@ def generate_corpus(
 ) -> tuple[list[Document], dict]:
     """Deterministically author the ~100-doc corpus (R-15/T-01, §15).
 
-    For a fixed `seed` the documents written (or returned) are **byte-identical** across
-    runs. Returns ``(docs, info)``: the docs plus the per-doc generation metadata
-    (domain/subject/scope/amount/year) used to author the grounded questions. When
-    ``out_dir`` is given and ``write`` is True, the corpus is written to ``out_dir``
-  (NNN.txt); the JSONL mirror (``corpus.jsonl`` used by `--corpus`) is also written.
-        """
+      For a fixed `seed` the documents written (or returned) are **byte-identical** across
+      runs. Returns ``(docs, info)``: the docs plus the per-doc generation metadata
+      (domain/subject/scope/amount/year) used to author the grounded questions. When
+      ``out_dir`` is given and ``write`` is True, the corpus is written to ``out_dir``
+    (NNN.txt); the JSONL mirror (``corpus.jsonl`` used by `--corpus`) is also written.
+    """
     rng = random.Random(seed)
     info: dict[str, Any] = {}
     docs: list[Document] = []
@@ -317,10 +351,8 @@ def generate_corpus_and_questions(
     The distribution is non-trivial (T-01b): the four tiers are all present, the
     ``distractor`` questions are anchored to docs that have lexically-similar-but-irrelevant
     siblings in the corpus (§6/§7/§17). Fully deterministic for a fixed `seed` (R-15).
-        """
-    docs, info = generate_corpus(
-        out_dir, n_docs=n_docs, seed=seed, write=write
-    )
+    """
+    docs, info = generate_corpus(out_dir, n_docs=n_docs, seed=seed, write=write)
     questions = _generate_questions(docs, info, n_questions=n_questions, seed=seed)
     if write and out_dir is not None:
         _write_questions(out_dir, questions, seed, n_questions, n_docs)
@@ -376,20 +408,16 @@ def _generate_questions(
             counter += 1
             records.append(
                 {
-                        "q_id": f"{tier[0]}{counter:03d}",
-                        "question": m["question"],
-                        "gold_answer": m["gold_answer"],
-                        "relevant_docs": m["relevant_docs"],
-                        "tier": tier,
+                    "q_id": f"{tier[0]}{counter:03d}",
+                    "question": m["question"],
+                    "gold_answer": m["gold_answer"],
+                    "relevant_docs": m["relevant_docs"],
+                    "tier": tier,
                 }
             )
             made += 1
     keys = ("q_id", "question", "gold_answer", "relevant_docs", "tier")
-    return [
-        Question(**{k: r[k] for k in keys}) for r in records
-        ]
-
-
+    return [Question(**{k: r[k] for k in keys}) for r in records]
 
 
 def _make_question(rng, by_domain, info, tier):
@@ -407,7 +435,12 @@ def _make_question(rng, by_domain, info, tier):
             f"for {m['year']}, at the {m['amount']}-dollar figure?"
         )
         gold = f"{m['amount']} dollars"
-        return {"question": q, "gold_answer": gold, "relevant_docs": [did], "tier": tier}
+        return {
+            "question": q,
+            "gold_answer": gold,
+            "relevant_docs": [did],
+            "tier": tier,
+        }
 
     if tier == "multi":
         dom = rng.choice([d for d in domains if len(by_domain[d]) >= 2] or None)
@@ -421,7 +454,12 @@ def _make_question(rng, by_domain, info, tier):
             f"in {dom} across {ma['year']} and {mb['year']} ({ma['amount']} and {mb['amount']})?"
         )
         gold = f"{ma['amount']} and {mb['amount']} dollars"
-        return {"question": q, "gold_answer": gold, "relevant_docs": [a, b], "tier": tier}
+        return {
+            "question": q,
+            "gold_answer": gold,
+            "relevant_docs": [a, b],
+            "tier": tier,
+        }
 
     if tier == "synthesis":
         # Combine up to 3 docs across domains; the answer must synthesize them.
@@ -438,7 +476,12 @@ def _make_question(rng, by_domain, info, tier):
             f"limits for {info[picks[0]]['scope']}, what total applies ({', '.join(parts)})?"
         )
         gold = f"sum {', '.join(parts)} dollars"
-        return {"question": q, "gold_answer": gold, "relevant_docs": picks, "tier": tier}
+        return {
+            "question": q,
+            "gold_answer": gold,
+            "relevant_docs": picks,
+            "tier": tier,
+        }
 
     if tier == "distractor":
         # A real target doc PLUS lexically-similar siblings in the same cell that are NOT
@@ -453,7 +496,12 @@ def _make_question(rng, by_domain, info, tier):
             f"{m['scope']} for {m['year']}, ignoring similar {dom} {m['subject']} references?"
         )
         gold = f"{m['amount']} dollars"
-        return {"question": q, "gold_answer": gold, "relevant_docs": [target], "tier": tier}
+        return {
+            "question": q,
+            "gold_answer": gold,
+            "relevant_docs": [target],
+            "tier": tier,
+        }
 
     return None
 
@@ -476,8 +524,8 @@ def _write_corpus(out_dir, docs, info, seed, n_docs) -> None:
     try:
         for doc in docs:
             with open(
-                    os.path.join(directory, f"{doc.doc_id}.txt"), "w", encoding="utf-8"
-                ) as h:
+                os.path.join(directory, f"{doc.doc_id}.txt"), "w", encoding="utf-8"
+            ) as h:
                 h.write(doc.text)
         jsonl_path = os.path.join(out_dir, "corpus.jsonl")
         with open(jsonl_path, "w", encoding="utf-8") as h:

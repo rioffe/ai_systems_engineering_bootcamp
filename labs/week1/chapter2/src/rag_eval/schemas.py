@@ -82,9 +82,7 @@ class ValidationResult:
 
     __slots__ = ("ok", "data", "errors", "raw")
 
-    def __init__(
-        self, ok: bool, data: dict | None, errors: list, raw: str
-    ) -> None:
+    def __init__(self, ok: bool, data: dict | None, errors: list, raw: str) -> None:
         self.ok: bool = ok
         self.data: dict | None = data
         self.errors: list[str] = errors
@@ -176,7 +174,10 @@ def generate_structured(
         last = result
         if result.ok:
             return StructuredResult(True, result.data, result, attempt + 1)
-    assert last is not None  # loop ran at least once, so `last` is set
+    if last is None:  # defensive: attempts==0 only when max_retries < 0
+        last = ValidationResult(
+            ok=False, data=None, errors=["no attempts made"], raw=""
+        )
     return StructuredResult(False, None, last, attempts)
 
 

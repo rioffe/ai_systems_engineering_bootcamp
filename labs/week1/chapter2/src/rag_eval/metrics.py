@@ -91,7 +91,7 @@ def _failure_breakdown(rows):
     ``failure_stage`` names *where* a non-terminal fault terminated (retrieval /
     context / generation / judging / cancelled); a SCORED row has ``failure_stage=None``
     and is counted under ``ok`` so the operator sees the full split.
-        """
+    """
     counts = {}
     for r in rows:
         key = r.failure_stage if r.failure_stage is not None else "ok"
@@ -117,7 +117,7 @@ def _build(rows, tier_label=None):
         hallucination_rate=_hallucination_rate(rows),
         failure_breakdown=_failure_breakdown(rows),
         by_tier=by_tier,
-        )
+    )
 
 
 def aggregate(rows):
@@ -126,7 +126,7 @@ def aggregate(rows):
     Precision/recall/f1 means are over the rows whose value is non-None; accuracy and
     hallucination rate are over the JUDGED rows (I-007); ``by_tier`` recurses one level
     per §17 tier present (I-012); ``failure_breakdown`` is the R-12 fault-stage split.
-        """
+    """
     return _build(list(rows))
 
 

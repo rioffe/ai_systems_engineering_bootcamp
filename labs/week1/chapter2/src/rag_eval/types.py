@@ -95,11 +95,13 @@ class Question:
     MULTI = "multi"
     SYNTHESIS = "synthesis"
     DISTRACTOR = "distractor"
-    TIERS: tuple[str, ...] = (EASY, MULTI, SYNTHESIS, DISTRACTOR)
+    TIERS = (EASY, MULTI, SYNTHESIS, DISTRACTOR)
 
     def __post_init__(self) -> None:
         if self.tier and self.tier not in self.TIERS:
-            raise ValueError(f"unknown tier {self.tier!r}; expected one of {self.TIERS}")
+            raise ValueError(
+                f"unknown tier {self.tier!r}; expected one of {self.TIERS}"
+            )
         if any(r is None or str(r).strip() == "" for r in self.relevant_docs):
             raise ValueError("Question.relevant_docs must contain only non-empty ids")
 
@@ -152,30 +154,32 @@ class RunMetrics:
     q_id: str
     tier: str
     # -- retrieval (populated iff the case cleared RETRIEVING) --
-    retrieved: list[str] = field(default_factory=list)   # doc_ids, in rank order
-    expected: list[str] = field(default_factory=list)    # == question.relevant_docs
+    retrieved: list[str] = field(default_factory=list)  # doc_ids, in rank order
+    expected: list[str] = field(default_factory=list)  # == question.relevant_docs
     tp: int = 0
     fp: int = 0
     fn: int = 0
-    precision: float | None = None    # TP/(TP+FP); None when TP+FP==0 (I-007/E-02/E-03)
-    recall: float | None = None       # TP/(TP+FN); None when TP+FN==0 (I-007)
-    f1: float | None = None           # 2PR/(P+R) when P+R>0 else 0.0 (E-04/I-007)
+    precision: float | None = None  # TP/(TP+FP); None when TP+FP==0 (I-007/E-02/E-03)
+    recall: float | None = None  # TP/(TP+FN); None when TP+FN==0 (I-007)
+    f1: float | None = None  # 2PR/(P+R) when P+R>0 else 0.0 (E-04/I-007)
     context_tokens: int = 0
     truncated: bool = False
-    grounding_violation: bool = False        # E-08: foreign source ids were stripped
+    grounding_violation: bool = False  # E-08: foreign source ids were stripped
     # -- answer + judge (populated if generation/judging ran) --
-    answer_status: str = "COMPLETED"        # "COMPLETED" | "ERROR"
+    answer_status: str = "COMPLETED"  # "COMPLETED" | "ERROR"
     correct: bool | None = None
     supported: bool | None = None
     complete: bool | None = None
     unsupported_claims: int = 0
     total_factual_claims: int = 0
     # -- diagnostics / timing --
-    failure_stage: str | None = None        # None | retrieval|context|generation|judging|cancelled
+    failure_stage: str | None = (
+        None  # None | retrieval|context|generation|judging|cancelled
+    )
     retrieve_ms: float = 0.0
     generate_ms: float = 0.0
     total_latency_ms: float = 0.0
-    status: str = "SCORED"                  # "SCORED" | "PARTIAL" | "ERROR"
+    status: str = "SCORED"  # "SCORED" | "PARTIAL" | "ERROR"
 
 
 @dataclass
@@ -192,11 +196,12 @@ class AggregateMetrics:
     precision: float
     recall: float
     f1: float
-    answer_accuracy: float             # mean(correct) over JUDGED rows (R-08)
-    hallucination_rate: float          # sum(unsupported)/sum(total) over JUDGED rows (R-09)
-    failure_breakdown: dict[str, int] = field(default_factory=dict)   # stage -> count (R-12)
+    answer_accuracy: float  # mean(correct) over JUDGED rows (R-08)
+    hallucination_rate: float  # sum(unsupported)/sum(total) over JUDGED rows (R-09)
+    failure_breakdown: dict[str, int] = field(
+        default_factory=dict
+    )  # stage -> count (R-12)
     by_tier: dict[str, "AggregateMetrics"] = field(default_factory=dict)
-
 
 
 __all__ = [
