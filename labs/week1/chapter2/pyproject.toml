@@ -1,0 +1,48 @@
+[project]
+name = "rag-eval"
+version = "0.1.0"
+description = "RAG eval harness: a deterministic BM25 retrieval + context-construction + metrics pipeline with an LLM-as-judge, run over a grounded question dataset. The CLI 'rag-eval' runs the full pipeline offline (MockLLM/MockJudge) or against a local Ollama model, emitting a metrics report with a per-tier breakdown (SPEC §5.1)."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+
+# Runtime dependencies (see SPEC.md §10 "Dependencies & Environment" for rationale).
+# The deterministic boundary (retrieval/context/metrics/corpus) is stdlib-only; jsonschema
+# gates the structured answer/verdict output (ch1 C-05 analog) and httpx is the Ollama
+# transport, living only in model.py/judgment.py (I-009). The optional PyQt5 GUI (R-13/§5.2)
+# is out of scope for v0.1; it would slot in behind the same pipeline modules.
+dependencies = [
+    "jsonschema>=4.21",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+rag-eval = "rag_eval.app:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rag_eval"]
+# The two JSON schemas (schemas/answer.json, schemas/verdict.json) are repo artifacts
+# mirroring the schema dicts embedded in rag_eval/schemas.py (the source of truth,
+# loaded without a file read so the offline path never resolves a path).
+
+[tool.uv]
+# Project is a source layout under src/
+package = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+# The pipeline's per-case guard (`except Exception`) is intentional: a single case's
+# fault must be *recorded* as an ERROR/PARTIAL row (SPEC §3.1 run-all) rather than
+# abort the suite or crash the process.
+ignore = ["BLE001"]

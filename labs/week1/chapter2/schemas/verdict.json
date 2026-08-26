@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RAG judge verdict (SPEC C-04 / C-06, §19 / §20)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "correct",
+    "supported",
+    "complete",
+    "unsupported_claims",
+    "total_factual_claims",
+    "rationale"
+  ],
+  "properties": {
+    "correct": {
+      "type": "boolean",
+      "description": "Does the answer correctly answer the question (reference-based, §19)."
+    },
+    "supported": {
+      "type": "boolean",
+      "description": "Is every factual claim grounded in the retrieved context (§20)."
+    },
+    "complete": {
+      "type": "boolean",
+      "description": "Are all facts in the question's relevant docs reflected in the answer (I-012)."
+    },
+    "unsupported_claims": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Factual claims not traceable to any provided doc; the numerator of the hallucination rate."
+    },
+    "total_factual_claims": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Denominator for the hallucination rate (§20); 0 yields a 0.0 rate (I-007)."
+    },
+    "rationale": {
+      "type": "string",
+      "description": "A short justification for the verdict."
+    }
+  }
+}
