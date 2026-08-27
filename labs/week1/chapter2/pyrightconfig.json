@@ -1,0 +1,7 @@
+{
+ "extraPaths": ["src"],
+ "pythonVersion": "3.12",
+ "typeCheckingMode": "off",
+ "reportMissingImports": "error",
+ "reportGeneralTypeIssues": false
+}
