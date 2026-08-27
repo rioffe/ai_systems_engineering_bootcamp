@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 from abc import ABC, abstractmethod
 
+from .logging_setup import clip, logger
 from .model import OllamaClient
 from .schemas import (
     DEFAULT_MAX_RETRIES,
@@ -159,10 +160,21 @@ class OllamaJudge(Judge):
         # Fatal transport faults (E-11/E-12) propagate out of judge() to the CLI; parse
         # / validation failures are handled by the surrounding generate_structured loop.
         max_tokens = _k.get("max_tokens", 512)
+        # --verbose DEBUG: raw LLM I/O -- the judge prompt sent and the verdict received.
+        logger.debug(
+            f"[judge {self._name}] request sys={len(sys_prompt)} "
+            f"user={len(user_prompt)} chars max_tokens={max_tokens}"
+        )
+        logger.debug(f"[judge {self._name}] system prompt:\n{clip(sys_prompt)}")
+        logger.debug(f"[judge {self._name}] user prompt:\n{clip(user_prompt)}")
         text, _usage, _trunc = self._client.chat(
             self._name, sys_prompt, user_prompt, max_tokens=max_tokens
         )
         self._truncated = _trunc
+        logger.debug(
+            f"[judge {self._name}] verdict={len(text)} "
+            f"chars truncated={_trunc}:\n{clip(text)}"
+        )
         return text
 
 

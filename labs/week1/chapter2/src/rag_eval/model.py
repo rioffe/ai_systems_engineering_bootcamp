@@ -27,6 +27,7 @@ from abc import ABC, abstractmethod
 
 import httpx
 
+from .logging_setup import clip, logger
 from .schemas import (
     ANSWER_SCHEMA,
     DEFAULT_MAX_RETRIES,
@@ -355,6 +356,14 @@ class OllamaLLM(LLM):
     ) -> str:
         # Fatal transport faults (E-11/E-12) propagate to the CLI; parse/validation
         # failures are handled by the surrounding generate_structured retry loop.
+        # --verbose DEBUG: raw LLM I/O -- the prompt sent and the response received.
+        logger.debug(
+            f"[llm {self._name}] request sys={len(sys_prompt)} "
+            f"user={len(user_prompt)} chars max_tokens={max_tokens} "
+            f"temperature={temperature} seed={seed}"
+        )
+        logger.debug(f"[llm {self._name}] system prompt:\n{clip(sys_prompt)}")
+        logger.debug(f"[llm {self._name}] user prompt:\n{clip(user_prompt)}")
         text, usage, truncated = self._client.chat(
             self._name,
             sys_prompt,
@@ -365,6 +374,10 @@ class OllamaLLM(LLM):
         )
         self._usage = usage
         self._truncated = truncated
+        logger.debug(
+            f"[llm {self._name}] response={len(text)} "
+            f"chars truncated={truncated}:\n{clip(text)}"
+        )
         return text
 
 

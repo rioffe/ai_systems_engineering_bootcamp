@@ -8,11 +8,13 @@ requires-python = ">=3.12,<3.13"
 # Runtime dependencies (see SPEC.md §10 "Dependencies & Environment" for rationale).
 # The deterministic boundary (retrieval/context/metrics/corpus) is stdlib-only; jsonschema
 # gates the structured answer/verdict output (ch1 C-05 analog) and httpx is the Ollama
-# transport, living only in model.py/judgment.py (I-009). The optional PyQt5 GUI (R-13/§5.2)
+# transport, living only in model.py/judgment.py (I-009). loguru powers --verbose logging
+# (logging_setup.py + the LLM modules) and is inert unless --verbose is set. The optional PyQt5 GUI (R-13/§5.2)
 # is out of scope for v0.1; it would slot in behind the same pipeline modules.
 dependencies = [
     "jsonschema>=4.21",
     "httpx>=0.27",
+    "loguru>=0.7.3",
 ]
 
 [project.scripts]

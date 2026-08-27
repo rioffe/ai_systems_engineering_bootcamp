@@ -27,6 +27,7 @@ from .corpus import (
     load_questions,
 )
 from .judgment import Judge, MockJudge, OllamaJudge
+from .logging_setup import configure_logging, logger
 from .model import (
     LLM,
     MockLLM,
@@ -138,10 +139,16 @@ def cmd_gen_corpus(args: argparse.Namespace) -> int:
         n_questions=args.n_questions,
         seed=args.seed,
     )
-    if not getattr(args, "quiet", False):
-        by_tier: dict[str, int] = {}
-        for q in questions:
-            by_tier[q.tier] = by_tier.get(q.tier, 0) + 1
+    by_tier: dict[str, int] = {}
+    for q in questions:
+        by_tier[q.tier] = by_tier.get(q.tier, 0) + 1
+    verbose = getattr(args, "verbose", None)
+    if verbose is not None:
+        logger.info(
+            f"generated {len(docs)} documents and {len(questions)} questions "
+            f"(seed {args.seed}) under {out_dir!r}: tiers {by_tier}"
+        )
+    elif not getattr(args, "quiet", False):
         print(
             f"generated {len(docs)} documents and {len(questions)} questions "
             f"(seed {args.seed}) under {out_dir!r}: tiers {by_tier}",
@@ -151,9 +158,14 @@ def cmd_gen_corpus(args: argparse.Namespace) -> int:
 
 
 # ------------------------------------------------------------------ eval
-def _progress(quiet: bool):
+def _progress(quiet: bool, verbose: str | None = None):
     # Per-case progress to stderr (§3.2) unless --quiet; a live marker, not a result.
     def step(question: Question, row) -> None:
+        if verbose is not None:
+            p = "none" if row.precision is None else f"{row.precision:.2f}"
+            r = "none" if row.recall is None else f"{row.recall:.2f}"
+            logger.info(f"{row.q_id} [{row.status}] p={p} r={r}")
+            return
         if quiet:
             return
         p = "none" if row.precision is None else f"{row.precision:.2f}"
@@ -164,9 +176,15 @@ def _progress(quiet: bool):
 
 
 def cmd_eval(args: argparse.Namespace) -> int:
+    verbose = getattr(args, "verbose", None)
+    # --verbose overrides --quiet: diagnostics route through loguru (stderr) and the
+    # print-based progress/summary below is bypassed.
+    quiet = getattr(args, "quiet", False) and verbose is None
     backend = select_backend(args)
     if backend.exit_code is not None:
-        if not getattr(args, "quiet", False):
+        if verbose is not None:
+            logger.error(f"backend unavailable: {backend.banner}")
+        elif not quiet:
             print(backend.banner, file=sys.stderr, flush=True)
         return backend.exit_code
     assert backend.llm is not None and backend.judge is not None
@@ -176,24 +194,31 @@ def cmd_eval(args: argparse.Namespace) -> int:
         docs = load_corpus(args.corpus)
         questions = load_questions(args.dataset, corpus=docs)
     except CorpusError as exc:
-        print(f"load error: {exc}", file=sys.stderr, flush=True)
+        if verbose is not None:
+            logger.error(f"load error: {exc}")
+        else:
+            print(f"load error: {exc}", file=sys.stderr, flush=True)
         return EXIT_LOAD
 
     retriever = BM25Retriever(docs)
     tiers = _parse_tiers(args.tiers)
     judge_on = args.judge not in OFF
+    if verbose is not None:
+        logger.info(f"loaded {len(docs)} documents and {len(questions)} questions")
+        logger.info(
+            f"params: k={args.k} budget={args.budget} "
+            f"max_tokens={getattr(args, 'max_tokens', 512)} "
+            f"tiers={sorted(tiers) if tiers is not None else 'all'} "
+            f"judge={'on' if judge_on else 'off'} seed={args.seed}"
+        )
 
     # E-17: a --tiers subset matching zero questions is a warning + empty report, not a crash.
-    if (
-        tiers is not None
-        and not any(q.tier in tiers for q in questions)
-        and not getattr(args, "quiet", False)
-    ):
-        print(
-            f"warning: --tiers {sorted(tiers)} matched no questions; empty report",
-            file=sys.stderr,
-            flush=True,
-        )
+    if tiers is not None and not any(q.tier in tiers for q in questions):
+        msg = f"warning: --tiers {sorted(tiers)} matched no questions; empty report"
+        if verbose is not None:
+            logger.warning(msg)
+        elif not quiet:
+            print(msg, file=sys.stderr, flush=True)
 
     meta = {
         "command": "eval",
@@ -221,7 +246,7 @@ def cmd_eval(args: argparse.Namespace) -> int:
         seed=args.seed,
         max_tokens=getattr(args, "max_tokens", 512),
         meta=meta,
-        on_progress=_progress(getattr(args, "quiet", False)),
+        on_progress=_progress(quiet, verbose),
     )
 
     # Coverage / truncation: surfaced so a headline accuracy can't hide failed cases.
@@ -245,7 +270,12 @@ def cmd_eval(args: argparse.Namespace) -> int:
             )
             return EXIT_LOAD
 
-    if not getattr(args, "quiet", False):
+    if verbose is not None:
+        if backend.banner:
+            logger.info(f"[{backend.banner}] {backend.label}")
+        for line in _summary_lines(report, out_path=args.out or DEFAULT_REPORT):
+            logger.info(line)
+    elif not quiet:
         if backend.banner:
             print(f"[{backend.banner}] {backend.label}", flush=True)
         _render_summary(report, out_path=args.out or DEFAULT_REPORT)
@@ -254,9 +284,13 @@ def cmd_eval(args: argparse.Namespace) -> int:
 
 # ------------------------------------------------------------------ show
 def cmd_show(args: argparse.Namespace) -> int:
+    verbose = getattr(args, "verbose", None)
+    quiet = getattr(args, "quiet", False) and verbose is None
     backend = select_backend(args)
     if backend.exit_code is not None:
-        if not getattr(args, "quiet", False):
+        if verbose is not None:
+            logger.error(f"backend unavailable: {backend.banner}")
+        elif not quiet:
             print(backend.banner, file=sys.stderr, flush=True)
         return backend.exit_code
 
@@ -264,7 +298,10 @@ def cmd_show(args: argparse.Namespace) -> int:
         docs = load_corpus(args.corpus)
         questions = load_questions(args.dataset, corpus=docs)
     except CorpusError as exc:
-        print(f"load error: {exc}", file=sys.stderr, flush=True)
+        if verbose is not None:
+            logger.error(f"load error: {exc}")
+        else:
+            print(f"load error: {exc}", file=sys.stderr, flush=True)
         return EXIT_LOAD
 
     if not questions:
@@ -293,7 +330,7 @@ def cmd_show(args: argparse.Namespace) -> int:
 
 
 # ------------------------------------------------------------------ report rendering
-def _render_summary(report: RunReport, out_path: str | None = None) -> None:
+def _summary_lines(report: RunReport, out_path: str | None = None) -> list[str]:
     agg = report.aggregate
     n_judged = sum(1 for r in report.rows if r.correct is not None)
     n_failed = sum(1 for r in report.rows if r.status != "SCORED")
@@ -323,7 +360,11 @@ def _render_summary(report: RunReport, out_path: str | None = None) -> None:
             )
     if out_path:
         lines.append(f"report: {out_path}")
-    print("\n".join(lines), flush=True)
+    return lines
+
+
+def _render_summary(report: RunReport, out_path: str | None = None) -> None:
+    print("\n".join(_summary_lines(report, out_path)), flush=True)
 
 
 def _render_case(case: CaseRun) -> None:
@@ -378,6 +419,16 @@ def _pick_question(questions: list[Question], qid: str | None) -> Question:
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
+    p.add_argument(
+        "--verbose",
+        nargs="?",
+        const="INFO",
+        default=None,
+        choices=["INFO", "DEBUG"],
+        metavar="LEVEL",
+        help="enable loguru logging to stderr (default INFO; --verbose DEBUG "
+        "also dumps raw LLM I/O). Overrides --quiet.",
+    )
     p.add_argument("--dataset", default=DEFAULT_DATASET, help="questions.json path")
     p.add_argument("--corpus", default=DEFAULT_CORPUS, help="document dir or .jsonl")
     p.add_argument("--k", type=int, default=DEFAULT_K, help="retrieval top-k")
@@ -451,6 +502,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_gen.add_argument("--n-docs", type=int, default=DEFAULT_N_DOCS)
     p_gen.add_argument("--n-questions", type=int, default=DEFAULT_N_QUESTIONS)
     p_gen.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    p_gen.add_argument(
+        "--verbose",
+        nargs="?",
+        const="INFO",
+        default=None,
+        choices=["INFO", "DEBUG"],
+        metavar="LEVEL",
+        help="enable loguru logging to stderr (default INFO; --verbose DEBUG "
+        "also dumps raw LLM I/O). Overrides --quiet.",
+    )
     p_gen.add_argument("--quiet", action="store_true")
     p_gen.set_defaults(func=cmd_gen_corpus)
 
@@ -477,6 +538,9 @@ def run(argv: list[str] | None = None) -> int:
     if getattr(args, "func", None) is None:
         parser.print_help()
         return EXIT_BAD_USAGE
+    verbose = getattr(args, "verbose", None)
+    # --verbose enables loguru (stderr); --verbose DEBUG also dumps raw LLM I/O.
+    configure_logging(verbose is not None, level=verbose or "INFO")
     try:
         return int(args.func(args))
     except CorpusError as exc:
