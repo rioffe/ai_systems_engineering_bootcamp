@@ -460,7 +460,12 @@ class MainWindow(QMainWindow):
 
     def _spawn_worker(self) -> None:
         llm, judge = self._build_backend()
-        self._worker = CaseWorker(
+        # Track the run *before* wiring it, so every handler can tell the run in
+        # flight from a superseded predecessor: a cancel+respawn (E-16) must not let
+        # an older worker's late signals clobber the new run or stick the flag
+        # (I-008/I-014). Each closure captures its own worker by default-arg so the
+        # binding is stable across queued cross-thread signal delivery.
+        worker = CaseWorker(
             self._retriever,
             llm,
             judge,
@@ -471,10 +476,22 @@ class MainWindow(QMainWindow):
             max_tokens=DEFAULT_MAX_TOKENS,
             max_retries=DEFAULT_MAX_RETRIES,
         )
-        worker = self._worker
-        worker.result_ready.connect(self._on_result)
-        worker.crashed.connect(self._on_crashed)
-        worker.finished.connect(self._on_worker_finished)
+        self._worker = worker
+
+        def _on_result(case: CaseRun, _w: CaseWorker = worker) -> None:
+            if self._worker is _w:
+                self._show_result(case)
+
+        def _on_crashed(message: str, _w: CaseWorker = worker) -> None:
+            if self._worker is _w:
+                self._surface_crash(message)
+
+        def _on_finished(_w: CaseWorker = worker) -> None:
+            self._settle(_w)
+
+        worker.result_ready.connect(_on_result)
+        worker.crashed.connect(_on_crashed)
+        worker.finished.connect(_on_finished)
         self._reset_panel()
         self._update_running()
         worker.start()
@@ -491,20 +508,27 @@ class MainWindow(QMainWindow):
 
     # --------------------------------------------------------- result handlers
 
-    def _on_result(self, case: CaseRun) -> None:
+    def _show_result(self, case: CaseRun) -> None:
         self._last = case
         self._show_case(case)
 
-    def _on_crashed(self, message: str) -> None:
+    def _surface_crash(self, message: str) -> None:
         self.lbl_error.setText(message)
 
-    def _on_worker_finished(self) -> None:
-        # The QThread is done; drop the reference so no live worker outlives the run
-        # (I-014). The terminal panel was already rendered by _on_result.
+    def _settle(self, worker: CaseWorker) -> None:
+        # The run's QThread is done. Only a finish for the *tracked* worker settles
+        # the window: it drops the reference so no live worker outlives the run
+        # (I-014) and clears the active flag -- so a normal *or* cancelled completion
+        # always repaints the state panel back to IDLE and re-enables Run. The
+        # terminal panel was already rendered by the result_ready handler; a
+        # superseded predecessor (self._worker is no longer `worker`) is ignored so it
+        # can neither clobber the new run nor clear its state (E-16/I-008).
+        if self._worker is not worker:
+            return
         self._worker = None
-        if not self._active:
-            self._update_running()
-            self.run_settled.emit()
+        self._active = False
+        self._update_running()
+        self.run_settled.emit()
 
     def _update_running(self) -> None:
         running = self._active
@@ -602,9 +626,17 @@ class MainWindow(QMainWindow):
     def _render_metrics(self, row: RunMetrics) -> None:
         self.lbl_qid.setText(row.q_id)
         self.lbl_tier.setText(f"[{row.tier}]")
-        p = " --" if row.precision is None else f"{row.precision:.3f}"
-        r = " --" if row.recall is None else f"{row.recall:.3f}"
-        f1 = " --" if row.f1 is None else f"{row.f1:.3f}"
+        # A free-text question carries no ground truth (relevant_docs=[]), so retrieval
+        # P/R/F1 are not evaluable. Show them as n/a, not a misleading "0.000" that
+        # reads like a zero-recall retrieval *failure* sitting next to a clean verdict
+        # (the math already yields P=0, R=None, F1=0 for an empty expected set -- I-007
+        # guards the division, but the value is meaningless without a ground truth).
+        if row.expected:
+            p = " --" if row.precision is None else f"{row.precision:.3f}"
+            r = " --" if row.recall is None else f"{row.recall:.3f}"
+            f1 = " --" if row.f1 is None else f"{row.f1:.3f}"
+        else:
+            p = r = f1 = "n/a"
         self.lbl_metric.setText(
             f"p= {p}  r= {r}  f1= {f1}   tokens= {row.context_tokens}"
         )
