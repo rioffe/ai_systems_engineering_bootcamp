@@ -165,3 +165,63 @@ def test_ollama_judge_maps_verdict_over_mock_transport():
     assert (v.correct, v.supported, v.complete) == (True, False, True)
     assert v.total_factual_claims == 3
     assert judge.model_id == "qwen3.8:27b-mlx"
+
+
+def test_judge_clamps_unsupported_count_to_total_factual_claims():
+    # s017 wrinkle: the model listed an unsupported claim but reported 0 total factual
+    # claims -- numerator > denominator (I-007 violation). The total-function boundary
+    # must lift the denominator so the hallucination rate stays in [0,1] and the flagged
+    # claim is never silently dropped.
+    verdict_json = json.dumps(
+        {
+            "correct": False,
+            "supported": False,
+            "complete": False,
+            "unsupported_claims": ["The total applies (2800, 5000, 5850)"],
+            "total_factual_claims": 0,
+            "rationale": "no combined total offered",
+        }
+    )
+    envelope = json.dumps({"message": {"role": "assistant", "content": verdict_json}})
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=envelope.encode("utf-8"))
+
+    client = OllamaClient(base="http://x", transport=httpx.MockTransport(handler))
+    judge = OllamaJudge("gemma4:31b", client=client)
+    v = judge.judge(
+        question=_q(["001"]),
+        context=_ctx(["001"]),
+        answer=Answer(q_id="t1", text="I cannot answer", confidence=0.0, sources=[]),
+    )
+    assert v.status == "JUDGED"
+    assert v.unsupported_claims == ["The total applies (2800, 5000, 5850)"]
+    assert v.total_factual_claims == 1  # lifted from 0 to 1
+    assert len(v.unsupported_claims) <= v.total_factual_claims  # I-007 invariant
+
+
+def test_judge_consistent_verdict_is_untouched():
+    # A self-consistent verdict (numerator <= denominator) must pass through unchanged.
+    verdict_json = json.dumps(
+        {
+            "correct": True,
+            "supported": False,
+            "complete": True,
+            "unsupported_claims": ["cite 009"],
+            "total_factual_claims": 3,
+            "rationale": "partly",
+        }
+    )
+    envelope = json.dumps({"message": {"role": "assistant", "content": verdict_json}})
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=envelope.encode("utf-8"))
+
+    client = OllamaClient(base="http://x", transport=httpx.MockTransport(handler))
+    v = OllamaJudge("qwen3.8:27b-mlx", client=client).judge(
+        question=_q(["001"]),
+        context=_ctx(["001"]),
+        answer=Answer(q_id="t1", text="x", confidence=0.5, sources=["001"]),
+    )
+    assert v.total_factual_claims == 3
+    assert len(v.unsupported_claims) <= v.total_factual_claims

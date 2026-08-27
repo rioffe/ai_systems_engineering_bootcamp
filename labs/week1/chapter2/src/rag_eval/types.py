@@ -112,8 +112,10 @@ class Answer:
 
     ``text`` is the free-form answer; ``confidence`` in [0,1]; ``sources`` are the doc_ids
     the model claims to cite -- the *harness* enforces these are a subset of the retrieved
-    ``Context.provenance`` (I-003 / E-08); ``status`` is ``"COMPLETED"`` (validated) or
-    ``"ERROR"`` (parse/validation exhausted).
+    ``Context.provenance`` (I-003 / E-08); ``status`` is ``"COMPLETED"`` (validated),
+    ``"ERROR"`` (parse/validation exhausted), or ``"TRUNCATED"`` (the model's visible
+    output was empty because the token budget was spent on a hidden thinking phase --
+     E-11 analog). ``truncated`` is set when the last attempt was cut short.
     """
 
     q_id: str
@@ -122,6 +124,7 @@ class Answer:
     sources: list[str] = field(default_factory=list)
     usage: Usage = field(default_factory=lambda: Usage(0, 0))
     status: str = "COMPLETED"
+    truncated: bool = False
 
 
 @dataclass
@@ -143,6 +146,7 @@ class Verdict:
     total_factual_claims: int
     rationale: str
     status: str = "JUDGED"
+    truncated: bool = False
 
 
 @dataclass
@@ -201,7 +205,7 @@ class AggregateMetrics:
     failure_breakdown: dict[str, int] = field(
         default_factory=dict
     )  # stage -> count (R-12)
-    by_tier: dict[str, "AggregateMetrics"] = field(default_factory=dict)
+    by_tier: dict[str, AggregateMetrics] = field(default_factory=dict)
 
 
 __all__ = [

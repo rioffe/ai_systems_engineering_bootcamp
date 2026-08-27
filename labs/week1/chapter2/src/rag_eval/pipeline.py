@@ -95,6 +95,7 @@ def run_case(
     judge_on: bool = True,
     seed: int = 42,
     max_retries: int = DEFAULT_MAX_RETRIES,
+    max_tokens: int = 512,
 ) -> CaseRun:
     """Run one question through the full §13 pipeline (state machine, §3.1).
 
@@ -150,6 +151,7 @@ def run_case(
             question=question.question,
             seed=seed,
             max_retries=max_retries,
+            max_tokens=max_tokens,
         )
         row.generate_ms = (time.perf_counter() - t) * 1000
     except (OllamaError, ModelNotFoundError):
@@ -163,10 +165,11 @@ def run_case(
 
     # A generation that exhausts its parse retries returns status "ERROR" (not a raised
     # exception): record it as a generation fault with the retrieval intact (I-008).
-    if answer.status == "ERROR":
+    if answer.status in ("ERROR", "TRUNCATED"):
         row.failure_stage = "generation"
         row.status = "ERROR"
-        row.answer_status = "ERROR"
+        # a truncated answer is a generation-stage fault too; surface TRUNCATED, not ERROR
+        row.answer_status = answer.status
         _total(row, start)
         return CaseRun(row, question, scored, context, answer, None)
 
@@ -196,6 +199,7 @@ def run_case(
                     status=answer.status,
                 ),
                 max_retries=max_retries,
+                max_tokens=max_tokens,
             )
         except Exception:
             verdict = Verdict(
@@ -255,6 +259,7 @@ def run_dataset(
     stop_on_error: bool = False,
     seed: int = 42,
     max_retries: int = DEFAULT_MAX_RETRIES,
+    max_tokens: int = 512,
     meta: dict | None = None,
     on_progress: Callable[[Question, RunMetrics], object] | None = None,
 ) -> RunReport:
@@ -278,6 +283,7 @@ def run_dataset(
             judge_on=judge_on,
             seed=seed,
             max_retries=max_retries,
+            max_tokens=max_tokens,
         )
         cases.append(case)
         if on_progress is not None:

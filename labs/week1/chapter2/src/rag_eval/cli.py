@@ -202,6 +202,7 @@ def cmd_eval(args: argparse.Namespace) -> int:
         "mock": bool(getattr(args, "mock", False)),
         "k": args.k,
         "token_budget": args.budget,
+        "max_tokens": getattr(args, "max_tokens", 512),
         "judge": judge_on,
         "seed": args.seed,
         "tiers": sorted(tiers) if tiers is not None else "all",
@@ -218,9 +219,15 @@ def cmd_eval(args: argparse.Namespace) -> int:
         tiers=tiers,
         stop_on_error=getattr(args, "stop_on_error", False),
         seed=args.seed,
+        max_tokens=getattr(args, "max_tokens", 512),
         meta=meta,
         on_progress=_progress(getattr(args, "quiet", False)),
     )
+
+    # Coverage / truncation: surfaced so a headline accuracy can't hide failed cases.
+    meta["n_judged"] = sum(1 for r in report.rows if r.correct is not None)
+    meta["n_failed"] = sum(1 for r in report.rows if r.status != "SCORED")
+    meta["n_truncated"] = sum(1 for r in report.rows if r.answer_status == "TRUNCATED")
 
     # Machine-readable report (--out; default report.json) with per-case rows + aggregate.
     if args.out:
@@ -276,6 +283,7 @@ def cmd_show(args: argparse.Namespace) -> int:
         token_budget=args.budget,
         judge_on=judge_on,
         seed=args.seed,
+        max_tokens=getattr(args, "max_tokens", 512),
     )
     if getattr(args, "as_json", False):
         print(json.dumps(case.to_detail(), indent=2, ensure_ascii=False))
@@ -287,8 +295,15 @@ def cmd_show(args: argparse.Namespace) -> int:
 # ------------------------------------------------------------------ report rendering
 def _render_summary(report: RunReport, out_path: str | None = None) -> None:
     agg = report.aggregate
+    n_judged = sum(1 for r in report.rows if r.correct is not None)
+    n_failed = sum(1 for r in report.rows if r.status != "SCORED")
+    n_truncated = sum(1 for r in report.rows if r.answer_status == "TRUNCATED")
+    trunc_note = (
+        f" ({n_truncated} truncated - raise --max-tokens)" if n_truncated else ""
+    )
     lines = [
         f"cases: {agg.n_cases}",
+        f"coverage: {n_judged}/{agg.n_cases} judged; {n_failed} failed{trunc_note}",
         f"precision: {agg.precision:.3f}",
         f"recall:    {agg.recall:.3f}",
         f"f1:        {agg.f1:.3f}",
@@ -371,6 +386,13 @@ def _add_common(p: argparse.ArgumentParser) -> None:
         type=int,
         default=DEFAULT_BUDGET,
         help="retrieval token budget B_retrieval",
+    )
+    p.add_argument(
+        "--max-tokens",
+        type=int,
+        default=512,
+        help="generation+judge num_predict; raise for thinking models "
+        "(e.g. --max-tokens 2048) to clear the hidden thinking phase",
     )
     p.add_argument(
         "--tiers", default=None, help="comma list of §17 tiers (default: all)"

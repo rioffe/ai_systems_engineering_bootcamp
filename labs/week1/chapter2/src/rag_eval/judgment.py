@@ -67,18 +67,20 @@ class Judge(ABC):
         answer: Answer,
         max_retries: int = DEFAULT_MAX_RETRIES,
         on_failure: str | None = None,
+        max_tokens: int = 512,
     ) -> Verdict:
         # parse -> validate -> error-informed-retry over VERDICT_SCHEMA (ch1 C-05).
         self._inputs = (question, context, answer)
         base = _VERDICT_SYSTEM + (f"\n{on_failure}" if on_failure else "")
         last_directive: str | None = None
+        self._truncated = False
 
         def prompt_for_attempt(attempt: int, last):
             nonlocal last_directive
             if last is not None and not last.ok:
                 last_directive = build_retry_directive(VERDICT_SCHEMA, last)
             user = _judge_user(question, context, answer, last_directive)
-            return self._raw(base, user)
+            return self._raw(base, user, max_tokens=max_tokens)
 
         structured = generate_structured(
             prompt_for_attempt, VERDICT_SCHEMA, max_retries=max_retries
@@ -94,23 +96,27 @@ class Judge(ABC):
                 total_factual_claims=0,
                 rationale="",
                 status="ERROR",
+                truncated=bool(getattr(self, "_truncated", False)),
             )
         data = structured.data  # structured.ok implies data present (I-010)
         assert data is not None
+        claims = [str(c) for c in data.get("unsupported_claims", [])]
         total = data.get("total_factual_claims", 0)
         try:
             total = int(total)
         except (TypeError, ValueError):
             total = 0  # defensive; the schema already bounds this to an int >= 0
+        total = max(total, len(claims))
         return Verdict(
             q_id=q_id,
             correct=bool(data.get("correct")),
             supported=bool(data.get("supported")),
             complete=bool(data.get("complete")),
-            unsupported_claims=[str(c) for c in data.get("unsupported_claims", [])],
+            unsupported_claims=claims,
             total_factual_claims=total,
             rationale=str(data.get("rationale", "")),
             status="JUDGED",
+            truncated=bool(getattr(self, "_truncated", False)),
         )
 
 
@@ -152,7 +158,11 @@ class OllamaJudge(Judge):
     def _raw(self, sys_prompt: str, user_prompt: str, **_k: object) -> str:
         # Fatal transport faults (E-11/E-12) propagate out of judge() to the CLI; parse
         # / validation failures are handled by the surrounding generate_structured loop.
-        text, _usage = self._client.chat(self._name, sys_prompt, user_prompt)
+        max_tokens = _k.get("max_tokens", 512)
+        text, _usage, _trunc = self._client.chat(
+            self._name, sys_prompt, user_prompt, max_tokens=max_tokens
+        )
+        self._truncated = _trunc
         return text
 
 

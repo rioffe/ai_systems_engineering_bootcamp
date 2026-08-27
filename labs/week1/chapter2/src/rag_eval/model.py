@@ -127,7 +127,7 @@ class OllamaClient:
         max_tokens: int = 512,
         temperature: float = 0.0,
         seed: int | None = None,
-    ) -> tuple[str, Usage]:
+    ) -> tuple[str, Usage, bool]:
         # POST /api/chat (non-stream); returns (text, Usage). 404 -> ModelNotFoundError.
         payload = {
             "model": model,
@@ -160,7 +160,11 @@ class OllamaClient:
             usage = Usage(int(prompt_eval), int(eval_count))
         except (TypeError, ValueError):
             usage = Usage(0, len(text.split()))  # best-effort on a malformed body
-        return text, usage
+        # truncated: content empty while a thinking trace is present (thinking ate budget)
+        truncated = not text.strip() and bool(
+            str(message.get("thinking") or "").strip()
+        )
+        return text, usage, truncated
 
 
 def _context_ids(context: str) -> list[str]:
@@ -184,6 +188,8 @@ class LLM(ABC):
 
     #: each subclass records its last Usage here so generate() can attach it (I-010).
     _usage: Usage
+    #: last-attempt truncation: num_predict spent on a hidden thinking block.
+    _truncated: bool
 
     @property
     @abstractmethod
@@ -217,6 +223,7 @@ class LLM(ABC):
         base = f"{_ANSWER_SYSTEM}\n{system}"
         last_directive: str | None = None
         self._usage = Usage(0, 0)
+        self._truncated = False
 
         def prompt_for_attempt(attempt: int, last):
             nonlocal last_directive
@@ -235,13 +242,16 @@ class LLM(ABC):
             prompt_for_attempt, ANSWER_SCHEMA, max_retries=max_retries
         )
         if not structured.ok:
+            truncated = bool(getattr(self, "_truncated", False))
+            # thinking ate num_predict -> TRUNCATED, not a silent parse ERROR (E-10/E-11)
             return Answer(
                 q_id="",
                 text="",
                 confidence=0.0,
                 sources=[],
                 usage=self._usage,
-                status="ERROR",
+                status="TRUNCATED" if truncated else "ERROR",
+                truncated=truncated,
             )
         data = structured.data
         assert data is not None  # structured.ok implies data present (I-010)
@@ -252,6 +262,7 @@ class LLM(ABC):
             sources=[str(s) for s in data.get("sources", [])],
             usage=self._usage,
             status="COMPLETED",
+            truncated=bool(getattr(self, "_truncated", False)),
         )
 
 
@@ -344,7 +355,7 @@ class OllamaLLM(LLM):
     ) -> str:
         # Fatal transport faults (E-11/E-12) propagate to the CLI; parse/validation
         # failures are handled by the surrounding generate_structured retry loop.
-        text, usage = self._client.chat(
+        text, usage, truncated = self._client.chat(
             self._name,
             sys_prompt,
             user_prompt,
@@ -353,6 +364,7 @@ class OllamaLLM(LLM):
             seed=seed,
         )
         self._usage = usage
+        self._truncated = truncated
         return text
 
 
