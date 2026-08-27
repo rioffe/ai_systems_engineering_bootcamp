@@ -96,6 +96,7 @@ def run_case(
     seed: int = 42,
     max_retries: int = DEFAULT_MAX_RETRIES,
     max_tokens: int = 512,
+    cancel_check: Callable[[], bool] | None = None,
 ) -> CaseRun:
     """Run one question through the full §13 pipeline (state machine, §3.1).
 
@@ -103,16 +104,38 @@ def run_case(
     generation fault is an ERROR, a judge fault is PARTIAL (retrieval intact). Backend
     faults (OllamaError/ModelNotFoundError) propagate. A judge-off case is a retrieval-
     only eval: its verdict is SKIPPED and its judgment fields are None.
+
+    ``cancel_check`` (E-14) is consulted right after each stage; when it returns True
+    the case settles as a terminal ``ERROR`` naming the stage just entered, keeping every
+    already-populated field (I-008). It is ``None`` by default, so the CLI/dataset path
+    is unaffected; the GUI worker supplies a threading Event so Cancel tears the worker
+    down to a terminal panel.
     """
     start = time.perf_counter()
+
+    def _cancelled(stage: str) -> CaseRun | None:
+        # A mid-pipeline Cancel (E-14): a terminal ERROR at the named stage, keeping
+        # whatever each earlier stage produced for a full retrieval diagnosis (I-008).
+        if cancel_check is None or not cancel_check():
+            return None
+        row.failure_stage = stage
+        row.status = "ERROR"
+        _total(row, start)
+        return CaseRun(row, question, scored, context, answer, verdict)
+
     row = RunMetrics(
         q_id=question.q_id,
         tier=question.tier,
         expected=list(question.relevant_docs),
     )
+    # Artifacts, defaulted so a Cancel can build a terminal CaseRun from whatever each
+    # stage has produced (I-008).
+    scored: list[ScoredDoc] = []
+    context: Context = _empty_context()
+    answer: Answer | None = None
+    verdict: Verdict | None = None
 
     # -- RETRIEVING (deterministic) --
-    scored: list[ScoredDoc]
     try:
         t = time.perf_counter()
         scored = retriever.search(question.question, k)
@@ -128,9 +151,11 @@ def run_case(
         row.status = "ERROR"
         _total(row, start)
         return CaseRun(row, question, [], _empty_context(), None, None)
+    cancelled = _cancelled("retrieval")
+    if cancelled is not None:
+        return cancelled
 
     # -- CONTEXTING (deterministic, token-bounded) --
-    context: Context
     try:
         context = build_context(scored, token_budget=token_budget)
         row.context_tokens = context.tokens
@@ -140,9 +165,11 @@ def run_case(
         row.status = "ERROR"
         _total(row, start)
         return CaseRun(row, question, scored, _empty_context(), None, None)
+    cancelled = _cancelled("context")
+    if cancelled is not None:
+        return cancelled
 
     # -- GENERATING (the one probabilistic step) --
-    answer: Answer
     try:
         t = time.perf_counter()
         answer = llm.generate(
@@ -173,6 +200,10 @@ def run_case(
         _total(row, start)
         return CaseRun(row, question, scored, context, answer, None)
 
+    cancelled = _cancelled("generation")
+    if cancelled is not None:
+        return cancelled
+
     # -- E-08 grounding gate: strip a foreign citation, force supported False, count it --
     provenance = set(context.provenance)
     raw_sources = list(answer.sources)
@@ -184,7 +215,6 @@ def run_case(
     row.answer_status = "COMPLETED"
 
     # -- JUDGING (the second probabilistic step, skippable via --judge off) --
-    verdict: Verdict | None = None
     if judge_on:
         try:
             verdict = judge.judge(
@@ -240,6 +270,10 @@ def run_case(
             row.supported = False
             row.unsupported_claims = len(foreign)
             row.total_factual_claims = len(raw_sources)
+
+    cancelled = _cancelled("judging")
+    if cancelled is not None:
+        return cancelled
 
     row.status = "SCORED"
     _total(row, start)

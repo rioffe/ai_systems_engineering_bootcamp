@@ -17,8 +17,26 @@ def main(argv: list[str] | None = None) -> int:
     return run(argv)
 
 
+def main_gui(argv: list[str] | None = None) -> int:
+    """`rag-gui` entry point: the optional PyQt5 one-question eval panel (R-13).
+
+    Imports PyQt5 lazily so the package and the `rag-eval` CLI stay importable without a
+    Qt install (I-011); the window is launched only when this surface is invoked, and it
+    discovers Ollama but degrades to the offline mocks when the daemon is unreachable.
+    """
+    from PyQt5.QtWidgets import QApplication
+
+    from .ui import MainWindow
+
+    args = argv if argv is not None else sys.argv[1:]
+    app = QApplication(args)
+    window = MainWindow()
+    window.show()
+    return app.exec_()
+
+
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())
 
 
-__all__ = ["main"]
+__all__ = ["main", "main_gui"]
