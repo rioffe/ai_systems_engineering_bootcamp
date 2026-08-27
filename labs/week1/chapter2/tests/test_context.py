@@ -31,14 +31,17 @@ def test_est_tokens_ceil_over_four():
 
 def test_t06_budget_is_respected_and_report_equals_build():
     # I-006: for every budget, tokens is the est_tokens of the built prompt and <= budget.
+    # Distinct texts so no E-06 dedupe fires: with a large budget every doc fits and
+    # nothing is dropped, hence truncated is False (a dedupe would set it True -- see T-06a).
     docs = _ranked(
-        ("a", "word " * 40, 3.0), ("b", "word " * 40, 2.0), ("c", "short", 1.0)
+        ("a", "word " * 40, 3.0), ("b", "term " * 40, 2.0), ("c", "short", 1.0)
     )
     for budget in (1, 2, 3, 5, 8, 16, 32, 128, 4000):
         ctx = build_context(docs, token_budget=budget)
         assert ctx.tokens <= budget, (budget, ctx.tokens)
         assert ctx.tokens == est_tokens(ctx.prompt)
     all_fit = build_context(docs, token_budget=4000)
+    assert [d.doc.doc_id for d in all_fit.docs] == ["a", "b", "c"]
     assert all_fit.truncated is False
     assert all_fit.tokens == est_tokens(all_fit.prompt)
 
