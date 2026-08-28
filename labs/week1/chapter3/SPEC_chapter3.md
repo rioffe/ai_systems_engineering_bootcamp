@@ -1,0 +1,61 @@
+## 2. Requirements (intent, high level)
+
+| ID | Statement |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| **R-01** | The system shall build the §22 pipeline **chunk → embed → index → retrieve → expand/multi-query → rerank → contextualize → context build → LLM → cited answer
+→ judge → metrics** over a corpus of **≈ 100 short, sectioned documents** with §7 metadata. |
+| **R-02** | The **embedder** shall map text to a fixed-dim `ℝᵈ` vector; the **real** path uses Ollama `nomic-embed-text` (`/api/embed`), and the **deterministic
+`MockEmbedder`** (hashed bag-of-words, fixed `d`, O-1) is a *drop-in double* such that the *entire deterministic boundary* is testable offline. The **VectorStore** is
+**in-memory** with **cosine** similarity (§3/§4). |
+| **R-03** | The **chunker** shall produce `Chunk`s with a documented **strategy** (fixed+overlap, heading-aware, semantic, contextual, §5/§6) and a **boundary guard**: a
+configured strategy MUST NOT silently split a *rule and its governing condition* across a boundary that separates them (§14); where it cannot know intent, it *warns and
+prefers the larger/overlap-safe* unit. |
+| **R-04** | **Hybrid retrieval** shall combine semantic and lexical (BM25) channels via `score = α·s_sem + (1−α)·s_lex` (§8) over **per-channel-normalized** scores, with
+`α ∈ [0,1]` (`α=0` ⇒ pure lexical, `α=1` ⇒ pure dense); each channel's score must be normalized to `[0,1]` *within the query* (documented rule) so the two channels are
+commensurable. |
+| **R-05** | **Reranking** (§9) shall take the fast top-**N** and return a precise top-**k** (`k ≤ N`); the **MockReranker** is a deterministic, documented
+coverage/overlap heuristic; a `LLMReranker` *may* replace it (same model, opt-in) but the *interface* `Reranker.rerank(q, candidates) -> ScoredChunk[]` is stable. |
+| **R-06** | **Query expansion / multi-query** (§10/§11) shall expand a query to `{q₁,…,qₙ}`, retrieve per expansion, and **union + dedupe by `chunk_id`**; the default
+`MockQueryExpander` is deterministic (templates + a fixed synonym map, seeded); a `LLMQueryExpander` *may* replace it. The merged ranking is **documented** (best
+component score wins; ties by `chunk_id`). |
+| **R-07** | **Contextual retrieval** (§12): at *index time* each chunk's *embedding* text is the **context-prefixed** form (`Document: {title} / Section: {section} /
+Topic: {domain}` + original text); the original text is preserved and is what is shown to the LLM. The query is embedded in its *plain* form. |
+| **R-08** | Every chunk the answer **cites** and every claim the judge marks *supported* shall be **traceable to a `chunk_id` present in the assembled `Context`** — no
+fabricated citations or grounds (anti-hallucination gate, §13/§21). Foreign citations are *deterministically dropped and flagged* by the `Citer`, not trusted to the
+model. |
+| **R-09** | The pipeline shall emit a **grounded, structured cited answer** `{answer, confidence, citations[], status}` via the local LLM, validated the ch1/ch2 way: raw
+text → strip an optional `json` fence → `json.loads` → schema-validate → accept/**reject-with-retry** (§15 ch1; I-010). |
+| **R-10** | The judge shall classify each answer **LLM-as-judge** (§19) into a structured verdict `{correct, supported, complete, unsupported_claims,
+total_factual_claims, faithfulness, completeness, citation_quality, rationale, status}`; offline, a deterministic`MockJudge` supplies verdicts *from ground truth*. |
+| **R-11** | The system SHALL measure **retrieval** with the §20 family — **Precision@k**, **Recall@k**, **MRR**, **MAP**, **NDCG@k** — using each question's
+`relevant_chunks` (ground truth) as the reference (`G`), with the documented no-empty-denominator behavior for each. |
+| **R-12** | The system SHALL measure **generation** with the §21 family — **faithfulness** = `supported_claims / total_factual_claims`, **completeness** = relevant facts
+reflected / total relevant facts, **citation_quality** = relevant citations / total citations — aggregated over judged rows, each with a no-division-by-zero behavior. |
+| **R-13** | The question dataset shall contain **known answers and known supporting chunks** (§15 ch2 analog) organized into the §14–§19 **failure-mode tiers**: `easy`
+(1 chunk), `multi` (≥2 chunks, A∧B∧C, §19), `chunking` (rule split by boundary, §14), `distractor` (lexically-similar-but-irrelevant, §15), `conflict` (disagreeing
+policies; resolve by version/authority, §16), `recency` (dated versions; newest wins, §17), `injection` (adversarial payload in evidence, §18). |
+| **R-14** | The **primary** product surface is a **CLI eval harness** (`rag`) that runs the full pipeline over the dataset and emits a **metrics report** —
+human-readable summary and machine-readable JSON — including a **per-tier breakdown** *and* a **per-capability diff** (§22). |
+| **R-15** | The system shall attribute every failed case to a **specific stage** (`chunking | retrieval | expansion | reranking | context | generation | judging`) (§21),
+so the report distinguishes *"did retrieval provide the evidence"* from *"did the model use it"* — the central diagnostic of the chapter. |
+| **R-16** | An **optional PyQt5 GUI** (`rag-gui`) reusing the *same* `chunking/embedding/retrieval/rerank/expand/context/citation/model/judgment/metrics` modules SHALL
+let the user type one question and inspect ranked→reranked→contextualized evidence (with per-stage scores), the cited answer, the verdict, and an **injection warning** —
+one question at a time. |
+| **R-17** | The project shall be reproducible via `uv` on Python 3.12 and **fully offline** (no Ollama, no network, no embed model) for the **entire automated test
+suite** via `MockEmbedder` + `MockLLM` + `MockJudge` + `MockReranker` + `MockQueryExpander`; the real Ollama path is **opt-in / manual** (§9.5). |
+| **R-18** | With a fixed seed on the **mock** path, all deterministic outputs (chunk boundaries, embeddings, ranked/re-ranked ids, context, computed metrics,
+corpus/question generation, mock answers/verdicts) are **reproducible/byte-identical**; the real Ollama path is **best-effort** reproducible (metrics asserted, exact
+generated/embedded bytes not — ch1 R-15). |
+| **R-19** | On start the real path shall **discover locally-pulled Ollama models** via `GET /api/tags`; if Ollama is unreachable it **falls back to the mock doubles**
+and states so (banner). If `--embed-model`/`--model` names a model **not pulled locally**, that stage surfaces a clear "pull required" error rather than a crash. |
+| **R-20** | The **probabilistic boundary is two components** — the **Embedder** and the **LLM** — and the LLM is used in **generation and judging** by default
+(R-09/R-10); **expansion** and **reranking** are *opt-in* LLM roles defaulting to their deterministic mocks. **`chunking`, `vector store`, `hybrid/rerank (mock)`,
+`expansion (mock)`, `contextualize`, `citation`, and `metrics` are LLM- and network-free** — asserted by a source/structure scan (T-02). |
+| **R-21** | Retrieved text is **data, not instructions** (§18): the system SHALL keep a **trust boundary** between system/application instructions and *evidence*, and
+when a retrieved chunk matches an injection pattern it SHALL flag the row `injection_warning=True` (and not let the evidence drive the system into obeying the payload) —
+observable in the report (§18). |
+| **R-22** | **Metadata (§7)** — `doc_id, title, section, author, created_at, updated_at, version, access_level, domain` — SHALL be loadable and usable for **filtering,
+recency ranking, authority/version resolution, and citation**; the `conflict` and `recency` tiers (§16/§17) SHALL resolve to the **highest-version / most-recent**
+authoritative chunk, and the system SHALL record which metadata field decided. |
+
+---
