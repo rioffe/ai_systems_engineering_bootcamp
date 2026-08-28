@@ -76,3 +76,38 @@ Beyond P0/P1, Level 4 (verification-grade, *mechanically checkable contracts + u
 - **Exact-match, canonical error/`failure_stage` strings** (currently prose; see F-019, §4) and **a defined model-availability outcome taxonomy** (F-013, ch1's F-003 analog) so the `real` path's observable states are mechanically checkable.
 
 These are stretch items; none is required for an implementation-grade (Level 3) build.
+
+---
+
+## 3. Findings Summary
+
+**24 findings: 0 CRITICAL · 3 HIGH · 11 MEDIUM · 10 LOW.** They cluster into three themes: (1) **three material semantic ambiguities on the offline-generation/hybrid/index-query seam** that could drive divergence between two competent implementers (F-001/002/003); (2) **a cluster of inter-consistency / cross-reference defects** (`which_doc_decided` meaning, stale `I-008→E-15`, the `E-13`/`E-16` injection-banner mixup, metric-numerator definitions) (F-004/005/006/007/008); and (3) **editorial, traceability, and stretch items** (F-009…F-024). No finding is a redesign (§17); every P0/P1 is additive or a one-line clarification. The deterministic core (metric math, failure semantics, source-scanned reliability boundary, `MockEmbedder`) is implementation-grade and is *not* where the work lies.
+
+| ID | Sev | Location | Issue (one line) |
+| ---- | ---- | -------- | ---------------- |
+| F-001 | HIGH | C-09/C-10 `MockLLM`/`MockJudge`, R-09, T-*8 | `MockLLM` is "ground-truth-fit" but its `generate` contract passes no `gold*`; it is undefined whether offline generation metrics exercise retrieval (the §21 thesis) or are tautological. |
+| F-002 | HIGH | C-04 `O-3`/`HybridRetriever`, R-04, I-002 | Hybrid candidate-pool formation + per-channel min-max (missing channel, zero-range) undefined → `--hybrid on` not byte-deterministic. |
+| F-003 | HIGH | §3.1, §5.1, §9.11, C-12 | `--contextual`/`--strategy` are index-time but appear as `eval` options; the `build-index`→`eval` handoff (pickle vs. rebuild) is undefined, breaking T-20/T-21's "same dataset" premise. |
+| F-004 | MEDIUM | C-11, R-22, E-09/E-10 | `which_doc_decided` is named "which *doc*" but semantically means "which *metadata field*"; conflict/recency precedence (version vs. `updated_at` vs. authority) is unordered. |
+| F-005 | MEDIUM | C-11, R-12, T-08a | `faithfulness = supported_claims / total_factual_claims` references `supported_claims`, which is not a `Verdict` field; must be defined as `total_factual_claims − len(unsupported_claims)`. |
+| F-006 | MEDIUM | C-11, R-12, §21 | Generation numerators ("reflected gold_facts", "relevant citations") are undefined / not independently reproducible for the *real* judge. |
+| F-007 | MEDIUM | I-008, §11, E-15 | `I-008`/`§11` trace failure-attribution to `E-15` (a `top_n` usage exit); attribution lives in `E-11` — a stale pointer. |
+| F-008 | MEDIUM | §5.1, §C-08, E-13/E-16 | The injection banner is attributed to `E-13` (Ollama-unreachable) in three places; it belongs to `E-16` (injection). |
+| F-009 | MEDIUM | C-01 `access_level`, R-22 | `access_level` is stored and advertised for "permissions" filtering but no authorizing *principal* or comparison rule is defined. |
+| F-010 | MEDIUM | C-01/C-11/I-004/I-006, E-05, T-06 | Token budget vs. `est_tokens`: the truncation/"`Context.tokens ≤ budget`" check (ceil-of-concatenation vs. sum-of-per-doc-ceil) is not pinned, so `truncated`/`Context.tokens` are ambiguous. |
+| F-011 | MEDIUM | C-02 lexical, R-04, §10 | The BM25/`idf` formula is "ch2 O-1 formula" by reference only; ch3 is not self-contained for the lexical channel (an implementer needs ch2's spec). |
+| F-012 | MEDIUM | C-05, I-006, C-12 | After `--rerank on`, the canonical ranking key (`.rerank` vs. retained `.score`) and what `retrieved` mirrors is not fixed. |
+| F-013 | MEDIUM | R-19, E-13/E-14, §5.1 | Model-availability outcomes (unreachable daemon → mock fallback vs. not-pulled model → error) are not unified into one outcome taxonomy with distinct banners (ch1's F-003 analog). |
+| F-014 | MEDIUM | C-11 `MRR`, R-11, T-05a/b | `MRR` is written without an `@k` while `P/R/NDCG` are `@k`; `MRR@k` vs. full-rank `MRR` is ambiguous at the boundary. |
+| F-015 | MEDIUM | E-04, E-14, T-01, I-007 | E-04's "ground-truth all-missing (`|G|=0`)*runtime*" branch is unreachable: absent `relevant_chunks` are a load-time error (E-14/I-013), so the guard is dead for the generated dataset. |
+| F-016 | MEDIUM | R-18, §5.1 `--seed`, §10 | Where `--seed` is actually consumed among the content-determined mocks is unclear; "reproducible with a fixed seed" is vague for the mock path. |
+| F-017 | LOW | R-18, I-002, §5.1 | The `report.json` aggregate order (`by_tier`/`by_capability`/`RunMetrics` rows) is not canonically ordered, so "byte-identical" (R-18) is at risk across dict/set iteration. |
+| F-018 | LOW | C-01/C-11/I-005 | `est_tokens = ceil(len(s)/4)` does not state character-count vs. byte-count for non-ASCII; should fix one. |
+| F-019 | LOW | §5.1 `--out` / "also -h stdout" | The "-h" for "also human-readable to stdout" collides with `argparse`'s `-h/--help`; clarify the human-vs-JSON split and the flag. |
+| F-020 | LOW | §0, R-17, R-20 | "*one* probabilistic boundary" (§0) vs. "*two components — Embedder and LLM*" (R-20); reconcile the framing. |
+| F-021 | LOW | C-12 `retrieved`, R-11, I-006 | Whether `RunMetrics.retrieved` is the top-*k* (the P/R@k denominator, `R_k`) or the top-*N* candidate pool is undefined. |
+| F-022 | LOW | C-11 `Verdict.status`, E-12 | Under `--judge off`, whether a `Verdict` with `status="SKIPPED"` is produced or no `Verdict` exists (generation fields `None`) is unspecified. |
+| F-023 | LOW | E-03 | Typo: a case is `SCORCED` rather than `SCORED`. |
+| F-024 | LOW | C-03 `SemanticChunker`, Q-04/OQ8 | `SemanticChunker` is listed as a first-class `Chunker` subclass yet deferred; clarify it is out-of-scope-for-v0.1 so an implementer does not ship it. |
+
+**Severity discipline.** No finding is CRITICAL: nothing is contradictory-to-impossibility or fundamentally unverifiable — the deterministic core is solid and the probabilistic path is honestly bounded (R-17/R-18). The three HIGH items are *material-divergence ambiguity*, not conceptual gaps or contradictions. The MEDIUM set is the work that must be cleared before claiming conformance/Level 3; the LOW set is improvement/Level-4 stretch. **Every P0/P1 is additive or a one-line clarification; none requires a redesign** (§17).
