@@ -168,23 +168,23 @@ The UI layers SHALL NOT implement retrieval, metric, or judgment semantics indep
 
 Each question executes independently.
 
-```text
-IDLE
-  |
-  v
-RETRIEVING --error--> ERROR[failure_stage=retrieval]
-  |
-  v
-CONTEXTING --error--> ERROR[failure_stage=context]
-  |
-  v
-GENERATING --error--> ERROR[failure_stage=generation]
-  |
-  v
-JUDGING --error--> PARTIAL[failure_stage=judging]
-  |
-  v
-SCORED
+```mermaid
+stateDiagram-v2
+     [*] --> IDLE
+IDLE --> RETRIEVING
+RETRIEVING --> CONTEXTING
+RETRIEVING --> ERR_RETRIEVAL: error (failure_stage=retrieval)
+CONTEXTING --> GENERATING
+CONTEXTING --> ERR_CONTEXT: error (failure_stage=context)
+GENERATING --> JUDGING
+GENERATING --> ERR_GENERATION: error (failure_stage=generation)
+JUDGING --> SCORED
+JUDGING --> PARTIAL: error (failure_stage=judging)
+SCORED --> [*]
+ERR_RETRIEVAL --> [*]
+ERR_CONTEXT --> [*]
+ERR_GENERATION --> [*]
+PARTIAL -->[*]
 ```
 
 A terminal state SHALL be one of:
@@ -714,18 +714,13 @@ The real model SHALL be prompted to emit exactly one JSON object.
 
 Validation pipeline:
 
-```text
-raw model text
-    ↓
-strip one optional ```json ... ``` fence
-    ↓
-JSON parse
-    ↓
-JSON Schema validation
-    ↓
-semantic normalization
-    ↓
-Answer
+```mermaid
+graph TD
+    RAW["raw model text"] --> STRIP["strip one optional JSON fence"]
+    STRIP --> PARSE["JSON parse"]
+    PARSE --> VALIDATE["JSON Schema validation"]
+    VALIDATE --> NORMALIZE["semantic normalization"]
+    NORMALIZE --> ANSWER["Answer"]
 ```
 
 The harness SHALL NOT accept an unvalidated object.
@@ -1447,23 +1442,22 @@ questions.json
 
 ### 21.2 Dependency direction
 
-```text
-types
-  ↑
-corpus ---------------+
-retrieval ------------|
-context --------------|
-claims ---------------|
-metrics --------------|
-schemas --------------|
-                      ↓
-                   pipeline
-                  /       \
-               model    judgment
-                  \       /
-                   reporting
-                      ↑
-                 cli / ui
+```mermaid
+graph TD
+    types
+    det["corpus · retrieval · context · claims · metrics · schemas<br/>(deterministic; no LLM / transport)"]
+    pipeline
+    model
+    judgment
+    reporting
+    ui["cli / ui"]
+    types --> det
+    det --> pipeline
+    pipeline --> model
+    pipeline --> judgment
+    model --> reporting
+    judgment --> reporting
+    reporting --> ui
 ```
 
 The deterministic modules MUST NOT depend on model or transport implementations.
