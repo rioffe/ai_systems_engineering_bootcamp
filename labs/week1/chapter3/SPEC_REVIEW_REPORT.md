@@ -99,7 +99,7 @@ These are stretch items; none is required for an implementation-grade (Level 3) 
 | F-012 | MEDIUM | C-05, I-006, C-12 | After `--rerank on`, the canonical ranking key (`.rerank` vs. retained `.score`) and what `retrieved` mirrors is not fixed. |
 | F-013 | MEDIUM | R-19, E-13/E-14, §5.1 | Model-availability outcomes (unreachable daemon → mock fallback vs. not-pulled model → error) are not unified into one outcome taxonomy with distinct banners (ch1's F-003 analog). |
 | F-014 | MEDIUM | C-11 `MRR`, R-11, T-05a/b | `MRR` is written without an `@k` while `P/R/NDCG` are `@k`; `MRR@k` vs. full-rank `MRR` is ambiguous at the boundary. |
-| F-015 | MEDIUM | E-04, E-14, T-01, I-007 | E-04's "ground-truth all-missing (`|G|=0`)*runtime*" branch is unreachable: absent `relevant_chunks` are a load-time error (E-14/I-013), so the guard is dead for the generated dataset. |
+| F-015 | MEDIUM | E-04, E-14, T-01, I-007 | E-04's "ground-truth all-missing (` | G | =0`)*runtime*" branch is unreachable: absent`relevant_chunks` are a load-time error (E-14/I-013), so the guard is dead for the generated dataset. |
 | F-016 | MEDIUM | R-18, §5.1 `--seed`, §10 | Where `--seed` is actually consumed among the content-determined mocks is unclear; "reproducible with a fixed seed" is vague for the mock path. |
 | F-017 | LOW | R-18, I-002, §5.1 | The `report.json` aggregate order (`by_tier`/`by_capability`/`RunMetrics` rows) is not canonically ordered, so "byte-identical" (R-18) is at risk across dict/set iteration. |
 | F-018 | LOW | C-01/C-11/I-005 | `est_tokens = ceil(len(s)/4)` does not state character-count vs. byte-count for non-ASCII; should fix one. |
@@ -300,7 +300,7 @@ Each finding follows the skill's format: **Observation · Why it matters · Pote
 
 **Potential consequence** A human reading "mock" on screen cannot tell *reachable-but-empty-model* from *daemon-down*; GUI banner wiring is ambiguous with F-008.
 
-**Recommended resolution** Define an **outcome enum** `{DEGRADED_MOCK (daemon unreachable), PULL_REQUIRED (model absent: emit `ollama pull <m>` + exit 4), RUN_REAL}` with a **distinct, canonical banner per outcome**, and unify E-13/E-14's cross-refs. This is the ch1 F-003 fix, adapted.
+**Recommended resolution** Define an **outcome enum** `{DEGRADED_MOCK (daemon unreachable), PULL_REQUIRED (model absent: emit`ollama pull <m>`+ exit 4), RUN_REAL}` with a **distinct, canonical banner per outcome**, and unify E-13/E-14's cross-refs. This is the ch1 F-003 fix, adapted.
 
 ---
 
@@ -414,7 +414,7 @@ Each finding follows the skill's format: **Observation · Why it matters · Pote
 
 **Potential consequence** `retrieved` can be top-N with `k=5` reported P/R@5 computed on those 20 chunks, inflating `Recall@5` vs. the `top-5` the context actually saw.
 
-**Recommended resolution** Fix `retrieved = the top-`k` ranking actually consumed by the `ContextBuilder` (post-rerank, post-expand-union), pin it in C-12, and add to I-006 a cross-check `set(retrieved[:k]) == sorted(R_k_by_score)[:k]`.
+**Recommended resolution** Fix `retrieved = the top-`k` ranking actually consumed by the `ContextBuilder` (post-rerank, post-expand-union), pin it in C-12, and add to I-006 a cross-check `set(retrieved[:k]) == sorted[R_k_by_score](:k)`.
 
 ---
 
@@ -467,6 +467,7 @@ Each finding follows the skill's format: **Observation · Why it matters · Pote
 **Observable and precise (strength).** `R-02`…`R-16`, `R-18`…`R-22` are observable obligations with measurable outputs (byte-identified mock vectors; a per-channel min-max; a top-`k` ranking; a structured `Answer`/`Verdict`; a `by_tier`/`by_capability` diff). `R-08`/`R-21` (anti-hallucination + injection) are *enforced by the harness, not the model* — an unusually strong, testable formulation. `R-13` (the seven tiers) and `R-14`/`R-15` (per-capability diff + per-stage attribution) make the chapter's thesis *assertable* rather than *asserted*.
 
 **Precision gaps (MEDIUM).**
+
 - **`R-12` / §21 generation-metric numerators** (F-006): "*reflected gold_facts*" and "*relevant citations*" are undefined for the real judge; only the mock's intersection semantics are concrete → the real-judgment metrics are not independently reproducible.
 - **`R-13` `access_level`/permissions** (F-009): the capability is advertised but has no *principal* or comparison rule → it is half-open.
 - **`R-11` `MRR`** (F-014): `MRR` is unnamed at `@k` while `P/R/NDCG` are → a boundary case diverges.
@@ -489,10 +490,12 @@ Each finding follows the skill's format: **Observation · Why it matters · Pote
 The contract surface (C-01…C-12) is **dense and mostly precise**. The data types (C-01) are *nearly implementation-grade*; the gaps are in *cross-field invariants* and a couple of **under-specified algorithms**, not in *missing fields*.
 
 ### 6.1 Data-contract completeness (strong)
+
 - **C-01** (`ChunkMetadata`, `Document`, `Chunk`, `ScoredChunk`, `Chunk`) is strong: field types, null-ability, defaults, and the `chunk_id = "doc_id#i"` stable-id rule are all fixed; `ScoredChunk` carries the *component scores* (`semantic`, `lexical`, `rerank`) needed for the per-stage diff. Only weak points: `version: int|float|None` mixing two orderings + a `None` (F-004), and `access_level` without a principal (F-009).
 - **C-11** (`Question`, `Answer`, `Verdict`, `RunMetrics`) is the schema-core and is strong on shape; the weak points are *intra-schema* (F-005 `supported_claims` not a field; F-012 post-rerank `score`/`rerank`/`rank` not reconciled; F-021 `retrieved` set; F-022 `SKIPPED` status; plus the metric-numerator definitions F-006). All are *field-semantics* fixes, not missing fields.
 
 ### 6.2 Interface completeness (strong, two gaps)
+
 - **Embedder/VectorStore/cosine (C-02)** is precise *except* the **BM25 formula is by-reference, not inlined** (F-011) and the **hybrid pool / per-channel norm edges** are undefined (F-002, in C-04). `cosine` has the zero-vector guard (E-02); `search` returns `[]` never `None` (good).
 - **Chunker (C-03)** precise incl. the `boundary_guard`/`split_risk` contract (a genuinely good, *observable* formulation of §14). Only `SemanticChunker`'s scope is muddled (F-024).
 - **Reranker/QueryExpander/Context/Contextualize (C-05–C-07)** precise; the post-rerank *canonical key* is the one gap (F-012).
@@ -500,11 +503,13 @@ The contract surface (C-01…C-12) is **dense and mostly precise**. The data typ
 - **Pipeline (C-12)** wires the state machine; `retrieved` semantics (F-021) and the index/query handoff (F-003) are the two open points.
 
 ### 6.3 Schema/gate precision (very strong)
+
 - A single `jsonschema` gate (I-010/T-08) with `additionalProperties:false` and an `out-of-range confidence` + `missing required field` reject/retry → `ERROR`, never `COMPLETED`, is the ch1/ch2 *reliability gate* carried forward cleanly into RAG (R-09). The *dual* gate (answer **and** verdict) is correct and necessary.
 - **Serialization.** No explicit **serialization contract** for `report.json` is given; F-017 is the one *serialization* gap (canonical ordering for R-18 byte-identity).
 - **Compatibility.** Invariant I-009 (source-scan, three modules) is a *structural compatibility* guarantee: the real-path transport (httpx/Ollama) is *quarantined* so the deterministic core's API is stable across backend swaps — a strong, unusual guarantee.
 
 ### 6.4 Input/output ambiguity
+
 - The one place an *input* is ambiguous is **hybrid `retrieve(q_vec, query, *, candidates)`** (F-002) — which `candidate`s get blended, and how a single-channel candidate is treated. Everything else (every dataclass field, every `--flag` default in K-03, every `T-*`) has a fixed default.
 - **Empty/null behavior** is largely covered: `[]`-never-`None` (E-02), no-empty-denominator (I-007, every metric), empty `--tiers`→exit 0 (E-18), empty answer citations allowed (OQ2). The *open* empty-case is the **zero-range min-max** (F-002).
 
@@ -517,20 +522,24 @@ The contract surface (C-01…C-12) is **dense and mostly precise**. The data typ
 The state model (§3.2 `CaseState`) and the failure model (§8 E-01…E-18) are the **cohesive heart** of this spec, and mostly *excellent*: a per-case single-threaded linear state machine with terminal `SCORED`/`PARTIAL`/`ERROR`, per-case fault isolation, a complete-retrieval-diagnosis guarantee that survives a later-stage fault (I-008), and **six §14–§19 failure modes realized as asserted tiers**. The defects are *local*, not structural.
 
 ### 7.1 State-machine completeness (strong, two notational gaps)
+
 - **States + transitions:** `IDLE→RETRIEVING→EXPANDING→RERANKING→CONTEXTING→GENERATING→JUDGING→{SCORED|PARTIAL|ERROR}` with terminal `SCORED`/`PARTIAL`/`ERROR`; toggle-gating (`--hybrid off` ⇒ pure-dense passthrough; `--rerank off` ⇒ passthrough; `--judge off` ⇒ skip `JUDGING`) is cleanly modeled as *no-op stages that carry inputs unchanged*. **Initial, terminal, and failure states are all named.** This is well above the lab norm.
 - **Gap 1 — the `ERROR` diagram annotation.** §3.2's ASCII diagram annotates the `ERROR` terminal as `failure_stage in {retrieval,expansion,reranking,context}`, but **E-11** says a *generation* fault (after retries) is `ERROR` with `failure_stage="generation"`, and `C-12`'s `failure_stage` enum includes `generation|judging`. So the diagram *under-states* the `ERROR`'s reachable `failure_stage` set (it omits `generation`; and `PARTIAL` is the *judge* fault, not `ERROR`). This is a **notational mismatch** between the diagram, the state table (`ERROR` = "*a stage before judging terminal-faulted*", which correctly includes `generation`), E-11, and the `C-12` enum — a verifier reading *only* the diagram would miss that a generation fault is an `ERROR`, not a `PARTIAL`.
 - **Gap 2 — the `PARTIAL` trigger.** §3.2 says `PARTIAL` ⇒ "*retrieval + generation ok but **judge** failed (E-15)*" — but the *judge*-fault case is **E-11** ("*if generation succeeded but the judge failed the row is `PARTIAL`*"); `E-15` is a `top_n`/`top_k` **usage** exit. This is the **same root as F-007** (the `I-008/T-10/E-15` pointer family): E-15 is the *nearest neighbor* of the edges that actually carry `generation`/`judging` attribution, and the state table re-points `PARTIAL` to E-15 as well. Resolve both with the **E-11 re-pointing** in F-007.
 
 ### 7.2 Failure semantics (very strong)
+
 - **Detection + resulting state + propagation + caller observation** are all specified per operation: parse/validation retry→`ERROR` (I-010), Ollama-unreachable→mock-degrade+banner (E-13), `relevant_chunks`-absent→load-error exit 3 (E-14/I-013), bad usage→exit 2 (E-15 with the exit-code *table* in §5.1). The **retry semantics** are precise: "*up to `max_retries` with an error-informed prompt, first failure reason recorded, then terminal*" — a ch2 E-03 analog carried cleanly.
 - **Partial work / resume:** the *no-resume, no-retry-of-the-case* design (one question at a time; a failed stage *terminates that case*, siblings continue) is **explicit and coherent** — and it is the right call for a *static-per-run* corpus (R-13) with no cross-question state (Q-06). No partial-completion ambiguity.
 - **Recovery / cancellation:** per-case isolation is the spec's *defining* failure property and is *architecturally* enforced (I-008: a later fault preserves the *complete retrieval diagnosis*); this is a genuinely unusual strength. GUI `Cancel` teardown is speced (I-014/E-17/T-16).
 
 ### 7.3 Intra-state consistency
+
 - **Failure-stage enumeration.** `C-12` `failure_stage` ∈ `{retrieval,expansion,reranking,context,generation,judging}` and the state table / E-set agree on *which stage produces which terminal state* **once E-11 is re-pointed** (F-007). After that fix, the *whole* error-attribution story is internally consistent, which is what makes §21's "*where did it fail?" diagnostic trustworthy.
 - **The one genuine failure-model tension — `E-04` vs. `E-14`/`I-013`** (F-015): the `|G|=0` *runtime* divide-guard is *unreachable* because absent ground-truth ids are a *load-time* error. This is *redundancy*, not *contradiction* — the guard is defensively-present-but-dead, and the resolution (label it defensive, or add a synthetic-corpus T) is additive.
 
 ### 7.4 What is *correctly* out of scope
+
 - **Retries across cases / re-run-on-fault** are not specified — correct, since R-17/R-21 make a single static run the unit and per-case isolation the guarantee. **No state/memory subsystem** (Q-06) — correct and well-motivated. These are *freedom*, not gaps.
 
 **Verdict of §7.** State-machines-and-failure is **near-implementation-grade**: complete state set, precise retry and propagation semantics, per-case isolation as an invariant, and six asserted failure tiers. The only *real* defect is the **E-15↔E-11/T-10 pointer family** (F-007, which also fixes the §3.2 diagram's `ERROR` annotation and the `PARTIAL` trigger) plus the **defensive-but-dead `E-04`** (F-015). After these, the state/failure model is fully consistent and mechanically verifiable.
@@ -544,16 +553,19 @@ The state model (§3.2 `CaseState`) and the failure model (§8 E-01…E-18) are 
 Determinism is the **thesis of the whole spec** ("*RAG … reproducible, offline*") and, accordingly, its **strongest algorithmic dimension**. It is *mostly* implementation-grade; the residual gaps are **edge behaviors of two algorithms** (hybrid min-max, token estimation) and a **serialization discipline** for the byte-identity claim — not *undefined behavior* in the core.
 
 ### 8.1 What is already deterministic and precise (excellent)
+
 - **`MockEmbedder` (O-1)** — the linchpin: a **fixed** FNV-1a 32-bit hashed bag-of-words, **explicitly *not* Python's per-process `hash`**, L2-normalized to a unit vector, `D_mock=256` (K-03). This is a *genuinely brilliant* move: it makes dense+hybrid retrieval *observable and assertable offline* without a model, with a *meaningful* ranking (shared vocabulary → non-zero cosine). The tie-break (`chunk_id` asc, O-1b) and the no-positive-similarity `[]` guard (E-02) close the ordering. T-04 pins *both* the byte-identical property *and* the tie-break with a crafted equal-score corpus — a *strong* determinism test.
 - **Metric math (§C-11, I-001/I-007)** — P/R@k, MRR, MAP, NDCG, faithfulness/completeness/citation_quality, each with a **closed-form equation** *and* a **worked example with asserted numbers** (T-05a/b, T-08a). The *no-division-by-zero* guards are individually named per metric (`precision=None` when `TP+FP=0`, `mrr=0.0` when nothing relevant, `ndcg=None` when `IDCG=0`, generation numerators `=0.0` when denominator `0`). This is *verification-grade* algorithm precision. The only algorithmic imprecision is the `MRR`-vs-`MRR@k` **at the rank-`>k` boundary** (F-014).
 - **`cosine`** — guarded against a zero vector (E-02, denominator `or 1.0`); deterministic. **`est_tokens`** — a single formula (`ceil(len/4)`, I-005) used identically by builder and report, with the *unit* being the only open point (F-018, char-vs-byte).
 - **Corpus/question generation** — `gen-corpus --seed 42` → byte-identical 100 docs + `questions.json` (T-01), with the §7 metadata and the seven tiers — a *fully deterministic* ground-truth factory. Strong.
 
 ### 8.2 Nondeterminism that is *correctly* bounded
+
 - The spec never *pretends away* nondeterminism: the **real** path (`OllamaEmbedder`/`OllamaLLM`/`OllamaJudge`) is declared **best-effort** and the suite is scoped to the deterministic doubles only (R-17/I-011/T-14, K-01). `temperature=0.0, seed=42` are *defaulted* on the real path (C-09) and the **real path is excluded from `uv run pytest`** (K-05) — the right posture. Per skill §3.9, this is *precise handling* of the nondeterministic components, not a *prompt-as-guarantee* mistake.
 - **Query expansion is honestly labeled** "*probabilistic in principle, deterministic by default*" (C-06) — exactly the right way to frame a default-mock, opt-in-LLM role (R-20).
 
 ### 8.3 Residual algorithmic gaps
+
 - **Hybrid min-max, edges (F-002).** Candidate-pool formation, missing-channel treatment, and the **zero-range** (all-equal-score → `0/0`) case are undefined; I-002 cannot hold for `--hybrid on` until these are fixed. The single-candidate degenerate is documented (E-03) but the *multi-candidate equal-score* case is not — a *real* determinism hole on the headline capability.
 - **Token estimator, two things (F-010, F-018).** (a) the *count that drives truncation* (running sum-of-`est_tokens` vs. `ceil` of concatenation) is undefined, and `ceil` is sub-additive so the two diverge **at the boundary** where `truncated` flips (I-004/T-06); (b) the *unit* of `len` (char vs. byte) is unstated (F-018), so non-ASCII breaks the I-006 *report=build* property.
 - **`report.json` serialization (F-017).** Byte-identity (R-18/I-002) is *in-memory*; the *serialized artifact* has no canonical ordering (`by_tier`/`by_capability`/`RunMetrics` rows) — a serialization gap, not an algorithm gap per se.
@@ -561,8 +573,36 @@ Determinism is the **thesis of the whole spec** ("*RAG … reproducible, offline
 - **BM25 by-reference (F-011).** The lexical channel's *algorithm* is cited, not inlined; the hybrid result depends on a formula defined in ch2. Not a determinism *defect* in ch3 per se, but it makes ch3 *non-self-contained* for a deterministic algorithm.
 
 ### 8.4 Numerical behavior / boundaries
+
 - **Rounding.** NDCG's `log2` and the worked-example decimals (`1.88685`, `2.13093`, `0.88547`) are *pinned by assertion* (T-05a), so the rounding is *implicitly fixed by T-05a* rather than stated — acceptable since T-05a *is* the pin. For *new* metrics, add a rounding/format rule (F-017's serialization rule).
 - **Empty/min/max.** Covered (E-02 empty retrieval, E-18 empty `--tiers`, I-007 empty denominators). The *uncovered* boundary is **zero-range min-max** (F-002).
 - **Concurrency/determinism interaction.** v0.1 is *strictly sequential* (Q-05) — so determinism has no *race* to defeat; this is *correctly* chosen and removes a whole class of nondeterminism. A future `--concurrency` (Q-05) would need a determinism-preservation argument; note it, but it is out of scope.
 
 **Verdict of §8.** Determinism and algorithm precision is the spec's **single strongest quality** (score 4 — the gap to 5 is *serialization + two algorithm edges*, not *undefined behavior*). The core (FNV-1a `MockEmbedder`, guarded metric math with asserted worked examples, per-case byte-identity, sequential design) is *verification-grade*; the P0/P1 fixes here are **F-002 (hybrid edges), F-017 (report serialization), and the F-010/F-018 estimator pins** — all additive and localized to the edges the rest of the spec already guards.
+
+---
+
+## 9. Edge-Case Review
+
+The edge/failure catalog (E-01…E-18) is **comprehensive and deterministic-by-construction**, and is the second pillar of this spec's quality after §8. Each edge is a *concrete, asserted behavior* (`precision=None`, "returns `[]` never `None`"), and the six §14–§19 failure modes are *measured* tiers, not special-cased branches (§21 "where did it fail?"). Only **two** edges have *real* issues, both *redundancy/coverage* rather than *contradiction*.
+
+### 9.1 Strong edge coverage
+
+- **Empty/null/missing/malformed.** `E-01` (malformed/unreadable corpus entry → load error), `E-02` (no positive similarity → `[]` never `None`), `E-14` (absent `relevant_chunks` id → load error, the I-013 guard), `E-18` (empty `--tiers`/empty dataset/empty question → warning + exit 0 with an empty report and no division-by-zero). These are *exactly* the "smallest/empty/missing/malformed" cases the skill asks for, each with an asserted behavior.
+- **The six failure modes as tiers (E-07/08/09/10/16 plus E-15/E-11/E-12/E-13/E-17).** *Chunk-boundary* (§14, E-07+T-21, the *measurable* `--contextual`/`--overlap` recovery), *distractor* (§15, E-08/E-03, precision-drops not rejected), *conflict* (§16, E-09, authority/version resolution with `which_doc_decided`), *outdated* (§17, E-10, recency resolution), *injection* (§18, E-16, flag-as-data + grounding). Each is a *tier* the report aggregates *and* an *edge* with a `T-*` — a genuinely strong design that turns the chapter's failure *narratives* into *measurable outcomes*.
+- **Boundary/minimum/maximum.** `E-05` (token_budget smaller than every doc → keep largest-rank that fits, `truncated=True`), `E-06` (duplicate docs → keep highest-rank), `E-15` (`top_n<k` or `top_k>len(candidates)` → **usage error, not a silent clamp** — a *notably good* call, per the *boundary test*), `E-03`/`E-04` (the empty/zero-retrieval degenerate of P/R/NDCG). These are the "minimum/maximum" cases, asserted.
+- **Timeout / unavailable dependency / partial dependency.** `E-13` (Ollama/embed-model unreachable → mock degrade + banner; with the F-013 outcome split), `E-11` (generator/judge LLM non-JSON/out-of-schema after retries → `ERROR`/`PARTIAL`). Both handled.
+- **Cancellation / resource.** `E-17` (GUI `Run`-while-`Run` / `Cancel`-mid-generation → tear down, terminal panel, no live worker — the *concurrency/cancellation* edge, speced offscreen T-16).
+
+### 9.2 The two real edge issues
+
+- **`E-04` unreachable (F-015).** The `|G|=0` *runtime* guard is dead under T-01/E-14/I-013. It is *redundancy*, not a wrong edge — but a dead guard weakens the *E⇒T* discipline that is this spec's hallmark. Fix: label it defensive-only (or add a synthetic-corpus T).
+- **The `E-15` pointer family (F-007, covered in §7).** `E-15` is a *usage* edge but is cited as the home of *failure-attribution* in `I-008`/`T-10`/§11 and as the `PARTIAL` trigger in the §3.2 state table; the attribution actually lives in `E-11`. Not an *edge* defect per se, but it *mis-associates* edges.
+
+### 9.3 Gaps not worth new findings
+
+- **Concurrent input / resource exhaustion.** Out of scope by design (`--concurrency` deferred, Q-05; corpus static-per-run, Q-06). The spec *correctly* does not need E-rows for these, and *does* not mis-assert them. No finding.
+- **Partial dependency failure vs. full.** `E-13` covers *unreachable daemon*; the *reachable-but-model-absent* (`PULL_REQUIRED`) case is folded into `E-13`/R-19 but *needs the outcome split* (F-013). This is reported under F-013, not as a new E-edge, because the *edge* exists — it is the *behavior/banners* that must be split.
+- **Duplicate/empty at the *answer* level.** Empty answer citations are allowed (OQ2); an empty "I cannot answer" answer is the *faithful* behavior for a `distractor`/`E-03` case. Covered.
+
+**Verdict of §9.** Edge-case coverage is **excellent** (score 4): the *smallest/empty/missing/malformed/minimum/maximum/timed-out/unavailable/cancelled* families are all present and asserted, and the six failure-mode tiers are *measured* not *special-cased*. The two *real* issues (F-015 dead guard, F-007 pointer family) are *redundancy/association*, not contradictions — neither blocks implementation; both are additive. After F-015 (and the F-007 re-point), the E-catalog is fully consistent and every *reachable* edge has a `T-*`.
