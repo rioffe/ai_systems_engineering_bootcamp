@@ -1,0 +1,1 @@
+sigma security audit policy reference 053, edition 53. The audit limit for new hires is 3600 dollars, effective 2020. Per security annex audit-053, this applies to new hires in the 2020 period. Cross-reference security audit for new hires budgeting at 3600 each.

@@ -1,0 +1,2604 @@
+{
+  "meta": {
+    "command": "eval",
+    "backend": "ollama phi4-mini:latest",
+    "model": "phi4-mini:latest",
+    "mock": false,
+    "k": 5,
+    "token_budget": 2000,
+    "max_tokens": 512,
+    "judge": true,
+    "seed": 42,
+    "tiers": "all",
+    "n_questions": 25,
+    "n_judged": 18,
+    "n_failed": 7,
+    "n_truncated": 0
+  },
+  "aggregate": {
+    "n_cases": 25,
+    "precision": 0.30400000000000005,
+    "recall": 0.96,
+    "f1": 0.4438095238095239,
+    "answer_accuracy": 0.8333333333333334,
+    "hallucination_rate": 0.2222222222222222,
+    "failure_breakdown": {
+      "generation": 7,
+      "ok": 18
+    },
+    "by_tier": {
+      "distractor": {
+        "n_cases": 6,
+        "precision": 0.20000000000000004,
+        "recall": 1.0,
+        "f1": 0.3333333333333333,
+        "answer_accuracy": 1.0,
+        "hallucination_rate": 0.0,
+        "failure_breakdown": {
+          "ok": 5,
+          "generation": 1
+        },
+        "by_tier": {}
+      },
+      "easy": {
+        "n_cases": 8,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "answer_accuracy": 1.0,
+        "hallucination_rate": 0.0,
+        "failure_breakdown": {
+          "generation": 2,
+          "ok": 6
+        },
+        "by_tier": {}
+      },
+      "multi": {
+        "n_cases": 6,
+        "precision": 0.4000000000000001,
+        "recall": 1.0,
+        "f1": 0.5714285714285715,
+        "answer_accuracy": 0.8,
+        "hallucination_rate": 0.2857142857142857,
+        "failure_breakdown": {
+          "ok": 5,
+          "generation": 1
+        },
+        "by_tier": {}
+      },
+      "synthesis": {
+        "n_cases": 5,
+        "precision": 0.48,
+        "recall": 0.8,
+        "f1": 0.6,
+        "answer_accuracy": 0.0,
+        "hallucination_rate": 1.0,
+        "failure_breakdown": {
+          "generation": 3,
+          "ok": 2
+        },
+        "by_tier": {}
+      }
+    }
+  },
+  "cases": [
+    {
+      "q_id": "e001",
+      "tier": "easy",
+      "question": "What is the procurement limit for new hires in policy for 2025, at the 3850-dollar figure?",
+      "gold_answer": "3850 dollars",
+      "relevant_docs": [
+        "058"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "058",
+          "rank": 1,
+          "score": 17.8324,
+          "truncated": false
+        },
+        {
+          "doc_id": "028",
+          "rank": 2,
+          "score": 11.8035,
+          "truncated": false
+        },
+        {
+          "doc_id": "088",
+          "rank": 3,
+          "score": 11.8035,
+          "truncated": false
+        },
+        {
+          "doc_id": "008",
+          "rank": 4,
+          "score": 8.5232,
+          "truncated": false
+        },
+        {
+          "doc_id": "018",
+          "rank": 5,
+          "score": 8.5232,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 360,
+      "context_truncated": false,
+      "provenance": [
+        "058",
+        "028",
+        "088",
+        "008",
+        "018"
+      ],
+      "metrics": {
+        "q_id": "e001",
+        "tier": "easy",
+        "retrieved": [
+          "058",
+          "028",
+          "088",
+          "008",
+          "018"
+        ],
+        "expected": [
+          "058"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 360,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "ERROR",
+        "correct": null,
+        "supported": null,
+        "complete": null,
+        "unsupported_claims": 0,
+        "total_factual_claims": 0,
+        "failure_stage": "generation",
+        "retrieve_ms": 0.19508297555148602,
+        "generate_ms": 793.7697499291971,
+        "total_latency_ms": 793.9910420682281,
+        "status": "ERROR"
+      },
+      "answer": {
+        "text": "",
+        "confidence": 0.0,
+        "sources": [],
+        "status": "ERROR"
+      },
+      "verdict": null
+    },
+    {
+      "q_id": "e002",
+      "tier": "easy",
+      "question": "What is the international limit for managers in travel for 2027, at the 5450-dollar figure?",
+      "gold_answer": "5450 dollars",
+      "relevant_docs": [
+        "090"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "090",
+          "rank": 1,
+          "score": 18.293,
+          "truncated": false
+        },
+        {
+          "doc_id": "030",
+          "rank": 2,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "060",
+          "rank": 3,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "012",
+          "rank": 4,
+          "score": 6.359,
+          "truncated": false
+        },
+        {
+          "doc_id": "024",
+          "rank": 5,
+          "score": 6.359,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 370,
+      "context_truncated": false,
+      "provenance": [
+        "090",
+        "030",
+        "060",
+        "012",
+        "024"
+      ],
+      "metrics": {
+        "q_id": "e002",
+        "tier": "easy",
+        "retrieved": [
+          "090",
+          "030",
+          "060",
+          "012",
+          "024"
+        ],
+        "expected": [
+          "090"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 370,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.755125074647367,
+        "generate_ms": 230.0062080612406,
+        "total_latency_ms": 870.0549158966169,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "5450 dollars",
+        "confidence": 1.0,
+        "sources": [
+          "090"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "e002",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The retrieved context directly states that the international limit for managers in 2027 is 5450 dollars, as per omega travel international policy reference 090.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "e003",
+      "tier": "easy",
+      "question": "What is the procurement limit for contractors in policy for 2021, at the 2650-dollar figure?",
+      "gold_answer": "2650 dollars",
+      "relevant_docs": [
+        "034"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "034",
+          "rank": 1,
+          "score": 15.3242,
+          "truncated": false
+        },
+        {
+          "doc_id": "004",
+          "rank": 2,
+          "score": 9.2256,
+          "truncated": false
+        },
+        {
+          "doc_id": "064",
+          "rank": 3,
+          "score": 9.2256,
+          "truncated": false
+        },
+        {
+          "doc_id": "094",
+          "rank": 4,
+          "score": 9.2256,
+          "truncated": false
+        },
+        {
+          "doc_id": "014",
+          "rank": 5,
+          "score": 5.9442,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 365,
+      "context_truncated": false,
+      "provenance": [
+        "034",
+        "004",
+        "064",
+        "094",
+        "014"
+      ],
+      "metrics": {
+        "q_id": "e003",
+        "tier": "easy",
+        "retrieved": [
+          "034",
+          "004",
+          "064",
+          "094",
+          "014"
+        ],
+        "expected": [
+          "034"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 365,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "ERROR",
+        "correct": null,
+        "supported": null,
+        "complete": null,
+        "unsupported_claims": 0,
+        "total_factual_claims": 0,
+        "failure_stage": "generation",
+        "retrieve_ms": 0.8000419475138187,
+        "generate_ms": 966.6333330096677,
+        "total_latency_ms": 967.5051670055836,
+        "status": "ERROR"
+      },
+      "answer": {
+        "text": "",
+        "confidence": 0.0,
+        "sources": [],
+        "status": "ERROR"
+      },
+      "verdict": null
+    },
+    {
+      "q_id": "e004",
+      "tier": "easy",
+      "question": "What is the deployment limit for managers in ops for 2022, at the 3200-dollar figure?",
+      "gold_answer": "3200 dollars",
+      "relevant_docs": [
+        "045"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "045",
+          "rank": 1,
+          "score": 18.0876,
+          "truncated": false
+        },
+        {
+          "doc_id": "015",
+          "rank": 2,
+          "score": 12.0587,
+          "truncated": false
+        },
+        {
+          "doc_id": "075",
+          "rank": 3,
+          "score": 12.0587,
+          "truncated": false
+        },
+        {
+          "doc_id": "009",
+          "rank": 4,
+          "score": 6.1536,
+          "truncated": false
+        },
+        {
+          "doc_id": "027",
+          "rank": 5,
+          "score": 6.1536,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 344,
+      "context_truncated": false,
+      "provenance": [
+        "045",
+        "015",
+        "075",
+        "009",
+        "027"
+      ],
+      "metrics": {
+        "q_id": "e004",
+        "tier": "easy",
+        "retrieved": [
+          "045",
+          "015",
+          "075",
+          "009",
+          "027"
+        ],
+        "expected": [
+          "045"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 344,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.4028750117868185,
+        "generate_ms": 230.07733304984868,
+        "total_latency_ms": 890.6620830530301,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "3200 dollars",
+        "confidence": 1.0,
+        "sources": [
+          "045"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "e004",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The answer is correct and complete as it directly reflects the deployment limit for managers in ops for 2022 at the 3200-dollar figure, as stated in the retrieved context for reference 045.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "e005",
+      "tier": "easy",
+      "question": "What is the audit limit for contractors in security for 2026, at the 5400-dollar figure?",
+      "gold_answer": "5400 dollars",
+      "relevant_docs": [
+        "089"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "089",
+          "rank": 1,
+          "score": 18.293,
+          "truncated": false
+        },
+        {
+          "doc_id": "029",
+          "rank": 2,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "059",
+          "rank": 3,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "005",
+          "rank": 4,
+          "score": 6.359,
+          "truncated": false
+        },
+        {
+          "doc_id": "017",
+          "rank": 5,
+          "score": 6.359,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 342,
+      "context_truncated": false,
+      "provenance": [
+        "089",
+        "029",
+        "059",
+        "005",
+        "017"
+      ],
+      "metrics": {
+        "q_id": "e005",
+        "tier": "easy",
+        "retrieved": [
+          "089",
+          "029",
+          "059",
+          "005",
+          "017"
+        ],
+        "expected": [
+          "089"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 342,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.774584012106061,
+        "generate_ms": 605.0827499711886,
+        "total_latency_ms": 1168.558624922298,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "The audit limit for contractors in security for 2026 is 5400 dollars.",
+        "confidence": 1.0,
+        "sources": [
+          "089"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "e005",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The retrieved context directly states that the audit limit for contractors in security for 2026 is 5400 dollars, as per security annex audit-089.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "e006",
+      "tier": "easy",
+      "question": "What is the credit_limit limit for new hires in finance for 2020, at the 4600-dollar figure?",
+      "gold_answer": "4600 dollars",
+      "relevant_docs": [
+        "073"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "073",
+          "rank": 1,
+          "score": 20.5498,
+          "truncated": false
+        },
+        {
+          "doc_id": "013",
+          "rank": 2,
+          "score": 14.589,
+          "truncated": false
+        },
+        {
+          "doc_id": "043",
+          "rank": 3,
+          "score": 14.589,
+          "truncated": false
+        },
+        {
+          "doc_id": "003",
+          "rank": 4,
+          "score": 8.5183,
+          "truncated": false
+        },
+        {
+          "doc_id": "023",
+          "rank": 5,
+          "score": 8.5183,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 357,
+      "context_truncated": false,
+      "provenance": [
+        "073",
+        "013",
+        "043",
+        "003",
+        "023"
+      ],
+      "metrics": {
+        "q_id": "e006",
+        "tier": "easy",
+        "retrieved": [
+          "073",
+          "013",
+          "043",
+          "003",
+          "023"
+        ],
+        "expected": [
+          "073"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 357,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.7602500263601542,
+        "generate_ms": 256.1034159734845,
+        "total_latency_ms": 914.9062919896096,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "4600 dollars",
+        "confidence": 1.0,
+        "sources": [
+          "073"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "e006",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The retrieved context directly states that the credit_limit limit for new hires in finance for 2020 is 4600 dollars, as per beta finance credit_limit policy reference 073, edition 73.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "e007",
+      "tier": "easy",
+      "question": "What is the audit limit for executives in security for 2024, at the 3300-dollar figure?",
+      "gold_answer": "3300 dollars",
+      "relevant_docs": [
+        "047"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "047",
+          "rank": 1,
+          "score": 18.293,
+          "truncated": false
+        },
+        {
+          "doc_id": "017",
+          "rank": 2,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "077",
+          "rank": 3,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "005",
+          "rank": 4,
+          "score": 6.359,
+          "truncated": false
+        },
+        {
+          "doc_id": "029",
+          "rank": 5,
+          "score": 6.359,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 340,
+      "context_truncated": false,
+      "provenance": [
+        "047",
+        "017",
+        "077",
+        "005",
+        "029"
+      ],
+      "metrics": {
+        "q_id": "e007",
+        "tier": "easy",
+        "retrieved": [
+          "047",
+          "017",
+          "077",
+          "005",
+          "029"
+        ],
+        "expected": [
+          "047"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 340,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.7625420112162828,
+        "generate_ms": 337.16241701040417,
+        "total_latency_ms": 941.3749169325456,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "The audit limit for executives in security for 2024 is 3300 dollars.",
+        "confidence": 1.0,
+        "sources": [
+          "047"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "e007",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The retrieved context directly states that the audit limit for executives in security for 2024 is 3300 dollars, as per sigma security audit policy reference 047, edition 47.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "e008",
+      "tier": "easy",
+      "question": "What is the procurement limit for executives in policy for 2019, at the 3550-dollar figure?",
+      "gold_answer": "3550 dollars",
+      "relevant_docs": [
+        "052"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "052",
+          "rank": 1,
+          "score": 15.3242,
+          "truncated": false
+        },
+        {
+          "doc_id": "022",
+          "rank": 2,
+          "score": 9.2256,
+          "truncated": false
+        },
+        {
+          "doc_id": "082",
+          "rank": 3,
+          "score": 9.2256,
+          "truncated": false
+        },
+        {
+          "doc_id": "002",
+          "rank": 4,
+          "score": 5.9442,
+          "truncated": false
+        },
+        {
+          "doc_id": "012",
+          "rank": 5,
+          "score": 5.9442,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 364,
+      "context_truncated": false,
+      "provenance": [
+        "052",
+        "022",
+        "082",
+        "002",
+        "012"
+      ],
+      "metrics": {
+        "q_id": "e008",
+        "tier": "easy",
+        "retrieved": [
+          "052",
+          "022",
+          "082",
+          "002",
+          "012"
+        ],
+        "expected": [
+          "052"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 364,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.7864159997552633,
+        "generate_ms": 256.506709032692,
+        "total_latency_ms": 843.1891669752076,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "3550 dollars",
+        "confidence": 1.0,
+        "sources": [
+          "052"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "e008",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The answer directly matches the procurement limit for executives in policy 052 for the year 2019, which is stated as 3550 dollars.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "m009",
+      "tier": "multi",
+      "question": "What are the deployment and deployment limits for contractors in ops across 2026 and 2022 (2900 and 3200)?",
+      "gold_answer": "2900 and 3200 dollars",
+      "relevant_docs": [
+        "039",
+        "045"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "039",
+          "rank": 1,
+          "score": 18.0726,
+          "truncated": false
+        },
+        {
+          "doc_id": "045",
+          "rank": 2,
+          "score": 15.4096,
+          "truncated": false
+        },
+        {
+          "doc_id": "009",
+          "rank": 3,
+          "score": 12.0437,
+          "truncated": false
+        },
+        {
+          "doc_id": "069",
+          "rank": 4,
+          "score": 12.0437,
+          "truncated": false
+        },
+        {
+          "doc_id": "099",
+          "rank": 5,
+          "score": 12.0437,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 349,
+      "context_truncated": false,
+      "provenance": [
+        "039",
+        "045",
+        "009",
+        "069",
+        "099"
+      ],
+      "metrics": {
+        "q_id": "m009",
+        "tier": "multi",
+        "retrieved": [
+          "039",
+          "045",
+          "009",
+          "069",
+          "099"
+        ],
+        "expected": [
+          "039",
+          "045"
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.4,
+        "recall": 1.0,
+        "f1": 0.5714285714285715,
+        "context_tokens": 349,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 2,
+        "failure_stage": null,
+        "retrieve_ms": 0.5685830255970359,
+        "generate_ms": 431.96445901412517,
+        "total_latency_ms": 1187.352666980587,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "The deployment limit for contractors in ops across 2026 is 2900 dollars and in 2022 is 3200 dollars.",
+        "confidence": 0.9,
+        "sources": [
+          "039",
+          "045"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "m009",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 2,
+        "rationale": "The answer correctly states the deployment limits for contractors in ops for the years 2026 and 2022 as per the retrieved documents. The limit for 2026 is 2900 dollars as per document 039, and for 2022 it is 3200 dollars as per document 045.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "m010",
+      "tier": "multi",
+      "question": "What are the international and international limits for all staff in travel across 2023 and 2019 (2750 and 4550)?",
+      "gold_answer": "2750 and 4550 dollars",
+      "relevant_docs": [
+        "036",
+        "072"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "036",
+          "rank": 1,
+          "score": 20.7389,
+          "truncated": false
+        },
+        {
+          "doc_id": "072",
+          "rank": 2,
+          "score": 15.615,
+          "truncated": false
+        },
+        {
+          "doc_id": "006",
+          "rank": 3,
+          "score": 14.778,
+          "truncated": false
+        },
+        {
+          "doc_id": "066",
+          "rank": 4,
+          "score": 14.778,
+          "truncated": false
+        },
+        {
+          "doc_id": "096",
+          "rank": 5,
+          "score": 14.778,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 371,
+      "context_truncated": false,
+      "provenance": [
+        "036",
+        "072",
+        "006",
+        "066",
+        "096"
+      ],
+      "metrics": {
+        "q_id": "m010",
+        "tier": "multi",
+        "retrieved": [
+          "036",
+          "072",
+          "006",
+          "066",
+          "096"
+        ],
+        "expected": [
+          "036",
+          "072"
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.4,
+        "recall": 1.0,
+        "f1": 0.5714285714285715,
+        "context_tokens": 371,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 2,
+        "failure_stage": null,
+        "retrieve_ms": 0.597291043959558,
+        "generate_ms": 432.6163330115378,
+        "total_latency_ms": 1189.7971250582486,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "The international limit for all staff in 2023 is 2750 dollars, and for executives in 2019 is 4550 dollars.",
+        "confidence": 1.0,
+        "sources": [
+          "036",
+          "072"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "m010",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 2,
+        "rationale": "The answer correctly states the international limit for all staff in 2023 as 2750 dollars, which is found in document [036], and for executives in 2019 as 4550 dollars, which is found in document [072]. Both facts are directly supported by the respective documents.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "m011",
+      "tier": "multi",
+      "question": "What are the procurement and procurement limits for managers in policy across 2027 and 2027 (4450 and 5950)?",
+      "gold_answer": "4450 and 5950 dollars",
+      "relevant_docs": [
+        "070",
+        "100"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "100",
+          "rank": 1,
+          "score": 15.4669,
+          "truncated": false
+        },
+        {
+          "doc_id": "070",
+          "rank": 2,
+          "score": 15.309,
+          "truncated": false
+        },
+        {
+          "doc_id": "010",
+          "rank": 3,
+          "score": 9.2105,
+          "truncated": false
+        },
+        {
+          "doc_id": "040",
+          "rank": 4,
+          "score": 9.2105,
+          "truncated": false
+        },
+        {
+          "doc_id": "020",
+          "rank": 5,
+          "score": 5.9292,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 355,
+      "context_truncated": false,
+      "provenance": [
+        "100",
+        "070",
+        "010",
+        "040",
+        "020"
+      ],
+      "metrics": {
+        "q_id": "m011",
+        "tier": "multi",
+        "retrieved": [
+          "100",
+          "070",
+          "010",
+          "040",
+          "020"
+        ],
+        "expected": [
+          "070",
+          "100"
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.4,
+        "recall": 1.0,
+        "f1": 0.5714285714285715,
+        "context_tokens": 355,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "ERROR",
+        "correct": null,
+        "supported": null,
+        "complete": null,
+        "unsupported_claims": 0,
+        "total_factual_claims": 0,
+        "failure_stage": "generation",
+        "retrieve_ms": 0.5963749717921019,
+        "generate_ms": 1215.2839170303196,
+        "total_latency_ms": 1215.9446669975296,
+        "status": "ERROR"
+      },
+      "answer": {
+        "text": "",
+        "confidence": 0.0,
+        "sources": [],
+        "status": "ERROR"
+      },
+      "verdict": null
+    },
+    {
+      "q_id": "m012",
+      "tier": "multi",
+      "question": "What are the procurement and procurement limits for executives in policy across 2019 and 2023 (3550 and 4750)?",
+      "gold_answer": "3550 and 4750 dollars",
+      "relevant_docs": [
+        "052",
+        "076"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "052",
+          "rank": 1,
+          "score": 15.309,
+          "truncated": false
+        },
+        {
+          "doc_id": "076",
+          "rank": 2,
+          "score": 12.4914,
+          "truncated": false
+        },
+        {
+          "doc_id": "022",
+          "rank": 3,
+          "score": 9.2105,
+          "truncated": false
+        },
+        {
+          "doc_id": "082",
+          "rank": 4,
+          "score": 9.2105,
+          "truncated": false
+        },
+        {
+          "doc_id": "016",
+          "rank": 5,
+          "score": 6.4625,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 362,
+      "context_truncated": false,
+      "provenance": [
+        "052",
+        "076",
+        "022",
+        "082",
+        "016"
+      ],
+      "metrics": {
+        "q_id": "m012",
+        "tier": "multi",
+        "retrieved": [
+          "052",
+          "076",
+          "022",
+          "082",
+          "016"
+        ],
+        "expected": [
+          "052",
+          "076"
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.4,
+        "recall": 1.0,
+        "f1": 0.5714285714285715,
+        "context_tokens": 362,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 2,
+        "failure_stage": null,
+        "retrieve_ms": 0.622207997366786,
+        "generate_ms": 400.62216704245657,
+        "total_latency_ms": 954.4778330018744,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "The procurement limit for executives in 2019 is 3550 dollars and for all staff in 2023 is 4750 dollars.",
+        "confidence": 1.0,
+        "sources": [
+          "052",
+          "076"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "m012",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 2,
+        "rationale": "The answer correctly states the procurement limits for executives in 2019 and for all staff in 2023 as per the retrieved documents.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "m013",
+      "tier": "multi",
+      "question": "What are the credit_limit and credit_limit limits for new hires in finance across 2020 and 2024 (1600 and 5800)?",
+      "gold_answer": "1600 and 5800 dollars",
+      "relevant_docs": [
+        "013",
+        "097"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "013",
+          "rank": 1,
+          "score": 20.5351,
+          "truncated": false
+        },
+        {
+          "doc_id": "097",
+          "rank": 2,
+          "score": 15.4096,
+          "truncated": false
+        },
+        {
+          "doc_id": "043",
+          "rank": 3,
+          "score": 14.5743,
+          "truncated": false
+        },
+        {
+          "doc_id": "073",
+          "rank": 4,
+          "score": 14.5743,
+          "truncated": false
+        },
+        {
+          "doc_id": "007",
+          "rank": 5,
+          "score": 9.3807,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 370,
+      "context_truncated": false,
+      "provenance": [
+        "013",
+        "097",
+        "043",
+        "073",
+        "007"
+      ],
+      "metrics": {
+        "q_id": "m013",
+        "tier": "multi",
+        "retrieved": [
+          "013",
+          "097",
+          "043",
+          "073",
+          "007"
+        ],
+        "expected": [
+          "013",
+          "097"
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.4,
+        "recall": 1.0,
+        "f1": 0.5714285714285715,
+        "context_tokens": 370,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": false,
+        "supported": false,
+        "complete": false,
+        "unsupported_claims": 4,
+        "total_factual_claims": 4,
+        "failure_stage": null,
+        "retrieve_ms": 0.5927910096943378,
+        "generate_ms": 436.4955830387771,
+        "total_latency_ms": 1446.4947499800473,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "The credit_limit limit for new hires in 2020 is 3100 dollars and for executives in 2024 is 5800 dollars.",
+        "confidence": 1.0,
+        "sources": [
+          "013",
+          "097"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "m013",
+        "correct": false,
+        "supported": false,
+        "complete": false,
+        "unsupported_claims": [
+          "The credit_limit limit for new hires in 2020 is 3100 dollars",
+          "The credit_limit limit for executives in 2024 is 5800 dollars",
+          "The credit_limit limit for new hires in 2020 is 1600 dollars",
+          "The credit_limit limit for executives in 2024 is 1300 dollars"
+        ],
+        "total_factual_claims": 4,
+        "rationale": "The retrieved documents contain different credit_limit limits for new hires and executives in different years, but the cited sources do not match the claimed credit_limit limits.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "m014",
+      "tier": "multi",
+      "question": "What are the international and international limits for managers in travel across 2027 and 2025 (2450 and 3350)?",
+      "gold_answer": "2450 and 3350 dollars",
+      "relevant_docs": [
+        "030",
+        "048"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "030",
+          "rank": 1,
+          "score": 18.278,
+          "truncated": false
+        },
+        {
+          "doc_id": "048",
+          "rank": 2,
+          "score": 15.4597,
+          "truncated": false
+        },
+        {
+          "doc_id": "060",
+          "rank": 3,
+          "score": 12.2491,
+          "truncated": false
+        },
+        {
+          "doc_id": "090",
+          "rank": 4,
+          "score": 12.2491,
+          "truncated": false
+        },
+        {
+          "doc_id": "018",
+          "rank": 5,
+          "score": 9.4989,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 368,
+      "context_truncated": false,
+      "provenance": [
+        "030",
+        "048",
+        "060",
+        "090",
+        "018"
+      ],
+      "metrics": {
+        "q_id": "m014",
+        "tier": "multi",
+        "retrieved": [
+          "030",
+          "048",
+          "060",
+          "090",
+          "018"
+        ],
+        "expected": [
+          "030",
+          "048"
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.4,
+        "recall": 1.0,
+        "f1": 0.5714285714285715,
+        "context_tokens": 368,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 4,
+        "failure_stage": null,
+        "retrieve_ms": 0.5789999850094318,
+        "generate_ms": 395.313624991104,
+        "total_latency_ms": 1186.2133339745924,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "2450 dollars for managers in 2027 and 3350 dollars for new hires in 2025",
+        "confidence": 1.0,
+        "sources": [
+          "030",
+          "048"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "m014",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 4,
+        "rationale": "The retrieved documents provide specific international limits for managers and new hires for the years 2027 and 2025, respectively. The answer correctly cites the limits as 2450 dollars for managers in 2027 and 3350 dollars for new hires in 2025, which are directly supported by the retrieved documents.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "s015",
+      "tier": "synthesis",
+      "question": "Combining the international and credit_limit limits for all staff, what total applies (1250, 1750, 3100)?",
+      "gold_answer": "sum 1250, 1750, 3100 dollars",
+      "relevant_docs": [
+        "006",
+        "016",
+        "043"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "006",
+          "rank": 1,
+          "score": 14.5346,
+          "truncated": false
+        },
+        {
+          "doc_id": "016",
+          "rank": 2,
+          "score": 11.3741,
+          "truncated": false
+        },
+        {
+          "doc_id": "043",
+          "rank": 3,
+          "score": 9.149,
+          "truncated": false
+        },
+        {
+          "doc_id": "036",
+          "rank": 4,
+          "score": 8.5737,
+          "truncated": false
+        },
+        {
+          "doc_id": "066",
+          "rank": 5,
+          "score": 8.5737,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 368,
+      "context_truncated": false,
+      "provenance": [
+        "006",
+        "016",
+        "043",
+        "036",
+        "066"
+      ],
+      "metrics": {
+        "q_id": "s015",
+        "tier": "synthesis",
+        "retrieved": [
+          "006",
+          "016",
+          "043",
+          "036",
+          "066"
+        ],
+        "expected": [
+          "006",
+          "016",
+          "043"
+        ],
+        "tp": 3,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.6,
+        "recall": 1.0,
+        "f1": 0.7499999999999999,
+        "context_tokens": 368,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "ERROR",
+        "correct": null,
+        "supported": null,
+        "complete": null,
+        "unsupported_claims": 0,
+        "total_factual_claims": 0,
+        "failure_stage": "generation",
+        "retrieve_ms": 0.6395409582182765,
+        "generate_ms": 776.6632499406114,
+        "total_latency_ms": 777.3770830826834,
+        "status": "ERROR"
+      },
+      "answer": {
+        "text": "",
+        "confidence": 0.0,
+        "sources": [],
+        "status": "ERROR"
+      },
+      "verdict": null
+    },
+    {
+      "q_id": "s016",
+      "tier": "synthesis",
+      "question": "Combining the international and deployment limits for all staff, what total applies (2750, 3400, 5600)?",
+      "gold_answer": "sum 2750, 3400, 5600 dollars",
+      "relevant_docs": [
+        "036",
+        "049",
+        "093"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "036",
+          "rank": 1,
+          "score": 14.5346,
+          "truncated": false
+        },
+        {
+          "doc_id": "093",
+          "rank": 2,
+          "score": 9.149,
+          "truncated": false
+        },
+        {
+          "doc_id": "006",
+          "rank": 3,
+          "score": 8.5737,
+          "truncated": false
+        },
+        {
+          "doc_id": "066",
+          "rank": 4,
+          "score": 8.5737,
+          "truncated": false
+        },
+        {
+          "doc_id": "096",
+          "rank": 5,
+          "score": 8.5737,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 365,
+      "context_truncated": false,
+      "provenance": [
+        "036",
+        "093",
+        "006",
+        "066",
+        "096"
+      ],
+      "metrics": {
+        "q_id": "s016",
+        "tier": "synthesis",
+        "retrieved": [
+          "036",
+          "093",
+          "006",
+          "066",
+          "096"
+        ],
+        "expected": [
+          "036",
+          "049",
+          "093"
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 1,
+        "precision": 0.4,
+        "recall": 0.6666666666666666,
+        "f1": 0.5,
+        "context_tokens": 365,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "ERROR",
+        "correct": null,
+        "supported": null,
+        "complete": null,
+        "unsupported_claims": 0,
+        "total_factual_claims": 0,
+        "failure_stage": "generation",
+        "retrieve_ms": 0.5621250020340085,
+        "generate_ms": 611.3460829947144,
+        "total_latency_ms": 611.9737080298364,
+        "status": "ERROR"
+      },
+      "answer": {
+        "text": "",
+        "confidence": 0.0,
+        "sources": [],
+        "status": "ERROR"
+      },
+      "verdict": null
+    },
+    {
+      "q_id": "s017",
+      "tier": "synthesis",
+      "question": "Combining the credit_limit and compensation limits for executives, what total applies (2800, 5000, 5850)?",
+      "gold_answer": "sum 2800, 5000, 5850 dollars",
+      "relevant_docs": [
+        "037",
+        "081",
+        "098"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "037",
+          "rank": 1,
+          "score": 11.9033,
+          "truncated": false
+        },
+        {
+          "doc_id": "098",
+          "rank": 2,
+          "score": 9.149,
+          "truncated": false
+        },
+        {
+          "doc_id": "081",
+          "rank": 3,
+          "score": 5.9798,
+          "truncated": false
+        },
+        {
+          "doc_id": "002",
+          "rank": 4,
+          "score": 5.8744,
+          "truncated": false
+        },
+        {
+          "doc_id": "007",
+          "rank": 5,
+          "score": 5.8744,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 358,
+      "context_truncated": false,
+      "provenance": [
+        "037",
+        "098",
+        "081",
+        "002",
+        "007"
+      ],
+      "metrics": {
+        "q_id": "s017",
+        "tier": "synthesis",
+        "retrieved": [
+          "037",
+          "098",
+          "081",
+          "002",
+          "007"
+        ],
+        "expected": [
+          "037",
+          "081",
+          "098"
+        ],
+        "tp": 3,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.6,
+        "recall": 1.0,
+        "f1": 0.7499999999999999,
+        "context_tokens": 358,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": false,
+        "supported": false,
+        "complete": false,
+        "unsupported_claims": 1,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.5341250216588378,
+        "generate_ms": 352.603540988639,
+        "total_latency_ms": 4590.395750012249,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "I cannot answer from the provided documents.",
+        "confidence": 1.0,
+        "sources": [],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "s017",
+        "correct": false,
+        "supported": false,
+        "complete": false,
+        "unsupported_claims": [
+          "The total applies (2800, 5000, 5850)"
+        ],
+        "total_factual_claims": 1,
+        "rationale": "The provided documents contain separate credit and compensation limits for different roles and time periods, but do not provide a combined total for both credit_limit and compensation limits for executives.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "s018",
+      "tier": "synthesis",
+      "question": "Combining the compensation and international limits for executives, what total applies (2550, 3600, 4850)?",
+      "gold_answer": "sum 2550, 3600, 4850 dollars",
+      "relevant_docs": [
+        "032",
+        "053",
+        "078"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "032",
+          "rank": 1,
+          "score": 11.9033,
+          "truncated": false
+        },
+        {
+          "doc_id": "078",
+          "rank": 2,
+          "score": 9.2554,
+          "truncated": false
+        },
+        {
+          "doc_id": "012",
+          "rank": 3,
+          "score": 5.9816,
+          "truncated": false
+        },
+        {
+          "doc_id": "042",
+          "rank": 4,
+          "score": 5.9816,
+          "truncated": false
+        },
+        {
+          "doc_id": "072",
+          "rank": 5,
+          "score": 5.9816,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 369,
+      "context_truncated": false,
+      "provenance": [
+        "032",
+        "078",
+        "012",
+        "042",
+        "072"
+      ],
+      "metrics": {
+        "q_id": "s018",
+        "tier": "synthesis",
+        "retrieved": [
+          "032",
+          "078",
+          "012",
+          "042",
+          "072"
+        ],
+        "expected": [
+          "032",
+          "053",
+          "078"
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 1,
+        "precision": 0.4,
+        "recall": 0.6666666666666666,
+        "f1": 0.5,
+        "context_tokens": 369,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "ERROR",
+        "correct": null,
+        "supported": null,
+        "complete": null,
+        "unsupported_claims": 0,
+        "total_factual_claims": 0,
+        "failure_stage": "generation",
+        "retrieve_ms": 0.5387919954955578,
+        "generate_ms": 680.2298750262707,
+        "total_latency_ms": 680.8466248912737,
+        "status": "ERROR"
+      },
+      "answer": {
+        "text": "",
+        "confidence": 0.0,
+        "sources": [],
+        "status": "ERROR"
+      },
+      "verdict": null
+    },
+    {
+      "q_id": "s019",
+      "tier": "synthesis",
+      "question": "Combining the deployment and credit_limit limits for all staff, what total applies (2000, 2550, 4000)?",
+      "gold_answer": "sum 2000, 2550, 4000 dollars",
+      "relevant_docs": [
+        "021",
+        "032",
+        "061"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "061",
+          "rank": 1,
+          "score": 14.4282,
+          "truncated": false
+        },
+        {
+          "doc_id": "021",
+          "rank": 2,
+          "score": 14.4282,
+          "truncated": false
+        },
+        {
+          "doc_id": "001",
+          "rank": 3,
+          "score": 8.4673,
+          "truncated": false
+        },
+        {
+          "doc_id": "031",
+          "rank": 4,
+          "score": 8.4673,
+          "truncated": false
+        },
+        {
+          "doc_id": "051",
+          "rank": 5,
+          "score": 8.4673,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 359,
+      "context_truncated": false,
+      "provenance": [
+        "061",
+        "021",
+        "001",
+        "031",
+        "051"
+      ],
+      "metrics": {
+        "q_id": "s019",
+        "tier": "synthesis",
+        "retrieved": [
+          "061",
+          "021",
+          "001",
+          "031",
+          "051"
+        ],
+        "expected": [
+          "021",
+          "032",
+          "061"
+        ],
+        "tp": 2,
+        "fp": 3,
+        "fn": 1,
+        "precision": 0.4,
+        "recall": 0.6666666666666666,
+        "f1": 0.5,
+        "context_tokens": 359,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": false,
+        "supported": false,
+        "complete": false,
+        "unsupported_claims": 1,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.5695000290870667,
+        "generate_ms": 252.25254194810987,
+        "total_latency_ms": 1105.105874943547,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "2550",
+        "confidence": 1.0,
+        "sources": [
+          "031",
+          "021"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "s019",
+        "correct": false,
+        "supported": false,
+        "complete": false,
+        "unsupported_claims": [
+          "2550 is the total credit and deployment limit for all staff combined"
+        ],
+        "total_factual_claims": 1,
+        "rationale": "The answer provided does not correctly combine the deployment and credit_limit limits for all staff as per the retrieved documents. The correct total would be 6000 (4000 for credit_limit and 2000 for deployment), not 2550.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "d020",
+      "tier": "distractor",
+      "question": "Which security audit limit, at the 4200 figure, applies to managers for 2022, ignoring similar security audit references?",
+      "gold_answer": "4200 dollars",
+      "relevant_docs": [
+        "065"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "065",
+          "rank": 1,
+          "score": 18.293,
+          "truncated": false
+        },
+        {
+          "doc_id": "005",
+          "rank": 2,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "035",
+          "rank": 3,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "095",
+          "rank": 4,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "017",
+          "rank": 5,
+          "score": 6.359,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 335,
+      "context_truncated": false,
+      "provenance": [
+        "065",
+        "005",
+        "035",
+        "095",
+        "017"
+      ],
+      "metrics": {
+        "q_id": "d020",
+        "tier": "distractor",
+        "retrieved": [
+          "065",
+          "005",
+          "035",
+          "095",
+          "017"
+        ],
+        "expected": [
+          "065"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 335,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.7731659570708871,
+        "generate_ms": 289.2937500728294,
+        "total_latency_ms": 945.9870000137016,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "beta security audit policy reference 065",
+        "confidence": 1.0,
+        "sources": [
+          "065"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "d020",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The retrieved context directly states that beta security audit policy reference 065, edition 65, sets the audit limit for managers at 4200 dollars, effective 2022, which matches the question's criteria.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "d021",
+      "tier": "distractor",
+      "question": "Which finance credit_limit limit, at the 5500 figure, applies to all staff for 2018, ignoring similar finance credit_limit references?",
+      "gold_answer": "5500 dollars",
+      "relevant_docs": [
+        "091"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "091",
+          "rank": 1,
+          "score": 20.5498,
+          "truncated": false
+        },
+        {
+          "doc_id": "001",
+          "rank": 2,
+          "score": 14.589,
+          "truncated": false
+        },
+        {
+          "doc_id": "031",
+          "rank": 3,
+          "score": 14.589,
+          "truncated": false
+        },
+        {
+          "doc_id": "061",
+          "rank": 4,
+          "score": 14.589,
+          "truncated": false
+        },
+        {
+          "doc_id": "011",
+          "rank": 5,
+          "score": 8.5183,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 362,
+      "context_truncated": false,
+      "provenance": [
+        "091",
+        "001",
+        "031",
+        "061",
+        "011"
+      ],
+      "metrics": {
+        "q_id": "d021",
+        "tier": "distractor",
+        "retrieved": [
+          "091",
+          "001",
+          "031",
+          "061",
+          "011"
+        ],
+        "expected": [
+          "091"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 362,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.7821659091860056,
+        "generate_ms": 297.15795791707933,
+        "total_latency_ms": 1030.7608749717474,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "alpha finance credit_limit policy reference 091",
+        "confidence": 1.0,
+        "sources": [
+          "091"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "d021",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The retrieved context directly states that alpha finance credit_limit policy reference 091, edition 91, sets the credit_limit limit for all staff at 5500 dollars, effective 2018, which matches the question's criteria.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "d022",
+      "tier": "distractor",
+      "question": "Which security audit limit, at the 2700 figure, applies to managers for 2022, ignoring similar security audit references?",
+      "gold_answer": "2700 dollars",
+      "relevant_docs": [
+        "035"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "035",
+          "rank": 1,
+          "score": 18.293,
+          "truncated": false
+        },
+        {
+          "doc_id": "005",
+          "rank": 2,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "065",
+          "rank": 3,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "095",
+          "rank": 4,
+          "score": 12.2641,
+          "truncated": false
+        },
+        {
+          "doc_id": "017",
+          "rank": 5,
+          "score": 6.359,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 335,
+      "context_truncated": false,
+      "provenance": [
+        "035",
+        "005",
+        "065",
+        "095",
+        "017"
+      ],
+      "metrics": {
+        "q_id": "d022",
+        "tier": "distractor",
+        "retrieved": [
+          "035",
+          "005",
+          "065",
+          "095",
+          "017"
+        ],
+        "expected": [
+          "035"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 335,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.7627500453963876,
+        "generate_ms": 599.4982500560582,
+        "total_latency_ms": 1178.2351250294596,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "The security audit limit for managers at 2700 dollars for 2022 is per security annex audit-035.",
+        "confidence": 1.0,
+        "sources": [
+          "035"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "d022",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The retrieved context directly states that the security audit limit for managers is 2700 dollars for the year 2022, as per security annex audit-035.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "d023",
+      "tier": "distractor",
+      "question": "Which ops deployment limit, at the 1700 figure, applies to managers for 2022, ignoring similar ops deployment references?",
+      "gold_answer": "1700 dollars",
+      "relevant_docs": [
+        "015"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "015",
+          "rank": 1,
+          "score": 18.0876,
+          "truncated": false
+        },
+        {
+          "doc_id": "045",
+          "rank": 2,
+          "score": 12.0587,
+          "truncated": false
+        },
+        {
+          "doc_id": "075",
+          "rank": 3,
+          "score": 12.0587,
+          "truncated": false
+        },
+        {
+          "doc_id": "009",
+          "rank": 4,
+          "score": 6.1536,
+          "truncated": false
+        },
+        {
+          "doc_id": "027",
+          "rank": 5,
+          "score": 6.1536,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 344,
+      "context_truncated": false,
+      "provenance": [
+        "015",
+        "045",
+        "075",
+        "009",
+        "027"
+      ],
+      "metrics": {
+        "q_id": "d023",
+        "tier": "distractor",
+        "retrieved": [
+          "015",
+          "045",
+          "075",
+          "009",
+          "027"
+        ],
+        "expected": [
+          "015"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 344,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.7608330342918634,
+        "generate_ms": 508.46804108005017,
+        "total_latency_ms": 1142.9272089153528,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "sigma ops deployment policy reference 015",
+        "confidence": 1.0,
+        "sources": [
+          "015"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "d023",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The retrieved context directly states that sigma ops deployment policy reference 015, edition 15, sets the deployment limit for managers at 1700 dollars, effective 2022, which answers the question.",
+        "status": "JUDGED"
+      }
+    },
+    {
+      "q_id": "d024",
+      "tier": "distractor",
+      "question": "Which finance credit_limit limit, at the 5800 figure, applies to executives for 2024, ignoring similar finance credit_limit references?",
+      "gold_answer": "5800 dollars",
+      "relevant_docs": [
+        "097"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "097",
+          "rank": 1,
+          "score": 18.0876,
+          "truncated": false
+        },
+        {
+          "doc_id": "007",
+          "rank": 2,
+          "score": 12.0587,
+          "truncated": false
+        },
+        {
+          "doc_id": "037",
+          "rank": 3,
+          "score": 12.0587,
+          "truncated": false
+        },
+        {
+          "doc_id": "067",
+          "rank": 4,
+          "score": 12.0587,
+          "truncated": false
+        },
+        {
+          "doc_id": "019",
+          "rank": 5,
+          "score": 6.1536,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 373,
+      "context_truncated": false,
+      "provenance": [
+        "097",
+        "007",
+        "037",
+        "067",
+        "019"
+      ],
+      "metrics": {
+        "q_id": "d024",
+        "tier": "distractor",
+        "retrieved": [
+          "097",
+          "007",
+          "037",
+          "067",
+          "019"
+        ],
+        "expected": [
+          "097"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 373,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "ERROR",
+        "correct": null,
+        "supported": null,
+        "complete": null,
+        "unsupported_claims": 0,
+        "total_factual_claims": 0,
+        "failure_stage": "generation",
+        "retrieve_ms": 0.7840830367058516,
+        "generate_ms": 714.3450829898939,
+        "total_latency_ms": 715.2008750708774,
+        "status": "ERROR"
+      },
+      "answer": {
+        "text": "",
+        "confidence": 0.0,
+        "sources": [],
+        "status": "ERROR"
+      },
+      "verdict": null
+    },
+    {
+      "q_id": "d025",
+      "tier": "distractor",
+      "question": "Which travel international limit, at the 1250 figure, applies to all staff for 2023, ignoring similar travel international references?",
+      "gold_answer": "1250 dollars",
+      "relevant_docs": [
+        "006"
+      ],
+      "retrieved": [
+        {
+          "doc_id": "006",
+          "rank": 1,
+          "score": 20.7536,
+          "truncated": false
+        },
+        {
+          "doc_id": "036",
+          "rank": 2,
+          "score": 14.7927,
+          "truncated": false
+        },
+        {
+          "doc_id": "066",
+          "rank": 3,
+          "score": 14.7927,
+          "truncated": false
+        },
+        {
+          "doc_id": "096",
+          "rank": 4,
+          "score": 14.7927,
+          "truncated": false
+        },
+        {
+          "doc_id": "016",
+          "rank": 5,
+          "score": 8.6022,
+          "truncated": false
+        }
+      ],
+      "context_tokens": 368,
+      "context_truncated": false,
+      "provenance": [
+        "006",
+        "036",
+        "066",
+        "096",
+        "016"
+      ],
+      "metrics": {
+        "q_id": "d025",
+        "tier": "distractor",
+        "retrieved": [
+          "006",
+          "036",
+          "066",
+          "096",
+          "016"
+        ],
+        "expected": [
+          "006"
+        ],
+        "tp": 1,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.2,
+        "recall": 1.0,
+        "f1": 0.33333333333333337,
+        "context_tokens": 368,
+        "truncated": false,
+        "grounding_violation": false,
+        "answer_status": "COMPLETED",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": 0,
+        "total_factual_claims": 1,
+        "failure_stage": null,
+        "retrieve_ms": 0.783582916483283,
+        "generate_ms": 224.2653330322355,
+        "total_latency_ms": 840.2765420032665,
+        "status": "SCORED"
+      },
+      "answer": {
+        "text": "006",
+        "confidence": 1.0,
+        "sources": [
+          "006"
+        ],
+        "status": "COMPLETED"
+      },
+      "verdict": {
+        "q_id": "d025",
+        "correct": true,
+        "supported": true,
+        "complete": true,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "rationale": "The retrieved context directly states that sigma travel international policy reference 006, edition 6, sets the international limit for all staff at 1250 dollars for the year 2023.",
+        "status": "JUDGED"
+      }
+    }
+  ]
+}

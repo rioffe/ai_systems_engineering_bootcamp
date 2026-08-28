@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "pi-json-tools": "^5.2.2"
+  },
+  "allowScripts": {
+    "pi-json-tools@5.2.2": true
+  }
+}

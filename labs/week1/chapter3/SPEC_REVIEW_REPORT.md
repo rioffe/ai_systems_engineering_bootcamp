@@ -40,3 +40,39 @@ Eleven **MEDIUM** findings (generation-metric numerators, the `which_doc_decided
 **Primary blocker:** **F-001** — the `MockLLM` gold-access contract is undefined, so it is *unspecifiable whether the offline generation/judgement metrics exercise retrieval or are tautological.* A faithful implementation-and-verification pair cannot be derived from v0.1 until this, F-002, and F-003 are resolved.
 
 **Recommendation:** resolve the 3 HIGH (P0) + the 11 MEDIUM (P1) — all additive or one-line — to reach a clean **Level 3**. The LOW set (P2) is a Level-4 stretch. **No architectural change is recommended** (§17). The deterministic core is already implementation-grade; the work is *precision*, not *structure*.
+
+---
+
+## 2. Overall Maturity
+
+**Level 2 — Implementable** (a competent agent *can* build the system), with an unusually short path to a clean **Level 3 — Implementation-grade** once the P0/P1 set in §20 lands. It is not yet Level 3, and it is not a "concept/direction" (Level 0/1): the ambiguity is *local and clarifiable*, not *substantial semantic decisions left to the implementer*.
+
+### 2.1 Why it clears the bar for "implementable"
+
+The specification already satisfies the Level-3 *gate* on every core surface:
+
+- **Deterministic layers are zero-inference.** `build_index`/`search`/`cosine`/hybrid-mock/rerank-mock/expand-mock/`contextualize`/`build_context`/`est_tokens`/`metrics`/`corpus`+`generate_corpus_and_questions` have fully-specified contracts with exact worked examples (O-1 hashed-BoW, O-3 min-max, I-001/I-007 metric formulas, §C-01 dataclasses, K-03 default parameter table). An agent can implement these without a single semantic guess.
+- **The probabilistic path is honestly bounded, not ignored.** R-09/R-10/R-17/R-18 correctly specify Ollama `generate`/`judge` as *best-effort* and confine all nondeterminism to two named components (R-20), with deterministic doubles for the suite. This is the right Level-3 posture for a system that *contains* probabilistic components.
+- **Everything traces.** §11 maps every `R-/I-/E-/T-/K-` id to a contract and a test; 14 of 14 invariants and 13 of 13 constraints carry a `verified by` / measurement.
+
+### 2.2 Why it stops short of clean Level 3
+
+Three **material ambiguities** (F-001, F-002, F-003) are the defining Level-2→Level-3 gap, and they live exactly where a second competent implementer would most plausibly diverge:
+
+1. **F-001 — the crux of the chapter.** `MockLLM` is "ground-truth-fit" but its contract carries no `gold*` data. *Two implementers:* one infers the double may read the question's `gold_facts` out-of-band (generation always perfect → the §21 retrieval-vs-generation split collapses into noise); one confines it to `context` (generation quality *tracks* retrieval → the thesis holds). Same document, opposite measurement. This is the difference between "a spec that describes a system" (Level 3) and "a spec that describes a *specific* system with a *specific* measurement" (Level 4).
+2. **F-002 — the headline capability.** Hybrid (R-04) is a first-class, measured, per-capability feature, yet its candidate-pool formation and per-channel normalization (missing channel, zero range) are undefined, so I-002 byte-determinism cannot hold for `--hybrid on`.
+3. **F-003 — the experimental method.** §22's whole value is "toggle a capability, re-run the *same* dataset, see which metric moved." If `--contextual`/`--strategy` are index-time but `eval` re-treats them as query-time, the *same dataset* premise of T-20/T-21 breaks.
+
+### 2.3 Why it does not descend to Level 1/2-weak
+
+Unlike ch1 (spec lagged the *written code* — a *drift* problem), this v0.1 **precedes** its implementation, so there is no divergence to reconcile; and unlike a Level-1 "direction" spec, it is not leaving *large* semantic domains open — the domains are *small and enumerable* (the 24 findings here). The maturity is therefore a **strong Level 2**, one P0/P1 pass from Level 3, and a further P2 stretch from Level 4.
+
+### 2.4 What Level 4 would additionally require
+
+Beyond P0/P1, Level 4 (verification-grade, *mechanically checkable contracts + unusual traceability/reproducibility*) would require:
+
+- **A run-level provenance record** (a `run_id`/timestamp/`spec_version`/git-sha on the report aggregate) so a metric is self-describing after the fact — currently the per-*case* `RunMetrics` is rich, but the *run* is not (F-017, and the analog of ch1's F-019).
+- **A canonical, ordered report** (F-017) so "byte-identical" (R-18/I-002) holds for the artifact, not just the in-memory values.
+- **Exact-match, canonical error/`failure_stage` strings** (currently prose; see F-019, §4) and **a defined model-availability outcome taxonomy** (F-013, ch1's F-003 analog) so the `real` path's observable states are mechanically checkable.
+
+These are stretch items; none is required for an implementation-grade (Level 3) build.

@@ -1,0 +1,6 @@
+create /Users/rioffe/projects/ai_systems_engineering_bootcamp/labs/week1/chapter3/SPEC.md file for this assignment following the example of the spec in                     
+/Users/rioffe/projects/ai_systems_engineering_bootcamp/labs/week1/chapter2; DO NOT CREATE the whole SPEC.md at once: create it one chapter at a time and commit every
+time you are finished with a chapter (use todo for this); once the SPEC.md is complete review it with spec review skill (do not create the full review    
+document at once: create a todo list and write the review document chapter by chapter - commit after every chapter, use todo); once spec review document is complete, 
+apply its findings to original SPEC.md  (make sure to commit the original first as well as spec review) - you can use a todo list here so as not to do it all at once; 
+use todo list for the above. COMMIT INTERMEDIATE WORK.

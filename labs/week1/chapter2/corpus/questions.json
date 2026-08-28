@@ -1,0 +1,257 @@
+{
+  "meta": {
+    "n_docs": 100,
+    "n_questions": 25,
+    "schema": "rag-eval/questions/v0.1",
+    "seed": 42,
+    "tiers": {
+      "distractor": 6,
+      "easy": 8,
+      "multi": 6,
+      "synthesis": 5
+    }
+  },
+  "questions": [
+    {
+      "gold_answer": "3850 dollars",
+      "q_id": "e001",
+      "question": "What is the procurement limit for new hires in policy for 2025, at the 3850-dollar figure?",
+      "relevant_docs": [
+        "058"
+      ],
+      "tier": "easy"
+    },
+    {
+      "gold_answer": "5450 dollars",
+      "q_id": "e002",
+      "question": "What is the international limit for managers in travel for 2027, at the 5450-dollar figure?",
+      "relevant_docs": [
+        "090"
+      ],
+      "tier": "easy"
+    },
+    {
+      "gold_answer": "2650 dollars",
+      "q_id": "e003",
+      "question": "What is the procurement limit for contractors in policy for 2021, at the 2650-dollar figure?",
+      "relevant_docs": [
+        "034"
+      ],
+      "tier": "easy"
+    },
+    {
+      "gold_answer": "3200 dollars",
+      "q_id": "e004",
+      "question": "What is the deployment limit for managers in ops for 2022, at the 3200-dollar figure?",
+      "relevant_docs": [
+        "045"
+      ],
+      "tier": "easy"
+    },
+    {
+      "gold_answer": "5400 dollars",
+      "q_id": "e005",
+      "question": "What is the audit limit for contractors in security for 2026, at the 5400-dollar figure?",
+      "relevant_docs": [
+        "089"
+      ],
+      "tier": "easy"
+    },
+    {
+      "gold_answer": "4600 dollars",
+      "q_id": "e006",
+      "question": "What is the credit_limit limit for new hires in finance for 2020, at the 4600-dollar figure?",
+      "relevant_docs": [
+        "073"
+      ],
+      "tier": "easy"
+    },
+    {
+      "gold_answer": "3300 dollars",
+      "q_id": "e007",
+      "question": "What is the audit limit for executives in security for 2024, at the 3300-dollar figure?",
+      "relevant_docs": [
+        "047"
+      ],
+      "tier": "easy"
+    },
+    {
+      "gold_answer": "3550 dollars",
+      "q_id": "e008",
+      "question": "What is the procurement limit for executives in policy for 2019, at the 3550-dollar figure?",
+      "relevant_docs": [
+        "052"
+      ],
+      "tier": "easy"
+    },
+    {
+      "gold_answer": "2900 and 3200 dollars",
+      "q_id": "m009",
+      "question": "What are the deployment and deployment limits for contractors in ops across 2026 and 2022 (2900 and 3200)?",
+      "relevant_docs": [
+        "039",
+        "045"
+      ],
+      "tier": "multi"
+    },
+    {
+      "gold_answer": "2750 and 4550 dollars",
+      "q_id": "m010",
+      "question": "What are the international and international limits for all staff in travel across 2023 and 2019 (2750 and 4550)?",
+      "relevant_docs": [
+        "036",
+        "072"
+      ],
+      "tier": "multi"
+    },
+    {
+      "gold_answer": "4450 and 5950 dollars",
+      "q_id": "m011",
+      "question": "What are the procurement and procurement limits for managers in policy across 2027 and 2027 (4450 and 5950)?",
+      "relevant_docs": [
+        "070",
+        "100"
+      ],
+      "tier": "multi"
+    },
+    {
+      "gold_answer": "3550 and 4750 dollars",
+      "q_id": "m012",
+      "question": "What are the procurement and procurement limits for executives in policy across 2019 and 2023 (3550 and 4750)?",
+      "relevant_docs": [
+        "052",
+        "076"
+      ],
+      "tier": "multi"
+    },
+    {
+      "gold_answer": "1600 and 5800 dollars",
+      "q_id": "m013",
+      "question": "What are the credit_limit and credit_limit limits for new hires in finance across 2020 and 2024 (1600 and 5800)?",
+      "relevant_docs": [
+        "013",
+        "097"
+      ],
+      "tier": "multi"
+    },
+    {
+      "gold_answer": "2450 and 3350 dollars",
+      "q_id": "m014",
+      "question": "What are the international and international limits for managers in travel across 2027 and 2025 (2450 and 3350)?",
+      "relevant_docs": [
+        "030",
+        "048"
+      ],
+      "tier": "multi"
+    },
+    {
+      "gold_answer": "sum 1250, 1750, 3100 dollars",
+      "q_id": "s015",
+      "question": "Combining the international and credit_limit limits for all staff, what total applies (1250, 1750, 3100)?",
+      "relevant_docs": [
+        "006",
+        "016",
+        "043"
+      ],
+      "tier": "synthesis"
+    },
+    {
+      "gold_answer": "sum 2750, 3400, 5600 dollars",
+      "q_id": "s016",
+      "question": "Combining the international and deployment limits for all staff, what total applies (2750, 3400, 5600)?",
+      "relevant_docs": [
+        "036",
+        "049",
+        "093"
+      ],
+      "tier": "synthesis"
+    },
+    {
+      "gold_answer": "sum 2800, 5000, 5850 dollars",
+      "q_id": "s017",
+      "question": "Combining the credit_limit and compensation limits for executives, what total applies (2800, 5000, 5850)?",
+      "relevant_docs": [
+        "037",
+        "081",
+        "098"
+      ],
+      "tier": "synthesis"
+    },
+    {
+      "gold_answer": "sum 2550, 3600, 4850 dollars",
+      "q_id": "s018",
+      "question": "Combining the compensation and international limits for executives, what total applies (2550, 3600, 4850)?",
+      "relevant_docs": [
+        "032",
+        "053",
+        "078"
+      ],
+      "tier": "synthesis"
+    },
+    {
+      "gold_answer": "sum 2000, 2550, 4000 dollars",
+      "q_id": "s019",
+      "question": "Combining the deployment and credit_limit limits for all staff, what total applies (2000, 2550, 4000)?",
+      "relevant_docs": [
+        "021",
+        "032",
+        "061"
+      ],
+      "tier": "synthesis"
+    },
+    {
+      "gold_answer": "4200 dollars",
+      "q_id": "d020",
+      "question": "Which security audit limit, at the 4200 figure, applies to managers for 2022, ignoring similar security audit references?",
+      "relevant_docs": [
+        "065"
+      ],
+      "tier": "distractor"
+    },
+    {
+      "gold_answer": "5500 dollars",
+      "q_id": "d021",
+      "question": "Which finance credit_limit limit, at the 5500 figure, applies to all staff for 2018, ignoring similar finance credit_limit references?",
+      "relevant_docs": [
+        "091"
+      ],
+      "tier": "distractor"
+    },
+    {
+      "gold_answer": "2700 dollars",
+      "q_id": "d022",
+      "question": "Which security audit limit, at the 2700 figure, applies to managers for 2022, ignoring similar security audit references?",
+      "relevant_docs": [
+        "035"
+      ],
+      "tier": "distractor"
+    },
+    {
+      "gold_answer": "1700 dollars",
+      "q_id": "d023",
+      "question": "Which ops deployment limit, at the 1700 figure, applies to managers for 2022, ignoring similar ops deployment references?",
+      "relevant_docs": [
+        "015"
+      ],
+      "tier": "distractor"
+    },
+    {
+      "gold_answer": "5800 dollars",
+      "q_id": "d024",
+      "question": "Which finance credit_limit limit, at the 5800 figure, applies to executives for 2024, ignoring similar finance credit_limit references?",
+      "relevant_docs": [
+        "097"
+      ],
+      "tier": "distractor"
+    },
+    {
+      "gold_answer": "1250 dollars",
+      "q_id": "d025",
+      "question": "Which travel international limit, at the 1250 figure, applies to all staff for 2023, ignoring similar travel international references?",
+      "relevant_docs": [
+        "006"
+      ],
+      "tier": "distractor"
+    }
+  ]
+}

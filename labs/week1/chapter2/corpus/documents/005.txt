@@ -1,0 +1,1 @@
+beta security audit policy reference 005, edition 5. The audit limit for managers is 1200 dollars, effective 2022. Per security annex audit-005, this applies to managers in the 2022 period. Cross-reference security audit for managers budgeting at 1200 each.
