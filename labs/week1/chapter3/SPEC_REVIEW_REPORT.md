@@ -229,3 +229,117 @@ Each finding follows the skill's format: **Observation · Why it matters · Pote
 **Potential consequence** GUI/report code wires the injection badge to the wrong handler; error-string/`banner` tests target the wrong branch; the §18 "measurable security boundary" is attributed to a runtime-availability edge.
 
 **Recommended resolution** Re-attribute every injection-banner citation from `E-13` to `E-16` (§5.1 item 3, the GUI badge, C-08 step 3); keep `E-13` strictly for *Ollama-unreachable → mock degradation*. Give each a **distinct banner string** (see F-013) and pin both in a T (T-16 for the GUI badge on an `injection`-tier run; a new T-row for the runtime-degradation banner on the real path).
+
+---
+
+### 4.2 F-009 … F-016
+
+#### F-009 — `access_level` has no authorizing *principal*
+
+**Severity:** MEDIUM **Location:** C-01 `ChunkMetadata.access_level` (default `"employee"`), R-22 ("*…`permissions`*"), actor table (`User (human, single process)`), §1 `+ metadata` ("*filter … permissions*").
+
+**Observation** R-22 lists `access_level` as a loadable/usable field for "filtering, recency ranking, authority/version resolution, **and citation**," and §1 advertises "filter/rank by … **permissions**." But the `User` actor is "*single process*" and no **requesting principal** (its own `access_level`/role/identity) or a **comparison rule** (which chunks may a given principal see?) is defined. `access_level` is stored without any consumer.
+
+**Why it matters** In a single-user CLI the filtering may be a no-op, but the spec *advertises* a permissions capability it does not *close* — an implementation test gap: two implementers will either (a) ignore `access_level` or (b) invent a principal. The "permissions" claim in §1/R-22 is aspirational (§3.3) rather than an observable obligation.
+
+**Potential consequence** Either `access_level` is dead metadata, or an implementer introduces an ad-hoc principal; the `citation`/`filtering` use of `access_level` is unassertable.
+
+**Recommended resolution** Either (a) **scope out** permissions filtering for v0.1 — state explicitly that `access_level` is *carried through and ignored* in single-process mode (drop "permissions" from §1/R-22's headline uses, keep it as a field for a future multi-tenant extension), or (b) define a `principal` + a monotone `access_level` ordering and a "*include iff principal.level ≥ chunk.level*" filter rule with a T. Do not leave the capability half-open.
+
+---
+
+#### F-010 — token-budget vs. `est_tokens`: which count drives truncation
+
+**Severity:** MEDIUM **Location:** C-11/C-03 `est_tokens`/`Context.tokens`/`truncated`, I-004/I-005/I-006, E-05/E-06, T-06/T-06b/T-11.
+
+**Observation** I-004 requires "*`Context.tokens ≤ token_budget` always*" and I-005 fixes `est_tokens(s) = ceil(len(s)/4)` as "*the single formula used identically by the context builder and the report.*" But it is undefined whether `Context.tokens` is (a) `est_tokens` over the **concatenated** context string, or (b) the **sum** of `est_tokens` over each included doc. Because `ceil` is sub-additive (`ceil(a/4)+ceil(b/4) ≠ ceil((a+b)/4)` in general), the two definitions agree most of the time but **disagree at the boundary**, and that boundary is exactly where E-05/T-06 assert `truncated=True` "*iff* a doc was dropped."
+
+**Why it matters** I-005 promises *one* formula, but "the count that is checked" and "the sum that builds" can be *two* different roundings; the `truncated` predicate (`I-004`, "iff a doc was dropped") can then flip between a builder that uses sum-of-ceil and a report that uses ceil-of-concatenation, violating I-006 ("report equals build").
+
+**Potential consequence** Boundary flaps in T-06/T-06a; an implementer's `truncated` can disagree with the reported `context_tokens`.
+
+**Recommended resolution** Fix one convention: `Context.tokens = Σ est_tokens(doc_text)` over the *included* docs, and the `truncated` predicate checks the **running sum against the budget *before* appending the next doc** (first doc that would exceed is dropped → `truncated=True`). State that `I-004`/`I-006` reference this same running sum, not a re-ceil of the concatenation.
+
+---
+
+#### F-011 — the BM25/`idf` formula is referenced, not inlined
+
+**Severity:** MEDIUM **Location:** C-02 (lexical `BM25Index`), R-04, §10 (*"ch2 O-1 formula, k1=1.5, b=0.75"*).
+
+**Observation** The lexical channel is defined as "*the ch2 O-1 formulas with the same tokenizer (O-1a); `k1=1.5, b=0.75`*" and `BM25Index.search` gives only a one-line signature. The actual `score(q,d)` / `idf(t)` bodies live in **ch2's** spec. This spec is *not self-contained* for the lexical channel it blends into the headline hybrid result.
+
+**Why it matters** A reviewer/implementer working **only** from ch3's `SPEC.md` cannot reproduce the `s_lex` used in `O-3`'s min-max; the hybrid result (F-002) depends on a formula in another document. `idf` has at least two common variants (e.g. `ln(1+(N−|D_t|+0.5)/(|D_t|+0.5))` vs. `(N−|D_t|)/|D_t|`), so "the ch2 O-1 formula" is not one function without the text.
+
+**Potential consequence** Two implementations of `s_lex` diverge; the ch3↔ch2 coupling is invisible to a fresh implementer; `T-07` depends on an out-of-scope formula.
+
+**Recommended resolution** Inline the BM25 `score`/`idf`/tokenizer (O-1a) into C-02 as a short worked formula (or a clearly-labelled *excerpts* from ch2 O-1 with a version pin), and add a one-paragraph "this reuses ch2 §…" with a *change-detection note* so a ch2 change cannot silently move the ch3 baseline.
+
+---
+
+#### F-012 — post-rerank canonical ranking key / what `retrieved` mirrors is not fixed
+
+**Severity:** MEDIUM **Location:** C-05 `Reranker`/`MockReranker` ("*descending `ScoredChunk.rerank`*"), C-01 `ScoredChunk` (`score`/`semantic`/`lexical`/`rerank`/`rank`), I-006, C-12 `RunMetrics.retrieved`.
+
+**Observation** `MockReranker.rerank` produces `ScoredChunk.rerank`, and the reranker "*re-rank (descending `ScoredChunk.rerank`)*." But `ScoredChunk.score` is defined as "*the *combined* ranking score (hybrid when `--hybrid`, else the winning channel)*," which is the **pre-rerank** value, and `rank` is "*1-based position in the *final* ranked list.*" It is undefined whether, when `--rerank on`, (a) `.score` is rewritten to the rerank output, (b) only `.rerank` is set and the final order is by `.rerank` while `.score` lags, or (c) both. And `I-006` requires `retrieved` to mirror "*the ranking actually assembled*" — which ranking, when `.score` and `.rerank` disagree?
+
+**Why it matters** This is the single point at which the *report's* ranking (used for P/R@k, MAP, NDCG — all computed on `retrieved`) could diverge from the *displayed* rerank order. The test test fails: a verifier cannot assert `retrieved == final order` without knowing which field is canonical.
+
+**Potential consequence** P/R@k/NDCG computed on the pre-rerank order while the UI shows the post-rerank order (or vice-versa); the `+rerank` per-capability diff (R-14) is not well-defined.
+
+**Recommended resolution** State that with `--rerank on` the **canonical final order is by `.rerank` (desc, `chunk_id` asc tie-break)** and that `retrieved`/I-006 mirror **this** order; define whether `.score` is frozen (pre-rerank, for the "+rerank diff" baseline) or overwritten; pin in T-23/T-11.
+
+---
+
+#### F-013 — model-availability outcomes are not unified (ch1 F-003 analog)
+
+**Severity:** MEDIUM **Location:** R-19, E-13, E-14, §5.1 exit codes, §4 `+ metadata`/GUI banner.
+
+**Observation** The real path has at least **three** distinct runtime situations but only two behaviors: **unreachable daemon** → "*degrades to the mock doubles and prints a banner*" (E-13); **daemon up but `--embed-model`/`--model` not pulled** → "*a clear `pull required` error rather than a crash*" (R-19). E-14 is a *corpus* load error. These three are conflated under "E-13/E-14" in several cross-refs, and the **banner string** for the mock-degradation is not fixed, so it collides with the injection banner (F-008). (This mirrors ch1's `discover_registry` finding: one boolean with one banner for distinct conditions.)
+
+**Why it matters** Three observable states (UNREACHABLE-DAEMON / REACHABLE-MODEL-ABSENT / REACHABLE-POPULATED) need distinct behaviors **and** distinct banners; a conflated banner misleads the human about *why* the mock is running, and the GUI `INJECTION!` badge could never be disambiguated from the runtime-degradation banner.
+
+**Potential consequence** A human reading "mock" on screen cannot tell *reachable-but-empty-model* from *daemon-down*; GUI banner wiring is ambiguous with F-008.
+
+**Recommended resolution** Define an **outcome enum** `{DEGRADED_MOCK (daemon unreachable), PULL_REQUIRED (model absent: emit `ollama pull <m>` + exit 4), RUN_REAL}` with a **distinct, canonical banner per outcome**, and unify E-13/E-14's cross-refs. This is the ch1 F-003 fix, adapted.
+
+---
+
+#### F-014 — `MRR` is written without an `@k` while `P/R/NDCG` are `@k`
+
+**Severity:** MEDIUM **Location:** C-11 `MRR` equation, R-11, T-05a/T-05b.
+
+**Observation** R-11 names the family "*`Precision@k`, `Recall@k`, `MRR`, `MAP`, `NDCG@k`*" — three measures carry `@k`, `MRR` does not. The §C-11 equation `MRR = 1/rank(first g ∈ R_k)` *implies* `MRR@k` (first relevant *within top-k*, else `0`), but "in `R_k`" is the only thing pinning it; the worked example (T-05b, `MRR=1.0`, rank 1) does not distinguish `MRR@k` from full-rank `MRR`. With `k=5` (K-03) and first-relevant at rank > 5, the two readings differ (`0` vs. `1/rank`).
+
+**Why it matters** `MRR` feeds `RunMetrics.mrr` and the aggregate; an off-by-k boundary case (first relevant at rank 6) yields a different reported value under the two readings, so `by_tier`/`by_capability` diffs can disagree.
+
+**Potential consequence** Divergent `mrr` in the report / aggregate; T-05a/b do not cover the rank > k case.
+
+**Recommended resolution** Adopt `MRR@k` (first relevant within top-`k`, else `0`) explicitly, add `MRR@k` to R-11 and the `RunMetrics` field comment, and extend T-05b with a rank > `k` sub-case to pin the `0` behavior.
+
+---
+
+#### F-015 — E-04's "ground-truth all-missing" runtime branch is unreachable
+
+**Severity:** MEDIUM **Location:** E-04, E-14/I-013, T-01, I-007.
+
+**Observation** E-04 says the `|G| = 0` guard fires on "*a query whose ground-truth is also **empty or all-missing** (`|G|=0`)*." But T-01 requires every question to have **non-empty** `relevant_chunks`, and I-013/E-14 make "*a `relevant_chunks` id absent from the built index*" a **load-time error** (exit 3) that prevents the run. So the `|G| = 0` *runtime* branch (with `|G|` computed as the count of `relevant_chunks` *present* in the index) cannot be reached: by the time a case runs, all `relevant_chunks` are guaranteed present. The only route to it is `gold_facts = []`, which T-01 forbids for the generated set (and which is the *completeness* denominator, not `G` for retrieval `|G|`).
+
+**Why it matters** The guard is *defensive but dead* for the specified dataset; leaving it implies a runtime path that does not exist, and an implementer may build a branch that T-* cannot trigger without an out-of-spec corpus — weakening the otherwise-strict E↔T correspondence.
+
+**Potential consequence** A dead guard confuses the failure model; a verifier can't exercise it from a T without first violating T-01/E-14.
+
+**Recommended resolution** Either (a) **mark E-04 explicitly defensive** — "*unreachable under T-01/E-14; present only as a divide-guard for a hand-edited corpus*" and reference it only by I-007, or (b) **add a T** that constructs a corrupted-then-hand-edited dataset (a `synthetic` corpus) and assert the `None` behavior — and drop "all-missing*runtime*" from E-04's wording, confining it to a *completeness* empty-`gold_facts` case.
+
+---
+
+#### F-016 — where `--seed` is consumed is unclear
+
+**Severity:** MEDIUM **Location:** R-18, §5.1 `--seed`, §10 (*"seed threading (corpus + mock paths)"*), O-1, §C-06 `MockQueryExpander`.
+
+**Observation** R-18 promises "*with a fixed `seed` on the **mock** path, all deterministic outputs … are reproducible/byte-identical*," and §11 traces `R-18 → seed threading (corpus + mock paths)`. But the mock doubles are *content-determined* — `MockEmbedder` uses **fixed** FNV-1a (no seed, by design, O-1), `MockReranker`/`multi_query` are functions of their inputs, and `MockJudge` derives from `gold_facts`/`claims`. The **only** genuine use of `seed` is `gen-corpus` (which writes the corpus). `MockQueryExpander` is "*seeded*" yet its templates + fixed synonym map are deterministic *without* a seed. So the contract says "*seeded*" for objects whose determinism does not depend on the seed.
+
+**Why it matters** "*Reproducible with a fixed seed*" is a weaker promise than the determinism the spec actually delivers; an implementer may *add* a seeded RNG to a mock "to honor R-18" and thereby **degrade** the byte-identical guarantee, or *omit* seed threading to a mock that genuinely randomizes (future `LLMQueryExpander`, `LLMReranker`).
+
+**Potential consequence** The `R-18`/T-03/T-07 byte-identical contract is either *stronger than promised* (an implementer adds needless entropy) or *weaker than needed* (a future mock is non-deterministic and the suite is "seeded-but-wonky").
+
+**Recommended resolution** For each mock double, declare precisely which of `seed` / inputs / both determine its output (recommend: corpus = `seed`; mocks = **inputs only**, `seed` ignored), and update `--seed`'s help to say "*affects gen-corpus; the mock doubles are input-determined*." Add a test that a second `gen-corpus --seed 42` is byte-identical but a `gen-corpus --seed 7` is not, pinning the *seed surface* itself.
