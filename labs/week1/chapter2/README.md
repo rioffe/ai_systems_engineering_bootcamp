@@ -78,7 +78,10 @@ src/rag_eval/
   cli.py        # §5.1 `rag-eval` (eval / gen-corpus / show)
   app.py        # process entry point
 schemas/        # answer.json, verdict.json -- the two structured-output schemas
-tests/          # SPEC §9 (pure/offline, T-01..T-16); conftest.py forces Qt offscreen
+tests/          # SPEC §9 offline suite (T-01..T-16); conftest.py forces Qt
+  offscreen. T-16 = an offscreen PyQt5 cancel-semantics suite, guarded by
+  importorskip so it self-skips without the optional `gui` extra; the default
+  `uv run pytest` needs neither Qt nor Ollama (I-011/T-14).
 ```
 
 `retrieval.py`, `context.py`, `metrics.py`, and `corpus.py` name **no** LLM/Ollama/httpx —
