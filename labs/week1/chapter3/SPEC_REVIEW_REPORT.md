@@ -509,3 +509,30 @@ The contract surface (C-01…C-12) is **dense and mostly precise**. The data typ
 - **Empty/null behavior** is largely covered: `[]`-never-`None` (E-02), no-empty-denominator (I-007, every metric), empty `--tiers`→exit 0 (E-18), empty answer citations allowed (OQ2). The *open* empty-case is the **zero-range min-max** (F-002).
 
 **Verdict of §6.** Interface and data-contract completeness is **strong-to-very-strong**; the two *material* gaps (F-001 mock-LLM input, F-002 hybrid pool) plus the cross-field invariants (F-004/005/012/017/021) are additive fixes. No missing field, no missing interface — only *under-pinned* semantics on existing fields and *under-specified* edges on existing algorithms.
+
+---
+
+## 7. State and Failure Review
+
+The state model (§3.2 `CaseState`) and the failure model (§8 E-01…E-18) are the **cohesive heart** of this spec, and mostly *excellent*: a per-case single-threaded linear state machine with terminal `SCORED`/`PARTIAL`/`ERROR`, per-case fault isolation, a complete-retrieval-diagnosis guarantee that survives a later-stage fault (I-008), and **six §14–§19 failure modes realized as asserted tiers**. The defects are *local*, not structural.
+
+### 7.1 State-machine completeness (strong, two notational gaps)
+- **States + transitions:** `IDLE→RETRIEVING→EXPANDING→RERANKING→CONTEXTING→GENERATING→JUDGING→{SCORED|PARTIAL|ERROR}` with terminal `SCORED`/`PARTIAL`/`ERROR`; toggle-gating (`--hybrid off` ⇒ pure-dense passthrough; `--rerank off` ⇒ passthrough; `--judge off` ⇒ skip `JUDGING`) is cleanly modeled as *no-op stages that carry inputs unchanged*. **Initial, terminal, and failure states are all named.** This is well above the lab norm.
+- **Gap 1 — the `ERROR` diagram annotation.** §3.2's ASCII diagram annotates the `ERROR` terminal as `failure_stage in {retrieval,expansion,reranking,context}`, but **E-11** says a *generation* fault (after retries) is `ERROR` with `failure_stage="generation"`, and `C-12`'s `failure_stage` enum includes `generation|judging`. So the diagram *under-states* the `ERROR`'s reachable `failure_stage` set (it omits `generation`; and `PARTIAL` is the *judge* fault, not `ERROR`). This is a **notational mismatch** between the diagram, the state table (`ERROR` = "*a stage before judging terminal-faulted*", which correctly includes `generation`), E-11, and the `C-12` enum — a verifier reading *only* the diagram would miss that a generation fault is an `ERROR`, not a `PARTIAL`.
+- **Gap 2 — the `PARTIAL` trigger.** §3.2 says `PARTIAL` ⇒ "*retrieval + generation ok but **judge** failed (E-15)*" — but the *judge*-fault case is **E-11** ("*if generation succeeded but the judge failed the row is `PARTIAL`*"); `E-15` is a `top_n`/`top_k` **usage** exit. This is the **same root as F-007** (the `I-008/T-10/E-15` pointer family): E-15 is the *nearest neighbor* of the edges that actually carry `generation`/`judging` attribution, and the state table re-points `PARTIAL` to E-15 as well. Resolve both with the **E-11 re-pointing** in F-007.
+
+### 7.2 Failure semantics (very strong)
+- **Detection + resulting state + propagation + caller observation** are all specified per operation: parse/validation retry→`ERROR` (I-010), Ollama-unreachable→mock-degrade+banner (E-13), `relevant_chunks`-absent→load-error exit 3 (E-14/I-013), bad usage→exit 2 (E-15 with the exit-code *table* in §5.1). The **retry semantics** are precise: "*up to `max_retries` with an error-informed prompt, first failure reason recorded, then terminal*" — a ch2 E-03 analog carried cleanly.
+- **Partial work / resume:** the *no-resume, no-retry-of-the-case* design (one question at a time; a failed stage *terminates that case*, siblings continue) is **explicit and coherent** — and it is the right call for a *static-per-run* corpus (R-13) with no cross-question state (Q-06). No partial-completion ambiguity.
+- **Recovery / cancellation:** per-case isolation is the spec's *defining* failure property and is *architecturally* enforced (I-008: a later fault preserves the *complete retrieval diagnosis*); this is a genuinely unusual strength. GUI `Cancel` teardown is speced (I-014/E-17/T-16).
+
+### 7.3 Intra-state consistency
+- **Failure-stage enumeration.** `C-12` `failure_stage` ∈ `{retrieval,expansion,reranking,context,generation,judging}` and the state table / E-set agree on *which stage produces which terminal state* **once E-11 is re-pointed** (F-007). After that fix, the *whole* error-attribution story is internally consistent, which is what makes §21's "*where did it fail?" diagnostic trustworthy.
+- **The one genuine failure-model tension — `E-04` vs. `E-14`/`I-013`** (F-015): the `|G|=0` *runtime* divide-guard is *unreachable* because absent ground-truth ids are a *load-time* error. This is *redundancy*, not *contradiction* — the guard is defensively-present-but-dead, and the resolution (label it defensive, or add a synthetic-corpus T) is additive.
+
+### 7.4 What is *correctly* out of scope
+- **Retries across cases / re-run-on-fault** are not specified — correct, since R-17/R-21 make a single static run the unit and per-case isolation the guarantee. **No state/memory subsystem** (Q-06) — correct and well-motivated. These are *freedom*, not gaps.
+
+**Verdict of §7.** State-machines-and-failure is **near-implementation-grade**: complete state set, precise retry and propagation semantics, per-case isolation as an invariant, and six asserted failure tiers. The only *real* defect is the **E-15↔E-11/T-10 pointer family** (F-007, which also fixes the §3.2 diagram's `ERROR` annotation and the `PARTIAL` trigger) plus the **defensive-but-dead `E-04`** (F-015). After these, the state/failure model is fully consistent and mechanically verifiable.
+
+*(Note: §3.2's `ERROR` diagram annotation and the `PARTIAL`→E-15 trigger are both resolved by the single F-007 re-point; they are reported here rather than as new findings because they share F-007's root cause and resolution.)*
