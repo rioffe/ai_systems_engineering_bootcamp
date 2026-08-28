@@ -21,7 +21,7 @@ The spec is **not yet a clean Level 3** for one reason that is *different in cha
 - **F-002 (HIGH)** — the hybrid candidate-pool formation and the per-channel min-max normalization are under-specified: how the dense and lexical top-N sets combine, how a candidate present in one channel but not the other is handled, and the zero-range (all-equal-score) case are not fixed, so the headline *+hybrid* capability is not byte-deterministic (I-002).
 - **F-003 (HIGH)** — `--contextual`/`--strategy` are **index-time** operations (§3.1) yet appear as query-time `eval` options (§5.1, §9.11), and the `build-index`→`eval` handoff (in-memory vs. pickle vs. rebuild-when-toggled) is undefined; this destabilizes the §22 per-capability experiment and T-20/T-21.
 
-Eleven **MEDIUM** findings (generation-metric numerators, the `which_doc_decided` name-vs-meaning mismatch, conflict/recency precedence, token-budget vs. `est_tokens` bookkeeping, stale cross-refs, no access *principal*, and the like) and ten **LOW** findings (editorial/traceability) round out the set. **No finding is rated CRITICAL** — nothing is contradictory-to-the-point-of-impossibility or fundamentally unverifiable.
+Thirteen **MEDIUM** findings (generation-metric numerators, the `which_doc_decided` name-vs-meaning mismatch, conflict/recency precedence, token-budget vs. `est_tokens` bookkeeping, a dead `E-04` guard, `--seed` scope, stale cross-refs, and no access *principal*) round out the set; eight **LOW** findings (editorial/traceability) close the list. **No finding is rated CRITICAL** — nothing is contradictory-to-the-point-of-impossibility or fundamentally unverifiable.
 
 **Strengths (most important).**
 
@@ -36,11 +36,11 @@ Eleven **MEDIUM** findings (generation-metric numerators, the `which_doc_decided
 - **A cluster of inter-consistency defects** (F-004/007/008): a field named `which_doc_decided` that means "which *metadata field*," a stale `I-008 → E-15` trace pointer, and the injection banner mis-attributed to `E-13` (Ollama-unreachable) instead of `E-16` (injection).
 - **Residual NFR/thin-security coverage**: `access_level` is stored but has no authorizing *principal* (F-009); the injection defense is correctly *flagged* but its *prevention* is only as strong as grounding + schema (F-21 / §18).
 
-**Findings by severity.** 0 CRITICAL · 3 HIGH · 11 MEDIUM · 10 LOW. Total: **24 findings.** (Severities are stated per finding in §4; §20 prioritizes them P0/P1/P2.)
+**Findings by severity.** 0 CRITICAL · 3 HIGH · 13 MEDIUM · 8 LOW. Total: **24 findings.** (Severities are stated per finding in §4; §20 prioritizes them P0/P1/P2.)
 
 **Primary blocker:** **F-001** — the `MockLLM` gold-access contract is undefined, so it is *unspecifiable whether the offline generation/judgement metrics exercise retrieval or are tautological.* A faithful implementation-and-verification pair cannot be derived from v0.1 until this, F-002, and F-003 are resolved.
 
-**Recommendation:** resolve the 3 HIGH (P0) + the 11 MEDIUM (P1) — all additive or one-line — to reach a clean **Level 3**. The LOW set (P2) is a Level-4 stretch. **No architectural change is recommended** (§17). The deterministic core is already implementation-grade; the work is *precision*, not *structure*.
+**Recommendation:** resolve the 3 HIGH (P0) + the 13 MEDIUM (P1) — all additive or one-line — to reach a clean **Level 3**. The 8 LOW (P2) are a Level-4 stretch. **No architectural change is recommended** (§17). The deterministic core is already implementation-grade; the work is *precision*, not *structure*.
 
 ---
 
@@ -82,7 +82,7 @@ These are stretch items; none is required for an implementation-grade (Level 3) 
 
 ## 3. Findings Summary
 
-**24 findings: 0 CRITICAL · 3 HIGH · 11 MEDIUM · 10 LOW.** They cluster into three themes: (1) **three material semantic ambiguities on the offline-generation/hybrid/index-query seam** that could drive divergence between two competent implementers (F-001/002/003); (2) **a cluster of inter-consistency / cross-reference defects** (`which_doc_decided` meaning, stale `I-008→E-15`, the `E-13`/`E-16` injection-banner mixup, metric-numerator definitions) (F-004/005/006/007/008); and (3) **editorial, traceability, and stretch items** (F-009…F-024). No finding is a redesign (§17); every P0/P1 is additive or a one-line clarification. The deterministic core (metric math, failure semantics, source-scanned reliability boundary, `MockEmbedder`) is implementation-grade and is *not* where the work lies.
+**24 findings: 0 CRITICAL · 3 HIGH · 13 MEDIUM · 8 LOW.** They cluster into three themes: (1) **three material semantic ambiguities on the offline-generation/hybrid/index-query seam** that could drive divergence between two competent implementers (F-001/002/003); (2) **a cluster of inter-consistency / cross-reference defects** (`which_doc_decided` meaning, stale `I-008→E-15`, the `E-13`/`E-16` injection-banner mixup, metric-numerator definitions) (F-004/005/006/007/008); and (3) **editorial, traceability, and stretch items** (F-009…F-024). No finding is a redesign (§17); every P0/P1 is additive or a one-line clarification. The deterministic core (metric math, failure semantics, source-scanned reliability boundary, `MockEmbedder`) is implementation-grade and is *not* where the work lies.
 
 | ID | Sev | Location | Issue (one line) |
 | ---- | ---- | -------- | ---------------- |
@@ -854,3 +854,147 @@ The skill's cross-check: *do later sections contradict earlier ones? Does termin
 - **External dependencies.** *Minimized and seam-guarded.* The *only* external dependency is `Ollama` (+ `httpx` for the transport), *quarantined to three modules* behind three interfaces, *with deterministic doubles* for the *entire suite* (R-17/K-05). `numpy` and a *future* hosted DB are *seams* behind the same interfaces (F-002/Q-03). *The probabilistic component is honestly bounded, not hidden* — the *correct* posture for a lab.
 
 **Verdict of §17.** Architecture is a second-strongest dimension (score **4.5**), and — *unusually for a review* — **no finding recommends a redesign**. The "one boundary / two components / three modules" frame is the spec's *defining move* and is *enforced by a source-scan*, not merely asserted; the 3-command CLI is *clean*; per-case fault isolation is a *design property* (I-008), not a *runtime check*. The *only* architectural gap is the **F-003 `build-index`→`eval` handoff + index/query toggle partition** — a *small, local* fix to an *already clean* two-scope design — plus the *F-013* outcome taxonomy (a small enumeration) and three *editorial* seam clarifications (`numpy`/cross-encoder/hosted-DB: *local vs. transport* imports for the T-02 scan). All findings are *within-architecture*: a missing handoff, a missing field, two pointer mis-routes. This is a *rare strength* — the spec's architecture is the *model answer* to "a deterministic boundary *around and around* a probabilistic component, *enforced by a source scan*." After F-003, I-008 attribution, and the F-012/021 field pins, the architecture is *verification-grade* and *should not change*. See §19.
+
+## 18. Implementation-Agent Readiness
+
+**Question:** could a strong coding agent implement `SPEC.md` v0.1 *and its test suite* **without asking a material semantic question?**
+
+**Answer: NO — currently** (the three **HIGH** findings, F-001/002/003, are *material* questions a second agent would answer *differently*). **YES after P0 + P1** — the P0 set (3 HIGH) plus the P1 set (13 MEDIUMs) are *all additive or one-line*, and none is a *design rewrite* (§17): once they are pinned, an implementation-and-verification pair is a *deterministic* function of v0.1. This is the defining property of a *pre-implementation* review: the spec *precedes* its code, so readiness is a function of *semantic closure*, not *spec↔code drift* (the ch1/ch2 condition). The difference in character matters: ch1 read "ready to build, but the spec *lags* the code that already exists"; ch3 reads "ready to build *as soon as three ambiguities are closed*; the code *has not begun*."
+
+**Blocking questions (must resolve before v0.1 is a source of truth):**
+
+1. **(F-001, P0)** May `MockLLM` read `gold_facts`/`gold_answer` out-of-band? Resolution direction: **no** — confine the double to `context`+`question`, reword "ground-truth-fit" to *schema-valid, evidence-grounded (from the assembled context)*, and add a `T-11a`/`T-08` assertion that `completeness`/*faithfulness* *vary with retrieval*. This is *the* decision: it determines whether §21's *retrieval-vs-generation* split is *measured* or *tautological*.
+2. **(F-002, P0)** What is the hybrid *candidate pool* and the *per-channel* min-max on a *missing* channel / *zero-range*? Resolution direction: **union of dense-top-N and BM25-top-N, deduped by `chunk_id`; missing = raw `0.0`; zero-range = all-`1.0` + `chunk_id` asc** (consistent with `O-1b`), pinned in `T-07`.
+3. **(F-003, P0)** Is a `--contextual`/`--strategy` flag at `eval` time a no-op, a rebuild, or an error, and how is the `build-index`→`eval` index passed? Resolution direction: **index-time flags force a rebuild from the corpus; the pickle is an optional flag-hash cache; a re-build is not a re-eval.** Rewrite §9.11 so a `+contextual`/`+strategy` diff *rebuilds first*.
+
+**Non-blocking questions (reasonable choice, no material impact — all P1/P2).** F-004 `which_doc_decided` *name-vs-meaning* + precedence (re-name + total precedence); F-005/006 generation-numerator definitions; F-007 pointer re-point; F-008 banner re-route; F-009 `access_level` principal (scope-out recommended); F-010 token-count convention; F-011 BM25 inlining; F-012/021 post-rerank canonical key + `retrieved` set; F-013 outcome taxonomy; F-014 `MRR@k`; F-015 `E-04` dead-guard label; F-016 seed scope; F-017–F-024 editorial/serialization/typo. Each has a *recommended direction* in §4; *none* blocks a *working* build — they are *conformance precision*, not *buildability*.
+
+**Readiness verdict by layer.** The **deterministic core** (`corpus`/`chunking`/`embedding`(mock)/`retrieval`/`rerank`/`context`/`citation`/`metrics`/`pipeline`) is **READY NOW** — zero semantic guesses, fully pinned contracts + worked examples + per-stage byte-identity tests (T-03/T-04/T-07/T-23). The **probabilistic boundary** (`model.py`/`judgment.py`/`embedding.py` real path) is **READY WITH P0** (F-001 the `MockLLM` contract; F-013 the outcome taxonomy; F-006 the real-judge numerators — P1/P2). The **test suite** is **READY WITH P0/P1** (add the two *coverage holes* — F-001 generation-degradation, F-002 hybrid-pool — plus F-007 re-point and the F-017 artifact test). The **CLI/GUI/`report.json`** is **READY WITH P1/P2** (F-003 handoff + F-017 serialization + F-019 `-h` collision). Everything else: **READY**.
+
+**Overall readiness:** **NO → YES after P0 + P1.** The blocker is *not* conceptual and *not* a redesign (§17) — it is *three* *material-divergence* ambiguities on the *offline-generation / hybrid / index-query* seam. Closing the P0 set turns v0.1 from "a spec that *describes a system*" into "a spec that describes a *specific system with a specific measurement*"; closing P1 makes it *verification-grade for conformance*. Both are *small, additive, local* relative to a system whose deterministic core is already implementation-grade. Score: **3/5** (implementation-grade for the deterministic ~80%; the P0/P1 set closes the gap to the probabilistic + experimental-method ~20%). See §19.
+
+---
+
+## 19. Quality Scorecard
+
+Per the skill's 0–5 scale (0 = absent · 1 = seriously deficient · 2 = weak · 3 = adequate · 4 = strong · 5 = implementation-grade). Scores are per-dimension; "held by" names the finding that caps the score.
+
+| Dimension | Score | Held by / note |
+| --- | ---: | --- |
+| Scope clarity | 4.5 | §0 intent + explicit non-goals (R-02); F-020 "one/two/three" framing is the only wart |
+| Terminology | 3.5 | F-004 `which_doc_decided` name≠meaning; F-013 outcome taxonomy; F-023 typo |
+| Requirement precision | 3.5 | F-001/002/003 material; F-006/009/014/016 within-requirement precision |
+| Interface completeness | 3.5 | C-01…C-12 dense; F-001 `MockLLM`, F-012 post-rerank, F-003 handoff |
+| Data-contract completeness | 3.5 | C-11/`C-12` strong on shape; F-005 `supported_claims`, F-021 `retrieved`, F-022 `SKIPPED` |
+| State/lifecycle definition | 4 | §3.2 complete + per-case isolation (I-008); F-007 caps the notational annotations |
+| Algorithm precision | 4 | F-002 hybrid edges, F-017 serialization, F-010/018 estimator; core (O-1, metric math) is 4.5 |
+| Failure semantics | 4 | excellent; F-015 dead `E-04` guard, F-007 pointer |
+| Edge-case coverage | 4 | E-01…E-18 broad + measured tiers; F-015/F-007 redundancy |
+| Non-functional requirements | 3.5 | K-01/K-02/K-05 *measured*, not asserted; F-009 half-open authorization |
+| Security specification | 3.5 | *strong-for-scope*; F-008 banner mis-route, F-009 principal; prevention-vs-detection inherent |
+| Observability/provenance | 3.5 | `RunMetrics` per-case *exceptional*; F-017 run-level (a Level-4 stretch) |
+| Testability | 4 | T-01…T-23 accepted *catalog* + worked examples; F-001/F-002 coverage holes |
+| Evaluation/metrics | 4.5 | *strongest* dimension; F-005/006/014/017 additive precision only |
+| Traceability | 3.5 | `id→where→test` matrix near-total; F-007 stale family + F-003/T-gap |
+| Internal consistency | 3.0 | **lowest**; not self-contradictory, but inter-consistency cluster (F-004/007/008/012/021/022) |
+| Architecture consistency | 4.5 | "one boundary / two components / three modules" + source-scan; F-003 handoff |
+| Implementation readiness | 3.0 | deterministic core ready NOW; P0 (3 HIGH) blocks a *faithful* build |
+
+**Weighted read.** Three dimensions score **4.5** (metrics, scope, architecture — the spec's *signature strengths*), eight score **4** (state, algorithms, failure, edge-cases, testability — the *structural core*), six score **3.5** (a *band of strong-but-not-verification-grade* dimensions capping on *small* findings), and the floor is **3.0** (internal consistency + readiness — the two dimensions that are *directly gated by the P0/P1 set*). **No dimension scores below 3**, and **no dimension is at 0/1/2** — the spec is *uniformly competent*; the gap to 5 is *precision and inter-consistency*, not *missing structure*. After P0/P1, eight of eighteen dimensions move to **4.5** (the ones held by a single P0/P1 finding: terminology on F-004/F-013, requirements on F-001/002/003, interfaces on F-012, data-contract on F-005/F-021, algorithms on F-002/F-017, traceability on F-007, readiness on the P0 set), and internal-consistency moves to **4.5** on the pointer fix.
+
+---
+
+## 20. Remediation Plan
+
+Findings grouped by priority. **No redesign is recommended** (§17); each P0/P1 is *additive* or a *one-line* clarification, and each P2 is *editorial* or a *Level-4 stretch*. Because v0.1 *precedes* its implementation, the "implementation" column says *where in v0.1 to pin the fix* (a contract/requirement/section to amend), not *a `src/` file to reconcile* — there is no code yet.
+
+### P0 — Blocking (resolve before v0.1 becomes the source of truth)
+
+- **F-001 (HIGH) — `MockLLM` gold-access contract.** Pin `MockLLM` to `context`+`question` only (no `gold*`); reword "ground-truth-fit" in C-09; add `T-11a` (generation-degradation: empty-support → low `completeness`/`faithfulness`, `injection_warning=False`) and extend `T-08`. *This is the §21 crux.*
+- **F-002 (HIGH) — Hybrid candidate pool + per-channel min-max edges.** In C-04/O-3: pool = *union(dense-top-N, BM25-top-N) deduped by `chunk_id`*; missing-channel raw = `0.0`; zero-range = all-`1.0` + `chunk_id` asc. Pin a crafted worked example in `T-07`.
+- **F-003 (HIGH) — `build-index`→`eval` handoff + index/query toggle partition.** Partition §3.1/§5.1 into *index-time* (`--strategy`/`--contextual`/`--chunk-size`/`--overlap`: must force a `build-index` rebuild; optional flag-hash pickle) vs. *query-time* toggles; rewrite §9.11 so a `+contextual`/`+strategy` diff *rebuilds first*.
+
+### P1 — Important (resolve before claiming conformance / Level 3)
+
+*Inter-consistency + security cluster (the findings that touch a defining invariant or a security-relevant path — highest P1 priority)*:
+
+- **F-007 (MEDIUM) — pointer family `E-15`↔`E-11`.** Re-point I-008/`T-10` and §11's `R-15/I-008` row to `E-11`; §11 `multi-hop` → `T-04b`/`T-23`; fix §3.2's `ERROR` annotation and `PARTIAL` trigger (§7.1). *One root, four sites.*
+- **F-008 (MEDIUM) — injection banner mis-routed to `E-13`.** Re-attribute the `INJECTION!` banner from `E-13` to `E-16` (§5.1 item 3, GUI badge, C-08 step 3, E-16 cross-ref); distinct canonical banner string per *security* outcome.
+- **F-013 (MEDIUM) — model-availability outcome taxonomy.** Define `{DEGRADED_MOCK, PULL_REQUIRED, RUN_REAL}` with a *distinct canonical banner per outcome*; unify E-13/E-14 cross-refs (ch1 F-003 analog). *Un-collides F-008.*
+- **F-004 (MEDIUM) — `which_doc_decided` name≠meaning + precedence.** Re-name `which_field_decided` (or state "stores the field name"); fix value domain; define a *total* precedence (`version` > `updated_at` > `access_level`) + `None`/type-mix tie; pin a conflict/recency case in `T-17`.
+- **F-005 (MEDIUM) — `supported_claims` not a field.** Define `supported_claims ≡ total_factual_claims − len(unsupported_claims)` (or add the field), state the I-003-recount ordering, pin `T-08a`.
+- **F-009 (MEDIUM) — `access_level` has no principal.** *Recommend scope-out* for v0.1 (single-process: `access_level` carried through and ignored; drop "permissions" from §1/R-22's headline uses) — or spec a `principal` + monotone-level `include iff principal.level ≥ chunk.level` filter with a `T-`. Do not leave it half-open.
+
+*Additive precision cluster (small, but on conformance-bearing fields)*:
+
+- **F-012/F-021 (MEDIUM/LOW, *one fix*) — post-rerank canonical key + `retrieved` set.** Pin *one* fix: with `--rerank on` the canonical order is by `.rerank` (desc, `chunk_id` asc); `retrieved = the post-rerank top-`k` consumed by the `ContextBuilder`*; state whether`.score` is frozen (pre-rerank) or overwritten; add the I-006 cross-check `set(retrieved[:k]) == sorted[R_k_by_score](:k)`.
+- **F-006 (MEDIUM) — real-judge numerators.** Define reference-bound matching (`reflected_facts ∩ gold_facts`; `relevant_citations` per §F-006) so the real-judgment columns are *independently reproducible*.
+- **F-014 (MEDIUM) — `MRR@k`.** State `MRR@k` in R-11 + `RunMetrics`; add the rank-`>k`→`0` sub-case to `T-05b`.
+- **F-010 (MEDIUM) — token-count convention.** `Context.tokens = Σ est_tokens(doc_text)` over included docs; `truncated` checks the *running sum* before the next append; I-004/I-006 reference that running sum.
+- **F-011 (MEDIUM) — BM25 by-reference.** Inline the ch2 O-1 `score`/`idf`/tokenizer into C-02 (short worked formula + version pin + change-detection note), so ch3 is self-contained for the lexical channel.
+- **F-015 (MEDIUM) — dead `E-04` guard.** Label it *defensive-only* (unreachable under T-01/E-14/I-013), or add a synthetic-corpus `T-`; drop "all-missing*runtime*."
+- **F-016 (MEDIUM) — `--seed` scope.** Declare per double what governs output (corpus = `seed`; mocks = *inputs only*); update `--seed` help; add a "same seed → identical, different seed → different" test.
+
+### P2 — Improvement (safe to defer / Level-4 stretch)
+
+- **F-017 (LOW)** — canonical report serialization (`q_id` order; `by_tier`/`by_capability` sorted; `json.dumps(sort_keys=True)`); add a two-run byte-identity test. *(Level-4 run-level provenance, ch1's F-019 analog.)*
+- **F-018 (LOW)** — pin `est_tokens` to *character* count (non-ASCII out-of-scope); optional `T-06b`.
+- **F-019 (LOW)** — drop the `-h` collision: human summary → `stdout`, JSON → `--out`; `--quiet` suppresses the human summary.
+- **F-020 (LOW)** — harmonize the "one boundary / two components / three modules" sentence across §0/R-20/C-02/C-08.
+- **F-022 (LOW)** — pick one `--judge off` behavior (recommend: *no* `Verdict`, drop `"SKIPPED"`; or a `SKIPPED`→row-`status` mapping `T-`).
+- **F-023 (LOW)** — fix the `SCORCED`→`SCORED` typo in E-03 (before it propagates into a `T-`).
+- **F-024 (LOW)** — mark `SemanticChunker` `# V0.1: NO` (or delete from §C-03 into an *Extensions* block); align the §5.1 `--strategy` enum.
+- *(F-021 is folded into F-012's fix in P1; listed here only as a LOW-tagged cross-reference.)*
+
+### Priority summary
+
+| Priority | Findings | Character |
+| --- | --- | --- |
+| P0 | F-001, F-002, F-003 | 3 material-divergence ambiguities (offline-generation / hybrid pool / index-query handoff) |
+| P1 | F-004, F-005, F-006, F-007, F-008, F-009, F-010, F-011, F-012/021, F-013, F-014, F-015, F-016 | 13 MEDIUM (pointer/banner security cluster + conformance-bearing field pins) |
+| P2 | F-017, F-018, F-019, F-020, F-022, F-023, F-024 | 8 LOW (editorial / serialization / Level-4 stretch) |
+
+*(F-021 is scored LOW in §3 but fixed *with* F-012 in P1; the P-row counts therefore read P0=3, P1=13 (+F-021 folded in), P2=7 distinct, totaling the 24 findings.)*
+
+**Key insight.** The P0/P1 set is *almost entirely spec-writing, not design* — the *deterministic core* already *realizes* the intended behavior (the FNV-1a `MockEmbedder`, the guarded metric math, the source-scan reliability boundary, the per-case state machine); the gaps are *precision and inter-consistency on a handful of fields and a handful of cross-refs*. Applying P0 + P1 brings v0.1 to **Level 3** (verification-grade, implementation-and-verification pair derivable from the spec); P2 is a **Level-4** stretch (run-level provenance + canonical serialization, the ch1 F-019 analog).
+
+---
+
+## 21. Final Verdict
+
+```text
+Specification maturity:
+Level 2 (strong) → Level 3 after P0/P1
+Currently a "strong Level 2": implementable now, and an
+unusually short path to a clean Level 3. Not a "concept/direction"
+(Level 0/1): the open domains are small and enumerable (24 findings,
+0 CRITICAL), not substantial semantic decisions.
+
+Implementation readiness:
+NO → YES after P0 + P1.
+The 3 HIGH (F-001/002/003) are material-divergence ambiguities a
+second agent would answer differently; after they (and the 13 MEDIUM
+P1) are pinned, an implementation-and-verification pair is a
+deterministic function of v0.1.
+
+Primary blocker:
+F-001 — the `MockLLM` "ground-truth-fit" contract carries no `gold*`
+data, so it is unspecifiable whether the offline generation/judgement
+metrics *exercise retrieval* (the §21 crux) or are *tautologically
+perfect*. F-002 (hybrid pool/min-max edges) and F-003 (index/query
+handoff) are the co-P0 material points. All three are additive.
+
+Most important improvement:
+Pin the three P0 ambiguities (F-001/002/003) and the inter-consistency
++ security P1 cluster (F-007 pointer, F-008/F-013 banners,
+F-004 name/precedence, F-005/F-006 numerators, F-009 principal).
+None is a redesign (§17): every fix is additive or one-line.
+```
+
+**Strengths (recap).** (1) **Formal, guarded, worked-example metrics** for both retrieval (P/R@k, MRR, MAP, NDCG — §8/§C-11, T-05a/b) and generation (faithfulness/completeness/citation_quality — T-08a), with *per-metric* no-division-by-zero behavior (Evaluation/metrics **4.5**, Algorithm **4**). (2) **An architecturally-enforced reliability boundary** — a *source-scan* invariant (I-009/T-02) that *proves* the deterministic layers name no `Ollama`/`httpx`/model, the ch1 model answer *upgraded for RAG* (Architecture **4.5**, the "one boundary / two components / three modules" frame). (3) **The `MockEmbedder` crux (O-1)** makes *dense/hybrid retrieval assertable entirely offline* — the linchpin of the "RAG without a model" claim and the reason this spec earns its Level-2 ceiling. (4) **Comprehensive, *measured* failure semantics** — E-01…E-18 across all six §14–§19 failure modes as *tiers*, not special-cased branches, with a full per-case state machine (I-008) and a complete-retrieval-diagnosis guarantee that survives a later-stage fault (Failure **4**, Edge-case **4**, State **4**). (5) **A full `id→where-realized→test` matrix** (§11) tying intent→requirement→contract→invariant→test→evidence.
+
+**Weaknesses (recap).** (1) **Three material ambiguities on the offline-generation / hybrid / index-query seam** (F-001/002/003, all HIGH) — enough that *two competent agents would build different, contradictorily-tested systems*; all clarifiable, none a redesign. (2) **An inter-consistency / cross-reference cluster** (F-004 name≠meaning; F-007 stale `E-15` pointer; F-008 mis-routed *security* banner; F-013 outcome taxonomy) — the spec's *least strong* dimension (Internal-consistency **3.0**), but a small set of pointer/name fixes, not contradictions. (3) **Residual NFR / thin-security coverage** — `access_level` has no authorizing *principal* (F-009, half-open) and the injection *prevention* is only as strong as grounding + schema (an *inherent* limitation the spec is *honest* about; a Level-4 post-answer check is noted, not required). (4) A *Level-4 stretch* (F-017 run-level provenance + canonical serialization, ch1's F-019 analog) that no Level-3 build requires. *All weaknesses are local and additive; none is a redesign.*
+
+*Report generated by the spec-review skill (4-pass method: comprehension → local precision → cross-consistency → implementation simulation). All 24 findings (0 CRITICAL · 3 HIGH · 13 MEDIUM · 8 LOW) are reproducible from `SPEC.md` v0.1 and are *spec-only* (no `src/rag/` exists). Recommended path: apply P0 + P1 to reach a clean **Level 3**; P2 is a **Level-4** stretch. No finding recommends a redesign.*
+
+---
