@@ -25,26 +25,26 @@ off is *skipped* (its node is a no-op that carries its inputs unchanged; e.g. wi
 ```
    IDLE
      | start
-    v
- RETRIEVING ---(hybrid? dense+lexical : dense)---+   ok    |
-     |                                            |         |
-    v ok  (top-N candidates for rerank/expand)    |         |
+     v
+ RETRIEVING ---(hybrid? dense+lexical : dense)-i----+   ok    |
+     |                                              |         |
+     v ok  (top-N candidates for rerank/expand)     |         |
  EXPANDING  (off ⇒ passthrough {q}; on ⇒ {q1..qn} → retrieve-per → union+dedupe, R-06)
      | ok
-    v
+     v
  RERANKING  (off ⇒ passthrough; on ⇒ MockReranker/LLMReranker over top-N → top-k, R-05)
      | ok
-    v
+     v
  CONTEXTING  (dedup + token-budget assemble + label, ch2 C-03; then citation/injection gate R-08/R-21)
      | ok    ------------------------------------------------------------+
-     |                                                                  |
-    v                                                                  v
+     |                                                                   |
+     v                                                                   v
  GENERATING            ---- fail/timeout ----       ERROR (failure_stage ∈ {retrieval,expansion,reranking,context})
      | ok                                                     SCORED/PARTIAL (if generation/judge ran)
-    v
+     v
  JUDGING   (LLM-as-judge; off ⇒ skip = retrieval-only eval)    ---- (judge fail) ----  PARTIAL (retrieval metrics intact, R-15)
      | ok
-    v
+     v
  SCORED   (terminal: Answer + Verdict + RunMetrics complete)
 ```
 
@@ -58,8 +58,7 @@ off is *skipped* (its node is a no-op that carries its inputs unchanged; e.g. wi
 | `GENERATING` | `LLM.generate(system, ctx, q)` → structured **cited** answer (may retry parse). | no |
 | `JUDGING` | `Judge.judge(...)` → verdict (may retry parse); skipped when `--judge off`. | no |
 | `SCORED` | All run stages ok: `Answer` + `Verdict` + `RunMetrics` (incl. §20 + §21 metrics). | **yes** |
-| `PARTIAL` | Retrieval + generation ok but **judge failed** (E-15): retrieval + generation metrics recorded; generation fields `None`, `failure_stage="judging"`. Row
-still counts for retrieval metrics. | **yes** |
+| `PARTIAL` | Retrieval + generation ok but **judge failed** (E-15): retrieval + generation metrics recorded; generation fields `None`, `failure_stage="judging"`. Row still counts for retrieval metrics. | **yes** |
 | `ERROR` | A stage before judging terminal-faulted: `failure_stage` names the failing stage. | **yes** |
 
 **Transition rules:**

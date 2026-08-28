@@ -42,7 +42,7 @@ and **assembles** the bounded evidence the model sees, (6) **generates** a groun
 (Precision@k / Recall@k / MRR / MAP / NDCG) *separately* from generation quality
 (faithfulness / completeness / citation quality) — with ground truth.
 
-The pipeline instantiates ch3 §2 (the two-stage split `D' = R(q,D)` then `y ∼ P(y | q, D')`)
+The pipeline instantiates ch3 §2 (the two-stage split `D' = R(q,D)` then `y ~ P(y | q, D')`)
 and ch3 §1 (§2): the retriever is a **deterministic boundary** whose job is to *select
 evidence*; the generator/judge is the **one probabilistic boundary**. The sharpest
 recurring claims of the chapter are operationalized:
@@ -81,9 +81,9 @@ CLI/GUI banner, E-13/E-14) — it never requires a network to import, build, or 
 ```text
 Baseline (dense + chunk + context + generate + judge)
    ↓  + metadata      (§7)     filter/rank by recency, authority, document type, permissions
-   ↓  + hybrid        (§8)     α·semantic + (1−α)·lexical (BM25)
+   ↓  + hybrid        (§8)     alpha·semantic + (1−alpha)·lexical (BM25)
    ↓  + reranking     (§9)     fast top-N  →  precise top-k
-   ↓  + query-expansion (§10/§11)  q → {q₁,q₂,…,qₙ}, retrieve-and-union
+   ↓  + query-expansion (§10/§11)  q → {q1,q2,…,qn}, retrieve-and-union
    ↓  + contextual    (§12)   enrich chunks with document context *before* embedding
    ↓  + citations     (§13)   answer carries claim→source→chunk; judge checks faithfulness/completeness/citation-quality
 ```
@@ -139,14 +139,14 @@ whole pipeline be asserted without the `nomic-embed-text` model.
 | --- | --------- |
 | **User** (human, single process) | Run the eval (CLI) over the grounded question dataset; inspect a metrics report with a per-tier breakdown and a per-capability diff; and/or, in the optional GUI, type one question and see ranked→reranked→contextualized evidence (with scores), the grounded **cited** answer, the verdict pills, and an injection warning. |
 | **Chunker** (`chunking.py`) | Split documents into meaningful `Chunk`s (fixed+overlap, heading-aware, semantic, contextual). **Deterministic**; a documented boundary guard so a *rule and its condition* are not silently split (§5/§14). |
-| **Embedder** (`embedding.py`: `OllamaEmbedder` real, `MockEmbedder` offline double) | Map text → a fixed-dim, **L2-normalized** vector `v ∈ ℝᵈ`. **Ollama `nomic-embed-text`** for the real path; the **deterministic `MockEmbedder`** (hashed BoW, O-1) is the offline double so vector search is testable without a model. |
+| **Embedder** (`embedding.py`: `OllamaEmbedder` real, `MockEmbedder` offline double) | Map text → a fixed-dim, **L2-normalized** vector `v in R^d`. **Ollama `nomic-embed-text`** for the real path; the **deterministic `MockEmbedder`** (hashed BoW, O-1) is the offline double so vector search is testable without a model. |
 | **VectorStore** (`retrieval.py`) | In-memory dense index over `ScoredChunk`; `search(q_vec, k)` → top-k by **cosine** (deterministic, documented tie-break). Also hosts the **BM25 lexical** channel for hybrid mode. |
-| **Retriever / Hybrid** (`retrieval.py`) | Combine the dense and lexical channels: `score = α·s_sem + (1−α)·s_lex` (§8) over normalized per-channel scores; ranked result list. Deterministic (mock embedder). |
-| **QueryExpander / Multi-Query** (`expand.py`: `MockQueryExpander` default, `LLMQueryExpander` optional) | Expand a query to `{q₁,…,qₙ}` and retrieve-per-expansion → **union + dedupe** (§10/§11). Deterministic mock by default. |
+| **Retriever / Hybrid** (`retrieval.py`) | Combine the dense and lexical channels: `score = alpha·s_sem + (1−alpha)·s_lex` (§8) over normalized per-channel scores; ranked result list. Deterministic (mock embedder). |
+| **QueryExpander / Multi-Query** (`expand.py`: `MockQueryExpander` default, `LLMQueryExpander` optional) | Expand a query to `{q1,…,qn}` and retrieve-per-expansion → **union + dedupe** (§10/§11). Deterministic mock by default. |
 | **Reranker** (`rerank.py`: `MockReranker` default, `LLMReranker` optional) | Take the fast top-N candidates and produce a more precise top-k (§9); **MockReranker** is a deterministic coverage/overlap heuristic. |
 | **Contextualizer** (`context.py`) | At *index time*, prepend document/section context to each chunk's *embedding text* (§12) while preserving the original chunk text for display; pure. |
 | **ContextBuilder** (`context.py`) | Turn the selected, contextualized docs into a token-bounded, deduped, source-labeled `Context` (the text the LLM sees). Pure. |
-| **Citer** (`citation.py`) | Enforce the **grounding gate** — every cited `source`/`chunk_id` ∈ retrieved context (§13); produce a structured claim→source→chunk citation set; detect/flag an **injection** payload in retrieved evidence (§18). |
+| **Citer** (`citation.py`) | Enforce the **grounding gate** — every cited `source`/`chunk_id` in retrieved context (§13); produce a structured claim→source→chunk citation set; detect/flag an **injection** payload in retrieved evidence (§18). |
 | **LLM** (`model.py`: `OllamaLLM` real, `MockLLM` offline double) | Given system + context + question, produce a grounded, structured **cited** answer `{answer, confidence, citations, status}`. **Never** touches the CLI/GUI. |
 | **Judge** (`judgment.py`: `OllamaJudge` real, `MockJudge` offline double) | Classify a verdict `{correct, supported, complete, unsupported_claims, total_factual_claims, faithfulness, completeness, citation_quality, rationale}` (§19/§20/§21). Never touches CLI/GUI. |
 | **Ollama daemon** *(external)* | Local runtime at `http://localhost:11434`: `/api/embed` (`nomic-embed-text`) and `/api/chat` (`qwen3.8:27b-mlx`). Owns the weights + CPU/GPU/NPU. Not part of this project; E-13/E-14 handle its absence. |
@@ -161,19 +161,19 @@ whole pipeline be asserted without the `nomic-embed-text` model.
 
 | ID | Statement |
 | ---------- | ------------------------------------------------------------------------------------------ |
-| **R-01** | The system shall build the §22 pipeline **chunk → embed → index → retrieve → expand/multi-query → rerank → contextualize → context build → LLM → cited answer → judge → metrics** over a corpus of **≈ 100 short, sectioned documents** with §7 metadata. |
-| **R-02** | The **embedder** shall map text to a fixed-dim `ℝᵈ` vector; the **real** path uses Ollama `nomic-embed-text` (`/api/embed`), and the **deterministic `MockEmbedder`** (hashed bag-of-words, fixed `d`, O-1) is a *drop-in double* such that the *entire deterministic boundary* is testable offline. The **VectorStore** is **in-memory** with **cosine** similarity (§3/§4). |
+| **R-01** | The system shall build the §22 pipeline **chunk → embed → index → retrieve → expand/multi-query → rerank → contextualize → context build → LLM → cited answer → judge → metrics** over a corpus of **~ 100 short, sectioned documents** with §7 metadata. |
+| **R-02** | The **embedder** shall map text to a fixed-dim `R^d` vector; the **real** path uses Ollama `nomic-embed-text` (`/api/embed`), and the **deterministic `MockEmbedder`** (hashed bag-of-words, fixed `d`, O-1) is a *drop-in double* such that the *entire deterministic boundary* is testable offline. The **VectorStore** is **in-memory** with **cosine** similarity (§3/§4). |
 | **R-03** | The **chunker** shall produce `Chunk`s with a documented **strategy** (fixed+overlap, heading-aware, semantic, contextual, §5/§6) and a **boundary guard**: a configured strategy MUST NOT silently split a *rule and its governing condition* across a boundary that separates them (§14); where it cannot know intent, it *warns and prefers the larger/overlap-safe* unit. |
-| **R-04** | **Hybrid retrieval** shall combine semantic and lexical (BM25) channels via `score = α·s_sem + (1−α)·s_lex` (§8) over **per-channel-normalized** scores, with `α ∈ [0,1]` (`α=0` ⇒ pure lexical, `α=1` ⇒ pure dense); each channel's score must be normalized to `[0,1]` *within the query* (documented rule) so the two channels are commensurable. |
-| **R-05** | **Reranking** (§9) shall take the fast top-**N** and return a precise top-**k** (`k ≤ N`); the **MockReranker** is a deterministic, documented coverage/overlap heuristic; a `LLMReranker` *may* replace it (same model, opt-in) but the *interface* `Reranker.rerank(q, candidates) -> ScoredChunk[]` is stable. |
-| **R-06** | **Query expansion / multi-query** (§10/§11) shall expand a query to `{q₁,…,qₙ}`, retrieve per expansion, and **union + dedupe by `chunk_id`**; the default `MockQueryExpander` is deterministic (templates + a fixed synonym map, seeded); a `LLMQueryExpander` *may* replace it. The merged ranking is **documented** (best component score wins; ties by `chunk_id`). |
+| **R-04** | **Hybrid retrieval** shall combine semantic and lexical (BM25) channels via `score = alpha·s_sem + (1−alpha)·s_lex` (§8) over **per-channel-normalized** scores, with `alpha in [0,1]` (`alpha=0` → pure lexical, `alpha=1` → pure dense); each channel's score must be normalized to `[0,1]` *within the query* (documented rule) so the two channels are commensurable. |
+| **R-05** | **Reranking** (§9) shall take the fast top-**N** and return a precise top-**k** (`k <= N`); the **MockReranker** is a deterministic, documented coverage/overlap heuristic; a `LLMReranker` *may* replace it (same model, opt-in) but the *interface* `Reranker.rerank(q, candidates) -> ScoredChunk[]` is stable. |
+| **R-06** | **Query expansion / multi-query** (§10/§11) shall expand a query to `{q1,…,qn}`, retrieve per expansion, and **union + dedupe by `chunk_id`**; the default `MockQueryExpander` is deterministic (templates + a fixed synonym map, seeded); a `LLMQueryExpander` *may* replace it. The merged ranking is **documented** (best component score wins; ties by `chunk_id`). |
 | **R-07** | **Contextual retrieval** (§12): at *index time* each chunk's *embedding* text is the **context-prefixed** form (`Document: {title} / Section: {section} / Topic: {domain}` + original text); the original text is preserved and is what is shown to the LLM. The query is embedded in its *plain* form. |
 | **R-08** | Every chunk the answer **cites** and every claim the judge marks *supported* shall be **traceable to a `chunk_id` present in the assembled `Context`** — no fabricated citations or grounds (anti-hallucination gate, §13/§21). Foreign citations are *deterministically dropped and flagged* by the `Citer`, not trusted to the model. |
 | **R-09** | The pipeline shall emit a **grounded, structured cited answer** `{answer, confidence, citations[], status}` via the local LLM, validated the ch1/ch2 way: raw text → strip an optional `json` fence → `json.loads` → schema-validate → accept/**reject-with-retry** (§15 ch1; I-010). |
 | **R-10** | The judge shall classify each answer **LLM-as-judge** (§19) into a structured verdict `{correct, supported, complete, unsupported_claims, total_factual_claims, faithfulness, completeness, citation_quality, rationale, status}`; offline, a deterministic`MockJudge` supplies verdicts *from ground truth*. |
 | **R-11** | The system SHALL measure **retrieval** with the §20 family — **Precision@k**, **Recall@k**, **MRR**, **MAP**, **NDCG@k** — using each question's `relevant_chunks` (ground truth) as the reference (`G`), with the documented no-empty-denominator behavior for each. |
 | **R-12** | The system SHALL measure **generation** with the §21 family — **faithfulness** = `supported_claims / total_factual_claims`, **completeness** = relevant facts reflected / total relevant facts, **citation_quality** = relevant citations / total citations — aggregated over judged rows, each with a no-division-by-zero behavior. |
-| **R-13** | The question dataset shall contain **known answers and known supporting chunks** (§15 ch2 analog) organized into the §14–§19 **failure-mode tiers**: `easy` (1 chunk), `multi` (≥2 chunks, A∧B∧C, §19), `chunking` (rule split by boundary, §14), `distractor` (lexically-similar-but-irrelevant, §15), `conflict` (disagreeing policies; resolve by version/authority, §16), `recency` (dated versions; newest wins, §17), `injection` (adversarial payload in evidence, §18). |
+| **R-13** | The question dataset shall contain **known answers and known supporting chunks** (§15 ch2 analog) organized into the §14–§19 **failure-mode tiers**: `easy` (1 chunk), `multi` (>=2 chunks, A and B and C, §19), `chunking` (rule split by boundary, §14), `distractor` (lexically-similar-but-irrelevant, §15), `conflict` (disagreeing policies; resolve by version/authority, §16), `recency` (dated versions; newest wins, §17), `injection` (adversarial payload in evidence, §18). |
 | **R-14** | The **primary** product surface is a **CLI eval harness** (`rag`) that runs the full pipeline over the dataset and emits a **metrics report** — human-readable summary and machine-readable JSON — including a **per-tier breakdown** *and* a **per-capability diff** (§22). |
 | **R-15** | The system shall attribute every failed case to a **specific stage** (`chunking | retrieval | expansion | reranking | context | generation | judging`) (§21), so the report distinguishes *"did retrieval provide the evidence"* from *"did the model use it"* — the central diagnostic of the chapter. |
 | **R-16** | An **optional PyQt5 GUI** (`rag-gui`) reusing the *same* `chunking/embedding/retrieval/rerank/expand/context/citation/model/judgment/metrics` modules SHALL let the user type one question and inspect ranked→reranked→contextualized evidence (with per-stage scores), the cited answer, the verdict, and an **injection warning** — one question at a time. |
@@ -213,26 +213,26 @@ off is *skipped* (its node is a no-op that carries its inputs unchanged; e.g. wi
 ```
    IDLE
      | start
-    v
- RETRIEVING ---(hybrid? dense+lexical : dense)---+   ok    |
-     |                                            |         |
-    v ok  (top-N candidates for rerank/expand)    |         |
- EXPANDING  (off ⇒ passthrough {q}; on ⇒ {q1..qn} → retrieve-per → union+dedupe, R-06)
+     v
+ RETRIEVING ---(hybrid? dense+lexical : dense)-----+   ok    |
+     |                                             |         |
+     v ok  (top-N candidates for rerank/expand)    |         |
+ EXPANDING  (off → passthrough {q}; on → {q1..qn} → retrieve-per → union+dedupe, R-06)
      | ok
-    v
- RERANKING  (off ⇒ passthrough; on ⇒ MockReranker/LLMReranker over top-N → top-k, R-05)
+     v
+ RERANKING  (off → passthrough; on → MockReranker/LLMReranker over top-N → top-k, R-05)
      | ok
-    v
+     v
  CONTEXTING  (dedup + token-budget assemble + label, ch2 C-03; then citation/injection gate R-08/R-21)
      | ok    ------------------------------------------------------------+
-     |                                                                  |
-    v                                                                  v
- GENERATING            ---- fail/timeout ----       ERROR (failure_stage ∈ {retrieval,expansion,reranking,context})
+     |                                                                   |
+     v                                                                   v
+ GENERATING            ---- fail/timeout ----       ERROR (failure_stage in {retrieval,expansion,reranking,context})
      | ok                                                     SCORED/PARTIAL (if generation/judge ran)
-    v
- JUDGING   (LLM-as-judge; off ⇒ skip = retrieval-only eval)    ---- (judge fail) ----  PARTIAL (retrieval metrics intact, R-15)
+     v
+ JUDGING   (LLM-as-judge; off → skip = retrieval-only eval)    ---- (judge fail) ----  PARTIAL (retrieval metrics intact, R-15)
      | ok
-    v
+     v
  SCORED   (terminal: Answer + Verdict + RunMetrics complete)
 ```
 
@@ -246,8 +246,7 @@ off is *skipped* (its node is a no-op that carries its inputs unchanged; e.g. wi
 | `GENERATING` | `LLM.generate(system, ctx, q)` → structured **cited** answer (may retry parse). | no |
 | `JUDGING` | `Judge.judge(...)` → verdict (may retry parse); skipped when `--judge off`. | no |
 | `SCORED` | All run stages ok: `Answer` + `Verdict` + `RunMetrics` (incl. §20 + §21 metrics). | **yes** |
-| `PARTIAL` | Retrieval + generation ok but **judge failed** (E-15): retrieval + generation metrics recorded; generation fields `None`, `failure_stage="judging"`. Row
-still counts for retrieval metrics. | **yes** |
+| `PARTIAL` | Retrieval + generation ok but **judge failed** (E-15): retrieval + generation metrics recorded; generation fields `None`, `failure_stage="judging"`. Row still counts for retrieval metrics. | **yes** |
 | `ERROR` | A stage before judging terminal-faulted: `failure_stage` names the failing stage. | **yes** |
 
 **Transition rules:**
@@ -268,24 +267,24 @@ still counts for retrieval metrics. | **yes** |
 
 ```
   INDEX TIME (per build-index):
-   Document(+metadata §7) ── Chunker(strategy) ── Chunk{chunk_id,text,context,meta} ── Contextualizer(§12) ─┐
-        text ── Embedder(mock|ollama) ── v∈R^D ── VectorStore.insert(chunk,v) ──────────────────────────────┘
-        text ── tokenize ── BM25 index (lexical channel) ── VectorStore.lexical
+   Document(+metadata §7) -- Chunker(strategy) -- Chunk{chunk_id,text,context,meta} -- Contextualizer(§12) -+
+        text -- Embedder(mock|ollama) -- v in R^D -- VectorStore.insert(chunk,v) ------------------------------+
+        text -- tokenize -- BM25 index (lexical channel) -- VectorStore.lexical
 
   QUERY TIME (per question):
-   q ── Embedder ── q_vec
+   q -- Embedder -- q_vec
       |
-      ├─ dense:  VectorStore.search(q_vec, N) ── s_sem (cosine)             ┐
-      └─ lex:    BM25.search(q, N)        ── s_lex                          ┤  Hybrid (R-04, §8):
-                                                                            └─ score = a·norm(s_sem) + (1-a)·norm(s_lex)
-         → [ScoredChunk, top-N] ── QueryExpander (on: {q1..qn} → retrieve-per → union+dedupe, R-06)
-         ── Reranker (top-N → top-k, R-05) ── [ScoredChunk, top-k]
-         ── ContextBuilder: dedup + token-budget + labels; Context.provenance, Context.tokens ≤ budget (ch2 C-03)
-         ── Citer: grounding gate (cited ids ⊆ provenance, R-08) + injection scan (R-21) + Claim→Evidence→Source (§13)
-      ── LLM.generate(system, context, q) ── Answer{answer, confidence, citations[], status}        (PROBABILISTIC)
-      ── Judge.judge(q, context, answer, gold) ── Verdict{correct, supported, complete, …, faithfulness, completeness, citation_quality}   (PROBABILISTIC)
-      ── metrics.retrieval(G, R_k) ── {precision@k, recall@k, mrr, map, ndcg@k}        (§20)
-      ── metrics.generation(verdict) ── {faithfulness, completeness, citation_quality} (§21)
+      +- dense:  VectorStore.search(q_vec, N) -- s_sem (cosine)             +
+      +- lex:    BM25.search(q, N)        -- s_lex                          +  Hybrid (R-04, §8):
+                                                                            +- score = a·norm(s_sem) + (1-a)·norm(s_lex)
+         → [ScoredChunk, top-N] -- QueryExpander (on: {q1..qn} → retrieve-per → union+dedupe, R-06)
+         -- Reranker (top-N → top-k, R-05) -- [ScoredChunk, top-k]
+         -- ContextBuilder: dedup + token-budget + labels; Context.provenance, Context.tokens <= budget (ch2 C-03)
+         -- Citer: grounding gate (cited ids in provenance, R-08) + injection scan (R-21) + Claim→Evidence→Source (§13)
+      -- LLM.generate(system, context, q) -- Answer{answer, confidence, citations[], status}        (PROBABILISTIC)
+      -- Judge.judge(q, context, answer, gold) -- Verdict{correct, supported, complete, …, faithfulness, completeness, citation_quality}   (PROBABILISTIC)
+      -- metrics.retrieval(G, R_k) -- {precision@k, recall@k, mrr, map, ndcg@k}        (§20)
+      -- metrics.generation(verdict) -- {faithfulness, completeness, citation_quality} (§21)
       → RunMetrics(per case)  →  AggregateMetrics(per tier / per capability flag)
 ```
 
@@ -356,7 +355,7 @@ def generate_corpus_and_questions(out_dir, n_docs=100, n_questions=25, seed=42,
 ```
 
 **Tiers (§14–§19, R-13).** `Question.tier` is one of `easy`, `multi`, `chunking`, `distractor`, `conflict`, `recency`, `injection`. Meanings: *easy* = 1 relevant chunk;
-*multi* = §19 multi-hop, ≥2 mutually-relevant chunks (A and B and C); *chunking* = §14 the rule's *governing condition* is split by a boundary (§5); *distractor* = §15
+*multi* = §19 multi-hop, >=2 mutually-relevant chunks (A and B and C); *chunking* = §14 the rule's *governing condition* is split by a boundary (§5); *distractor* = §15
 lexically-similar-but-irrelevant docs present; *conflict* = §16 two policies disagree, resolved by `version` / `updated_at`; *recency* = §17 several dated versions,
 newest wins; *injection* = §18 an adversarial payload in *retrievable* evidence.
 
@@ -393,7 +392,7 @@ return tuple(x / norm for x in v)         # L2-normalized  => cosine == dot on u
 ```
 
 `fnv1a32` is the documented, seed-independent hash (offset basis `0x811c9dc5`, prime `0x01000193`).
-Because embeddings are hashed bag-of-words, **shared vocabulary ⇒ non-zero cosine**; the mock gives a
+Because embeddings are hashed bag-of-words, **shared vocabulary → non-zero cosine**; the mock gives a
 *meaningful* dense ranking (not garbage), which is what lets T-03/T-04 assert dense+hybrid **behavior**
 without any embed model. The real `OllamaEmbedder` is swapped in for the opt-in smoke (§9.5);
 the interface (`embed(text) -> unit vector`) is identical, so nothing downstream changes. (The
@@ -940,7 +939,7 @@ ERROR/PARTIAL row names *which* stage (§3.2), per R-15.
 | **E-18** | Empty `--tiers` subset, or an empty questions dataset, or an empty question string (GUI). | A `warning` + **exit 0** with an *empty report* (means are computed over zero rows as `None`, I-007); no division by zero, no crash. |
 
 **Failure-mode tier mapping (R-13, §14–§19).** `easy`/`multi` are the *positive* tiers (T-08/T-11
-happy path). `chunking`↔E-07, `distractor`↔E-08, `conflict`↔E-09, `recency`↔E-10, `injection`↔
+happy path). `chunking`<->E-07, `distractor`<->E-08, `conflict`<->E-09, `recency`<->E-10, `injection`<->
 E-16. The report's `by_tier` and `by_capability` aggregates (T-08b/I-012) are what let §22 *attribute
 a metric change to a stage* — e.g. "adding `--contextual` lifted `chunking`-tier recall," or
 "`--hybrid` raised the `distractor`-tier precision" — the operational form of the chapter's
@@ -961,7 +960,7 @@ model calls are the **manual smoke** (§9.11). Every failure mode of §14–§19
 
 | ID | Criterion |
 | ------ | ------------- |
-| **T-01** | `gen-corpus --n-docs 100 --n-questions 25 --seed 42` writes exactly 100 distinct `documents/NNN.txt` (each carrying the §7 metadata) and a `questions.json` of 25 questions, each with `question`, `gold_answer`, a non-empty `gold_facts`, non-empty `relevant_chunks` (ids ⊆ built index), and a `tier` ∈ the seven §C-01 tiers; **two invocations with the same seed produce byte-identical files** (R-18). |
+| **T-01** | `gen-corpus --n-docs 100 --n-questions 25 --seed 42` writes exactly 100 distinct `documents/NNN.txt` (each carrying the §7 metadata) and a `questions.json` of 25 questions, each with `question`, `gold_answer`, a non-empty `gold_facts`, non-empty `relevant_chunks` (ids in built index), and a `tier` in the seven §C-01 tiers; **two invocations with the same seed produce byte-identical files** (R-18). |
 | **T-01a** | `load_corpus` + `load_questions` accept the generated artifacts and raise on a malformed/unreadable entry (E-01), a blank/missing `gold_facts` or `relevant_chunks`, or a `relevant_chunks` id absent from the built index (E-14/I-013). |
 | **T-01b** | The 25-question set has a **non-trivial per-tier distribution** — all seven tiers present — with a `distractor` question whose lexically-similar-but-irrelevant docs are *also* in the corpus, a `conflict`/`recency` pair of disagreeing policies, and an `injection` question whose adversarial chunk is *retrievable*. |
 
@@ -970,10 +969,10 @@ model calls are the **manual smoke** (§9.11). Every failure mode of §14–§19
 | ID | Criterion |
 | ------ | ------------- |
 | **T-03** | **Index-time build (I-001a, §3.1):** `build_index(docs, ...)` over the seeded mock corpus returns a `(VectorStore, BM25Index)` whose chunk set equals the deterministic chunking of the corpus; running it twice with the same seed yields byte-identical indices (no external DB, R-02). |
-| **T-04** | **Determinism + tie-break (I-002):** `VectorStore.search(q_vec, k)` is byte-identical across two builds with the **same** corpus + params; the documented tie-break (`chunk_id` ascending on equal cosine, O-1b) is respected by a crafted equal-score corpus. `MockEmbedder` (O-1, FNV-1a hashed-BoW) gives a *non-trivial* ranking (shared vocabulary ⇒ non-zero cosine) and is process-independent (not Python's `hash`). |
-| **T-07** | **Hybrid blend (R-04/O-3):** with `--hybrid on`, `score = α·minmax(s_sem) + (1−α)·minmax(s_lex)` reproduces the documented per-query normalization; `α=1` ⇒ pure dense, `α=0` ⇒ pure lexical; a single-candidate query normalizes to `1.0` (degenerate E-03), never divides by zero. |
+| **T-04** | **Determinism + tie-break (I-002):** `VectorStore.search(q_vec, k)` is byte-identical across two builds with the **same** corpus + params; the documented tie-break (`chunk_id` ascending on equal cosine, O-1b) is respected by a crafted equal-score corpus. `MockEmbedder` (O-1, FNV-1a hashed-BoW) gives a *non-trivial* ranking (shared vocabulary → non-zero cosine) and is process-independent (not Python's `hash`). |
+| **T-07** | **Hybrid blend (R-04/O-3):** with `--hybrid on`, `score = alpha·minmax(s_sem) + (1−alpha)·minmax(s_lex)` reproduces the documented per-query normalization; `alpha=1` → pure dense, `alpha=0` → pure lexical; a single-candidate query normalizes to `1.0` (degenerate E-03), never divides by zero. |
 | **T-23** | **Rerank / expand determinism (I-002):** `MockReranker.rerank` (0.6·coverage + 0.4·norm-cosine) and `MockQueryExpander.multi_query` (union, max-score) are byte-identical under a fixed seed; `--rerank off`/`--expand off` are exact passthroughs equal to the retriever output. |
-| **T-04b** | **Multi-doc retrieval (§19/E-15):** for a `multi`-tier question, top-k contains *all* of the ≥2 mutually-relevant chunks (recall ≈ 1); expansion *raises* the `multi`-tier recall relative to the unexpanded baseline (measured, not asserted blind). |
+| **T-04b** | **Multi-doc retrieval (§19/E-15):** for a `multi`-tier question, top-k contains *all* of the >=2 mutually-relevant chunks (recall ~ 1); expansion *raises* the `multi`-tier recall relative to the unexpanded baseline (measured, not asserted blind). |
 
 ### 9.3 Chunking + contextual retrieval (C-03/C-07, I-013)
 
@@ -986,9 +985,9 @@ model calls are the **manual smoke** (§9.11). Every failure mode of §14–§19
 
 | ID | Criterion |
 | ------ | ------------- |
-| **T-05a** | **The §20 worked example (I-001):** for `G={c1,c3,c5}`, `R_5=[c1,c8,c3,c9,c5]`, `k=5`: `TP=3`, `precision@5=0.60`, `recall@5=1.0`, `MRR=1.0`, `NDCG@5 ≈ 0.88547` (DCG 1.88685 / IDCG 2.13093). |
-| **T-05b** | **AP/MAP + guards (I-007):** `q1` has two relevant items, one at rank 1 and one at rank 3 ⇒ `AP=(P@1+P@3)/2 = (1 + 2/3)/2 = 0.83333`, `MRR=1.0`; `q2` has one relevant item at rank 2 ⇒ `AP=MRR=0.5`. Hence `MRR=mean(1.0,0.5)=0.75`, `MAP=mean(0.83333,0.5)=0.66667`. Empty `retrieved` ⇒ `precision=None`; all-irrelevant ⇒ `precision=0.0`, `NDCG=0.0`; no `inf`/`nan` anywhere. |
-| **T-08a** | **Generation guards (R-12/I-007 over judged rows):** a verdict with `total_factual_claims=4, unsupported=1` ⇒ `faithfulness=3/4=0.75`; `gold_facts` of size 4 with 3 reflected ⇒ `completeness=3/4=0.75`; `5 citations` of which 4 relevant ⇒ `citation_quality=4/5=0.8`; a verdict with `total_factual_claims=0` ⇒ `faithfulness=0.0` (the no-division-by-zero behavior). |
+| **T-05a** | **The §20 worked example (I-001):** for `G={c1,c3,c5}`, `R_5=[c1,c8,c3,c9,c5]`, `k=5`: `TP=3`, `precision@5=0.60`, `recall@5=1.0`, `MRR=1.0`, `NDCG@5 ~ 0.88547` (DCG 1.88685 / IDCG 2.13093). |
+| **T-05b** | **AP/MAP + guards (I-007):** `q1` has two relevant items, one at rank 1 and one at rank 3 → `AP=(P@1+P@3)/2 = (1 + 2/3)/2 = 0.83333`, `MRR=1.0`; `q2` has one relevant item at rank 2 → `AP=MRR=0.5`. Hence `MRR=mean(1.0,0.5)=0.75`, `MAP=mean(0.83333,0.5)=0.66667`. Empty `retrieved` → `precision=None`; all-irrelevant → `precision=0.0`, `NDCG=0.0`; no `inf`/`nan` anywhere. |
+| **T-08a** | **Generation guards (R-12/I-007 over judged rows):** a verdict with `total_factual_claims=4, unsupported=1` → `faithfulness=3/4=0.75`; `gold_facts` of size 4 with 3 reflected → `completeness=3/4=0.75`; `5 citations` of which 4 relevant → `citation_quality=4/5=0.8`; a verdict with `total_factual_claims=0` → `faithfulness=0.0` (the no-division-by-zero behavior). |
 
 ### 9.5 Context + budgets (ch2 C-03 analog, I-004/I-005/I-006)
 
@@ -996,7 +995,7 @@ model calls are the **manual smoke** (§9.11). Every failure mode of §14–§19
 | ------ | ------------- |
 | **T-06** | **Budget (I-004/I-006):** `build_context(scored, token_budget=N)` always yields `Context.tokens <= N`; `truncated=True` **iff** a doc was dropped. A crafted `token_budget` smaller than even the top doc forces `truncated=True` with a non-empty prompt (E-05). |
 | **T-06a** | **Dedupe (E-06/I-004):** two ranked docs of identical text keep the **highest-rank** copy and set `truncated=True`; lower-rank dupes drop without error. |
-| **T-06b** | **Provenance + single formula (I-005):** every id in `Context.provenance` ⊆ the included docs, and `est_tokens` is the **same** `ceil(len(s)/4)`-analog used identically by the builder and the report. |
+| **T-06b** | **Provenance + single formula (I-005):** every id in `Context.provenance` in the included docs, and `est_tokens` is the **same** `ceil(len(s)/4)`-analog used identically by the builder and the report. |
 
 ### 9.6 LLM + Judge + Citer, offline (`MockLLM` + `MockJudge` — R-08/R-09/R-10/R-12)
 
@@ -1117,7 +1116,7 @@ uv run rag-gui                           # optional GUI over the same pipeline (
 R-01                   --> pipeline.py build_index + run_case                  --> T-01, T-03, T-13
 R-02 / I-002           --> C-02 OllamaEmbedder/MockEmbedder + VectorStore/cosine + O-1b  --> T-03, T-04
 R-03 / I-013 (§14/§14) --> chunking.py Fixed/Heading/Contextual + boundary_guard   --> T-21, E-07
-R-04 / O-3             --> C-04 HybridRetriever (α·minmax sem + (1−α)·minmax lex) --> T-07
+R-04 / O-3             --> C-04 HybridRetriever (alpha·minmax sem + (1−alpha)·minmax lex) --> T-07
 R-05 (§9)              --> C-05 MockReranker/LLMReranker top-N -> top-k         --> T-23
 R-06 (§10/§11/§19)     --> C-06 MockQueryExpander + multi_query union/dedupe     --> T-23, T-04b
 R-07 / I-007 (§12)     --> C-07 contextualize (embed_text prefix; text shown)   --> T-20
@@ -1159,7 +1158,7 @@ K-05                   --> real end-to-end smoke (opt-in manual)                
 4. **Token estimator.** `est_tokens = ceil(len(s)/4)` (approx; deterministic, single formula, I-005) — *confirm* this vs. a real tokenizer (out of scope for v0.1: it would introduce a model dependency into the deterministic boundary, contradicting I-009; Q-04).
 5. **Concurrency.** v0.1 is **strictly sequential** per case (one shared `qwen3.8:27b-mlx` slot; deterministic and simplest). `--concurrency N` is deferred (Q-05).
 6. **State/memory extension.** A cross-question state/memory subsystem is explicitly **out of scope** for v0.1 (Q-06): the corpus + question set are static per run; the only cross-stage state is the retrieval trace that becomes the report row. *Confirm* no persistence between questions is needed.
-7. **Ground truth in a synthetic corpus.** `gen-corpus` authors the `question ↔ relevant_chunks`/`gold_facts` mapping deterministically so the §20/§21 metrics have a meaningful denominator. *Confirm* this is acceptable as the v0.1 eval baseline (Q-07) vs. hand-authoring a curated ~10-doc + a few-question starter set first to sanity-check before scaling to ~100.
+7. **Ground truth in a synthetic corpus.** `gen-corpus` authors the `question <-> relevant_chunks`/`gold_facts` mapping deterministically so the §20/§21 metrics have a meaningful denominator. *Confirm* this is acceptable as the v0.1 eval baseline (Q-07) vs. hand-authoring a curated ~10-doc + a few-question starter set first to sanity-check before scaling to ~100.
 8. **Semantic chunking.** `SemanticChunker` is an optional/extension strategy (Q-04); v0.1 ships `Fixed` (baseline, for the §14 boundary experiment) and `Heading` (default per §6) plus `Contextual`. *Confirm* semantic chunking stays deferred.
 9. **Report format.** v0.1 emits JSON (`report.json`) with `by_tier` + `by_capability` + `failure_breakdown` plus a human summary to stdout (Q-08). *Confirm* no richer format (HTML/CSV dashboard) is needed for v0.1.
 
