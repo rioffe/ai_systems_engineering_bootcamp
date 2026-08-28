@@ -1,7 +1,7 @@
 ## 1. Actors and goals
 
 | Actor | Goals |
-| --- | --- |
+| --- | --------- |
 | **User** (human, single process) | Run the eval (CLI) over the grounded question dataset; inspect a metrics report with a per-tier breakdown and a per-capability diff; and/or, in the optional GUI, type one question and see ranked→reranked→contextualized evidence (with scores), the grounded **cited** answer, the verdict pills, and an injection warning. |
 | **Chunker** (`chunking.py`) | Split documents into meaningful `Chunk`s (fixed+overlap, heading-aware, semantic, contextual). **Deterministic**; a documented boundary guard so a *rule and its condition* are not silently split (§5/§14). |
 | **Embedder** (`embedding.py`: `OllamaEmbedder` real, `MockEmbedder` offline double) | Map text → a fixed-dim, **L2-normalized** vector `v ∈ ℝᵈ`. **Ollama `nomic-embed-text`** for the real path; the **deterministic `MockEmbedder`** (hashed BoW, O-1) is the offline double so vector search is testable without a model. |
@@ -21,3 +21,4 @@
 | **UI** (`ui.py`, *optional*) | One-question interactive view over the shared pipeline; never blocks on inference. |
 
 ---
+

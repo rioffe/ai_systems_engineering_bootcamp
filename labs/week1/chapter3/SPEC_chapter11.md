@@ -63,3 +63,4 @@ uv run rag-gui                           # optional GUI over the same pipeline (
 ```
 
 ---
+

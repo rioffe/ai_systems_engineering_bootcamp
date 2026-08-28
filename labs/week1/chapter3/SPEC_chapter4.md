@@ -106,3 +106,6 @@ The **deterministic** stages (index, chunk, embed*mock*, vector/hybrid math, rer
 *real*, generate *real*, judge *real*) are separated by the ch1 §15 / ch2 reliability boundary. The
 LLM appears **only** in generate + judge by default, and the Embedder only in the *real* embed step
 (R-20; enforced by the T-02 structure scan).
+
+---
+

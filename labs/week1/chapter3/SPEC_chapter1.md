@@ -132,3 +132,4 @@ whole pipeline be asserted without the `nomic-embed-text` model.
    `qwen3.8:27b-mlx` are the *real* backends for the opt-in manual smoke (§9.5).
 
 ---
+

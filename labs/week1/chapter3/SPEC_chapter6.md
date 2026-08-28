@@ -93,3 +93,6 @@ contextualized evidence *with per-stage scores*, a truncation badge when `Contex
 cited answer, the verdict pills, and — when the `injection` tier is exercised — a prominent
 **INJECTION!** badge plus the offending chunk id (§18, R-21, E-13). **One question at a time**
 (R-16).
+
+---
+

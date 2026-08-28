@@ -83,7 +83,7 @@ class MockEmbedder(Embedder):     # deterministic double -> hashed bag-of-words 
 **O-1 — `MockEmbedder` (the deterministic dense vector, the crux of offline-testable RAG).**
 For text, the mock vector is a *hashed bag of words* — fully deterministic and process-independent:
 
-```text
+```python
 tokens  = tokenize(text)                  # lowercase; split on [^\w']+; drop empty (same as ch2 BM25 tokenizer)
 v       = [0.0] * D_mock                  # D_mock = 256 (default; K-03)
 for t in tokens:
@@ -478,3 +478,6 @@ class RunMetrics:
     total_latency_ms: float
     status: str                     # "SCORED" | "PARTIAL" | "ERROR"   (§3.2)
 ```
+
+---
+

@@ -93,3 +93,4 @@ model calls are the **manual smoke** (§9.11). Every failure mode of §14–§19
 - **GUI smoke (offscreen + one real interactive run):** launch `uv run rag-gui`; confirm the ranked→reranked→contextualized ranking + per-stage scores + truncation badge + cited answer + verdict pills + (when the `injection` tier is hit) the INJECTION! badge render for a `--model` run *and* for the `--mock` run (ch1/§5.2 analog).
 
 ---
+
