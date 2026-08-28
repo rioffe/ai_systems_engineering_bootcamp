@@ -536,3 +536,33 @@ The state model (§3.2 `CaseState`) and the failure model (§8 E-01…E-18) are 
 **Verdict of §7.** State-machines-and-failure is **near-implementation-grade**: complete state set, precise retry and propagation semantics, per-case isolation as an invariant, and six asserted failure tiers. The only *real* defect is the **E-15↔E-11/T-10 pointer family** (F-007, which also fixes the §3.2 diagram's `ERROR` annotation and the `PARTIAL` trigger) plus the **defensive-but-dead `E-04`** (F-015). After these, the state/failure model is fully consistent and mechanically verifiable.
 
 *(Note: §3.2's `ERROR` diagram annotation and the `PARTIAL`→E-15 trigger are both resolved by the single F-007 re-point; they are reported here rather than as new findings because they share F-007's root cause and resolution.)*
+
+---
+
+## 8. Determinism and Algorithm Review
+
+Determinism is the **thesis of the whole spec** ("*RAG … reproducible, offline*") and, accordingly, its **strongest algorithmic dimension**. It is *mostly* implementation-grade; the residual gaps are **edge behaviors of two algorithms** (hybrid min-max, token estimation) and a **serialization discipline** for the byte-identity claim — not *undefined behavior* in the core.
+
+### 8.1 What is already deterministic and precise (excellent)
+- **`MockEmbedder` (O-1)** — the linchpin: a **fixed** FNV-1a 32-bit hashed bag-of-words, **explicitly *not* Python's per-process `hash`**, L2-normalized to a unit vector, `D_mock=256` (K-03). This is a *genuinely brilliant* move: it makes dense+hybrid retrieval *observable and assertable offline* without a model, with a *meaningful* ranking (shared vocabulary → non-zero cosine). The tie-break (`chunk_id` asc, O-1b) and the no-positive-similarity `[]` guard (E-02) close the ordering. T-04 pins *both* the byte-identical property *and* the tie-break with a crafted equal-score corpus — a *strong* determinism test.
+- **Metric math (§C-11, I-001/I-007)** — P/R@k, MRR, MAP, NDCG, faithfulness/completeness/citation_quality, each with a **closed-form equation** *and* a **worked example with asserted numbers** (T-05a/b, T-08a). The *no-division-by-zero* guards are individually named per metric (`precision=None` when `TP+FP=0`, `mrr=0.0` when nothing relevant, `ndcg=None` when `IDCG=0`, generation numerators `=0.0` when denominator `0`). This is *verification-grade* algorithm precision. The only algorithmic imprecision is the `MRR`-vs-`MRR@k` **at the rank-`>k` boundary** (F-014).
+- **`cosine`** — guarded against a zero vector (E-02, denominator `or 1.0`); deterministic. **`est_tokens`** — a single formula (`ceil(len/4)`, I-005) used identically by builder and report, with the *unit* being the only open point (F-018, char-vs-byte).
+- **Corpus/question generation** — `gen-corpus --seed 42` → byte-identical 100 docs + `questions.json` (T-01), with the §7 metadata and the seven tiers — a *fully deterministic* ground-truth factory. Strong.
+
+### 8.2 Nondeterminism that is *correctly* bounded
+- The spec never *pretends away* nondeterminism: the **real** path (`OllamaEmbedder`/`OllamaLLM`/`OllamaJudge`) is declared **best-effort** and the suite is scoped to the deterministic doubles only (R-17/I-011/T-14, K-01). `temperature=0.0, seed=42` are *defaulted* on the real path (C-09) and the **real path is excluded from `uv run pytest`** (K-05) — the right posture. Per skill §3.9, this is *precise handling* of the nondeterministic components, not a *prompt-as-guarantee* mistake.
+- **Query expansion is honestly labeled** "*probabilistic in principle, deterministic by default*" (C-06) — exactly the right way to frame a default-mock, opt-in-LLM role (R-20).
+
+### 8.3 Residual algorithmic gaps
+- **Hybrid min-max, edges (F-002).** Candidate-pool formation, missing-channel treatment, and the **zero-range** (all-equal-score → `0/0`) case are undefined; I-002 cannot hold for `--hybrid on` until these are fixed. The single-candidate degenerate is documented (E-03) but the *multi-candidate equal-score* case is not — a *real* determinism hole on the headline capability.
+- **Token estimator, two things (F-010, F-018).** (a) the *count that drives truncation* (running sum-of-`est_tokens` vs. `ceil` of concatenation) is undefined, and `ceil` is sub-additive so the two diverge **at the boundary** where `truncated` flips (I-004/T-06); (b) the *unit* of `len` (char vs. byte) is unstated (F-018), so non-ASCII breaks the I-006 *report=build* property.
+- **`report.json` serialization (F-017).** Byte-identity (R-18/I-002) is *in-memory*; the *serialized artifact* has no canonical ordering (`by_tier`/`by_capability`/`RunMetrics` rows) — a serialization gap, not an algorithm gap per se.
+- **`--seed` scope (F-016).** What the seed *actually governs* (only `gen-corpus`?) should be stated per-double so "*reproducible with a fixed seed*" is not *stronger-than-needed* (an implementer adds needless RNG) or *weaker* (a future mock silently non-deterministic).
+- **BM25 by-reference (F-011).** The lexical channel's *algorithm* is cited, not inlined; the hybrid result depends on a formula defined in ch2. Not a determinism *defect* in ch3 per se, but it makes ch3 *non-self-contained* for a deterministic algorithm.
+
+### 8.4 Numerical behavior / boundaries
+- **Rounding.** NDCG's `log2` and the worked-example decimals (`1.88685`, `2.13093`, `0.88547`) are *pinned by assertion* (T-05a), so the rounding is *implicitly fixed by T-05a* rather than stated — acceptable since T-05a *is* the pin. For *new* metrics, add a rounding/format rule (F-017's serialization rule).
+- **Empty/min/max.** Covered (E-02 empty retrieval, E-18 empty `--tiers`, I-007 empty denominators). The *uncovered* boundary is **zero-range min-max** (F-002).
+- **Concurrency/determinism interaction.** v0.1 is *strictly sequential* (Q-05) — so determinism has no *race* to defeat; this is *correctly* chosen and removes a whole class of nondeterminism. A future `--concurrency` (Q-05) would need a determinism-preservation argument; note it, but it is out of scope.
+
+**Verdict of §8.** Determinism and algorithm precision is the spec's **single strongest quality** (score 4 — the gap to 5 is *serialization + two algorithm edges*, not *undefined behavior*). The core (FNV-1a `MockEmbedder`, guarded metric math with asserted worked examples, per-case byte-identity, sequential design) is *verification-grade*; the P0/P1 fixes here are **F-002 (hybrid edges), F-017 (report serialization), and the F-010/F-018 estimator pins** — all additive and localized to the edges the rest of the spec already guards.
