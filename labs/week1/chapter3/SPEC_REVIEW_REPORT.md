@@ -457,3 +457,55 @@ Each finding follows the skill's format: **Observation · Why it matters · Pote
 **Potential consequence** An implementer either (a) *omits* `SemanticChunker` (correct) or (b) *ships a broken extension* that violates I-009/R-18. The *wrong* outcome passes a coarse T-* and fails I-002.
 
 **Recommended resolution** **Delete the `SemanticChunker` class from §C-03** and keep it only in a `## Extensions (out of scope for v0.1)` block, or **mark every v0.1-vs-extension class explicitly** in §C-03 with a `# V0.1: NO` comment on the class line so an implementer knows *not* to ship it; align the §5.1 `--strategy` enum with the §C-03 class set.
+
+---
+
+## 5. Requirements Review
+
+`R-01`…`R-22` are, as a set, **almost entirely observable** — the dominant trait of this spec. Each names a *stage* (chunk/embed/retrieve/expand/rerank/contextualize/ground/generate/judge/metrics/attribute), a *condition* (tier, `alpha`, `--hybrid on`, `token_budget` smaller than a doc), an *input*, and a *result* that is asserted by a named `T-*` (§11 routes every `R-*` to a test). The few that are aspirational are flagged here.
+
+**Observable and precise (strength).** `R-02`…`R-16`, `R-18`…`R-22` are observable obligations with measurable outputs (byte-identified mock vectors; a per-channel min-max; a top-`k` ranking; a structured `Answer`/`Verdict`; a `by_tier`/`by_capability` diff). `R-08`/`R-21` (anti-hallucination + injection) are *enforced by the harness, not the model* — an unusually strong, testable formulation. `R-13` (the seven tiers) and `R-14`/`R-15` (per-capability diff + per-stage attribution) make the chapter's thesis *assertable* rather than *asserted*.
+
+**Precision gaps (MEDIUM).**
+- **`R-12` / §21 generation-metric numerators** (F-006): "*reflected gold_facts*" and "*relevant citations*" are undefined for the real judge; only the mock's intersection semantics are concrete → the real-judgment metrics are not independently reproducible.
+- **`R-13` `access_level`/permissions** (F-009): the capability is advertised but has no *principal* or comparison rule → it is half-open.
+- **`R-11` `MRR`** (F-014): `MRR` is unnamed at `@k` while `P/R/NDCG` are → a boundary case diverges.
+- **`R-04` hybrid** (F-002): candidate-pool + per-channel norm (missing channel, zero range) undefined → not byte-deterministic.
+- **`R-18`/`R-20`** (F-016, F-020): the *seed surface* and the *one-vs-two-boundary* framing are loose.
+- **`R-09`/`R-10`** (F-001): the `MockLLM` contract is the deepest gap — "*ground-truth-fit*" is undefined as to which data the double may read, which decides whether §21 is real or tautological.
+
+**Companionship vs. aspiration.** A `SHOULD`/aspirational residue exists in §1's `+ metadata (*permissions*)` (F-009) and in the C-03 `SemanticChunker` (F-024). Both should be **resolved** (scoped out or fully specified) rather than left in the aspirational middle. `MAY`/"opt-in" usage (`LLMQueryExpander`/`LLMReranker`, the numpy accelerator, the GUI) is *correctly* marked and appropriately left to the implementer — these are genuine **implementation freedom**, not defects (per the skill's *freedom test*).
+
+**Coverage.** All six §14–§19 failure modes have a tier **and** an edge (`chunking↔E-07`, `distractor↔E-08`, `conflict↔E-09`, `recency↔E-10`, `injection↔E-16`; `easy`/`multi` positive) — unusually complete for a lab spec. No requirement in **scope** is missing. The one *implicitly-introduced* capability is `access_level`/permissions (F-009) without the principal that would need it.
+
+**Conflicts.** No requirement *contradicts* another. The tensions are *ambiguity-within-a-requirement* (`R-12` numerators, `R-04` pool, `R-09` mock input) and one *cross-reference* confusion at the edges (`R-22`↔`which_doc_decided`, F-004), not contradictory requirements. The `R-17`/`R-18` offline+determinism pair is *coherent* and is the spec's backbone, not a source of conflict.
+
+**Verdict of §5.** Requirements are **observable, mostly precise, and comprehensive** for scope; the gaps are a small, enumerated set of *within-requirement* precision issues (F-001/002/006/009/014 + the `R-09` mock). None is a contradiction or an out-of-scope creep requiring a redesign.
+
+---
+
+## 6. Interface and Data-Contract Review
+
+The contract surface (C-01…C-12) is **dense and mostly precise**. The data types (C-01) are *nearly implementation-grade*; the gaps are in *cross-field invariants* and a couple of **under-specified algorithms**, not in *missing fields*.
+
+### 6.1 Data-contract completeness (strong)
+- **C-01** (`ChunkMetadata`, `Document`, `Chunk`, `ScoredChunk`, `Chunk`) is strong: field types, null-ability, defaults, and the `chunk_id = "doc_id#i"` stable-id rule are all fixed; `ScoredChunk` carries the *component scores* (`semantic`, `lexical`, `rerank`) needed for the per-stage diff. Only weak points: `version: int|float|None` mixing two orderings + a `None` (F-004), and `access_level` without a principal (F-009).
+- **C-11** (`Question`, `Answer`, `Verdict`, `RunMetrics`) is the schema-core and is strong on shape; the weak points are *intra-schema* (F-005 `supported_claims` not a field; F-012 post-rerank `score`/`rerank`/`rank` not reconciled; F-021 `retrieved` set; F-022 `SKIPPED` status; plus the metric-numerator definitions F-006). All are *field-semantics* fixes, not missing fields.
+
+### 6.2 Interface completeness (strong, two gaps)
+- **Embedder/VectorStore/cosine (C-02)** is precise *except* the **BM25 formula is by-reference, not inlined** (F-011) and the **hybrid pool / per-channel norm edges** are undefined (F-002, in C-04). `cosine` has the zero-vector guard (E-02); `search` returns `[]` never `None` (good).
+- **Chunker (C-03)** precise incl. the `boundary_guard`/`split_risk` contract (a genuinely good, *observable* formulation of §14). Only `SemanticChunker`'s scope is muddled (F-024).
+- **Reranker/QueryExpander/Context/Contextualize (C-05–C-07)** precise; the post-rerank *canonical key* is the one gap (F-012).
+- **`LLM`/`Judge`/`Citer` (C-08–C-10)** strong; the one *material* gap is the **`MockLLM` gold-access contract** (F-001), which is the crux of §21. The Citer's grounding+injection scan is a genuinely strong, *enforced* contract (I-003, R-21).
+- **Pipeline (C-12)** wires the state machine; `retrieved` semantics (F-021) and the index/query handoff (F-003) are the two open points.
+
+### 6.3 Schema/gate precision (very strong)
+- A single `jsonschema` gate (I-010/T-08) with `additionalProperties:false` and an `out-of-range confidence` + `missing required field` reject/retry → `ERROR`, never `COMPLETED`, is the ch1/ch2 *reliability gate* carried forward cleanly into RAG (R-09). The *dual* gate (answer **and** verdict) is correct and necessary.
+- **Serialization.** No explicit **serialization contract** for `report.json` is given; F-017 is the one *serialization* gap (canonical ordering for R-18 byte-identity).
+- **Compatibility.** Invariant I-009 (source-scan, three modules) is a *structural compatibility* guarantee: the real-path transport (httpx/Ollama) is *quarantined* so the deterministic core's API is stable across backend swaps — a strong, unusual guarantee.
+
+### 6.4 Input/output ambiguity
+- The one place an *input* is ambiguous is **hybrid `retrieve(q_vec, query, *, candidates)`** (F-002) — which `candidate`s get blended, and how a single-channel candidate is treated. Everything else (every dataclass field, every `--flag` default in K-03, every `T-*`) has a fixed default.
+- **Empty/null behavior** is largely covered: `[]`-never-`None` (E-02), no-empty-denominator (I-007, every metric), empty `--tiers`→exit 0 (E-18), empty answer citations allowed (OQ2). The *open* empty-case is the **zero-range min-max** (F-002).
+
+**Verdict of §6.** Interface and data-contract completeness is **strong-to-very-strong**; the two *material* gaps (F-001 mock-LLM input, F-002 hybrid pool) plus the cross-field invariants (F-004/005/012/017/021) are additive fixes. No missing field, no missing interface — only *under-pinned* semantics on existing fields and *under-specified* edges on existing algorithms.
