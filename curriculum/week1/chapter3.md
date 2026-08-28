@@ -371,6 +371,7 @@ Prefer:
 $$
 \text{updated\_at} > 2026\text{-}01\text{-}01
 $$
+
 ### Authorization
 
 Only retrieve documents the current user is permitted to see.
