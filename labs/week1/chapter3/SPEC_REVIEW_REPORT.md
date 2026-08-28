@@ -1,10 +1,11 @@
 # Specification Review Report
 
-**Target:** `SPEC.md` — *RAG Pipeline System (dense + hybrid retrieval, rerank, contextual, citations, + uv)*, status **v0.1 — draft for implementation**
-**Reviewer:** spec-review skill (4-pass method: comprehension → local precision → cross-consistency → implementation simulation)
-**Grounding:** *spec-only* review. Unlike ch1/ch2, **no implementation exists yet** — there is no `src/rag/` — so findings distinguish *spec defects* and *spec↔spec inter-consistency* issues from any code divergence. The 20 curriculum dimensions (§1–§28 of `curriculum/week1/chapter3.md`) are the intent this spec operationalizes; the review's job is to fix the residual **semantic uncertainty** between that intent and a verifiable build.
-**Maturity scale:** 0 = absent · 1 = seriously deficient · 2 = weak · 3 = adequate · 4 = strong · 5 = implementation-grade
-**Finding severities:** CRITICAL · HIGH · MEDIUM · LOW. **Remediation priorities:** P0 (blocking) · P1 (important) · P2 (improvement).
+- **Target:** `SPEC.md` — *RAG Pipeline System (dense + hybrid retrieval, rerank, contextual, citations, + uv)*, status **v0.1 — draft for implementation**
+- **Reviewer:** spec-review skill (4-pass method: comprehension → local precision → cross-consistency → implementation simulation)
+- **Grounding:** *spec-only* review. Unlike ch1/ch2, **no implementation exists yet** — there is no `src/rag/` — so findings distinguish *spec defects* and *spec↔spec inter-consistency* issues from any code divergence. The 20 curriculum dimensions (§1–§28 of `curriculum/week1/chapter3.md`) are the intent this spec operationalizes; the review's job is to fix the residual **semantic uncertainty** between that intent and a verifiable build.
+- **Maturity scale:** 0 = absent · 1 = seriously deficient · 2 = weak · 3 = adequate · 4 = strong · 5 = implementation-grade
+- **Finding severities:** CRITICAL · HIGH · MEDIUM · LOW.
+- **Remediation priorities:** P0 (blocking) · P1 (important) · P2 (improvement).
 
 *(Sections §1–§21 of this review are written and committed chapter by chapter; see the report's git history.)*
 
@@ -686,3 +687,91 @@ Observability is *well covered at the case level* and *under-covered at the run 
 - **Can an engineer determine *what happened and why* after a run?** **Yes, per case** (the `RunMetrics` field set is *exceptional* — *best in the curriculum*). **Partially, at the run level** (the *aggregate* is *self-describing in values* but *not in identity* — F-017). After F-017 (a `run_id`/`ts`/`spec_version` on the *aggregate* + a *canonical serialization order* + a *human/JSON* parity *test*), the answer is *yes, at both levels*.
 
 **Verdict of §12.** Observability-and-provenance is **strong** (score 3.5): *per-case* provenance is *exceptional* (`RunMetrics` + `failure_stage` + timing + tier/capability aggregates + `by_tier`/`by_capability`), and the *run-level* gap (F-017) is a *Level-4 stretch* — the *direct analog* of ch1's F-019, which ch1 *deferred*. After F-017, observability is *run-level-complete*; before it, *per-case* observability already *exceeds* the lab norm, and the gap is *one field set on the aggregate*, not *missing fields on the case*. No *provenance* defect blocks implementation or conformance.
+
+---
+
+## 13. Testing and Verification Review
+
+Testing is where the spec is **most unusually strong**: §9 is not a *list of tests* but a *catalog of acceptance criteria* (T-01…T-17/T-20/T-21/T-23, plus the *E-*↔*T-* cross-refs) that pins down *what a conforming implementation must do*; and §6/§C-11 give a **worked-example corpus** (I-001) that *asserts the exact numbers* P/R/MRR/MAP/NDCG/faithfulness/completeness/citation_quality must produce. This is *verification-grade* testing for the deterministic core; the gaps are *two T-coverage holes* (a T for the *hybrid pool* and a T for a *retrieval-degradation* generation case) plus *one stale T* pointer.
+
+### 13.1 What is genuinely strong
+
+- **The *worked-examples* discipline (I-001/T-05a/T-05b/T-08a).** The spec *asserts the exact numbers* a set of *fixed inputs* must produce (`G={c1,c3,c5}`, `R_5=[c1,c8,c3,c9,c5]` → `P=0.60, R=1.0, MRR=1.0, NDCG=0.88547`; `q1`/`q2` → `MAP=0.66667`; `total=4, unsupported=1` → `faithfulness=0.75`). This is a *genuinely unusual* strength: the metric math is *pinned by assertion*, not just by formula — a *verification-grade* test for the *most numerically delicate* part of the spec.
+- **The *E-↔T-* cross-refs.** Almost every *E-* (E-01…E-18) is paired with a *T-* (T-06/T-06a/T-06b, T-11, T-15, T-17, T-21, T-16, T-13, T-14); the *E↔T* correspondence is a *strong* discipline that makes "an edge case that is not tested" a *traceable defect* rather than a *silent gap*.
+- **The *tiered* test matrix (T-01/T-01a/T-01b + the 7 tiers).** The corpus is *synthesized and asserted* (T-01: byte-identical, non-trivial per-tier distribution) and the *tiers are measured* (T-17/T-21: the failure modes are *verified*, not *asserted*).
+- **The *reliability-gate* test (T-08/I-010).** An out-of-schema/out-of-range answer or verdict is *rejected and retried then errored*; only a `jsonschema`-valid object reaches `COMPLETED`/`JUDGED`. A *strong* *input-validation* test, carried forward from ch1/ch2.
+- **The *determinism* test (T-03/T-04/T-07/T-08c/T-11/T-13/T-14).** "Two invocations produce byte-identical `questions.json` / `report.json` / `context` / `retrieved` / `verdicts`" is a *strong*, *mechanically-checkable* invariant. (F-017 is the *only* gap: the *report.json* *ordering* must be *canonical* for byte-identity to be *real*.)
+- **The *structure-scan* test (T-02/I-009).** A *source scan* asserts that `Ollama`/`httpx`/model-names appear *only* in `embedding.py`/`model.py`/`judgment.py` — a *unique* *test* that *mechanically enforces* the *reliability boundary*, *unusually strong*.
+- **The *offscreen* GUI test (T-16/E-17).** The GUI is spec-tested *with `QT_QPA_PLATFORM=offscreen`*, not *manually*. Good.
+
+### 13.2 Gaps
+
+- **T-07 does not yet *cover* the *hybrid pool*** (F-002). T-07 asserts the *per-channel min-max*, but not the *candidate-pool* formation (union vs. intersection, etc.); a *T-* for a *crafted equal-score pool* must be *added* with F-002's fix.
+- **T-08/T-11 do not yet *assert* a *retrieval-degradation* generation case** (F-001). If `MockLLM` is *context-only* (the *right* resolution), it must be *proven* that a *degraded-retrieval* case (e.g. `distractor`-tier) yields *low* `faithfulness`/`completeness` — otherwise the *generation metric* is *self-averaging* (a *test test* failure for §21). A *T-08d* ("a *distractor*-tier case yields `faithfulness<0.8`") is the *additive* fix; *before* F-001 is resolved, the test-set is *incomplete* for *generation*.
+- **No T-* for the *run-level provenance***(F-017). After F-017's *serial-ordering* fix, a T-* asserting *two `eval --mock` runs are byte-identical* *files* (not just *values*) should be *added* — a *Level-4* stretch, but a *small* one.
+- **The *T-* *numbering* is *non-contiguous*** (T-08a/b/c/d jump from T-08 to T-10; T-10/T-11 to T-13; T-14/T-15 to T-16/T-17; then T-20/T-21/T-23). *Not a defect* — the *sub-id* (a/b/c/d) *discipline* is *fine*, and *ch1* also *skips T-12* — but a *future T-* set (e.g. a *T-09* for the *run-level provenance* check) *would be* *awkward* to *insert*; a *note* (or a *reserved* `T-12`/`T-18`/`T-19` slot) is a *small* editorial. No *finding* (the *T-* *set* is *coherent*, not *broken*).
+- **The `*by_capability*` *diff* has *no T-*** (F-003). The *per-capability* *diff* is *R-14's* *headline* feature *but* T-*s* cover the *per-stage* *metrics* (*T-08b/I-012*) — *not* the *diff itself* *across* *an* *`eval` *run* *with* *--capability* *on* *vs* *off*. A *T-* that *asserts* *"`--hybrid on` *lifts* *`distractor`*-tier* *recall* *by* *Δ ≥ 0`* *and* *`--rerank on`*lifts* *`mrr`-on-`distractor`* *by* *Δ ≥ 0`* *is* *the* *missing* *test* *for* *R-14* *in* *its* *operational* *form*. *Additive*, *P1*.
+
+### 13.3 Testability audit
+
+- **Major requirements are testable:** R-02…R-16, R-18…R-22 → T-01…T-17/T-20/T-21/T-23/T-13/T-14 — *all* *cover*. No *requirement* *is* *untestable* *from* *the* *spec* *as* *written*; *F-001*/*F-002* *make* *one* *requirement* (*R-14*/*R-04* *in* *its* *operational* *form*) *untestable* *until* *resolved*.
+- **Acceptance criteria are precise:** the *worked-example* *numbers* *are* *exact* (*0.88547*, *0.66667*, *0.75*, *0.8*); the *E-↔T-* *correspondence* *is* *near-total*; the *byte-identity* *is* *a* *named* *invariant* — *strong*.
+- **Edge cases are covered** (E-01…E-18, *each* *paired* *with* *a* *T-*; *F-015* *is* *the* *one* *exception* — *a* *T-* *for* *E-04* *would* *violate* *T-01* *so* *is* *not* *written*; *the* *fix* *is* *a* *synthetic* *corpus* *or* *a* *defensive-label*).
+- **Invariants are verifiable:** I-001…I-014 *are* *all* *paired* *with* *a* *T-* *(*I-001→T-05a/b, *I-002→T-03/T-04/T-07/T-23,*I-003→T-08c, *I-004→T-06,*I-005→T-06b, *I-006→T-11,*I-007→T-05b/T-08a, *I-008→T-10,*I-009→T-02, *I-010→T-08,*I-011→T-14, *I-012→T-08b,*I-013→T-21/T-15, *I-014→T-16*); *the* *one* *weak* *pairing* *is* *I-008→T-10/E-15* (*F-007* *re-points* *I-008* *to* *E-11*).
+
+**Verdict of §13.** Testing-and-verification is *extremely strong* (*score 4* — *the* *gap* *to* *5* *is* *two* *T-coverage* *holes* *for* *F-001*/*F-002* *and* *a* *run-level* *provenance* *T-* *for* *F-017*, *not* *missing* *tests* *for* *a* *major* *requirement*). *The* *worked-examples* *discipline* *is* *verification-grade*; *the* *E-↔T-* *cross-refs* *are* *near-total*; *the* *structure-scan* *T-02* *is* *unusually* *strong*. *The* *two* *T-coverage* *holes* *(*F-001*/*F-002* *in* *their* *operational* *forms*) *are* *the* *only* *material* *gap* *in* *§13*, *and* *are* *resolved* *additively* *alongside* *F-001*/*F-002*.
+
+---
+
+## 14. Metrics and Evaluation Review
+
+Metrics is the *single strongest dimension* *of* *the* *spec* *(*score* *4.5*); *the* *gap* *to* *5* *is* *three* *small* *precision* *issues* *(F-005/F-006/F-014)* *and* *a* *run-level* *serialization* *ordering* *(F-017)*, *not* *a* *formulation* *gap*. *The* *formulas* *are* *guarded*, *the* *workeds* *are* *asserted*, *the* *no-division-by-zero* *behavior* *is* *per-metric*, *and* *the* *per-case* *vs* *per-tier* *vs* *per-capability* *aggregations* *are* *well-formed*.
+
+### 14.1 Strengths
+
+- **The *metric formulas* are *guarded and per-metric.* `Precision@k`/`Recall@k`/`MRR`/`MAP`/`NDCG@k` *are* *each* *given* *a* *closed-form* *equation* *in* *§C-11* *and* *a* *per-metric* *no-division-by-zero* *behavior* *(*`precision=None` / `recall=None` / `mrr=0.0` / `ndcg=None` / *generation* *numerators* *=0.0*)*, *with* *a* *worked* *example* *asserting* *the* *exact* *numbers* *(T-05a/b, T-08a)*. *This* *is* *the* *verification-grade* *standard* *for* *metric* *math*.
+- **The *generation* *metrics* are *defined* *as* *reference-bound* *(*R-12*/*I-007*/*T-08a*)*: *faithfulness* *// completeness* *// *citation-quality* *are* *each* *defined* *with* *a* *denominator* *and* *a* *no-/0* *behavior*; *the* *generat* *metrics* *are* *computed* *over* *judged* *rows* *and* *aggregated* *over* *non-None* *rows* — *a* *strong* *design*.
+- **The *per-tier*/per-capability* *aggregates* *are* *well-formed* *(I-012/T-08b)*: *a* **by_tier** *sub-aggregate* *per* *populated* *tier* *and* *a* **by_capability** *per* *toggled* *stage*, *with* *a* *root* *aggregate* *as* *the* *cross-tier* *combination* *of* *the* *same* *formula* — *so* *+hybrid* *is* *a* *row-to-row* *comparison*, *not* *an* *aggregate-vs-aggregate* *confusion*.
+- **The *§20*/§21* *worked* *examples* *are* *asserted* *(*T-05a/b*/*T-08a*)*: *a* *genuinely* *strong* *discipline* *for* *the* *most* *numerically* *delicate* *part* *of* *the* *spec*.
+
+### 14.2 Gaps
+
+- **F-005 (`supported_claims` *not* *a* *field*):** *the* *faithfulness* *numerator* *is* *recovered* *by* *inference* *as* *`total_factual_claims - len(unsupported_claims)`*; *state* *the* *invariant* *explicitly* *and* *pin* *T-08a*.
+- **F-006 (*generation* *numerators* *for* *the* *real* *judge*):** *completeness*/*citation-quality* *are* *undefined* *for* *the* *real* *judge* *(real-vs-real* *disagreement* *on* *"`reflected`*/*`relevant`*"); *define* *a* *reference-bound* *matching* *rule* *(*reflected_facts* ∩ gold_facts, *relevant_citations* = *{c: c.chunk_id ∈ relevant_chunks}* ∪ *{c: c.claim matches a gold_fact})* — *a* *small* *additive* *fix*.
+- **F-014 (`MRR` *vs* *MRR@k*):** *R-11* *lists* *`MRR`* *without* *an* *`@k`* *while* *`P/R/NDCG`* *carry* *`@k`*; *the* *equation* *(`1/rank(first g ∈ R_k)`)* *implies* *MRR@k* *but* *T-05b* *does* *not* *cover* *a* *rank-`>k`* *case*; *state* *MRR@k* *and* *add* *the* *sub-case*.
+- **F-017 (*run-level* *serialization* *ordering*):** *byte-identity* *across* *two* *`eval* *runs* *depends* *on* *dict/set* *iteration*; *a* *canonical* *serialization* *(`json.dumps(sort_keys=True, indent=2)`* *with* *fixed* *float* *format*, *rows* *in* *`q_id`* *order*, *`by_tier`/`by_capability`* *keyed* *by* *sorted* *tier*/capability) *is* *the* *small* *additive* *fix*.
+
+### 14.3 Metric-audit (the *skill's* *§16 *per-metric* *check*)
+
+- **Definition/formula/units/population/denominator/aggregation/edge case/interpretation:** *all* *eight* *are* *covered* *per* *metric*; *the* *one* *gap* *is* *F-006* *(for* *the* *real* *judge's* *`completeness`/`citation_quality`)* *and* *F-005* *(for* *`faithfulness`'s* *`supported_claims`)*, *both* *additive*.
+
+**Verdict of §14.** Metrics-and-evaluation is *the* *spec's* *strongest* *dimension* *(*score 4.5*); *the* *formulae* *are* *guarded* *and* *per-metric*, *the* *worked* *examples* *are* *asserted*, *and* *the* *no-/0* *behavior* *is* *per-metric*. *The* *gap* *to* *5* *is* *three* *small* *precision* *issues* *(F-005/F-006/F-014)* *and* *a* *run-level* *serialization* *ordering* *(F-017)*, *all* *additive* *and* *small*. *No* *metric* *is* *wrong* *or* *unmeasurable*; *the* *residual* *work* *is* *closing* *the* *three* *numerators* *and* *pinning* *a* *MRR@k**sub-case.
+
+---
+
+## 15. Traceability Review
+
+Traceability is *the* *most* *unusual* *strength* *of* *this* *spec*: *§11* *is* *a* *full* *`id→where-realized→test`* *matrix* *for* *every* *`R-*`*/*/`I-*`*/*/`E-*`*/*/`T-*`*/*/`K-*`* *id* *in* *the* *spec*, *with* *a* *per-id* *pointer* *to* *a* *`T-*`* *(*I-001→T-05a/b, *I-009→T-02,*I-013→T-21/T-15, *etc.*) *and* *a* *per-stage* *pointer* *to* *a* *`module`* (*R-04→`retrieval.py`, *R-08→`citation.py`, *R-11→`metrics.py`, *etc.*). *This* *is* *the* *verification-grade* *traceability* *a* *Level-4* *spec* *aspires* *to*; *the* *one* *gap* *is* *a* *small* *stale-pointer* *family* *(F-007)* *and* *a* *missing* *T-* *for* *R-14* *in* *its* *operational* *form* *(F-003*/*§13.2*) — *not* *a* *missing* *trace*.
+
+### 15.1 Strengths
+
+- **The *full* *`id→where-realized→test`* *matrix* *(*§11*)***is* *unusually* *complete* *for* *a* *lab* *spec*; *every* *`R-*`* *is* *pointed* *to* *a* *module* *and* *a* *T-*; *every* *`I-*`* *is* *pointed* *to* *a* *T-*; *every* *`E-*`* *is* *paired* *with* *a* *T-**(*except* *E-04*, *F-015*). *This* *is* *a* *genuinely* *strong* *traceability* *posture*.
+- **The *§C-01/C-02…/C-12* *contracts* *are* *cross-referenced* *to* *the* *§9* *T-*s* *and* *the* *§8**E-*s* *by* *id* *(*e.g.* *`T-08/T-08b/T-08c/T-08a`* *each* *name* *an* *I-*/*R-*/*E-* *and* *a* *T-*), *so* *a* *verifier* *can* *walk* *from* *a* *requirement* *to* *a* *test* *and* *back* *in* *one* *step.*
+- **The *§14–§19* *failure-modes* *are* *traced* *as* *both* *E-*s* *and**T-*s* *and* *tiers* *(*`chunking↔E-07↔T-21`, *`distractor↔E-08↔T-*`*, *`conflict↔E-09↔E-10↔T-17`, *`injection↔E-16↔T-17* *via* *`injection_warning=True`* *in* *the* *`injection* *tier`*), *so* *the* *failure* *modes* *are* *traceable* *as* *a* *set* — *a* *genuinely* *unusual* *strength.*
+
+### 15.2 Gaps
+
+- **F-007 (stale *pointer* *family* *E-15*↔*E-11*):** *I-008*/*§11*/*§11* *multi-hop* *all* *point* *to* *E-15* *(`top_n* *< k`, *a* *usage* *exit*) *for* *failure-attribution* *and* *multi-hop* *coverage*, *but* *attribution* *lives* *in* *E-11* *and* *multi-hop* *lives* *in* *T-04b*/`T-23`; *re-point* *all* *three**(`I-008* *→ E-11`, *`§11` *multi-hop* *→ T-04b*/`T-23`, *`§3.2` *PARTIAL-trigger* *→ E-11* *via* *E-11*/*E-12*)*.
+- **F-013/F-008 (a *security-relevant* *trace* *gap* *for* *the* *injection* *banner*)**: *the* *injection* *banner* *is* *traced* *to* *E-13* *in* *§5.1*/`§5.2`*/`C-08` *and* *E-16*, *but* *E-13* *is* *the* *Ollama-unreachable* *edge*, *not* *the* *injection* *edge**(E-16); *re-trace* *all* *three* *to* *E-16*, *and* *add* *a* *distinct* *banner-string* *per* *outcome* *(*F-013*/*F-016* *for* *the* *runtime* *banner*, *F-008* *for* *the* *injection* *banner*).
+- **F-010/F-017 (a *trace* *for* *the* *token* *estimator* *and* *the* *run-level* *serialization*)**: *the* *estimator's* *unit* *(*F-018*) *and* *the* *run-level* *serialization**(*F-017*) *are* *not* *traced* *to* *a* *T-*; *add* *T-06b* *(*F-018* *non-ASCII* *case*) *and* *a* *T-* *for* *byte-identical* `report.json` *files**(*F-017*).
+- **The *§C-12/C-11* *data-flow* *is* *traced* *but* *the* *`retrieved`* *field* *(`C-12`)* *is* *not* *uniquely* *defined* *(*F-021*:* *top-k* *vs* *top-N* *vs* *raw-pool*); *its* *trace* *to* *`metrics`* *(`P/R/MAP/NDCG`* *are* *computed* *on* `R_k`*) *is* *ambiguous* *by* *the* *same* *root*. *Re-trace* *`retrieved`* *as* *the* *post-rerank* *top-k* *consumed* *by* *the* `ContextBuilder*, *in*`C-12`, *and* *pin* *the* *trace* *to* *T-11/T-23*.
+
+### 15.3 Traceability audit (the *skill's* *§17 *chain* *Intent→Requirement→Contract→Invariant→Test→Evidence*)
+
+- **Intent→Requirement:** *§0* / *§2* *thesis* *→* *R-01…* *R-22* *(*all* *pointed*)*— *strong*.
+- **Requirement→Contract:** *R-02..R-16* *→* *C-01..C-12* *(*`chunking* *→ C-03`, *`embed* *→ C-02`, *`retrieval`*/`hybrid`* *→ C-02/C-04`, *`rerank`* *→ C-05`, *`expand`**→ C-06`, *`contextual`* *→ C-07`, *`citation`* *→ C-08`, *`LLM`* *→ C-09`, *`Judge`**→ C-10`, *`Pipeline`* *→ C-12`) *— *strong*.
+- **Contract→Invariant:** *C-02*/*C-05*/*C-06* *→* *I-002* *(*byte-identity*); *C-08* *→* *I-003**(*grounding*); *C-09*/*C-10* *→* *I-010* *(*schema*); *C-11* *→* *I-004/I-005/I-006/I-007**(*token* *budget*/*estimator*/*report=build*/*no-/0*); *I-008* *from* *§3.2* *(*state* *machine*)*— *strong* *(*the* *one* *gap* *is* *F-007* *re-point*).
+- **Invariant→Test:** *I-001* *→ T-05a/b*, *I-002* *→ T-03/T-04/T-07/T-23/T-13*, *I-003* *→ T-08c/E-08*, *I-004* *→ T-06*, *I-005* *→ T-06b*, *I-006* *→ T-11*, *I-007* *→ T-05b/T-08a*, *I-008* *→ T-10* *(*+ E-11**via* *F-007*), *I-009* *→ T-02*, *I-010* *→ T-08*, *I-011* *→ T-14*, *I-012* *→ T-08b*, *I-013* *→ T-21/T-15*, *I-014**→ T-16 *— *strong**(*the* *one* *gap* *is* *F-007* *and* *a* *T-* *for* *R-14* *operational* *diff*, *§13.2/F-003*).
+- **Test→Evidence:** *the* *worked* *examples* *(*T-05a/b/T-08a*) *are* *exact* *evidence*; *the* *byte-identity**(*T-03/T-04/T-07/T-23*) *are* *exact* *evidence* *(*modulo* *F-017* *serialization* *ordering*)*— *strong* *(*modulo* *F-017*).
+
+**Verdict of §15.** Traceability *is* *the* *spec's* *most* *unusual* *strength* *(*score 3.5*, *held* *below* *the* *4s* *only* *by* *F-007* *and* *the* *F-003/R-14-operational* *T-* *gap*); *the* *chain* *Intent→Requirement→Contract→Invariant→Test→Evidence* *is* *near-complete* *at* *every* *stage*, *with* *one* *stale-pointer* *family* *(F-007)* *and* *one* *T-* *gap* *(*R-14* *operational*, *F-003*/*§13.2*) *to* *close*. *After* *F-007* *and* *a* *T-* *for* *R-14* *operational* *diff* *(*alongside* *F-003*), *traceability* *is* *verification-grade* — *a* *Level-4* *stretch*, *but* *a* *small* *one*. *No* *`id`* *in* *the* *spec* *is* *un-traced*; *the* *gap* *is* *a* *stale* *pointer* *and* *a* *missing* *T-* *for* *an* *operational* *form*, *not* *a* *missing* *trace.*
