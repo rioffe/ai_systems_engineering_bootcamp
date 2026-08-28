@@ -343,3 +343,117 @@ Each finding follows the skill's format: **Observation · Why it matters · Pote
 **Potential consequence** The `R-18`/T-03/T-07 byte-identical contract is either *stronger than promised* (an implementer adds needless entropy) or *weaker than needed* (a future mock is non-deterministic and the suite is "seeded-but-wonky").
 
 **Recommended resolution** For each mock double, declare precisely which of `seed` / inputs / both determine its output (recommend: corpus = `seed`; mocks = **inputs only**, `seed` ignored), and update `--seed`'s help to say "*affects gen-corpus; the mock doubles are input-determined*." Add a test that a second `gen-corpus --seed 42` is byte-identical but a `gen-corpus --seed 7` is not, pinning the *seed surface* itself.
+
+---
+
+### 4.3 F-017 … F-024 (LOW)
+
+#### F-017 — `report.json` ordering not canonically fixed, jeopardizing R-18 byte-identity
+
+**Severity:** LOW **Location:** R-18/I-002, §5.1 (JSON report), C-11 `by_tier`/`by_capability`.
+
+**Observation** R-18 promises "*computed metrics … reproducible/byte-identical*." The aggregate carries `by_tier` (per populated tier) and `by_capability` (per toggled stage); these are naturally **dict/set**-keyed. Without an **ordering discipline** (e.g. `tier`/`capability` keys sorted; `RunMetrics` rows in `--tiers` or `q_id` order), the serialized `report.json` can vary with dict/set iteration across Python builds, breaking byte-identity *between runs* on the same machine.
+
+**Why it matters** "*Byte-identical*" (R-18, the determinism crux of the whole spec) is only meaningful for the *artifact*, not just the in-memory floats. A verifier comparing two `report.json` files needs a deterministic serialization.
+
+**Potential consequence** `git diff report.json` is noisy across runs even with identical inputs; a CI byte-equality test would flap.
+
+**Recommended resolution** Specify the report serializer: `RunMetrics` rows in `q_id` order; `by_tier`/`by_capability` keyed by a **sorted** canonical order; `json.dumps(..., sort_keys=True, indent=2)` with fixed float formatting; and add a T that two `eval --mock` runs are byte-identical *files*.
+
+---
+
+#### F-018 — `est_tokens = ceil(len(s)/4)` does not state char vs. byte
+
+**Severity:** LOW **Location:** C-01 `Chunk.tokens`, C-11 `est_tokens`, I-005, T-06/T-06b (O-2 *"analog of ch2*").
+
+**Observation** `est_tokens(s) = ceil(len(s)/4)` is fixed as the single formula but the **unit of `len(s)`** is not: in Python `len(str)` is *characters* (so an emoji counts as 1), but many real tokenizers count bytes or sub-word units. The §C-01 comment "*(same formula as ch2 O-2, I-006)*" pins the *shape* but not the *unit*.
+
+**Why it matters** With non-ASCII corpus text (travel/finance docs might include a `—` or a non-ASCII quote), byte-count and char-count differ, moving `context_tokens`/`truncated` and so `I-006` (report = build) is only provable for ASCII.
+
+**Potential consequence** A non-ASCII corpus yields a `context_tokens` disagreement *between the builder and the report* if one uses `len` and the other `len(encode())`.
+
+**Recommended resolution** State "*`len` is the Python character count (`len(str)`, UTF-16-code-unit-independent of encoding) — **not** a byte or sub-word count*; non-ASCII is out-of-scope for the estimator." Optionally pin a non-ASCII case in T-06b.
+
+---
+
+#### F-019 — "`--out` … also `-h` stdout" collides with `argparse`
+
+**Severity:** LOW **Location:** §5.1 options and "1. A **human-readable summary** to stdout … 2. … `--out`." The line "*write the JSON report (default: `report.json`; also `-h` stdout)*" overloads `-h`.
+
+**Observation** §5.1 item 2 says "*write the JSON report (default: `report.json`; also `-h` stdout)*" but then `--out PATH write the JSON report (default: report.json; also -h stdout)` — the token `-h` is, in the standard `argparse` (the natural choice for a `rag` CLI), the **help** flag. Conflating "*also print human-readable to stdout*" with the help flag is a real usability bug waiting to happen, and the report's **human summary** (item 1) already *is* the stdout human output, so it is unclear which "`-h`" is meant.
+
+**Why it matters** A CLI that reuses `-h` for something other than `help` (the universal convention) will surprise every human user, and any test that runs `rag --h` to get a human report would collide with `--help`.
+
+**Potential consequence** The CLI either *silently* hijacks `-h` (breaking `--help`) or the "*also `-h` stdout*" phrase is interpreted as the human summary, in which case the JSON report is the *only* file output and the human summary is implicit.
+
+**Recommended resolution** State the two output channels precisely: **human summary → always `stdout`**, **JSON report → `--out PATH`** (default `report.json`); **drop the `-h` shorthand** entirely (let `--help` be `argparse`'s). Add `--quiet` (already present) as the knob to suppress the human summary when only JSON is wanted.
+
+---
+
+#### F-020 — "one probabilistic boundary" vs. "two components: Embedder + LLM"
+
+**Severity:** LOW **Location:** §0 ("*the generator/judge is the **one** probabilistic boundary*"), R-20 ("The **probabilistic boundary is two components** — the **Embedder** and the **LLM**"), actor table (`Embedder`, `LLM`).
+
+**Observation** §0 first calls generation the *one* probabilistic boundary, then R-20 corrects/replaces it with *two* components (Embedder + LLM). Both are *true* — the real path has two Ollama calls — but the language is inconsistent: the §0 framing reads as one boundary and then R-20 says two. The §C-08/C-02 `source-scan` invariant (I-009/T-02) lists *three* modules (`embedding.py`, `model.py`, `judgment.py`) — so the *operational* story is *two interfaces × two roles* = *three modules*.
+
+**Why it matters** The *reliability-boundary* story of the spec is its central pitch (ch1 §15 → ch2 → ch3 §0/R-20). If "one boundary" vs. "two components vs. three modules" are not reconciled, a fresh reader may not know whether I-009's three-module source-scan is a *consequence* of two-component-or-three-module or an *independent* design choice, and whether expanding/judging is "part of" the generative boundary or a *second* boundary it *happens* to reuse the LLM module for.
+
+**Potential consequence** A reader/verifier misreads *what* the boundary is and *why* I-009 scans 3 modules rather than 2; the pitch loses one click of clarity.
+
+**Recommended resolution** State cleanly: "*The system has **one** reliability boundary — the *probabilistic boundary* — realized by **two Ollama-facing components**: the Embedder and the LLM. The LLM is reused for both generation and judging; rerank and expand are *opt-in LLM roles* that share the same module but default to their deterministic mocks. Three source modules (`embedding.py`, `model.py`, `judgment.py`) implement the boundary; I-009/T-02 scan those three.*" Keep "one boundary / two components / three modules" as the canonical sentence and align §0, R-20, and §C-02/C-08 with it.
+
+---
+
+#### F-021 — `RunMetrics.retrieved` is top-`k` or top-`N`?
+
+**Severity:** LOW **Location:** C-12 `RunMetrics` field list, R-11, I-006, T-11.
+
+**Observation** `RunMetrics.retrieved` is commented `# chunk_ids ranked` but it is undefined whether this is the **post-rerank top-`k`** (the P/R@k `R_k`), the **pre-rerank top-`N`** (the rerank input), or the **raw candidate pool** (the hybrid union). `I-006` ("*`retrieved` exactly mirror the `Context`/ranking actually assembled for that case*") says "*ranking actually assembled*" — but two rankings exist at that point (pre- and post-rerank), and two *contexts* exist if `--expand on` (per-expansion contexts vs. the *union* context used to build `D'\`).
+
+**Why it matters** An off-by-set choice flips which `chunk_id`s appear in `retrieved`, hence which P/R@k/NDCG the report claims, and whether `retrieved` is *the ranking used to build the context that was judged* (the defensible reading) or *the ranking as it left the retriever* (the *pre-rerank* reading).
+
+**Potential consequence** `retrieved` can be top-N with `k=5` reported P/R@5 computed on those 20 chunks, inflating `Recall@5` vs. the `top-5` the context actually saw.
+
+**Recommended resolution** Fix `retrieved = the top-`k` ranking actually consumed by the `ContextBuilder` (post-rerank, post-expand-union), pin it in C-12, and add to I-006 a cross-check `set(retrieved[:k]) == sorted(R_k_by_score)[:k]`.
+
+---
+
+#### F-022 — `Verdict.status = "SKIPPED"` only under `--judge off`?
+
+**Severity:** LOW **Location:** C-11 `Verdict.status` ("`"JUDGED" | "ERROR" | "SKIPPED"`"), E-12, R-10.
+
+**Observation** The `Verdict` enum carries `"SKIPPED"` but E-12 ("*`--judge off` … The `JUDGING` stage is skipped; generation fields are `None`*") and T-* never assert *which* of two behaviors happens: (a) a `Verdict(status="SKIPPED", …)` is *produced* and stored on the `RunMetrics` row, or (b) **no** `Verdict` object exists at all and `RunMetrics.correct/fidelity/…` are simply `None` with `status="SCORED"`/`"PARTIAL"` at the *row* level.
+
+**Why it matters** `RunMetrics` has its **own** `status` field (`"SCORED"|"PARTIAL"|"ERROR"`), so "*row status*" and "*verdict status*" are **two different** concepts that need an explicit mapping; the `"SKIPPED"` enum value is either vestigial or load-bearing and the spec does not choose.
+
+**Potential consequence** A verifier either expects a `Verdict(status="SKIPPED")` object or a `None` verdict field; E-12's "*generation fields are None*" is ambiguous as to which *fields* of *which object*.
+
+**Recommended resolution** Pick one: recommend **no `Verdict` under `--judge off`** (row-level `status` carries the terminal state; `RunMetrics.correct/…` are just `None`), and **drop `"SKIPPED"` from the `Verdict` enum** — or, if the enum is kept, add a T that asserts the `Verdict(status="SKIPPED", answer=…) row-level status = "SCORED"` (or `"PARTIAL"`) mapping.
+
+---
+
+#### F-023 — `SCORCED` typo in E-03
+
+**Severity:** LOW **Location:** E-03 ("*case is `SCORCED` with an (empty or wrong) answer*").
+
+**Observation** The terminal state is spelled `SCORCED` in E-03; the canonical spelling `SCORED` is used everywhere else (e.g. the state table in §3.2, I-008, `RunMetrics.status` in §C-12). This is a one-character typo, but it is a *state-name* typo in a normative row.
+
+**Why it matters** An error-string / `failure_stage` assertion would have to choose a spelling; the typo is the kind of thing that creeps into a test's `assert status == "SCORCED"` by *copy*, producing a false-failing test.
+
+**Potential consequence** A typo-propagation defect in the T-suite; cosmetic.
+
+**Recommended resolution** Replace `SCORCED` with `SCORED` in E-03.
+
+---
+
+#### F-024 — `SemanticChunker` in C-03 but deferred (Q-04 / OQ8); ship-scope unclear
+
+**Severity:** LOW **Location:** §C-03 (`class SemanticChunker(Chunker):   # OPTIONAL/extension (Q-04)`), R-03, OQ (open question 8 in §11).
+
+**Observation** §C-03 lists `SemanticChunker` as a first-class `Chunker` subclass next to `Fixed`/`Heading`/`Contextual`, but the class body is a comment "*OPTIONAL/extension*" and open question 8 (Q-04) defers it. An implementer who treats §C-03's class list as the *interface set to implement* may ship a partial `SemanticChunker` (embedding sentences, cutting at low cosine) that is *neither tested nor used*, and which (being probabilistic at index time) would **break the determinism invariant** by re-introducing Ollama into the index path.
+
+**Why it matters** A shipped-buthalf-built class is worse than a deferred one: it can pass a naive source-scan while *not* honoring I-009/R-18, and it confuses the `--strategy` enum (the CLI list in §5.1 has `heading|fixed` *only*, matching the deferred status — so the mismatch is the other way: §C-03 names a class the CLI does not offer).
+
+**Potential consequence** An implementer either (a) *omits* `SemanticChunker` (correct) or (b) *ships a broken extension* that violates I-009/R-18. The *wrong* outcome passes a coarse T-* and fails I-002.
+
+**Recommended resolution** **Delete the `SemanticChunker` class from §C-03** and keep it only in a `## Extensions (out of scope for v0.1)` block, or **mark every v0.1-vs-extension class explicitly** in §C-03 with a `# V0.1: NO` comment on the class line so an implementer knows *not* to ship it; align the §5.1 `--strategy` enum with the §C-03 class set.
