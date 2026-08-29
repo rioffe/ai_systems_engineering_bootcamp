@@ -385,6 +385,10 @@ repeated_state, consecutive_tool_failures}` — the closed enum (R-05, I-011).
 separation is I-004: an `observation` entry carries tool output verbatim; `reasoning` entries are
 policy text and MUST NOT appear inside `observation`.)
 
+`run_id` is **pinned** (F-005 closed): `sha256(canonical_json(question, corpus_revision,
+budgets, fault_spec, policy_id, prompt_version))[:12]` — stable per episode, discriminating
+across configs, no wall-clock input.
+
 ### C-08 Retry taxonomy (§12, total — I-006)
 
 | Failure class | Detected as | Strategy | Bound |
@@ -428,6 +432,9 @@ LOOP_METRIC_KEYS = [
     "retry_count", "denial_count", "unnecessary_call_estimate",
     "termination_reason", "latency_ms", "tokens_total", "cost_usd_total",
 ]
+# repair_success (pairing rule, F-007 closed): an invalid-argument observation counts as
+#   repaired iff, before termination, a valid call to the SAME tool follows; denominator =
+#   invalid-argument observations; empty denominator -> 1.0 (I-005).
 # unnecessary_call_estimate = seen_actions entries with count > 1 at termination (R-10 data)
 # zero-denominator rule (ch3 I-001 analog carried): no metric divides by an empty denominator;
 # each zero case falls back to its documented value (repair_success with 0 repairs -> 1.0,
@@ -454,7 +461,14 @@ DRILLS = {
 
 Faults inject at the **tool boundary or the scripted MockPolicy** — never inside runtime,
 authorization, budgets, or validation code (the deterministic core under test must stay genuine,
-I-015). `rate` is a deterministic schedule (every Nth call), not RNG (I-003).
+I-015). `rate` / `schedule` is a **deterministic agenda** (e.g. `schedule=[1]` faults only
+attempt index 1), not RNG (I-003).
+
+**Conflict-marker protocol (F-006 closed):** documents in the `contradiction_pair` fixture carry
+`conflict_marker: {"quantity": <name>, "with": <doc_id>, "values": [...]}`; final-report
+validation on the drill path requires `report.conflicts` to cover **every marker among the
+episode's retrieved documents** — the deterministic trigger for E-08/T-08f (no semantic guessing
+in the deterministic core).
 
 ### C-12 Drill report (§34 four questions)
 
@@ -471,7 +485,11 @@ I-015). `rate` is a deterministic schedule (every Nth call), not RNG (I-003).
 ```
 
 `expected_*` fields are **pinned per drill** in `drills.py` (the §34 "what should have happened"
-is part of the spec, not an observation). The expected-verdict table is normative (F-001 closed):
+is part of the spec, not an observation). The four text fields (`model_behavior`,
+`runtime_behavior`, `expected_behavior`, `instrumentation`) are **per-drill fixed template
+strings** in `drills.py`; interpolation is limited to named trace values via documented
+placeholders (`{{actual_termination}}`, `{{denial_count}}`, …) — no free-text generation, so
+I-003 byte-identity holds (F-012 closed). The expected-verdict table is normative (F-001 closed):
 
 | Drill | Expected termination | Additional pass predicates (all must hold) |
 | ------ | -------------------- | ------------------------------------------ |
@@ -488,6 +506,28 @@ is part of the spec, not an observation). The expected-verdict table is normativ
 
 `pass` = (`actual_termination` == expected) AND all predicates; a drill that terminates
 for the wrong reason fails even if it terminates (E-10).
+
+### C-13 MockPolicy rule list (input-determined — F-004 closed)
+
+```python
+# policy.py — the ONLY mock policy; rules evaluated top-down each step, no RNG (I-003):
+#   MP-1  no completed search yet -> tool_call search(query = question)
+#   MP-2  search returned 0 hits  -> final(report: insufficient_evidence)
+#   MP-3  search returned hits and hits[0] not yet retrieved -> tool_call retrieve(hits[0])
+#   MP-4  retrieve resolved (success OR PERMANENT failure)
+#         -> final(report): status ok iff >=1 retrieve succeeded else insufficient_evidence;
+#            citations := ids of successful retrieves; conflicts := every conflict_marker
+#            among retrieved docs; caveats := ["low_quality_evidence"] if any retrieved
+#            doc has quality == "marketing"
+#   MP-5  observation error == "invalid_arguments"
+#         -> re-emit the SAME tool with the originally-intended argument value
+#            (the pinned repair re-issue; fault injection is single-step)
+# Policy faults (C-11) overlay these rules: null_query (once: emit search(query=None)),
+# repeat_last_search, never_final (suspend MP-2/MP-4), attempt_delete (once: propose
+# delete_file(path="/tmp/sentinel"), then resume rules).
+# Reasoning-entry strings are FIXED templates (byte-identity): "searching for evidence",
+# "retrieving top hit", "finalizing report", "repairing invalid arguments".
+```
 
 ---
 
