@@ -18,30 +18,30 @@ FNV_MASK = 0xFFFFFFFF
 
 
 def test_fnv1a32_known_value():
-          # FNV-1a 32-bit of "a": h = offset; h = (h XOR 0x61) * prime, masked.
+    # FNV-1a 32-bit of "a": h = offset; h = (h XOR 0x61) * prime, masked.
     h = fnv1a32("a")
     expected = ((FNV_OFFSET ^ 0x61) * FNV_PRIME) & FNV_MASK
     assert h == expected
-        # Process-independent: identical input gives identical output.
+    # Process-independent: identical input gives identical output.
     assert fnv1a32("hello") == fnv1a32("hello")
-        # Differ from Python's per-process built-in hash.
+    # Differ from Python's per-process built-in hash.
     assert h != hash("a")
 
 
 def test_tokenizer_matches_spec():
-          # O-1a: lowercase, split on [^\w']+, drop empty; apostrophe is kept
-          # (it is inside the negated set), so words are not split inside.
+    # O-1a: lowercase, split on [^\w']+, drop empty; apostrophe is kept
+    # (it is inside the negated set), so words are not split inside.
     assert tokenizer("Hello, World! Foo'bar") == ["hello", "world", "foo'bar"]
     assert tokenizer("") == []
     assert tokenizer("a b c") == ["a", "b", "c"]
-         # Digits and underscores survive \w; a space still splits tokens.
+    # Digits and underscores survive \w; a space still splits tokens.
     assert tokenizer("v1.2_3 x") == ["v1", "2_3", "x"]
 
 
 def test_mock_embedder_l2_normalized():
     emb = MockEmbedder()
     vec = emb.embed("hello world")
-    norm = sum(x * x for x in vec)**0.5
+    norm = sum(x * x for x in vec) ** 0.5
     assert abs(norm - 1.0) < 1e-9
 
 

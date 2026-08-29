@@ -13,6 +13,7 @@ Implements C-06 / R-06 / T-23 from SPEC.md.
 The `retriever` argument is a callable (query: str, candidates: int) ->
 list[ScoredChunk] so multi_query itself has no LLM/network dependency.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -34,32 +35,32 @@ class QueryExpander(ABC):
 
 # Fixed synonym map applied as substr.replaces.
 SYNONYM_MAP: dict[str, str] = {
-        "business class": "premium cabin",
-        "airfare": "airline fare",
-        "upgrade": "cabin upgrade",
-        "refund": "reimbursement",
-        "policy": "travel policy",
-        "limit": "cap",
-        "fare": "airline price",
-        "flight": "airline trip",
+    "business class": "premium cabin",
+    "airfare": "airline fare",
+    "upgrade": "cabin upgrade",
+    "refund": "reimbursement",
+    "policy": "travel policy",
+    "limit": "cap",
+    "fare": "airline price",
+    "flight": "airline trip",
 }
 
 TEMPLATES: list[str] = [
-        "{q}?",
-        "related to: {q}",
-        "about {q}",
-        "policy for {q}",
-        "what about {q}",
-        "summary of {q}",
-        "explain {q}",
-        "examples of {q}",
-        "details on {q}",
-        "overview of {q}",
+    "{q}?",
+    "related to: {q}",
+    "about {q}",
+    "policy for {q}",
+    "what about {q}",
+    "summary of {q}",
+    "explain {q}",
+    "examples of {q}",
+    "details on {q}",
+    "overview of {q}",
 ]
 
 
 def _synonym_variants(query: str) -> list[str]:
-          # Apply each substitution in sorted-key order (deterministic).
+    # Apply each substitution in sorted-key order (deterministic).
     variants: list[str] = []
     for phrase in sorted(SYNONYM_MAP):
         repl = SYNONYM_MAP[phrase]
@@ -80,7 +81,7 @@ def _template_variants(query: str) -> list[str]:
 
 
 class MockQueryExpander(QueryExpander):
-      # Deterministic; no LLM, no seed. Input-determined (R-18 / F-016).
+    # Deterministic; no LLM, no seed. Input-determined (R-18 / F-016).
     def expand(self, query: str, *, n: int) -> list[str]:
         if n <= 0:
             return []
@@ -94,8 +95,7 @@ class MockQueryExpander(QueryExpander):
             result.append(variant)
             if len(result) >= n:
                 break
-        logger.debug("MockQueryExpander: {} expansions for {}",
-                        len(result), query[:40])
+        logger.debug("MockQueryExpander: {} expansions for {}", len(result), query[:40])
         return result[:n]
 
 
@@ -103,14 +103,14 @@ class MockQueryExpander(QueryExpander):
 
 
 class LLMQueryExpander(QueryExpander):
-      # Opt-in; real path only. Falls back to MockQueryExpander offline.
+    # Opt-in; real path only. Falls back to MockQueryExpander offline.
     def __init__(self, model: str = "qwen3.8:27b-mlx") -> None:
         self.model = model
         self.model_id = model
 
     def expand(self, query: str, *, n: int) -> list[str]:
-            # Real path: few-shot prompt to Ollama, collect n phrasings.
-            # The offline test suite never exercises this (I-011 / K-05).
+        # Real path: few-shot prompt to Ollama, collect n phrasings.
+        # The offline test suite never exercises this (I-011 / K-05).
         return MockQueryExpander().expand(query, n=n)
 
 
@@ -119,16 +119,16 @@ class LLMQueryExpander(QueryExpander):
 
 def multi_query(
     expander: QueryExpander,
-        retriever,
+    retriever,
     query: str,
-        *,
+    *,
     n: int,
     candidates: int,
     merge: str = "union",
-        ) -> list[ScoredChunk]:
-      # For each q_i: r_i = retriever(q_i, candidates).
-           # merge=union: dedupe by chunk_id, keep MAX score seen.
-      # Ties broken by chunk_id ascending (first-seen entry wins on a tie).
+) -> list[ScoredChunk]:
+    # For each q_i: r_i = retriever(q_i, candidates).
+    # merge=union: dedupe by chunk_id, keep MAX score seen.
+    # Ties broken by chunk_id ascending (first-seen entry wins on a tie).
     expansions = expander.expand(query, n=n)
     if len(expansions) <= 1:
         return list(retriever(expansions[0], candidates))

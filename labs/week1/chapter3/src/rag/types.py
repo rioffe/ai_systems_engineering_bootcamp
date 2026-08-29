@@ -149,7 +149,9 @@ class RunMetrics:
     q_id: str
     tier: str
     # Retrieval fields (populated iff RETRIEVING cleared)
-    retrieved: list[str] = field(default_factory=list)  # post-rerank top-k consumed by ContextBuilder
+    retrieved: list[str] = field(
+        default_factory=list
+    )  # post-rerank top-k consumed by ContextBuilder
     expected: list[str] = field(default_factory=list)  # == question.relevant_chunks
     precision: float | None = None
     recall: float | None = None
@@ -172,7 +174,9 @@ class RunMetrics:
     grounding_violation: bool = False
     which_field_decided: str | None = None
     # Diagnostics
-    failure_stage: str | None = None  # None | retrieval|expansion|reranking|context|generation|judging
+    failure_stage: str | None = (
+        None  # None | retrieval|expansion|reranking|context|generation|judging
+    )
     retrieve_ms: float = 0.0
     rerank_ms: float = 0.0
     generate_ms: float = 0.0

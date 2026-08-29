@@ -13,17 +13,16 @@ from rag.types import Chunk, ChunkMetadata, Document
 
 
 class Chunker:
-         # Abstract base for all chunking strategies.
-     def chunk(self, doc: Document, *,
-               overlap: int = 0) -> list[Chunk]:
-         raise NotImplementedError
+    # Abstract base for all chunking strategies.
+    def chunk(self, doc: Document, *, overlap: int = 0) -> list[Chunk]:
+        raise NotImplementedError
 
-     def __init_subclass__(cls) -> None:
-          pass
+    def __init_subclass__(cls) -> None:
+        pass
 
 
 def _build_meta(doc: Document, index: int, chunk_id: str) -> ChunkMetadata:
-        # Propagate document metadata into a chunk.
+    # Propagate document metadata into a chunk.
     return ChunkMetadata(
         chunk_id=chunk_id,
         doc_id=doc.doc_id,
@@ -39,17 +38,15 @@ def _build_meta(doc: Document, index: int, chunk_id: str) -> ChunkMetadata:
 
 
 class FixedChunker(Chunker):
-        # Naive fixed-size + overlap character chunks.
-    def __init__(self, *,
-                  strategy: str = "fixed",
-                  chunk_size: int = 800,
-                  overlap: int = 200) -> None:
+    # Naive fixed-size + overlap character chunks.
+    def __init__(
+        self, *, strategy: str = "fixed", chunk_size: int = 800, overlap: int = 200
+    ) -> None:
         self.strategy = strategy
         self.chunk_size = chunk_size
         self.overlap = overlap
 
-    def chunk(self, doc: Document, *,
-              overlap: int | None = None) -> list[Chunk]:
+    def chunk(self, doc: Document, *, overlap: int | None = None) -> list[Chunk]:
         ov = overlap if overlap is not None else self.overlap
         text = doc.text
         step = max(1, self.chunk_size - ov)
@@ -60,13 +57,15 @@ class FixedChunker(Chunker):
             end = min(pos + self.chunk_size, len(text))
             seg = text[pos:end]
             chunk_id = f"{doc.doc_id}#{i}"
-            out.append(Chunk(
-                chunk_id=chunk_id,
-                text=seg,
-                meta=_build_meta(doc, i, chunk_id),
-                position=i,
-                embed_text=seg,
-            ))
+            out.append(
+                Chunk(
+                    chunk_id=chunk_id,
+                    text=seg,
+                    meta=_build_meta(doc, i, chunk_id),
+                    position=i,
+                    embed_text=seg,
+                )
+            )
             if end >= len(text):
                 break
             pos += step
@@ -75,12 +74,11 @@ class FixedChunker(Chunker):
 
 
 def _split_by_headings(text: str) -> list[str]:
-        # Split on markdown-style heading markers (# / ## / Article / Section).
+    # Split on markdown-style heading markers (# / ## / Article / Section).
     lines = text.split("\n")
     sections: list[list[str]] = []
     current: list[str] = []
-    heading_re = re.compile(
-        r"^(#{1,6}\s.*)|^(Article\s+\d+)|^(Section\s+\d+)")
+    heading_re = re.compile(r"^(#{1,6}\s.*)|^(Article\s+\d+)|^(Section\s+\d+)")
     for line in lines:
         if heading_re.match(line):
             if current:
@@ -99,17 +97,15 @@ def _split_by_headings(text: str) -> list[str]:
 
 
 class HeadingChunker(Chunker):
-        # Split on heading markers; never across a heading boundary.
-    def __init__(self, *,
-                  strategy: str = "heading",
-                  chunk_size: int = 800,
-                  overlap: int = 200) -> None:
+    # Split on heading markers; never across a heading boundary.
+    def __init__(
+        self, *, strategy: str = "heading", chunk_size: int = 800, overlap: int = 200
+    ) -> None:
         self.strategy = strategy
         self.chunk_size = chunk_size
         self.overlap = overlap
 
-    def chunk(self, doc: Document, *,
-              overlap: int | None = None) -> list[Chunk]:
+    def chunk(self, doc: Document, *, overlap: int | None = None) -> list[Chunk]:
         sections = _split_by_headings(doc.text)
         out: list[Chunk] = []
         for i, sec_text in enumerate(sections):
@@ -120,23 +116,28 @@ class HeadingChunker(Chunker):
             meta = _build_meta(doc, i, chunk_id)
             meta.title = title
             meta.section = section
-            out.append(Chunk(
-                chunk_id=chunk_id,
-                text=sec_text,
-                meta=meta,
-                position=i,
-                embed_text=sec_text,
-             ))
+            out.append(
+                Chunk(
+                    chunk_id=chunk_id,
+                    text=sec_text,
+                    meta=meta,
+                    position=i,
+                    embed_text=sec_text,
+                )
+            )
         return out
 
 
 class ContextualChunker(Chunker):
-        # Wrap another chunker and add the contextual embedding prefix.
-    def __init__(self, *,
-                  overlay: Chunker | None = None,
-                  strategy: str = "contextual",
-                  chunk_size: int = 800,
-                  overlap: int = 200) -> None:
+    # Wrap another chunker and add the contextual embedding prefix.
+    def __init__(
+        self,
+        *,
+        overlay: Chunker | None = None,
+        strategy: str = "contextual",
+        chunk_size: int = 800,
+        overlap: int = 200,
+    ) -> None:
         if overlay is None:
             overlay = FixedChunker(
                 strategy="fixed",
@@ -148,31 +149,31 @@ class ContextualChunker(Chunker):
         self.chunk_size = chunk_size
         self.overlap = overlap
 
-    def chunk(self, doc: Document, *,
-              overlap: int | None = None) -> list[Chunk]:
+    def chunk(self, doc: Document, *, overlap: int | None = None) -> list[Chunk]:
         title = doc.metadata.title or doc.doc_id
         section = doc.metadata.section or ""
         prefix = f"Document: {title}\nSection: {section}\n\n"
         out: list[Chunk] = []
         for c in self.overlay.chunk(doc):
-            out.append(Chunk(
-                chunk_id=c.chunk_id,
-                text=c.text,
-                context=prefix,
-                embed_text=prefix + c.text,
-                meta=c.meta,
-                position=c.position,
-                tokens=c.tokens,
-                split_risk=c.split_risk,
-            ))
+            out.append(
+                Chunk(
+                    chunk_id=c.chunk_id,
+                    text=c.text,
+                    context=prefix,
+                    embed_text=prefix + c.text,
+                    meta=c.meta,
+                    position=c.position,
+                    tokens=c.tokens,
+                    split_risk=c.split_risk,
+                )
+            )
         return out
 
 
-def _find_sentence_end(text: str, start: int,
-                       window: int) -> int | None:
-        # Find the last sentence boundary in [start, start+window].
+def _find_sentence_end(text: str, start: int, window: int) -> int | None:
+    # Find the last sentence boundary in [start, start+window].
     end_pos = min(start + window, len(text))
-        # Search backwards from end_pos for a sentence boundary char.
+    # Search backwards from end_pos for a sentence boundary char.
     for pos in range(end_pos - 1, start - 1, -1):
         after_ok = pos + 1 >= len(text) or text[pos + 1] == " "
         if text[pos] in ".!?" and after_ok:
@@ -180,11 +181,10 @@ def _find_sentence_end(text: str, start: int,
     return None
 
 
-def boundary_guard(chunks: list[Chunk],
-                   overlap: int = 200) -> list[Chunk]:
-        # I-013: pull a naive mid-sentence cut up to the last sentence
-        # end within the overlap window; if none, keep the larger unit
-        # and flag split_risk.
+def boundary_guard(chunks: list[Chunk], overlap: int = 200) -> list[Chunk]:
+    # I-013: pull a naive mid-sentence cut up to the last sentence
+    # end within the overlap window; if none, keep the larger unit
+    # and flag split_risk.
     n = len(chunks)
     for i in range(max(0, n - 1)):
         chunk = chunks[i]
@@ -230,6 +230,7 @@ def boundary_guard(chunks: list[Chunk],
             )
         logger.debug(
             "boundary_guard: chunk_id={} split_risk=True (window={})",
-            chunks[i].chunk_id, overlap,
+            chunks[i].chunk_id,
+            overlap,
         )
     return chunks

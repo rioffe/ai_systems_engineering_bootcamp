@@ -45,12 +45,12 @@ def test_cosine_zero_vector_is_zero():
 
 
 def test_vector_store_ranks_by_cosine_descending():
-        # c1 aligned with q (cosine 1.0); c2 at 45 deg; c3 at 60 deg.
-        # All have strictly-descending positive cosines so all are returned.
+    # c1 aligned with q (cosine 1.0); c2 at 45 deg; c3 at 60 deg.
+    # All have strictly-descending positive cosines so all are returned.
     vs = VectorStore(dim=3)
-    vs.insert(_chunk("c1", "hello world"), (1.0, 0.0, 0.0))    # cosine 1.0
+    vs.insert(_chunk("c1", "hello world"), (1.0, 0.0, 0.0))  # cosine 1.0
     vs.insert(_chunk("c2", "foo"), (0.7071068, 0.7071068, 0.0))  # 45 deg
-    vs.insert(_chunk("c3", "hello"), (0.5, 0.5, 0.7071068))    # 60 deg
+    vs.insert(_chunk("c3", "hello"), (0.5, 0.5, 0.7071068))  # 60 deg
     q = (1.0, 0.0, 0.0)
     results = vs.search(q, k=3)
     assert results[0].chunk.chunk_id == "c1"
@@ -60,7 +60,7 @@ def test_vector_store_ranks_by_cosine_descending():
 
 
 def test_vector_store_tie_break_by_chunk_id_ascending():
-       # Two identical-vectors: chunk_id ascending wins.
+    # Two identical-vectors: chunk_id ascending wins.
     vs = VectorStore(dim=3)
     vs.insert(_chunk("c3", "a"), (1.0, 0.0, 0.0))
     vs.insert(_chunk("c1", "a"), (1.0, 0.0, 0.0))
@@ -83,16 +83,18 @@ def test_vector_store_empty_return_empty_list():
 
 
 def test_bm25_ranking():
-          # BM25 with standard defaults k1=1.5, b=0.75.
+    # BM25 with standard defaults k1=1.5, b=0.75.
     bm25 = BM25Index(k1=1.5, b=0.75)
     bm25.index(
         [_chunk("d1", "python is great for data science")],
-        k1=1.5, b=0.75,
-        )
+        k1=1.5,
+        b=0.75,
+    )
     bm25.index(
         [_chunk("d2", "java is a popular language for enterprise")],
-        k1=1.5, b=0.75,
-        )
+        k1=1.5,
+        b=0.75,
+    )
     results = bm25.search("python data", k=2)
     assert results[0].chunk.chunk_id == "d1"
     assert results[0].lexical > 0.0
@@ -117,34 +119,32 @@ def test_bm25_dedupe_by_chunk_id_keep_highest():
 
 
 def test_hybrid_pool_union_and_minmax_blend():
-          # T-07 worked example.
-       # dense_N = {c1: 0.9, c2: 0.4}
-       # BM25_N  = {c1: 0.6, c3: 0.7}
-       # pool = {c1, c2, c3}; per-channel min-max, alpha=0.5:
-       #   c1: 0.5 * 1.0 + 0.5 * 0.857 = 0.929
-       #   c3: 0.5 * 0.0 + 0.5 * 1.0   = 0.500
-       #   c2: 0.5 * 0.444 + 0.5 * 0.0 = 0.222
-       # order: c1 > c3 > c2
+    # T-07 worked example.
+    # dense_N = {c1: 0.9, c2: 0.4}
+    # BM25_N  = {c1: 0.6, c3: 0.7}
+    # pool = {c1, c2, c3}; per-channel min-max, alpha=0.5:
+    #   c1: 0.5 * 1.0 + 0.5 * 0.857 = 0.929
+    #   c3: 0.5 * 0.0 + 0.5 * 1.0   = 0.500
+    #   c2: 0.5 * 0.444 + 0.5 * 0.0 = 0.222
+    # order: c1 > c3 > c2
     c1 = _chunk("c1", "hello world")
     c2 = _chunk("c2", "foo bar")
     c3 = _chunk("c3", "alpha beta")
 
     class FakeVS:
-
         def search(self, q_vec, k):
             return [
                 ScoredChunk(chunk=c1, score=0.9, semantic=0.9, rank=1),
                 ScoredChunk(chunk=c2, score=0.4, semantic=0.4, rank=2),
                 ScoredChunk(chunk=c3, score=0.0, semantic=0.0, rank=3),
-        ]
+            ]
 
     class FakeBM25:
-
         def search(self, query, k):
             return [
                 ScoredChunk(chunk=c1, score=0.6, lexical=0.6, rank=1),
                 ScoredChunk(chunk=c3, score=0.7, lexical=0.7, rank=2),
-        ]
+            ]
 
     cfg = HybridConfig(alpha=0.5)
     hybrid = HybridRetriever(FakeVS(), FakeBM25(), cfg=cfg)
@@ -156,34 +156,32 @@ def test_hybrid_pool_union_and_minmax_blend():
 
 
 def test_hybrid_zero_range_channel_normalizes_to_one():
-         # All-equal scores => min-max normalizes everything to 1.0.
+    # All-equal scores => min-max normalizes everything to 1.0.
     c1 = _chunk("c1", "aaa")
     c2 = _chunk("c2", "bbb")
 
     class FakeVS:
-
         def search(self, q_vec, k):
             return [
                 ScoredChunk(chunk=c1, score=0.5, semantic=0.5, rank=1),
                 ScoredChunk(chunk=c2, score=0.5, semantic=0.5, rank=2),
-        ]
+            ]
 
     class FakeBM25:
-
         def search(self, query, k):
             return [
                 ScoredChunk(chunk=c1, score=0.3, lexical=0.3, rank=1),
                 ScoredChunk(chunk=c2, score=0.3, lexical=0.3, rank=2),
-        ]
+            ]
 
     cfg = HybridConfig(alpha=0.5)
     hybrid = HybridRetriever(FakeVS(), FakeBM25(), cfg=cfg)
     results = hybrid.retrieve((1.0, 0.0, 0.0), "q", candidates=2)
-          # All equal => all normalize to 1.0 => tie broken by chunk_id ascending.
+    # All equal => all normalize to 1.0 => tie broken by chunk_id ascending.
     ids = [r.chunk.chunk_id for r in results]
     assert ids == ["c1", "c2"]
     blended_scores = [r.score for r in results]
-          # All should be ~equal (all normalized to 1.0).
+    # All should be ~equal (all normalized to 1.0).
     assert all(abs(s - blended_scores[0]) < 1e-9 for s in blended_scores)
 
 
@@ -192,26 +190,24 @@ def test_hybrid_alpha_one_is_pure_dense():
     c2 = _chunk("c2", "b")
 
     class FakeVS:
-
         def search(self, q_vec, k):
             return [
                 ScoredChunk(chunk=c1, score=0.9, semantic=0.9, rank=1),
                 ScoredChunk(chunk=c2, score=0.1, semantic=0.1, rank=2),
-        ]
+            ]
 
     class FakeBM25:
-
         def search(self, query, k):
             return [
                 ScoredChunk(chunk=c1, score=100.0, lexical=100.0, rank=1),
                 ScoredChunk(chunk=c2, score=1.0, lexical=1.0, rank=2),
-        ]
+            ]
 
     cfg = HybridConfig(alpha=1.0)
     hybrid = HybridRetriever(FakeVS(), FakeBM25(), cfg=cfg)
     results = hybrid.retrieve((1.0, 0.0, 0.0), "q", candidates=2)
     ids = [r.chunk.chunk_id for r in results]
-     # Pure dense: c1 (0.9) > c2 (0.1).
+    # Pure dense: c1 (0.9) > c2 (0.1).
     assert ids == ["c1", "c2"]
 
 
@@ -220,25 +216,23 @@ def test_hybrid_alpha_zero_is_pure_lexical():
     c2 = _chunk("c2", "b")
 
     class FakeVS:
-
         def search(self, q_vec, k):
             return [
                 ScoredChunk(chunk=c1, score=0.9, semantic=0.9, rank=1),
                 ScoredChunk(chunk=c2, score=0.1, semantic=0.1, rank=2),
-        ]
+            ]
 
     class FakeBM25:
-
         def search(self, query, k):
             return [
                 ScoredChunk(chunk=c1, score=1.0, lexical=1.0, rank=1),
                 ScoredChunk(chunk=c2, score=0.3, lexical=0.3, rank=2),
-        ]
+            ]
 
     cfg = HybridConfig(alpha=0.0)
     hybrid = HybridRetriever(FakeVS(), FakeBM25(), cfg=cfg)
     results = hybrid.retrieve((1.0, 0.0, 0.0), "q", candidates=2)
-     # Pure lexical: c1 (1.0 > 0.3).
+    # Pure lexical: c1 (1.0 > 0.3).
     ids = [r.chunk.chunk_id for r in results]
     assert ids == ["c1", "c2"]
 
@@ -247,7 +241,7 @@ def test_hybrid_alpha_zero_is_pure_lexical():
 
 
 def test_mock_reranker_returns_top_k():
-         # MockReranker: 0.6 * coverage + 0.4 * norm-cosine.
+    # MockReranker: 0.6 * coverage + 0.4 * norm-cosine.
     reranker = MockReranker()
     c1 = _chunk("d1", "alpha")
     c2 = _chunk("d2", "beta")
@@ -259,7 +253,7 @@ def test_mock_reranker_returns_top_k():
     ]
     result = reranker.rerank("alpha beta gamma", candidates, top_k=2)
     assert len(result) == 2
-          # ScoredChunk.rerank should be populated.
+    # ScoredChunk.rerank should be populated.
     for r in result:
         assert r.rerank is not None
 

@@ -57,10 +57,9 @@ def build_context(
         for sc in scored:
             key = sc.chunk.text
             if key in seen:
-                 # Lower-rank duplicate drops silently except via the flag.
+                # Lower-rank duplicate drops silently except via the flag.
                 ctx.truncated = True
-                logger.debug("build_context: drop duplicate chunk_id={}",
-                            sc.chunk.chunk_id)
+                logger.debug("build_context: drop duplicate chunk_id={}", sc.chunk.chunk_id)
                 continue
             seen.add(key)
             deduped.append(sc)
@@ -68,13 +67,11 @@ def build_context(
         # Overflow check below may also set ctx.truncated.
     for sc in scored:
         t = est_tokens(sc.chunk.text)
-            # Before appending, check the budget guard (I-004 / E-05).
+        # Before appending, check the budget guard (I-004 / E-05).
         if ctx.tokens + t > token_budget:
-             # Drop this doc and every subsequent one; mark truncated.
+            # Drop this doc and every subsequent one; mark truncated.
             ctx.truncated = True
-            logger.debug(
-                "build_context: budget overflow at chunk_id={}",
-                sc.chunk.chunk_id)
+            logger.debug("build_context: budget overflow at chunk_id={}", sc.chunk.chunk_id)
             break
         ctx.tokens += t
         ctx.docs.append(sc)

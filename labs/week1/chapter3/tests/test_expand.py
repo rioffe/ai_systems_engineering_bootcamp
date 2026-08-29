@@ -2,6 +2,7 @@
 
 Implements R-06 / C-06 / T-23, T-04b (SPEC section 8 / section 9).
 """
+
 from __future__ import annotations
 
 from rag.expand import (
@@ -16,8 +17,7 @@ from rag.types import Chunk, ChunkMetadata, ScoredChunk
 
 def _chunk(cid: str, text: str) -> Chunk:
     meta = ChunkMetadata(chunk_id=cid, doc_id=cid.rsplit("#", 1)[0])
-    return Chunk(chunk_id=cid, text=text, meta=meta,
-                 position=0, tokens=max(1, len(text) // 4))
+    return Chunk(chunk_id=cid, text=text, meta=meta, position=0, tokens=max(1, len(text) // 4))
 
 
 def test_mock_expander_original_is_first():
@@ -30,7 +30,7 @@ def test_mock_expander_produces_n_expansions():
     exp = MockQueryExpander()
     out = exp.expand("business class airfare refund", n=4)
     assert len(out) == 4
-    assert len(set(out)) == 4     # all distinct
+    assert len(set(out)) == 4  # all distinct
 
 
 def test_mock_expander_is_deterministic():
@@ -85,8 +85,9 @@ def test_multiquery_dedupe_keeps_max_score():
     def fake_ret(q, _candidates):
         return responses.get(q, [])
 
-    merged = multi_query(FakeExpander(), fake_ret, "business class airfare",
-                         n=3, candidates=5, merge="union")
+    merged = multi_query(
+        FakeExpander(), fake_ret, "business class airfare", n=3, candidates=5, merge="union"
+    )
     ids = [sc.chunk.chunk_id for sc in merged]
     assert len(set(ids)) == 3
     sc_map = {sc.chunk.chunk_id: sc for sc in merged}
@@ -106,9 +107,9 @@ def test_multiquery_n_one_collapses():
     def fake_ret(_q, _candidates):
         return [ScoredChunk(chunk=c1, score=0.7, semantic=0.7, rank=1)]
 
-    merged = multi_query(FakeExpander(), fake_ret,
-                         "business class airfare",
-                         n=1, candidates=5, merge="union")
+    merged = multi_query(
+        FakeExpander(), fake_ret, "business class airfare", n=1, candidates=5, merge="union"
+    )
     assert len(merged) == 1
     assert merged[0].chunk.chunk_id == "c1"
     assert merged[0].score == 0.7
@@ -132,8 +133,7 @@ def test_multiquery_sorted_by_score_desc():
     def fake_ret(q, _candidates):
         return responses.get(q, [])
 
-    merged = multi_query(FakeExpander(), fake_ret, "q",
-                         n=3, candidates=5, merge="union")
+    merged = multi_query(FakeExpander(), fake_ret, "q", n=3, candidates=5, merge="union")
     ids = [sc.chunk.chunk_id for sc in merged]
     assert ids == ["c2", "c3", "c1"]
 
@@ -154,8 +154,7 @@ def test_multiquery_tie_break_chunk_id_ascending():
     def fake_ret(q, _candidates):
         return responses.get(q, [])
 
-    merged = multi_query(FakeExpander(), fake_ret, "q",
-                         n=2, candidates=5, merge="union")
+    merged = multi_query(FakeExpander(), fake_ret, "q", n=2, candidates=5, merge="union")
     ids = [sc.chunk.chunk_id for sc in merged]
     assert ids == ["cB", "cC"]
 

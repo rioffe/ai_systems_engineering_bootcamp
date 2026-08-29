@@ -49,7 +49,9 @@ def configure(verbose: bool = False, quiet: bool = False, *, log_file: str | Non
         )
 
     # Quiet the noisy std-log bridges; keep them mapped through loguru via InterceptHandler.
-    logging.basicConfig(handlers=[_InterceptHandler()] if not _CONFIGURED else None, level=logging.WARNING)
+    logging.basicConfig(
+        handlers=[_InterceptHandler()] if not _CONFIGURED else None, level=logging.WARNING
+    )
     for name in ("httpx", "httpcore", "urllib3"):
         logging.getLogger(name).setLevel(logging.WARNING)
     _CONFIGURED = True
@@ -59,11 +61,11 @@ class _InterceptHandler(logging.Handler):
     """Bridge stdlib logging records into loguru."""
 
     def emit(self, record: logging.LogRecord) -> None:
-         # Make sure the loguru level matches the stdlib level name.
+        # Make sure the loguru level matches the stdlib level name.
         level = "WARNING" if record.levelno >= logging.WARNING else "INFO"
         try:
             logger.log(level, record.getMessage())
         except (ValueError, TypeError, KeyError):
-             # Only the three realistic emit failures are rethrown as an emit error;
+            # Only the three realistic emit failures are rethrown as an emit error;
             # a truly unexpected crash propagates rather than being swallowed blind.
             self.handleError(record)
