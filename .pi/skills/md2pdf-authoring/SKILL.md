@@ -313,9 +313,18 @@ Diagrams in this project live in ` ```text ` fences and must render under xelate
    math symbols, so treat any such glyph placed in a code fence as risky and use a
    plain-ASCII equivalent instead. Known offenders:
       `∈` (U+2208, triggers `Missing character: ... in font [lmmono10-regular]`),
-    `×` (U+00D7, as in `3× performance`), `≤`/`≥` (=> `<=`/`>=`), `≈` (=> `~`).
+    `×` (U+00D7, as in `3× performance`), `≤`/`≥` (=> `<=`/`>=`), `≈` (=> `~`),
+    `⇄` (U+21C4, as in state-machine loops => `<->`), `≠` (U+2260, => `!=`).
    Example: `currency in allowed currencies`, `3x performance`.
    These symbols are fine inside `$$ ... $$` math, where the math font provides them.
+- **In prose, risky math glyphs become inline `$latex$`.** The same glyph problem
+  bites outside code fences: an `≈`/`≤`/`≥`/`≠`/`∈`/`⇄` in narrative text or a table
+  cell renders as a missing-glyph `lmroman` warning or garbled output. Replace it
+  with inline math -- `\approx`, `\le`/`\ge`, `\ne`, `\in`, `\rightleftarrows` —
+  e.g. `Observation ≠ reasoning` => `Observation $\ne$ reasoning`,
+  `(≤ max_retries)` => `($\le$ max_retries)`. Keep the ASCII fallback (`~`,
+  `<=`/`>=`, `!=`, `in`, `<->`) for code-fence occurrences only. Scan for offenders
+  with `grep -n '[≈≤≥≠∈⇄]' file.md` before converting.
 
 ## Verification workflow
 
@@ -346,10 +355,11 @@ for c,n in sorted(collections.Counter(x for x in s if ord(x)>127).items()):
 PY
 ```
 
-Expected non-ASCII in these chapters: `— – “ ” ’ § ↓ →` and the `ï` in "naïve"
+Expected non-ASCII in these chapters: `— – “ ” ’ § ↓ →` and the `ï` in “naïve”
 (`∈` may appear but only inside `$$` math). Anything outside that set -- box
-characters `┌┐└┘│┬┴─`, triangle arrows `▲▼`, or `×`/`≈`/`≤`/`≥` inside a code fence --
-is a bug to fix.
+characters `┌┐└┘│┬┴─`, triangle arrows `▲▼`, or `×`/`≈`/`≤`/`≥`/`≠`/`⇄` anywhere (code
+fence or prose) -- is a bug to fix (ASCII fallback in fences, inline `$latex$` in
+prose).
 
 ## Debugging a "Success but wrong" conversion
 
@@ -406,7 +416,7 @@ The `l.<n>` in the xelatex log points at a line in pandoc's generated `.tex`, *n
    open-`[` nor close-`]` sed rule, so don't "fix" it)
 - [ ] Prose `\(var\)` / `\(f_\theta\)` math notation converted to inline `$…$`
 - [ ] No triangle arrows `▲ ▼` (or `↑`) in ` ```text ` diagrams -- use `^` / `v`
-- [ ] No `×` / `≈` / `≤` / `≥` / `∈` glyphs inside ` ```text ` / ` ```json ` fences
+- [ ] No `×` / `≈` / `≤` / `≥` / `∈` / `⇄` / `≠` glyphs inside ` ```text ` / ` ```json ` fences
 - [ ] Percent signs escaped as `\%` inside math
 - [ ] `$` escaped as `\$` inside display math
 - [ ] Coefficient–label pairs use `\,` and `\text{}`
@@ -414,5 +424,9 @@ The `l.<n>` in the xelatex log points at a line in pandoc's generated `.tex`, *n
 - [ ] No `===…=`/leading `# ` artifacts left inside math blocks
 - [ ] Diagrams use `+ - |` boxes, not Unicode box-drawing
 - [ ] No `∈`/glyph-missing chars inside ` ```text ` / ` ```json ` fences
+- [ ] Risky math glyphs in prose (`≈`/`≤`/`≥`/`≠`/`∈`/`⇄`) replaced with inline
+     `$latex$` (`\approx`, `\le`/`\ge`, `\ne`, `\in`, `\rightleftarrows`); ASCII
+     fallbacks (`~`, `<=`, `!=`, `in`, `<->`) only in code fences -- grep
+     `grep -n '[≈≤≥≠∈⇄]' chapter.md` before converting
 - [ ] `md2pdf.sh --toc` prints only "Success!"
 - [ ] Regenerated `.pdf` committed together with the `.md`
