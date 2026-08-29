@@ -7,6 +7,7 @@ network. The OllamaEmbedder is the real path, used only in the manual smoke.
 
 from __future__ import annotations
 
+import abc
 import math
 import re
 
@@ -35,14 +36,14 @@ def tokenizer(text: str) -> list[str]:
     return [t for t in raw if t]
 
 
-class Embedder:
-    # Abstract interface; concrete subclasses provide model_id + dim.
+class Embedder(abc.ABC):
+    """Abstract interface; concrete subclasses provide model_id + dim."""
     model_id: str = ""
     dim: int = 256
 
+    @abc.abstractmethod
     def embed(self, text: str) -> tuple[float, ...]:
-        raise NotImplementedError
-
+        """Return a dense vector of size `dim` for the given text."""
 
 class MockEmbedder(Embedder):
     # O-1: deterministic hashed bag-of-words, L2-normalized, process-independent.

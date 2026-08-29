@@ -39,5 +39,7 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 
 [tool.pyright]
+pythonPath = ".venv/bin/python3"
 extraPaths = ["src"]
 include = ["src", "tests"]
+reportMissingImports = "none"

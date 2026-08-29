@@ -95,8 +95,8 @@ def _faithfulness(
 class Judge(ABC):
 
     @property
-    def model_id(self) -> str:   # pragma: no cover
-        raise NotImplementedError
+    def model_id(self) -> str:
+        return ""
 
     @abstractmethod
     def judge(
@@ -110,7 +110,7 @@ class Judge(ABC):
         max_retries: int = 2,
         on_failure: str | None = None,
         ) -> Verdict:  # pragma: no cover
-          ...
+        pass
 
 
 # -- MockJudge ---------------------------------------------------------------

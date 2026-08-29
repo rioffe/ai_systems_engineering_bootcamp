@@ -35,10 +35,12 @@ class VectorStore:
     def __init__(self, dim: int) -> None:
         self.dim = dim
         self._entries: list[tuple[ScoredChunk, tuple[float, ...]]] = []
+        self._data: dict[str, tuple[Chunk, tuple[float, ...]]] = {}
 
     def insert(self, chunk: Chunk, vector: tuple[float, ...]) -> None:
         sc = ScoredChunk(chunk=chunk, score=0.0, semantic=0.0, rank=0)
         self._entries.append((sc, vector))
+        self._data[chunk.chunk_id] = (chunk, vector)
 
     def search(self, q_vec: tuple[float, ...], k: int) -> list[ScoredChunk]:
         results: list[ScoredChunk] = []
@@ -63,6 +65,7 @@ class BM25Index:
         self._tf: list[dict[str, int]] = []
         self._df: dict[str, int] = {}
         self._dl: list[int] = []
+        self._data: dict[str, Chunk] = {}
 
     def index(self, chunks: list[Chunk], k1: float | None = None, b: float | None = None) -> None:
         # O-3a dedup by chunk_id: skip a chunk_id already indexed (keep first).
