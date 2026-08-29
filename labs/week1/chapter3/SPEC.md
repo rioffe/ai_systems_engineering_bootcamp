@@ -933,7 +933,7 @@ signals so the UI never blocks on inference:
 +---------------------------+-----------------------------------------------+
 ```
 
-GUI controls validate like ch1 §5.2 (non-empty question; $k \in [1,100]$, $k \le top_n$, 
+GUI controls validate like ch1 §5.2 (non-empty question; $k \in [1,100]$, $k \le top_n$,
 $\alpha \in [0,1]$, tiers >= 1; `Cancel` enables only while running). On `Run` the pipeline executes
 off-thread with `QT_QPA_PLATFORM=offscreen` for CI; the panel shows the ranked->reranked
 contextualized evidence *with per-stage scores*, a truncation badge when `Context.truncated`, the
