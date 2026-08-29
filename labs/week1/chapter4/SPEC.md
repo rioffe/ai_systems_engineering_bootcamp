@@ -386,3 +386,225 @@ pre-filled and `reference_answer` / `relevant_chunks` / `gold_facts` carrying th
 a human completes ground truth, E-02). Deterministic, offline.
 
 ---
+
+## 5. Interface specification
+
+### 5.1 CLI — primary surface (`rag-eval`, R-18)
+
+| Subcommand | Behavior | Exit |
+| ---------- | -------- | ---- |
+| `rag-eval check --dataset <path>` | Validate the golden dataset (schema, category membership, reference closure, sentinel check); emit `dataset_report.json`. | `0` ok / `3` violations / `2` usage |
+| `rag-eval run --dataset <path> [--mock] --out eval.json` | Load → `build_index` → run all cases → eval.json + human summary. | `0` (also on DEGRADED_MOCK) / `4` PULL_REQUIRED |
+| `rag-eval compare --baseline a.json --current b.json [--force]` | §23 Δ report to stdout + `compare_report.json`. | `0` |
+| `rag-eval gates --baseline a.json --current b.json --config gates.yml` | §24 CI decision, per C-07. | `0` pass / `1` fail |
+| `rag-eval judge-check --labels labels.json --eval eval.json` | §26 evaluator agreement vs human labels. | `0` / `3` missing labels / `2` usage |
+| `rag-eval pair --a config.json --b config.json [--mock]` | §27 WinRate (optional, R-12). | `0` / `2` usage |
+| `rag-eval new-case --trace <AoEResult.json> --case-id <id>` | §28 scaffold an EvalCase (optional, R-13). | `0` / `2` usage |
+
+**Usage errors** (missing flags, bad paths, unknown subcommand) exit `2` consistently (K-01). The
+`--force-rebuild` flag is reserved for the experiment path (R-08/E-08); `--force` for `compare`/`gates`
+bypasses eval-report-version mismatch (E-06). Global: `--self-check` (source-scan for I-016, T-02
+analog), `--verbose/--quiet` (loguru level as in ch3), `--model` (real-path judge override).
+
+### 5.2 GUI — optional surface (`rag-eval-gui`, R-16)
+
+A PyQt5 window opens a saved `eval.json` or `compare_report.json` from disk (file picker). It shows:
+run summary banner (`usage_kind`, judge-role mock/real), `by_category` table, per-case trace detail
+(retrieved chunks, verdict pills, failure-classification string), and a compare Δ table. It never
+runs inference — the GUI is read-only over artifacts (I-016). Offscreen-rendered in tests via pytest-qt
+(T-13, ch3 R-16/T-16 analog).
+
+---
+
+## 6. Invariants (must hold in every valid implementation)
+
+| ID | Invariant |
+| -- | --------- |
+| **I-001** | **Zero-denominator safety** (ch3 carried): no metric divides by an empty denominator; each zero case falls back to its documented value (C-04: accuracy/P/R/`cost_per_success` -> `0`, groundedness/completeness -> `1.0` "nothing to contradict", hallucination -> `0.0`). |
+| **I-002** | **Byte-deterministic output:** for identical inputs, harness output artifacts are byte-identical. Floats are rendered at fixed `%.4f`; `by_category` keys are sorted lexicographically; latencies on the mock path are deterministic content-derived surrogates; the real path is opt-in (never in CI). |
+| **I-003** | **Deterministic-first evaluator:** deterministic checks (C-03) execute before, and independently of, the judge verdict; a judge is only ever asked about what passes structure. An application answer failing schema validation never reaches the judge (status `PARSE_BLOCKED`). |
+| **I-004** | **Directionality map** (C-06): every metric's Δ is computed with its declared direction (higher- or lower-better); the map is centralized in `compare.py` as a dict — no per-call `if metric == ...` scattered in reports. |
+| **I-005** | **Verdict status totality:** every verdict settles in one of `{PASS, FAIL, PARSE_BLOCKED}`; a `PARSE_BLOCKED` verdict still enters failure classification and metrics. No case is silently dropped. |
+| **I-006** | **Failure-classification totality:** the §34 set `{RETRIEVAL, CONTEXT, GENERATION, PARSING, EVALUATION}` covers every non-pass case exactly once, evaluated by the C-08 precedence; the fallback is `GENERATION_FAILURE`. The classification must not rethrow "unknown" for an omitted ch3 stage. |
+| **I-007** | **Metric key totality:** `compare`/`gates` operate over the declared `METRIC_KEYS` list only; any key outside it is a config error (I-015). Gates operate on the *same* metric names the report emits. |
+| **I-008** | **Index/query flag boundary:** experiment flags that ch3 classifies as index-time (`--chunk-size`, `--strategy`, `--contextual`, `--embed-model`) force a fresh `build_index` before any case runs; query-time flags recompute on an existing index. Comparing runs across a stale index is refused unless `--force-rebuild` (E-08). |
+| **I-009** | **Core is LLM/network-free:** the deterministic eval core (`dataset.py`, `evaluator.py`, `metrics.py`, `compare.py`, `gates.py`, `failure.py`, `report.py`) must not import the ch3 `rag` package, Ollama, or the network — enforced by the source-scan (T-02). Only `aoe.py` may import ch3 `rag` (I-016). |
+| **I-010** | **Schema gate on load:** `eval.json`, `compare_report.json`, and `gates.yml` (via `pyyaml` → jsonschema) are validated on every read before use (R-19); a malformed artifact is a deterministic load error (E-06/E-14). |
+| **I-011** | **Gold isolation:** `reference_answer` / `relevant_chunks` / `gold_facts` are consumed by `evaluator.py` + `metrics.py` only; they never reach `aoe.py` (and therefore the generation prompt) — ch3 F-001 carried. |
+| **I-012** | **Stratification totality:** aggregate output always includes `by_category`; the dataset must therefore declare category labels (§35). Compare never drops stratification; a baseline lacking it is deprecated schema (E-06). |
+| **I-013** | **Dataset integrity** (ch3 I-013 carried): corrupt/missing/partial dataset file → deterministic violations enumerated in `check`; never a partial load (E-02). |
+| **I-014** | **GUI read-only** (ch3 analog): the GUI may only open artifacts; it never blocks on or performs inference (T-13). |
+| **I-015** | **Config validation totality:** unknown gate metric keys or malformed YAML fail at load with an explicit config error (not silently ignored), and only `METRIC_KEYS` names are accepted. |
+| **I-016** | **Adapter boundary:** the *only* module permitted to import the ch3 `rag` package is `aoe.py`; `compare`, `gates`, the GUI, and report reading open artifact files only (they never re-run the AoE). Enforced by the source-scan (T-02, ch3 I-009/T-02 analog). |
+| **I-017** | **No unseen re-verdict / label fabrication:** `EVALUATION_FAILURE` may be asserted ONLY when a human-label disagreement exists (C-08/E-16); the harness never fabricates evaluation disagreement. Similarly `new-case` scaffolds (never completes) ground truth (C-11). |
+
+---
+
+## 7. Constraints (precise and measurable)
+
+| ID | Constraint |
+| -- | ---------- |
+| **K-01** | **Usage-error exit codes:** all CLI subcommands exit `2` on usage errors (missing flag, unparsable YAML, missing file); never `0` or `1`. |
+| **K-02** | **Offline mock run time** (ch3 analog): a full 100-case mock dataset run completes **under 5 minutes** on the host (CI soft target). |
+| **K-03** | **Gates aggregate exit:** `gates` exit `0` iff all per-gate booleans pass; exit `1` otherwise. `gate_report.json` is emitted either way. |
+| **K-04** | **Compare/gates output coupling:** the stdout Δ table and `compare_report.json` are emitted by one `report.py` call so the on-screen text and on-disk JSON cannot disagree. |
+| **K-05** | **Percentile method:** latency percentiles use the **near-rank** method (sorted array, `rank = ceil(p/100 * n)`), cross-checked in T-07 against simple cases; no interpolation approximations. |
+
+---
+
+## 8. Edge cases and failure semantics
+
+| ID | Case | Semantics |
+| -- | ---- | --------- |
+| **E-01** | Corpus path missing/unreadable at `run` | exit `2` usage error; no partial index (ch3 E-01 carried). |
+| **E-02** | Dataset has duplicate `case_id`s / bad category / dangling chunk reference / `REPLACE_ME` sentinel / bad JSON | `check` enumerates ALL violations in `dataset_report.json`, exit `3`; a partial load is never accepted (I-013). |
+| **E-03** | Zero `gold_facts`, zero unsupported claims, zero total claims, zero corpus successes | documented zero-denominator fallbacks per I-001 (groundedness/completeness become `1.0` "nothing to contradict"; hallucination `0.0`; cost `n/m`). |
+| **E-04** | AoE answer JSON fails schema validation | verdict.status = `PARSE_BLOCKED`; classification `PARSING_FAILURE` (I-005/I-006); judge not asked. |
+| **E-05** | AoE run raises (`run_case` exception) | caught, verdict `FAIL` status `RUN_ERROR`, classified `GENERATION_FAILURE` fallback, harness continues other cases (E-11-follow), warning recorded in trace. |
+| **E-06** | `eval.json` version mismatch / bad schema in `compare` / `gates` | rejected with explicit message (exit `2`) unless `--force`; schema gate always first (I-010). |
+| **E-07** | Metric absent on one side of `compare` / `gates` | Δ row renders explicit `n/m` marker; `gates` treats missing metric as **fail-closed** (fail, explicit `missing-metric` string) (I-007). |
+| **E-08** | Stale index mismatch across `compare` (experiment flags imply different index) | refused with explicit `stale index` message unless `--force-rebuild` (I-008); no silent cross-index compare. |
+| **E-09** | `judge-check` and no human-label file matches `--labels` | exit `3`, `NO_LABELS` report; not auto-agreement (I-017). |
+| **E-10** | Human-label file empty or wrong shape | `check` violations enumerated (same as E-02), exit `3`; labels must specify at least one of the verdict fields. |
+| **E-11** | Gates config missing metric key / `n/m` cell reached | that gate **fails closed** with explicit `missing-metric` (I-007/E-07); the overall aggregate reflects it. |
+| **E-12** | `compare` or `gates` invoked with different `dataset_id`s | rejected in usage error (exit `2`); comparing different datasets is a deterministically-detected error. |
+| **E-13** | `--real` with Ollama unavailable → taxonomy | DEGRADED_MOCK (exit `0`, banner) / PULL_REQUIRED (exit `4`, non-numeric remediation) / RUN_REAL (exit `0`) — ch3 taxonomy carried verbatim (R-15). |
+| **E-14** | Report schema drift (e.g. hand-edited `n/m` becomes numeric `0` in artifact) | schema gate on load detects and rejects (I-010) — `n/m` is a documented literal, not a zero. |
+| **E-15** | `pair` ties | ties count in `comparisons` denominator, never in the `A_wins` numerator (C-10). |
+| **E-16** | Classifier receives an omitted ch3 `failure_stage` | falls back to `GENERATION_FAILURE` (I-006); never asserts `EVALUATION_FAILURE` without label evidence (I-017). |
+| **E-17** | GUI opened without a valid artifact path | shows the open-file dialog; a malformed artifact yields an inline schema error message, never a crash (I-014). |
+| **E-18** | `new-case --trace` points at a malformed artifact | schema-gate rejects it before scaffolding, usage error exit `2` (I-010). The scaffold is always valid-JSON. |
+
+---
+
+## 9. Acceptance criteria, tests, and evals
+
+All subsections below (T-01..T-24) run fully offline under `uv run pytest` (R-14, ch3 carried); the
+real Ollama path is §9.11 manual-only. Test ids use ch3's naming discipline: each acceptance row is a
+`T-NN` id registered in §11.
+
+### 9.1 Dataset (C-01, R-02/R-13)
+
+- **T-01** `check` on a valid 5-row dataset exits `0` and produces a valid `dataset_report.json` (schema-gated).
+- **T-01b** dataset with a duplicate `case_id` → `check` exit `3` + enumerated violation.
+- **T-01c** dataset with `REPLACE_ME` sentinel (scaffold) → violation (the scaffold is not golden, C-11).
+- **T-15** corrupt JSON input → `check` enumerates schema violations; exit `3` (ch3 I-013 analog).
+
+### 9.2 Pipeline end-to-end (C-02/C-12, R-01/R-14)
+
+- **T-03** `run --mock --out eval.json` over the 5-row dataset → emits valid `eval.json` (R-21), each case carries `verdict` + `metrics` + `failure_classification`, report version `0.1`.
+- **T-13** GUI offscreen opens the emitted `eval.json` without error (R-16/I-014).
+- **T-14** source/structure scan: no LLM/Ollama/network import in the eval core; only `aoe.py` imports ch3 `rag` (I-009/I-016).
+
+### 9.3 Metrics (C-04, R-04)
+
+- **T-04** P/R@k threshold example over fixed retrieved/relevant lists (hand-computed).
+- **T-05** percentile near-rank on a sorted 20-sample latency list → T-05 asserts P50/P95 match K-05's formula.
+- **T-05b** zero-denominator fallbacks honored per I-001 (empty gold-facts, no-claims case, zero successes → n/m/1.0/0.0 per I-001).
+- **T-07** `by_category` aggregation equals per-category arithmetic mean of case metrics (I-012).
+- **T-08a** ch3 metric ancestry preserved: retrieval P@k/R@k reuse ch3 `metrics.py` (no rewrite, T-02 covers the boundary).
+
+### 9.4 Determinism + gold isolation (R-14/R-20)
+
+- **T-06** repeated `run --mock` on byte-identical inputs produces byte-identical `eval.json` (I-002) with fixed `%.4f`.
+- **T-06b** corpus one-row parse-error simulation via ModelAnswer factory (verdict status `PARSE_BLOCKED`; never spawn an LLM) (I-003/I-005).
+- **T-11** gold-isolation test: assert `run_case` receives only `context/system/question` (no reference fields) (I-011).
+
+### 9.5 Compare (C-06, R-06)
+
+- **T-08** fabricated two-version pair asserts Δ signs on the direction map (higher- vs lower-better both) (I-004).
+- **T-08b** `by_category` Δ row for each category appears in output (I-012).
+- **T-12** dataset-id mismatch `compare` → exit `2` + explicit message (E-12).
+
+### 9.6 Gates (C-07, R-07)
+
+- **T-09i** all-pass gates config → exit `0`, `gate_report.json` enumerates per-gate booleans.
+- **T-09f** config where one gate fails → exit `1` with explicit failing-gate list (K-03).
+- **T-09m** missing metric → fail-closed exit `1` + explicit missing-marker (E-11/I-007).
+- **T-15b** malformed YAML/unknown metric key → usage error exit `2` (I-015/K-01).
+
+### 9.7 Failure classification (C-08, R-10)
+
+- **T-10a** schema-invalid answer → `PARSING_FAILURE` classification.
+- **T-10b** ch3 stage `expansion` → `RETRIEVAL_FAILURE` (mapping rule C-08 step 3).
+- **T-10c** ch3 stage `generation` → `GENERATION_FAILURE` (C-08 step 5).
+- **T-10d** label-evidence → `EVALUATION_FAILURE` asserted only when the label disagreement exists (I-017).
+- **T-10e** omitted stage → fallback `GENERATION_FAILURE` (I-006).
+
+### 9.8 Deliberate regression, §33 (R-09)
+
+- **T-09** the fixed §33 exercise is preloaded under `tests/fixtures/` as two artifacts (`top_k=5` vs `top_k=30`); Δ shows **precision/groundedness worse** and **recall better**; documented example (acceptance).
+
+### 9.9 Judge validation (C-09, R-11)
+
+- **T-17** fabricated labels + eval with one disagreement → agreement = computed fraction (not 1.0), disagreement pair listed (I-017 never fabricates).
+- **T-08a-reuse** ch3 verdict-shape is preserved (schemas match ch3 verdict fields exactly, R-19).
+
+### 9.10 Optional surfaces (R-12/R-13/R-16)
+
+- **T-16/T-22** `pair` twins A/B over 3 fabricated cases → `WinRate` correct and ties excluded from numerator (E-15).
+- **T-23** `new-case` on a valid trace emits sentinel-filled EvalCase schema-valid (and `check` *flags* the sentinel) (C-11/E-02).
+- **T-13** GUI offscreen-reads the pair report too (I-014).
+
+### 9.11 Manual / real-path smoke (opt-in — not part of `uv run pytest`)
+
+- `M-01` with Ollama up and model pulled, `run --real` exits `0`, banner `RUN_REAL`, `usage_kind` is `measured`, real percentiles included.
+- `M-02` Ollama down → `DEGRADED_MOCK` exits `0` with ch3 banner; `PULL_REQUIRED` exits `4` with remediation line (R-15/E-13).
+
+---
+
+## 10. Dependencies and environment
+
+Python **3.12** via `uv` (ch3 carried); libraries: `pyyaml` (gates YAML), `jsonschema` (schema gate
+R-19), `loguru` (logging), `httpx` (Ollama real path), plus ch3 `rag` package **as a path dependency**
+(read-only): `file:${PROJECT_ROOT}/labs/week1/chapter3/src/rag`. Optional GUI: `PyQt5`,
+`pytest-qt` (R-16). Dev: `pytest`. No network, no Ollama, no model required for CI (R-14).
+
+The ch3 **host prerequisite** is *optional* (needed only for the manual §9.11 real path):
+
+```text
+ollama pull nomic-embed-text     # embedder   (real path only)
+ollama pull qwen3.8:27b-mlx      # generation + judge (real path only)
+```
+
+Without them the harness *must* degrade to the mock doubles with ch3's exact banner text (R-15/E-13).
+
+---
+
+## 11. Traceability matrix (id → where realized)
+
+```text
+§0 / §31 thesis         --> pipeline loop in §3.2                               --> T-03
+R-01 (§2 harness)       --> pipeline wiring (dataset -> aoe -> evaluator -> metrics) --> T-03
+R-02 / R-13 / I-013     --> dataset.py loader + closure validator               --> T-01, T-15
+R-03 / I-003 (§5)       --> evaluator.py deterministic-first ordering           --> T-06b, T-11
+R-04 (§19 vector)       --> metrics.py accuracy/P/R/G/C/H/L/K math              --> T-04, T-05, T-05b, T-07
+R-05 / I-012 (§21/§35)  --> metrics.py by_category + compare.py preserved       --> T-07, T-08b
+R-06 / I-004 (§23)      --> compare.py direction map + n/m                      --> T-08, T-08b
+R-07 / K-03 (§24/$25)   --> gates.py hard directional constraints                --> T-09i, T-09f
+R-08 / I-008 (§32)      --> experiment flags index/query split (from ch3)       --> T-14 scan + E-08
+R-09 (§33 deliberate)   --> tests/fixtures top_k 5 vs 30 pair                   --> T-09
+R-10 / I-005/I-006 (§34)--> failure.py precedence classifier                    --> T-10a..T-10e
+R-11 (§26)              --> judge_check.py agreement                            --> T-17
+R-12 (§27 MAY)          --> pair.py WinRate                                     --> T-16/T-22
+R-13 (§28 MAY)          --> new-case scaffold (REPLACE_ME sentinel)             --> T-01c, E-02
+R-14 (offline)          --> mock doubles via ch3; deterministic surrogates      --> T-06, T-03, R-17
+R-15 (E-13 carried)     --> aoe.py availability resolution                      --> M-02 (§9.11)
+R-16 / I-014 (GUI)      --> ui.py read-only artifact browser                    --> T-13
+R-17 / I-009 (core)     --> source-scan assertion                               --> T-14 (ch3 T-02 analog)
+R-18 (CLI)              --> cli.py subcommands                                  --> T-03, T-12, T-15b
+R-19 / I-010 (schema)   --> schemas.py gate on eval/compare/gates/labels        --> T-01, T-15, E-14
+R-20 / I-011 (gold)     --> aoe.py prompt fields only                           --> T-11
+R-21 (versioning)       --> report.py eval_report_version literal + gate        --> T-03, E-06
+I-001 (zero-div)        --> metrics.py documented fallbacks                     --> T-05b
+I-002 (byte-ident)      --> report.py fixed %.4f + sorted keys                  --> T-06
+I-004 (direction map)   --> compare.py centralized                              --> T-08
+I-007 (metric keys)     --> gates.py METRIC_KEYS filter + E-07/E-11             --> T-09m, T-15b
+I-015 (config)          --> gates.py YAML validation + unknown keys             --> T-15b
+I-017 (labels)          --> failure.py + judge_check.py label evidence          --> T-10d, T-17, E-16
+I-016 (adapter)         --> aoe.py boundary (only module importing ch3)         --> T-14
+K-01..K-05              --> cli.py exits / metrics near-rank percentiles        --> T-05, T-12, T-15b
+E-01..E-18              --> failure.py + cli.py + UI schema-error paths         --> T-03, T-10a..e, T-12, T-13, T-15, T-15b, T-17
+```
+
+---
