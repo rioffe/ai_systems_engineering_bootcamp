@@ -673,7 +673,7 @@ flag partitioning (F-010), pair config schema (F-011).
 | Scope clarity | 5 | Single AoE boundary crisp (adapter), in/out scope explicit |
 | Terminology | 4 | AoE/Evaluator/Judge/verdict/etc stable; `pair` label learns small drift |
 | Requirement precision | 4 | Behavioral form mostly; R-02 floor lacks anchoring (F-004) |
-| Interface completeness | 3 | Weak on ch3↔ch4 verdict seam (F-001/F-002) |
+| Interface completeness | 3 | Weak on the ch3-to-ch4 verdict seam (F-001/F-002) |
 | Data-contract completeness | 4 | Lifecycle enumerated (C-01..C-11); `dataset_id` ambiguity |
 | State/lifecycle definition | 4 | §3.2 state machine with explicit PARSE_BLOCKED path |
 | Algorithm precision | 4 | Zero-denominator fallbacks + directionality (I-001/I-004) |
@@ -682,13 +682,13 @@ flag partitioning (F-010), pair config schema (F-011).
 | Non-functional requirements | 3 | K-02 soft-typed as "host" partly unsupported; percentiles K-05 pinned |
 | Security specification | 3 | Scope-appropriate; gold isolation and trust boundary normative |
 | Observability/provenance | 5 | Trace per case, artifacts versioned, `usage_kind` labeled |
-| Testability | 4 | Granular acceptance + regression fixtures (T-09) − F-001/F-004 blockers |
+| Testability | 4 | Granular acceptance + regression fixtures (T-09) minus F-001/F-004 blockers |
 | Evaluation/metrics | 4 | Formulas+denominators per I-001; F-009 metric-family ambiguity |
 | Traceability | 4 | §11 matrix fine modulo F-012 ids |
 | Internal consistency | 3 | F-001/F-002/F-003 real conflicts |
 | Architecture consistency | 4 | Adapter+artifact pattern sound; I-016 enforced |
 | Implementation readiness | 3 | Blocking questions listed above |
-**Average:** ≈ 3.8 / 5
+**Average:** about 3.8 / 5
 
 ## 20. Remediation Plan
 
