@@ -557,3 +557,91 @@ single-principal use; security NFR is adequate given stated scope (F-013 usage-k
 risk of data provenance rather than a security fault).
 
 ---
+
+---
+
+## 11. Security and Trust-Boundary Review
+
+The harness's threat surface is compact: (a) golden dataset files, (b) LLM/gate boundary (retrieved
+text as data, ch3 R-21), (c) human label ingestion for evaluator validation, and (d) the eval.json
+provenance. Chapters ch3 R-21 remains intact (retrieved evidence flagged via `injection_warning`
+through `citation.py`); gold-isolation I-011 forbids the evaluator's expected-values from flowing
+into generation (a good trust boundary).
+
+Remaining semantic points: labels are untrusted input for the classifier (F-008 ingestion timing);
+the `pair` config (JSON flags typed) lacks schema (F-011); the `eval.json` carries full
+`raw_output` text of the AoE — a comparatively small leak surface since the system reads local
+artifacts only (fine, and explicitly a non-issue in ch3). No privileged operations; no
+authentication. Your spec correctly scopes out an unrelated security architecture.
+
+## 12. Observability and Provenance Review
+
+Strongest section. The harness pins provenance: `dataset_id` name (set, F-003), trace record per
+`case_id` (C-02), `usage_kind` labeling (synthetic vs measured, R-14), capability deltas (ch3
+carried), and the R-to-I-to-C-to-E traceability matrix in §11 itself. Gaps are narrow:
+
+- **F-012** (untested edge cases and collided T-ids) weakens the T-NN→module→behavior chain.
+- **F-013** (usage-kind compare guard) hides dimension K provenance.
+- **F-016** is technically avoided because protos are explicitly pinned to AoE results; good.
+
+The §34 trace record is preserved per case — the class of mistake "what did class X do" is never
+guessy. The guide version `0.1` is ritualistically wired (E-06/E-14) and `check` tells the user
+which version they're on.
+
+## 13. Testing and Verification Review
+
+Acceptance criteria are granular: T-01..T-24 grouped by §9.1 dataset, §9.1 pipeline, §9.3 metrics,
+§9.4 determinism, §9.5 compare/gates, §9.7 classification, §9.8 deliberate-regression (excellent
+exercise discipline), §9.9 judge validation, §9.10 optional surfaces, and §9.11 manual real-path
+smoke. For every requirement, the test that would prove it exists **(though F-012 undermines clarity
+by colliding ids)**. Negatives (T-01b/T-01c/T-12/T-15b) and zero-denominator (T-05b) exercised.
+
+What blocks "test-driven completeness": T-01 assumes 5-row fixture (F-004), T-08a tests aim at the
+wrong verdict layer (F-001/F-002) — after which §9.3's zero-denominator tests cease long-branch
+failover tests (F-007). The F-012 list names untested E-ids on which verification would be more
+secure.
+
+## 14. Metrics and Evaluation Review
+
+Formulas in C-04 are precise, named, and reference the right denominators per I-001 (groundedness =
+supported/F, completeness = reflected/total, hallucination = unsupported/total, latency near-rank
+percentile, cost per *successful* case). Reflected/relevant definition carries ch3's F-006
+interaction-with-reference only in comment form — below recommendation is to restate explicitly.
+Practical blocking bits: the **METRIC_KEYS normative closure** (F-009), **PARSE_BLOCKED numerics**
+(F-007), and missing **MRR/MAP/NDCG specification** (F-009) are the only metric-layer gaps.
+
+Every metric is independently reproducible from evidence (trace + verdict) without requiring the
+component itself (the most important property; ch3 F-006 carried).
+
+## 15. Traceability Review
+
+The §11 matrix again is strong (each R mapped to a source/behavior + test); unfortunately it
+collapses on three ids: T-08a allocated to metrics and to judge-validation; T-13 to GUI and to
+pair; and a handful of E-ids (E-01, E-05, E-08, E-14, E-17) have no test row (F-012). That is a
+naming defect, not an architectural defect. §11 maintains its usefulness across P0 fixes if
+renumbered (recommended resolution §20).
+
+## 16. Internal-Consistency Review
+
+Internal consistency is currently the weakest axis:
+
+- The ch4 status set restriction vs ch3's PARTIAL-capable status (F-002) side-by-side is a true
+  inconsistency.
+- `AoEResult.verdict` ownership vs `evaluator.py` judges (F-001) is a true inconsistency.
+- `dataset_id name/hash` destruction in compare (F-003).
+
+Other sections are genuinely consistent: exit codes consistent globally (K-01) with a formatting
+outlier (F-014); category uniqueness (C-01) consistent with §21/§35 taxonomy; direction-map I-004
+is one canonical source. Because consistency is required for Level 3, P0 items will close it out.
+
+## 17. Architecture Review
+
+The adapter architecture (`aoe.py` as the sole ch3 importer) is exactly the right shape; it makes
+the harness's deterministic core formally decoupled from the ch3 rag import graph (I-016,
+source-scan-verified). The artifact-level architecture (six eval artifacts being the harness's only
+durable outputs, §3.3) confines state to files, making `compare`/`gates`/GUI deterministic over
+artifacts, without inference (I-016/I-014). The component responsibilities are correct and the
+dependency direction (dataset → aoe → evaluator → metrics → compare/gates → GUI) never reverses.
+Architecture consists at Level 3 relatively established modulo P0.
+
+---
