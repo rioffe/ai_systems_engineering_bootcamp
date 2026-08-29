@@ -1,3 +1,5 @@
+# Specification Engineering Tools
+
 I would expect the **Specification Engineer's toolchain to become a new layer of the software-development stack**—not just better requirements-management software.
 
 The key shift is from:
@@ -28,36 +30,36 @@ The interesting part is how these categories begin to **converge**.
 
 ---
 
-# 2. The current toolchain is fragmented
+## 2. The current toolchain is fragmented
 
 Today, the Specification Engineer has to stitch together many tools:
 
 ```text
 Product
-   │
-   ├── Jira / Linear
-   ├── Notion / Confluence
-   └── Product docs
-          │
-          ▼
+   |
+   +-- Jira / Linear
+   +-- Notion / Confluence
+   +-- Product docs
+          |
+          v
      Requirements
-          │
-          ├── OpenAPI
-          ├── JSON Schema
-          ├── Protobuf
-          ├── SQL schemas
-          ├── UML
-          └── Architecture docs
-                  │
-                  ▼
+          |
+          +-- OpenAPI
+          +-- JSON Schema
+          +-- Protobuf
+          +-- SQL schemas
+          +-- UML
+          +-- Architecture docs
+                  |
+                  v
               Source Code
-                  │
-          ┌───────┴────────┐
-          ▼                ▼
+                  |
+          +-------+--------+
+          v                v
        Tests             Evals
-          │                │
-          └───────┬────────┘
-                  ▼
+          |                |
+          +-------+--------+
+                  v
               CI/CD
 ```
 
@@ -75,43 +77,43 @@ That's going to change.
 
 ---
 
-# 3. The first major evolution: the Specification IDE
+## 3. The first major evolution: the Specification IDE
 
 I think the most important new tool will be something analogous to today's IDE, but for **system behavior rather than source code**.
 
 Imagine:
 
 ```text
-┌──────────────────────────────────────────────────────┐
-│ Specification IDE                                    │
-├──────────────────────────────────────────────────────┤
-│                                                      │
-│ Requirements                                         │
-│   R1  Users can upload documents                     │
-│   R2  Users can search documents                     │
-│                                                      │
-│ Behavior                                             │
-│   B1  Document ingestion workflow                   │
-│   B2  Search workflow                               │
-│                                                      │
-│ Contracts                                            │
-│   C1  POST /documents                               │
-│   C2  POST /search                                  │
-│                                                      │
-│ Invariants                                           │
-│   I1  User isolation                                │
-│   I2  Deleted documents never retrieved              │
-│                                                      │
-│ Evals                                                │
-│   E1  Retrieval accuracy                            │
-│   E2  Groundedness                                  │
-│                                                      │
-│ Coverage                                             │
-│   Requirements: 100%                                │
-│   Invariants: 100%                                  │
-│   Evals: 94%                                        │
-│                                                      │
-└──────────────────────────────────────────────────────┘
++------------------------------------------------------+
+| Specification IDE                                    |
++------------------------------------------------------+
+|                                                      |
+| Requirements                                         |
+|   R1  Users can upload documents                     |
+|   R2  Users can search documents                     |
+|                                                      |
+| Behavior                                             |
+|   B1  Document ingestion workflow                    |
+|   B2  Search workflow                                |
+|                                                      |
+| Contracts                                            |
+|   C1  POST /documents                                |
+|   C2  POST /search                                   |
+|                                                      |
+| Invariants                                           |
+|   I1  User isolation                                 |
+|   I2  Deleted documents never retrieved              |
+|                                                      |
+| Evals                                                |
+|   E1  Retrieval accuracy                             |
+|   E2  Groundedness                                   |
+|                                                      |
+| Coverage                                             |
+|   Requirements: 100%                                 |
+|   Invariants: 100%                                   |
+|   Evals: 94%                                         |
+|                                                      |
++------------------------------------------------------+
 ```
 
 The editor would understand the semantics of the artifacts.
@@ -138,7 +140,7 @@ That's much more powerful than editing a Word document.
 
 ---
 
-# 4. Natural language will become an interface to the specification system
+## 4. Natural language will become an interface to the specification system
 
 The Specification Engineer won't necessarily write every specification manually.
 
@@ -182,7 +184,7 @@ This is likely to become one of the most important AI-native engineering workflo
 
 ---
 
-# 5. Specification languages will become more important
+## 5. Specification languages will become more important
 
 I don't think natural language alone is sufficient.
 
@@ -248,7 +250,7 @@ AI evaluation criteria
 
 ---
 
-# 6. Formal methods will move closer to mainstream development
+## 6. Formal methods will move closer to mainstream development
 
 This is another major evolution.
 
@@ -292,7 +294,7 @@ into a formal property and ask the solver whether the modeled workflow permits a
 
 ---
 
-# 7. Contract tools will become generative rather than descriptive
+## 7. Contract tools will become generative rather than descriptive
 
 Today OpenAPI, Protobuf, JSON Schema, etc. primarily describe interfaces.
 
@@ -305,12 +307,12 @@ Specification
       ↓
 API contract
       ↓
-├── server stubs
-├── client SDK
-├── validation
-├── test cases
-├── documentation
-└── monitoring rules
++-- server stubs
++-- client SDK
++-- validation
++-- test cases
++-- documentation
++-- monitoring rules
 ```
 
 The Specification Engineer therefore spends less time writing boilerplate and more time defining **semantics**.
@@ -319,7 +321,7 @@ The same principle applies to database schemas, event schemas, policy definition
 
 ---
 
-# 8. The specification will generate the eval suite
+## 8. The specification will generate the eval suite
 
 This is particularly important for AI systems.
 
@@ -359,7 +361,7 @@ This creates an extremely important feedback loop:
 
 ---
 
-# 9. Traceability becomes a graph rather than a spreadsheet
+## 9. Traceability becomes a graph rather than a spreadsheet
 
 I think this will be one of the biggest changes.
 
@@ -372,19 +374,19 @@ Requirement → ticket → code → test
 you get a semantic graph:
 
 ```text
-                 ┌── API
-                 │
-Requirement ─ Specification ─ Invariant
-                 │      │
-                 │      └── Policy
-                 │
-                 ├── Agent behavior
-                 │
-                 ├── Implementation
-                 │
-                 ├── Test
-                 │
-                 └── Eval
+                 +-- API
+                 |
+Requirement - Specification - Invariant
+                 |      |
+                 |      +-- Policy
+                 |
+                 +-- Agent behavior
+                 |
+                 +-- Implementation
+                 |
+                 +-- Test
+                 |
+                 +-- Eval
 ```
 
 The system can then answer questions automatically:
@@ -403,7 +405,7 @@ That is **semantic traceability** rather than project-management traceability.
 
 ---
 
-# 10. Git will evolve from source control toward specification control
+## 10. Git will evolve from source control toward specification control
 
 Today:
 
@@ -448,7 +450,7 @@ The important object isn't merely **what lines changed**, but:
 
 ---
 
-# 11. AI agents themselves become Specification Engineering tools
+## 11. AI agents themselves become Specification Engineering tools
 
 Eventually I expect specialized agents:
 
@@ -488,16 +490,16 @@ So instead of one coding agent doing everything:
 
 ```text
                    Specification
-                        │
-          ┌─────────────┼──────────────┐
-          ▼             ▼              ▼
+                        |
+          +-------------+--------------+
+          v             v              v
       Analyst       Architect      Verifier
-          │             │              │
-          └─────────────┼──────────────┘
-                        ▼
+          |             |              |
+          +-------------+--------------+
+                        v
                     Coding Agent
-                        │
-                        ▼
+                        |
+                        v
                    Eval Agents
 ```
 
@@ -505,7 +507,7 @@ This is much closer to **multi-agent engineering**.
 
 ---
 
-# 12. The Specification Engineer's most important tool may be the "ambiguity detector"
+## 12. The Specification Engineer's most important tool may be the "ambiguity detector"
 
 I would actually make this a first-class capability.
 
@@ -543,7 +545,7 @@ That turns **specification quality itself into something measurable**.
 
 ---
 
-# 13. Eventually, specifications may become the primary engineering artifact
+## 13. Eventually, specifications may become the primary engineering artifact
 
 This is the deeper evolution I would predict.
 
@@ -551,9 +553,9 @@ Today:
 
 ```text
                 CODE
-                 │
-       ┌─────────┼─────────┐
-       ▼         ▼         ▼
+                 |
+       +---------+---------+
+       v         v         v
      Tests      Docs    Requirements
 ```
 
@@ -563,17 +565,17 @@ Future:
              SPECIFICATION
             /      |       \
            /       |        \
-          ▼        ▼         ▼
+          v        v         v
      CODEGEN     EVALS     ARCHITECTURE
-        │          │          │
-        └──────────┼──────────┘
-                   ▼
+        |          |          |
+        +----------+----------+
+                   v
                 RUNTIME
-                   │
-                   ▼
+                   |
+                   v
              OBSERVABILITY
-                   │
-                   ▼
+                   |
+                   v
            SPECIFICATION
               REFINEMENT
 ```
@@ -586,56 +588,56 @@ That is the profound change.
 
 ---
 
-# 14. I would define the future Specification Engineering stack like this
+## 14. I would define the future Specification Engineering stack like this
 
 ```text
-┌───────────────────────────────────────────────┐
-│              HUMAN INTENT                     │
-├───────────────────────────────────────────────┤
-│ Specification elicitation                     │
-│ ambiguity detection                            │
-│ domain modeling                                │
-├───────────────────────────────────────────────┤
-│              SPECIFICATION                    │
-│                                               │
-│ behavior │ contracts │ constraints │ policies │
-│ state    │ invariants │ edge cases │ failures │
-├───────────────────────────────────────────────┤
-│              DERIVATION                       │
-│                                               │
-│ architecture │ APIs │ schemas │ tests │ evals │
-├───────────────────────────────────────────────┤
-│              AI ENGINEERING                   │
-│                                               │
-│ coding agents │ test agents │ review agents   │
-├───────────────────────────────────────────────┤
-│              VERIFICATION                     │
-│                                               │
-│ tests │ formal checks │ evals │ security      │
-├───────────────────────────────────────────────┤
-│              RUNTIME                          │
-│                                               │
-│ telemetry │ traces │ failures │ user feedback │
-├───────────────────────────────────────────────┤
-│              LEARNING                         │
-│                                               │
-│ specification refinement                      │
-└───────────────────────────────────────────────┘
++-----------------------------------------------+
+|              HUMAN INTENT                     |
++-----------------------------------------------+
+| Specification elicitation                     |
+| ambiguity detection                           |
+| domain modeling                               |
++-----------------------------------------------+
+|              SPECIFICATION                    |
+|                                               |
+| behavior | contracts | constraints | policies |
+| state    | invariants | edge cases | failures |
++-----------------------------------------------+
+|              DERIVATION                       |
+|                                               |
+| architecture | APIs | schemas | tests | evals |
++-----------------------------------------------+
+|              AI ENGINEERING                   |
+|                                               |
+| coding agents | test agents | review agents   |
++-----------------------------------------------+
+|              VERIFICATION                     |
+|                                               |
+| tests | formal checks | evals | security      |
++-----------------------------------------------+
+|              RUNTIME                          |
+|                                               |
+| telemetry | traces | failures | user feedback |
++-----------------------------------------------+
+|              LEARNING                         |
+|                                               |
+| specification refinement                      |
++-----------------------------------------------+
 ```
 
-## The three evolutionary stages
+### The three evolutionary stages
 
 I'd summarize the evolution as:
 
-### **Today: Documentation**
+#### **Today: Documentation**
 
 Specifications are mostly documents that humans interpret.
 
-### **Near term: Structured specification**
+#### **Near term: Structured specification**
 
 Specifications become machine-readable and generate contracts, tests, evals, and implementation scaffolding.
 
-### **Long term: Executable specification**
+#### **Long term: Executable specification**
 
 Specifications become **active system artifacts** that constrain agents, generate implementations, drive verification, monitor production behavior, and evolve from observed failures.
 
@@ -644,4 +646,3 @@ That leads to a very different definition of the engineer:
 > **The traditional software engineer primarily transforms specifications into code. The AI-native Specification Engineer transforms intent into specifications that machines can implement and verify.**
 
 And I think this is potentially one of the most important new roles in the AI-native software engineering stack—because as the marginal cost of generating code approaches zero, **the bottleneck moves from implementation to precise specification, verification, and control.**
-

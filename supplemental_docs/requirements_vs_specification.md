@@ -1,10 +1,12 @@
+# How requirements differ from specification?
+
 The key distinction is that **traditional requirements describe what the system should do**, while a modern **specification describes the system precisely enough that an AI agent can actually construct, test, and verify it**.
 
 This distinction becomes especially important in the 2026 development model you were outlining:
 
 > **Problem → Specification → Context → Agent(s) → Generated implementation → Automated verification**
 
-### 1. Traditional requirements
+## 1. Traditional requirements
 
 A traditional requirement is primarily a **statement of desired behavior or business need**.
 
@@ -42,7 +44,7 @@ These are useful, but an AI coding agent still has to infer a great deal.
 
 ---
 
-# 2. A specification is more operational
+## 2. A specification is more operational
 
 A specification takes the requirement and turns it into something closer to an **executable engineering contract**.
 
@@ -81,8 +83,7 @@ Output:
         text: string,
         score: float,
         citation: Citation
-      }
-    ]
+      } ]
   }
 
 Constraints:
@@ -111,31 +112,31 @@ Now an AI agent has substantially less to guess.
 
 ---
 
-# 3. The deepest difference: requirements express intent; specifications reduce ambiguity
+## 3. The deepest difference: requirements express intent; specifications reduce ambiguity
 
 You can think of the relationship this way:
 
 ```text
                   Human intent
-                       │
-                       ▼
+                       |
+                       v
                   Requirements
-                       │
+                       |
              "What should exist?"
-                       │
-                       ▼
+                       |
+                       v
                  Specification
-                       │
+                       |
           "Exactly what should it do?"
-                       │
-                       ▼
+                       |
+                       v
                 Implementation
-                       │
+                       |
               "How will we build it?"
-                       │
-                       ▼
+                       |
+                       v
                   Verification
-                       │
+                       |
              "Did we build it?"
 ```
 
@@ -145,14 +146,14 @@ AI-native engineering needs to make that interpretation much more explicit.
 
 ---
 
-# 4. Specifications contain things requirements traditionally leave implicit
+## 4. Specifications contain things requirements traditionally leave implicit
 
 A useful specification generally makes several dimensions explicit:
 
 | Dimension           | Requirement         | Specification             |
 | ------------------- | ------------------- | ------------------------- |
-| Intent              | ✓                   | ✓                         |
-| Functional behavior | ✓                   | ✓                         |
+| Intent              | Yes                   | Yes                         |
+| Functional behavior | Yes                   | Yes                         |
 | Interfaces          | Sometimes           | Explicit                  |
 | Data structures     | Sometimes           | Explicit                  |
 | Preconditions       | Rarely              | Explicit                  |
@@ -164,7 +165,7 @@ A useful specification generally makes several dimensions explicit:
 | Performance         | Targets             | Measurable conditions     |
 | State transitions   | Rarely              | Explicit                  |
 | Dependencies        | General             | Explicit                  |
-| Acceptance criteria | ✓                   | Executable/testable       |
+| Acceptance criteria | Yes                   | Executable/testable       |
 | Tests               | Separate artifact   | Often derived directly    |
 | Implementation      | Usually unspecified | Still can remain abstract |
 
@@ -182,7 +183,7 @@ That distinction remains valuable.
 
 ---
 
-# 5. Specification is not simply "more detailed requirements"
+## 5. Specification is not simply "more detailed requirements"
 
 This is an important nuance.
 
@@ -198,7 +199,7 @@ Adding more words doesn't make this a better specification.
 
 Instead:
 
-> "For requests containing ≤10,000 records, p95 end-to-end latency must be <500 ms at 100 requests/sec."
+> "For requests containing <=10,000 records, p95 end-to-end latency must be <500 ms at 100 requests/sec."
 
 Now you have a **verifiable property**.
 
@@ -221,7 +222,7 @@ The second version is useful to both a human engineer **and an AI agent**.
 
 ---
 
-# 6. The crucial new dimension: specifications become agent context
+## 6. The crucial new dimension: specifications become agent context
 
 This is where the distinction becomes particularly important for your **AI Engineer's future** chapter.
 
@@ -263,11 +264,11 @@ The better the specification, the smaller the agent's inference space.
 
 You can almost think of it as:
 
-[
+$$
 \text{Implementation quality}
 \approx
 f(\text{model capability},\text{context quality},\text{specification precision},\text{verification})
-]
+$$
 
 A vague requirement forces the agent to make architectural and behavioral assumptions.
 
@@ -275,7 +276,7 @@ A precise specification constrains those assumptions.
 
 ---
 
-# 7. Specifications also become machine-checkable
+## 7. Specifications also become machine-checkable
 
 This may be the most important difference.
 
@@ -287,15 +288,15 @@ Specifications can increasingly be transformed into:
 
 ```text
 Specification
-      │
-      ├── implementation constraints
-      ├── interface definitions
-      ├── schemas
-      ├── invariants
-      ├── acceptance tests
-      ├── property tests
-      ├── eval cases
-      └── monitoring conditions
+      |
+      +-- implementation constraints
+      +-- interface definitions
+      +-- schemas
+      +-- invariants
+      +-- acceptance tests
+      +-- property tests
+      +-- eval cases
+      +-- monitoring conditions
 ```
 
 So the specification becomes a **source from which engineering artifacts can be generated**.
@@ -304,21 +305,21 @@ For example:
 
 ```text
 Specification
-     │
-     ├── API schema
-     ├── database schema
-     ├── test cases
-     ├── agent instructions
-     ├── eval dataset
-     ├── observability requirements
-     └── acceptance criteria
+     |
+     +-- API schema
+     +-- database schema
+     +-- test cases
+     +-- agent instructions
+     +-- eval dataset
+     +-- observability requirements
+     +-- acceptance criteria
 ```
 
 That is considerably more powerful than a conventional requirements document.
 
 ---
 
-# 8. Requirements are often human-facing; specifications increasingly become dual human/machine-facing
+## 8. Requirements are often human-facing; specifications increasingly become dual human/machine-facing
 
 A traditional requirement might say:
 
@@ -383,25 +384,24 @@ That doesn't mean humans stop defining requirements. Rather, there is a new inte
 
 ```text
 Human / Product
-      │
-      ▼
+      |
+      v
    Problem
-      │
-      ▼
+      |
+      v
  Requirements
-      │
-      ▼
+      |
+      v
  Specification  ← increasingly important engineering artifact
-      │
-      ▼
+      |
+      v
  AI Agent
-      │
-      ▼
+      |
+      v
  Implementation
-      │
-      ▼
+      |
+      v
  Automated Verification
 ```
 
 This also explains why **Specification Engineering** may become a distinct skill in the AI-native software development stack.
-

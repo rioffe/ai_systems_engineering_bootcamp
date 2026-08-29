@@ -1,3 +1,5 @@
+# Specification Engineering
+
 I would treat **Specification Engineering** as a distinct engineering discipline sitting between product intent and implementation.
 
 The core idea is:
@@ -12,40 +14,40 @@ I envision something like:
 
 ```text
                     HUMAN INTENT
-                         │
-                         ▼
+                         |
+                         v
                       PROBLEM
-                         │
-                         ▼
+                         |
+                         v
                     REQUIREMENTS
-                         │
-                         ▼
-              ┌─────────────────────┐
-              │ Specification        │
-              │ Engineering          │
-              └─────────────────────┘
-                         │
-             ┌───────────┼───────────┐
-             ▼           ▼           ▼
+                         |
+                         v
+              +---------------------+
+              | Specification       |
+              | Engineering         |
+              +---------------------+
+                         |
+             +-----------+-----------+
+             v           v           v
           Behavior    Constraints   Interfaces
-             │           │           │
-             ├───────────┼───────────┤
-             ▼           ▼           ▼
+             |           |           |
+             +-----------+-----------+
+             v           v           v
           Invariants   Edge Cases   Failure Modes
-             │           │           │
-             └───────────┼───────────┘
-                         ▼
+             |           |           |
+             +-----------+-----------+
+                         v
                     SPECIFICATION
-                         │
-              ┌──────────┼──────────┐
-              ▼          ▼          ▼
+                         |
+              +----------+----------+
+              v          v          v
           AI Agent    Tests/Evals  Architecture
-              │          │          │
-              ▼          │          │
-        Implementation   │          │
-              │          │          │
-              └──────────┼──────────┘
-                         ▼
+              |          |          |
+              v          |          |
+        Implementation   |          |
+              |          |          |
+              +----------+----------+
+                         v
                     VERIFICATION
 ```
 
@@ -53,7 +55,7 @@ The important change is that **the specification becomes a central engineering a
 
 ---
 
-# 2. What does a Specification Engineer actually do?
+## 2. What does a Specification Engineer actually do?
 
 I would break the discipline into roughly eight activities.
 
@@ -153,7 +155,7 @@ The contract becomes useful simultaneously to:
 
 ---
 
-# 3. The specification should contain invariants
+## 3. The specification should contain invariants
 
 This is one of the biggest differences from conventional requirements.
 
@@ -181,7 +183,7 @@ The agent can generate many implementations, but every implementation must satis
 
 ---
 
-# 4. Specifications should describe failure semantics
+## 4. Specifications should describe failure semantics
 
 Traditional requirements tend to emphasize the happy path.
 
@@ -214,7 +216,7 @@ This is particularly important because an LLM-based system has **probabilistic f
 
 ---
 
-# 5. Specification Engineering includes AI-specific behavioral contracts
+## 5. Specification Engineering includes AI-specific behavioral contracts
 
 This is where I think the discipline becomes genuinely new.
 
@@ -263,7 +265,7 @@ The agent may not:
 
 ```text
 The agent must terminate when:
-    answer confidence ≥ threshold
+    answer confidence >= threshold
     OR
     maximum iterations = 8
     OR
@@ -274,7 +276,7 @@ This is essentially **behavioral specification for probabilistic components**.
 
 ---
 
-# 6. Specifications become generative
+## 6. Specifications become generative
 
 This is perhaps the most interesting consequence.
 
@@ -286,19 +288,19 @@ For example:
 
 ```text
                  SPECIFICATION
-                       │
-        ┌──────────────┼───────────────┐
-        ▼              ▼               ▼
+                       |
+        +--------------+---------------+
+        v              v               v
       APIs           Tests           Data Model
-        │              │               │
-        ▼              ▼               ▼
+        |              |               |
+        v              v               v
      OpenAPI       Test Cases       SQL Schema
-        │              │
-        └───────┬──────┘
-                ▼
+        |              |
+        +-------+------+
+                v
            Coding Agent
-                │
-                ▼
+                |
+                v
           Implementation
 ```
 
@@ -322,7 +324,7 @@ That starts to resemble a **specification → synthesis → verification loop**.
 
 ---
 
-# 7. This makes specifications closer to executable contracts
+## 7. This makes specifications closer to executable contracts
 
 I would distinguish three levels:
 
@@ -339,7 +341,7 @@ Weak.
 ```text
 p95 latency < 500 ms
 under 100 requests/sec
-for payloads ≤ 1 MB
+for payloads <= 1 MB
 ```
 
 Much better.
@@ -372,42 +374,42 @@ Not every requirement needs to reach Level 4. But the important ones should.
 
 ---
 
-# 8. Specification Engineering needs its own toolchain
+## 8. Specification Engineering needs its own toolchain
 
 I would expect a future Specification Engineering environment to look something like an IDE.
 
 Instead of primarily editing source code, you might have:
 
 ```text
-┌─────────────────────────────────────────────────────────┐
-│ Product: Research Assistant                             │
-├─────────────────────────────────────────────────────────┤
-│ REQUIREMENTS                                             │
-│   R-001 Document ingestion                               │
-│   R-002 Grounded answers                                 │
-│   R-003 Citation support                                 │
-│                                                         │
-│ BEHAVIOR                                                 │
-│   B-014 Search workflow                                  │
-│   B-015 Answer workflow                                 │
-│                                                         │
-│ INVARIANTS                                               │
-│   I-001 Authorization isolation                          │
-│   I-002 Citation grounding                              │
-│                                                         │
-│ CONTRACTS                                                │
-│   API-001 /documents                                    │
-│   API-002 /search                                       │
-│                                                         │
-│ EVALS                                                   │
-│   E-001 Retrieval accuracy                              │
-│   E-002 Groundedness                                    │
-│   E-003 Hallucination                                   │
-│                                                         │
-│ AGENTS                                                   │
-│   research-agent                                        │
-│   retrieval-agent                                       │
-└─────────────────────────────────────────────────────────┘
++---------------------------------------------------------+
+| Product: Research Assistant                             |
++---------------------------------------------------------+
+| REQUIREMENTS                                            |
+|   R-001 Document ingestion                              |
+|   R-002 Grounded answers                                |
+|   R-003 Citation support                                |
+|                                                         |
+| BEHAVIOR                                                |
+|   B-014 Search workflow                                 |
+|   B-015 Answer workflow                                 |
+|                                                         |
+| INVARIANTS                                              |
+|   I-001 Authorization isolation                         |
+|   I-002 Citation grounding                              |
+|                                                         |
+| CONTRACTS                                               |
+|   API-001 /documents                                    |
+|   API-002 /search                                       |
+|                                                         |
+| EVALS                                                   |
+|   E-001 Retrieval accuracy                              |
+|   E-002 Groundedness                                    |
+|   E-003 Hallucination                                   |
+|                                                         |
+| AGENTS                                                  |
+|   research-agent                                        |
+|   retrieval-agent                                       |
++---------------------------------------------------------+
 ```
 
 And the system could continuously answer:
@@ -428,7 +430,7 @@ That last question is particularly important.
 
 ---
 
-# 9. AI can participate in Specification Engineering
+## 9. AI can participate in Specification Engineering
 
 The specification itself can become an interactive artifact.
 
@@ -478,7 +480,7 @@ This is a major shift:
 
 ---
 
-# 10. Specifications should have traceability
+## 10. Specifications should have traceability
 
 I would make traceability a first-class property.
 
@@ -486,19 +488,19 @@ Something like:
 
 ```text
 Requirement R-17
-      │
-      ├── Specification S-42
-      │      │
-      │      ├── Contract C-12
-      │      ├── Invariant I-07
-      │      └── Edge Cases E-31..E-36
-      │
-      ├── Implementation M-83
-      │
-      └── Evaluation
-             ├── Test T-91
-             ├── Test T-92
-             └── Eval E-14
+      |
+      +-- Specification S-42
+      |      |
+      |      +-- Contract C-12
+      |      +-- Invariant I-07
+      |      +-- Edge Cases E-31..E-36
+      |
+      +-- Implementation M-83
+      |
+      +-- Evaluation
+             +-- Test T-91
+             +-- Test T-92
+             +-- Eval E-14
 ```
 
 Then a change to R-17 can automatically identify everything affected.
@@ -507,7 +509,7 @@ This gives you something close to **requirements traceability**, but much richer
 
 ---
 
-# 11. Specification becomes the stable artifact in an AI-native codebase
+## 11. Specification becomes the stable artifact in an AI-native codebase
 
 This is perhaps the biggest conceptual shift.
 
@@ -541,29 +543,29 @@ That suggests a very different lifecycle:
 
 ```text
              SPECIFICATION
-                   │
-          ┌────────┴────────┐
-          ▼                 ▼
+                   |
+          +--------+--------+
+          v                 v
      Implementation      Evaluation
-          │                 │
-          └────────┬────────┘
-                   ▼
+          |                 |
+          +--------+--------+
+                   v
                Runtime
-                   │
-                   ▼
+                   |
+                   v
              Observations
-                   │
-                   ▼
+                   |
+                   v
           Specification updates
-                   │
-                   └──────────────►
+                   |
+                   +-------------->
 ```
 
 The system becomes a continuously evolving **specification–implementation–evaluation loop**.
 
 ---
 
-# 12. I would define Specification Engineering this way
+## 12. I would define Specification Engineering this way
 
 For your book, I think the strongest formulation is:
 
@@ -573,14 +575,14 @@ And I would emphasize that it has **four objectives**:
 
 ```text
 Specification Engineering
-        │
-        ├── Remove ambiguity
-        │
-        ├── Constrain behavior
-        │
-        ├── Enable generation
-        │
-        └── Enable verification
+        |
+        +-- Remove ambiguity
+        |
+        +-- Constrain behavior
+        |
+        +-- Enable generation
+        |
+        +-- Enable verification
 ```
 
 That makes it fundamentally different from merely writing better requirements.
@@ -595,10 +597,10 @@ That makes it fundamentally different from merely writing better requirements.
        SPECIFICATION ENGINEERING
                 ↓
           SPECIFICATION
-          ↙      ↓       ↘
+          /      ↓       \
      CONTEXT   AGENTS    EVALS
         ↓        ↓        ↓
-        └──── IMPLEMENT ──┘
+        +---- IMPLEMENT --+
                 ↓
            VERIFICATION
                 ↓
@@ -606,8 +608,7 @@ That makes it fundamentally different from merely writing better requirements.
                 ↓
          SPECIFICATION
              REFINEMENT
-                ↺
+                ^
 ```
 
 **That, in my view, is the important idea:** as implementation becomes increasingly automated, **the scarce engineering skill moves upward—from writing code toward precisely specifying what the code must mean and how we will know it is correct.**
-
