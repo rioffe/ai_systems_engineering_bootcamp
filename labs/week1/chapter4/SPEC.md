@@ -72,8 +72,8 @@ reliability split as ch1/ch2/ch3:
 **Evaluation hierarchy discipline (§5–§7).** The ch4 §7 hierarchy — deterministic tests → automated
 metrics → LLM evaluation → human evaluation — is encoded as an *ordered evaluator pipeline*:
 deterministic checks (schema-validity, citation-chunk membership, structure) run first and *before any
-judge*; LLM-judge verdicts are gated on those checks; human labels (when present) are used to
-**validate the judge itself** (§26), not as the primary regression groove.
+judge*; LLM-the AoE-returned verdicts are gated on those checks; human labels (when present) are used to
+**validate the ch3 judge itself** (§26 via `judge-check`), not as the primary regression groove.
 
 **The evaluation vector (§19)** is the reporting object. Per-case and aggregate:
 
@@ -116,7 +116,7 @@ reports — never runs inference itself.
 | **User** (human, single process) | Validate the golden dataset; run the evaluation over the AoE (mock or real); compare two runs (regression report with per-metric Δ); enforce gates in CI (exit `0`/`1`); classify failures by the §34 taxonomy; optionally browse a run report in the GUI. (**single-principal** — no inter-principal authorization, ch3 F-009 carried; `access_level` is carried but not consumed.) |
 | **Dataset / Generator** (`dataset.py`) | Load the golden dataset (50–100+ `EvalCase`s), validate schema, category membership, and **reference closure** (every `relevant_chunks` id exists in the corpus); emit load errors deterministically (ch3 I-013 analog). |
 | **AoE adapter** (`aoe.py`) | Drive the ch3 application through its **pinned interface** (C-02): `build_index(...)` (index-time flags), `run_case(question, index, query_time_flags)` → `AoEResult` (answer, retrieved chunks, scores, raw/parsed output, verdict, usage tokens, latency, trace). Wraps ch3; never re-implements RAG. |
-| **Evaluator** (`evaluator.py`: `DeterministicChecks` first, then `MockJudge` offline / `OllamaJudge` real) | Run deterministic structure checks *before* any judge (§5); produce a per-case verdict + metrics row; classify the failure stage on non-pass (§34). |
+| **Evaluator** (`evaluator.py`) | Run deterministic structure checks first (§5); the **evaluated verdict itself is the AoE-returned ch3 verdict** (F-001: no second verdict path is constructed); the evaluator adds checks, metrics rows, and failure classification (C-08). `judge_check.py` wraps ch3's `judgment.py` Judge pair (MockJudge/OllamaJudge) for the §26 agreement run only. |
 | **Metrics** (`metrics.py`) | Reuse ch3 `metrics.py` for P@k / R@k / MRR / MAP / NDCG; add the §19 evaluation-vector math (groundedness, completeness, hallucination rate, latency percentiles, cost per success). Pure, headless, testable. |
 | **Compare / Gates** (`compare.py`) | Load two `eval.json` artifacts (schema-versioned), emit the §23 regression report (per-metric directional Δ), and evaluate §24 gate thresholds as **hard directional constraints** — never a weighted composite score (§25). |
 | **JudgeValidator** (`judge_check.py`) | Compare a judge's verdicts against a human-labeled sample (§26): emit agreement rate + confusion pairs — "the measurement system must itself be measured." |
@@ -133,7 +133,7 @@ reports — never runs inference itself.
 | -- | --------- |
 | **R-01** | The system shall execute the ch4 §2 harness pipeline — **Dataset → Application → Outputs → Evaluator → Metrics → Regression Report** — where the **Application under Evaluation (AoE)** is the ch3 RAG pipeline, reached *only* through the pinned adapter interface (C-02). The harness never re-implements retrieval/generation; it wires, measures, and compares. |
 | **R-02** | The **golden dataset** (§3/§32) shall hold 50–100+ `EvalCase`s, each with `question`, `reference_answer`, `relevant_chunks` (ground-truth chunk ids), and `category`, plus ch3-carried `gold_facts` for completeness (C-01). `dataset check` MUST validate schema, category membership in the documented `CATEGORY_SET` (ch3's seven failure tiers plus `{adversarial, boundary, regression}`, §21/§35), and **reference closure**: every `relevant_chunks` id MUST exist in the corpus index and every required field MUST be present; violations are deterministic **load errors** (E-02, ch3 I-013 analog). |
-| **R-03** | The evaluator (§5/§7 hierarchy) shall run **deterministic checks before any judge**: answer-schema validity, citation-`chunk_id` membership in the retrieved context, and any property with an exact spec (e.g. `amount >= 0`, enum membership) are checked deterministically. A case whose answer fails schema validation is attributed `PARSING_FAILURE` and is judged on that basis (I-005) — no LLM verdict needed. |
+| **R-03** | The evaluator (§5/§7 hierarchy) shall run **deterministic checks before any judge**: answer-schema validity, citation-`chunk_id` membership in the retrieved context, and any property with an exact spec (e.g. `amount >= 0`, enum membership) are checked deterministically. A case whose answer fails schema validation is attributed `PARSING_FAILURE` and is judged on that basis (I-005) — no additional judge call needed (the AoE-returned ch3 verdict is reused verbatim, F-001). |
 | **R-04** | The harness shall compute the §19 **evaluation vector** per case and in aggregate: correctness `A` (from the ch3 verdict `correct`), retrieval `P@k` and `R@k` (ch3 `metrics.py` reuse), groundedness `G` (faithfulness = supported claims / total factual claims, ch3 §21 formula), completeness `C` (reflected `gold_facts` / total `gold_facts`), hallucination rate `H` (unsupported claims / total claims, §15), latency `L` as percentiles $P50/P90/P95/P99$ (near-rank interpolation, §17), and cost `K` per successful case (§18 formulas: `cost_success = sum(input+output tokens × price_table) / successes`). §16 tool-success `T` is a **reserved** slot (retrieval pipeline has no tool loop in ch3 — kept for the agent weeks). |
 | **R-05** | **Stratification** (§21/§35): the aggregate report MUST include a `by_category` breakdown over the dataset's declared category set, plus an optional `by_difficulty` breakdown when the dataset carries difficulty metadata. A global-only aggregate is a **report violation** (I-012). |
 | **R-06** | **Regression report** (§23): `compare` reads a baseline `eval.json` and a current `eval.json` (both schema-versioned, R-21) and emits a per-metric Δ table with a documented direction map (I-004: correctness/groundedness/completeness/P/R are higher-better; hallucination rate/latency percentiles/cost are lower-better). Cells lacking the metric on either side render as the explicit marker `n/m` (E-07), not a misleading zero. |
@@ -259,7 +259,7 @@ class AoEResult:                  # everything the evaluator/metrics need; the �
     scores: list[float]
     raw_output: str
     parsed_answer: dict | None    # None on parse failure -> PARSE_BLOCKED
-    verdict: dict                 # ch3 verdict record (R-19 schema-gated)
+    verdict: dict                 # THE evaluated verdict (ch3 judgment.py output — F-001; R-19 schema-gated)
     failure_stage: str | None     # ch3 stage: retrieval|expansion|reranking|context|generation|judging
     usage_kind: str               # "synthetic" (mock) | "measured" (real)
     usage_tokens: int             # synthetic: est(context+question)+est(answer); real: counted
@@ -274,14 +274,14 @@ follows the ch3 E-13 taxonomy (R-15).
 
 ```python
 # evaluator.py
-class DeterministicChecks:        # §5 — runs BEFORE any judge (I-003)
+class DeterministicChecks:        # §5 — runs BEFORE anything consuming the verdict (I-003)
     def check(self, aoe_result: AoEResult) -> list[dict]  # pass/fail records, deterministic-first
 
-class MockJudge:                  # offline double, ground-truth-derived verdict (ch3 MockJudge)
-class OllamaJudge:                # real LLM-as-judge (§6/§26 — itself validated via judge-check)
-# Verdict record (JSON-schema gated, R-19): {correct, supported, complete, unsupported_claims,
-#   total_factual_claims, faithfulness, completeness, citation_quality, rationale, status}
-# status set: PASS | FAIL | PARSE_BLOCKED (I-005)
+# Verdict (R-19 schema-gated): the AoE-provided ch3 verdict object is authoritative (F-001).
+# Status enum mapping (F-002; total): ch3 SCORED -> ch4 PASS; ch3 ERROR -> ch4 FAIL;
+# ch3 PARTIAL -> ch4 FAIL, with the original ch3 status preserved at verdict.ch3_status;
+# PARSE_BLOCKED is introduced by DeterministicChecks only (parsed_answer None/invalid).
+# ch4 status set: PASS | FAIL | PARSE_BLOCKED (I-005)
 ```
 
 ### C-04 Metrics math (pure; zero-denominator guarded, I-001)
@@ -424,7 +424,7 @@ runs inference — the GUI is read-only over artifacts (I-016). Offscreen-render
 | **I-002** | **Byte-deterministic output:** for identical inputs, harness output artifacts are byte-identical. Floats are rendered at fixed `%.4f`; `by_category` keys are sorted lexicographically; latencies on the mock path are deterministic content-derived surrogates; the real path is opt-in (never in CI). |
 | **I-003** | **Deterministic-first evaluator:** deterministic checks (C-03) execute before, and independently of, the judge verdict; a judge is only ever asked about what passes structure. An application answer failing schema validation never reaches the judge (status `PARSE_BLOCKED`). |
 | **I-004** | **Directionality map** (C-06): every metric's Δ is computed with its declared direction (higher- or lower-better); the map is centralized in `compare.py` as a dict — no per-call `if metric == ...` scattered in reports. |
-| **I-005** | **Verdict status totality:** every verdict settles in one of `{PASS, FAIL, PARSE_BLOCKED}`; a `PARSE_BLOCKED` verdict still enters failure classification and metrics. No case is silently dropped. |
+| **I-005** | **Verdict status totality + enum mapping (F-002):** every ch4 verdict settles in one of `{PASS, FAIL, PARSE_BLOCKED}`; ch3 statuses map totally — `SCORED → PASS`, `ERROR → FAIL`, `PARTIAL → FAIL` (original preserved at `verdict.ch3_status`), and `PARSE_BLOCKED` introduced solely by DeterministicChecks. The mapping is asserted on load by the schema gate (I-010). `PARSE_BLOCKED` still enters classification and metrics. No case is silently dropped. |
 | **I-006** | **Failure-classification totality:** the §34 set `{RETRIEVAL, CONTEXT, GENERATION, PARSING, EVALUATION}` covers every non-pass case exactly once, evaluated by the C-08 precedence; the fallback is `GENERATION_FAILURE`. The classification must not rethrow "unknown" for an omitted ch3 stage. |
 | **I-007** | **Metric key totality:** `compare`/`gates` operate over the declared `METRIC_KEYS` list only; any key outside it is a config error (I-015). Gates operate on the *same* metric names the report emits. |
 | **I-008** | **Index/query flag boundary:** experiment flags that ch3 classifies as index-time (`--chunk-size`, `--strategy`, `--contextual`, `--embed-model`) force a fresh `build_index` before any case runs; query-time flags recompute on an existing index. Comparing runs across a stale index is refused unless `--force-rebuild` (E-08). |
@@ -577,7 +577,7 @@ Without them the harness *must* degrade to the mock doubles with ch3's exact ban
 §0 / §31 thesis         --> pipeline loop in §3.2                               --> T-03
 R-01 (§2 harness)       --> pipeline wiring (dataset -> aoe -> evaluator -> metrics) --> T-03
 R-02 / R-13 / I-013     --> dataset.py loader + closure validator               --> T-01, T-15
-R-03 / I-003 (§5)       --> evaluator.py deterministic-first ordering           --> T-06b, T-11
+R-03 / F-001 (§5)        --> evaluator.py deterministic checks over AoE verdict --> T-06b, T-11
 R-04 (§19 vector)       --> metrics.py accuracy/P/R/G/C/H/L/K math              --> T-04, T-05, T-05b, T-07
 R-05 / I-012 (§21/§35)  --> metrics.py by_category + compare.py preserved       --> T-07, T-08b
 R-06 / I-004 (§23)      --> compare.py direction map + n/m                      --> T-08, T-08b
@@ -585,7 +585,7 @@ R-07 / K-03 (§24/$25)   --> gates.py hard directional constraints              
 R-08 / I-008 (§32)      --> experiment flags index/query split (from ch3)       --> T-14 scan + E-08
 R-09 (§33 deliberate)   --> tests/fixtures top_k 5 vs 30 pair                   --> T-09
 R-10 / I-005/I-006 (§34)--> failure.py precedence classifier                    --> T-10a..T-10e
-R-11 (§26)              --> judge_check.py agreement                            --> T-17
+R-11 / F-001 (§26)       --> judge_check.py wraps ch3 judgment.py judges        --> T-17
 R-12 (§27 MAY)          --> pair.py WinRate                                     --> T-16/T-22
 R-13 (§28 MAY)          --> new-case scaffold (REPLACE_ME sentinel)             --> T-01c, E-02
 R-14 (offline)          --> mock doubles via ch3; deterministic surrogates      --> T-06, T-03, R-17
