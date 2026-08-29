@@ -173,3 +173,295 @@ PyQt5 GUI (`research-agent-gui`) that browses saved traces — never runs infere
 | **R-20** | **Bound everything, declaratively** (§33 principle 4): every bound — `max_steps` (default `10`, §19), `max_tokens`, `max_cost_usd`, `max_seconds`, `max_retries`, `repeat_threshold`, `max_consecutive_failures` — SHALL be settable in a `budgets.yml` config (C-06) validated on load (unknown keys are config errors, ch4 I-015 analog); documented defaults apply when no config is passed. |
 
 ---
+
+## 3. Behavior and state model
+
+### 3.1 Lifecycle scope
+
+The system has a single execution scope — **episode time** (one research question → one bounded
+loop → one termination). There is no index-time phase (the fixture corpus is static data, loaded
+read-only at episode start, ch3 E-14 closure analog: every `retrieve` id referenced by a drill or
+fixture MUST exist in the corpus, E-02) and no cross-episode state: two `run` invocations share
+nothing but the read-only corpus and the config files. Drill scope is episode scope with one
+fault spec active (C-11). All durable state lives in artifacts written at termination (§3.3).
+
+### 3.2 The episode flow (one run)
+
+```text
+        question + budgets.yml + policy selection (mock|real)
+                          |
+                          v
+                initialize_state (C-04)
+                          |
+                          v
+        +----------------------------------------------+
+        |  loop:                                       |
+        |    budgets.check(state)  --breach----------+ |  §11 stopping conditions,
+        |         |                                  | |  evaluated BEFORE the model
+        |         v                                  | |
+        |    decision = policy.decide(state, tools)  | |  probabilistic boundary
+        |         |                                  | |
+        |    +-- type == "final" -----> validate     | |  §31 validate_final_answer;
+        |    |      report              report       | |  invalid -> error observation,
+        |    |                            |          | |  loop continues (R-18)
+        |    |                            v          | |
+        |    |                     TERMINATE         | |
+        |    |                    (goal_complete)    | |
+        |    v                                       | |
+        |    validate args (C-03) --invalid--> structured error observation --+
+        |         |                                                           |
+        |         v                                                           |
+        |    authorize (C-09) ----deny-----> permission_denied observation ---+
+        |         |                                                           |
+        |         v                                                           |
+        |    execute_with_retry (C-08) --> observation -----------------------+
+        |         |                                              (all fed     |
+        |         v                                               back to     |
+        |    update_state  <--------------------------------------  policy)   |
+        +----------------------------------------------+          |
+                          |                                       |
+                          +<--------------------------------------+
+                          v
+        TERMINATE (exactly one termination_reason, C-06/I-011)
+                          |
+                          v
+        trace.json + human summary (+ drill_report.json under `drill`)
+```
+
+Each episode moves through the deterministic state machine
+`INIT → RUNNING ⇄ (VALIDATING | AUTHORIZING | EXECUTING | REPAIRING) → VALIDATING_FINAL →
+TERMINATED`. A run that exhausts any budget transitions `RUNNING → TERMINATED` directly, with the
+breach's `termination_reason` recorded — the `VALIDATING_FINAL` stage is reached **only** on a
+policy-proposed `final` (R-18).
+
+### 3.3 The artifact pipeline (artifacts are the interface)
+
+The runtime's *only* durable artifacts are files written by `report.py`:
+
+- `trace.json` (from `run` and every `drill` execution) — the versioned, schema-gated episode
+  record (C-07): §27 field list, typed step entries, termination record, loop-metrics row.
+- `drill_report.json` (from `drill`) — the §34 four-question report (C-12) plus the drill's
+  `trace.json` path.
+
+Every artifact is schema-validated on every read (R-19). All downstream consumers (`trace`
+subcommand rendering, the GUI) read **only** these artifacts — they never re-run the episode
+(ch4 I-016 analog).
+
+---
+
+## 4. Interfaces / contracts
+
+### C-01 Tool contracts (§3: tools are APIs)
+
+```python
+# tools.py
+@dataclass
+class ToolSpec:                  # §3: name / description / schemas / semantics / permissions
+    name: str                    # "search" | "retrieve" | "delete_file"
+    description: str
+    input_schema: dict           # JSON Schema; validated by validate.py on EVERY call (R-04)
+    output_schema: dict
+    failure_classes: list[str]   # subset of the C-08 taxonomy the tool can raise
+    permission: str              # "allow" | "deny" — declarative default, C-09 overrides nothing
+
+# The two operational tools (§34), over the local fixture corpus:
+def search(query: str) -> list[SearchHit]: ...
+#   SearchHit = {doc_id, title, snippet, quality, published}   (R-12 provenance)
+def retrieve(document_id: str) -> Document: ...
+#   Document  = {doc_id, title, text, quality, published}
+# delete_file(path) is REGISTERED (so the policy can see it) with permission="deny" (R-02).
+```
+
+### C-02 Tool determinism + corpus fixture
+
+Tools operate over `corpus/` fixture documents (JSON, version-controlled); `search` ranking is a
+documented deterministic function (lexical overlap, ties broken by `doc_id` sort). Identical
+arguments MUST return byte-identical results (I-003). No tool MAY perform network I/O — the
+"web" of §17 is the fixture corpus (I-012). `retrieve` on an unknown id is a structured
+`PERMANENT` error, not an exception (E-05).
+
+### C-03 Decision + report validation
+
+```python
+# validate.py
+DECISION_SCHEMA = {              # the policy's entire output language
+    "tool_call": {"tool": "str — must be registered", "arguments": "per ToolSpec.input_schema"},
+    "final":     {"report": "per REPORT_SCHEMA"},
+}
+REPORT_SCHEMA = {                # the final research report (R-08/R-12)
+    "status": "ok | insufficient_evidence",
+    "answer": "str",
+    "citations": "list[doc_id] — every id MUST have been retrieved this episode (I-014)",
+    "conflicts": "list[{quantity, sources[], values[]}] — may be empty, never dropped (E-08)",
+    "caveats": "list[str] — e.g. low_quality_evidence (E-09)",
+}
+# Rejection shape (§21 Failure 3, verbatim field names):
+# {"error": "invalid_arguments", "field": <name>, "message": <reason>}
+```
+
+### C-04 State (§6, explicit — §33 principle 3)
+
+```python
+# state.py
+@dataclass
+class AgentState:                # S_t = (G, H_t, O_t, M_t, P)
+    goal: str                    # the research question (immutable after INIT)
+    messages: list[dict]         # policy-facing history
+    observations: list[Observation]   # tool results, typed (C-07 step entries)
+    artifacts: list[dict]        # retrieved documents marked "kept"
+    step_count: int
+    tokens_used: int
+    cost_usd: float
+    consecutive_tool_failures: int
+    seen_actions: dict[str, int] # canonical (tool, arguments) -> count (R-10)
+    started_monotonic: float     # synthetic on mock path (R-13)
+```
+
+All loop-relevant state lives in this object; the policy receives a **serialization** of it
+(I-010). `seen_actions` keys are canonical JSON (sorted keys) so argument dicts compare by value.
+
+### C-05 The runtime loop (§5/§31, pinned order)
+
+```python
+# runtime.py — the ONLY loop; order is normative (I-001):
+#   1. budgets.check(state)          -> terminate(reason) on any breach  (BEFORE model call)
+#   2. decision = policy.decide(...) -> probabilistic boundary
+#   3. validate decision (C-03)      -> error observation + continue
+#   4. authorize (C-09)              -> permission_denied observation + continue
+#   5. execute_with_retry (C-08)     -> observation (or exhausted-class observation)
+#   6. update_state                  -> step_count += 1; seen_actions[...] += 1; budgets accrue
+# A "final" decision shortcuts to REPORT_SCHEMA validation between steps 2 and 3.
+```
+
+### C-06 Stopping conditions + budgets (§11)
+
+```yaml
+# budgets.yml — every key optional; unknown keys are config errors (R-20)
+max_steps: 10                  # §19 default
+max_tokens: 20000
+max_cost_usd: 0.50
+max_seconds: 120
+max_retries: 2                 # per tool call, TRANSIENT/RATE_LIMIT classes only
+repeat_threshold: 3            # same canonical action seen this many times -> repeated_state
+max_consecutive_failures: 3
+```
+
+`termination_reason ∈ {goal_complete, max_steps, token_budget, cost_budget, time_budget,
+repeated_state, consecutive_tool_failures}` — the closed enum (R-05, I-011).
+
+### C-07 Trace record (§20/§27)
+
+```json
+{
+  "agent_trace_version": "0.1",
+  "run_id": "<deterministic content hash>",
+  "question": "...", "model": "mock-policy|qwen3.8:27b-mlx", "model_params": {},
+  "prompt_version": "agent-prompt-v1", "usage_kind": "synthetic",
+  "steps": [
+    {"step": 0, "entries": [
+      {"kind": "reasoning",   "text": "..."},
+      {"kind": "action",      "tool": "search", "arguments": {"query": "..."}},
+      {"kind": "observation", "tool": "search", "latency_ms": 0.0, "result": {},
+       "error": null, "attempt": 1}
+    ], "tokens": 0, "cost_usd": 0.0}
+  ],
+  "termination": {"reason": "goal_complete", "steps": 4, "tokens": 11823, "cost_usd": 0.0},
+  "report": {"status": "ok", "answer": "...", "citations": [], "conflicts": [], "caveats": []},
+  "loop_metrics": {"...": "C-10"}
+}
+```
+
+(Rows abridged; `schemas/trace.json` is authoritative and gated on load, R-19. Entry `kind`
+separation is I-004: an `observation` entry carries tool output verbatim; `reasoning` entries are
+policy text and MUST NOT appear inside `observation`.)
+
+### C-08 Retry taxonomy (§12, total — I-006)
+
+| Failure class | Detected as | Strategy | Bound |
+| ------------- | ----------- | -------- | ----- |
+| `TRANSIENT` | tool raises `TransientError` (e.g. injected timeout) | retry with deterministic backoff `base * attempt` | `max_retries` |
+| `RATE_LIMIT` | tool raises `RateLimitError` | deterministic backoff, retry | `max_retries` (shared) |
+| `INVALID_INPUT` | C-03 rejection | structured repair observation to policy; **no execution** | counts toward `max_steps` |
+| `PERMISSION` | C-09 deny | structured `permission_denied` observation; **never retried** | — |
+| `AUTHENTICATION` | tool raises `AuthError` | record escalation; tool path dead for the episode | — |
+| `PERMANENT` | tool raises `PermanentError` / unknown id | record; observation `{"error": "permanent", ...}` | — |
+
+Every tool error maps to **exactly one** class; an unclassified error is a bug (T-06 asserts
+totality over the fixture error set). Exhausted `TRANSIENT` retries increment
+`consecutive_tool_failures` (C-04) — the §11 tool-failure threshold is how a dead tool stops the
+loop.
+
+### C-09 Authorization policy (§15/§16)
+
+```yaml
+# policy.yml — declarative, loaded at startup, schema-gated; NOT visible to the LLM prompt
+version: 1
+rules:
+  - {tool: search,      effect: allow}
+  - {tool: retrieve,    effect: allow}
+  - {tool: delete_file, effect: deny}     # §25 — the model may see it; it may never run it
+default: deny                              # unregistered/unknown tools are denied (closed world)
+```
+
+The engine evaluates `(tool, arguments)` → `allow | deny` **in code**; there is no flag, prompt,
+or argument that overrides a rule at runtime (I-002). Denials are traced and counted (R-07).
+(§16 human-in-the-loop `confirm` effects are out of scope for the two-tool lab: the rule set is
+`allow | deny` only — noted as the extension point, O-2.)
+
+### C-10 Loop metrics (§27/§33.9)
+
+```python
+# metrics.py — pure functions over a parsed trace (I-012)
+LOOP_METRIC_KEYS = [
+    "steps_used", "tool_calls", "search_calls", "retrieve_calls",
+    "invalid_argument_count", "repair_success",       # repairs that led to a valid call
+    "retry_count", "denial_count", "unnecessary_call_estimate",
+    "termination_reason", "latency_ms", "tokens_total", "cost_usd_total",
+]
+# unnecessary_call_estimate = seen_actions entries with count > 1 at termination (R-10 data)
+# zero-denominator rule (ch3 I-001 analog carried): no metric divides by an empty denominator;
+# each zero case falls back to its documented value (repair_success with 0 repairs -> 1.0,
+# "nothing to repair").
+```
+
+### C-11 Drill fault specs (§34, closed set)
+
+```python
+# drills.py — DRILLS: dict[str, FaultSpec]; the ONLY fault-injection surface (R-09)
+DRILLS = {
+  "search_timeout":        FaultSpec(tool="search",   error="TRANSIENT",  rate=1.0),
+  "empty_results":         FaultSpec(tool="search",   result=[]),
+  "malformed_arguments":   FaultSpec(policy_fault="null_query"),   # forces §21 Failure 3
+  "retrieval_failure":     FaultSpec(tool="retrieve", error="PERMANENT", rate=1.0),
+  "duplicate_searches":    FaultSpec(policy_fault="repeat_last_search"),
+  "contradictory_sources": FaultSpec(corpus="contradiction_pair"),  # §24 fixture
+  "low_quality_sources":   FaultSpec(corpus="marketing_heavy"),      # §22 fixture
+  "infinite_loop":         FaultSpec(tool="search",   result="no_useful_information"),
+  "max_steps_exhaustion":  FaultSpec(policy_fault="never_final"),
+  "unauthorized_tool_call": FaultSpec(policy_fault="attempt_delete"), # §25
+}
+```
+
+Faults inject at the **tool boundary or the scripted MockPolicy** — never inside runtime,
+authorization, budgets, or validation code (the deterministic core under test must stay genuine,
+I-015). `rate` is a deterministic schedule (every Nth call), not RNG (I-003).
+
+### C-12 Drill report (§34 four questions)
+
+```json
+{
+  "drill_report_version": "0.1",
+  "drill": "search_timeout",
+  "trace_path": "out/drills/search_timeout.trace.json",
+  "model_behavior": "...",        "runtime_behavior": "...",
+  "expected_behavior": "...",     "instrumentation": "...",
+  "verdict": {"expected_termination": "goal_complete", "actual_termination": "goal_complete",
+              "pass": true}
+}
+```
+
+`expected_*` fields are **pinned per drill** in `drills.py` (the §34 "what should have happened"
+is part of the spec, not an observation); `pass` compares expectation to the executed trace — a
+drill that terminates for the wrong reason fails even if it terminates (E-10).
+
+---
