@@ -304,6 +304,9 @@ METRIC_KEYS = [
 # hallucination_rate = len(unsupported_claims) / total_factual_claims (0 claims -> 0.0)
 # latency_pXX     = near-rank percentile over ALL cases (sorted, rank = ceil(p/100 * n)) (§17)
 # cost_per_success = sum(cost over successes) / count(successes)   (0 successes -> n/m, E-03)
+# PARSE_BLOCKED numerics (F-007): a PARSE_BLOCKED verdict maps
+#   correct=false, supported=false, complete=false, unsupported_claims=0,
+#   total_factual_claims=0 -> follows I-001 zero-fallbacks (accuracy edge downweighted uniformly)
 ```
 
 Output formatting: floats are rendered to fixed `%.4f` and `by_category` keys sorted
@@ -366,8 +369,10 @@ Gate evaluation is per-gate boolean; aggregate = `all(gates)`; exit `0` pass / `
 Evaluate in this exact order (I-006):
 
 1. `PARSING_FAILURE` — the AoE answer failed schema validation at `CHECKED`.
-2. Label-evidence: `EVALUATION_FAILURE` — present in the human-label disagreement set (and only when
-   such evidence exists; never auto-asserted, E-16).
+2. Label-evidence: `EVALUATION_FAILURE` — active ONLY when `run --labels labels.json` is supplied
+   (F-008): asserted iff the case_id appears in the human-label disagreement set; when labels are not
+   supplied the classifier skips this step and `EVALUATION_FAILURE` cannot be asserted (E-16).
+   `judge-check` is a **read-only comparison** (no rewrite of eval.json).
 3. `RETRIEVAL_FAILURE` — ch3 `failure_stage` in `{retrieval, expansion, reranking, chunking}`.
 4. `CONTEXT_FAILURE` — ch3 stage `context` (retrieved but omitted from assembled context).
 5. `GENERATION_FAILURE` — ch3 stage `generation`/`judging` (evidence present, answer wrong).
@@ -406,7 +411,7 @@ a human completes ground truth, E-02). Deterministic, offline.
 | Subcommand | Behavior | Exit |
 | ---------- | -------- | ---- |
 | `rag-eval check --dataset <path>` | Validate the golden dataset (schema, category membership, reference closure, sentinel check); emit `dataset_report.json`. | `0` ok / `3` violations / `2` usage |
-| `rag-eval run --dataset <path> [--mock] --out eval.json` | Load → `build_index` → run all cases → eval.json + human summary. | `0` (also on DEGRADED_MOCK) / `4` PULL_REQUIRED |
+| `rag-eval run --dataset <path> [--mock] [--labels labels.json] --out eval.json` | Revalidate like `check` (with warnings enumerated; F-006), then load → `build_index` → run all cases → eval.json + human summary. | `0` (also on DEGRADED_MOCK) / `3` dataset violations / `4` PULL_REQUIRED |
 | `rag-eval compare --baseline a.json --current b.json [--force]` | §23 Δ report to stdout + `compare_report.json`. | `0` |
 | `rag-eval gates --baseline a.json --current b.json --config gates.yml` | §24 CI decision, per C-07. | `0` pass / `1` fail |
 | `rag-eval judge-check --labels labels.json --eval eval.json` | §26 evaluator agreement vs human labels. | `0` / `3` missing labels / `2` usage |
