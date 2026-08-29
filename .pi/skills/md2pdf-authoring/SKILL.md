@@ -66,7 +66,7 @@ A JSON array written with the closing bracket on its own line:
 }
 ```
 
-renders in the PDF with `$$` in place of `]`, because `    ]` matches the sed
+renders in the PDF with `$$` in place of `]`, because `]` matches the sed
 rule. Fix by removing the standalone `]` -- either inline the array:
 
 ```json
@@ -138,7 +138,6 @@ Do the Bug 1 JSON-array fix *first* -- otherwise this turns a JSON closing `]` i
 `Missing $` noise disappears. (The `==…=` runs and standalone `>` symptoms that
 commonly appear *with* the blank vanish once the fence truly opens -- but tidy them
 per the "Standards for LaTeX math" list below regardless.)
-
 
 ### Bug 3: a blank line *inside* a `$$ … $$` block makes pandoc escape the `$$`
 
@@ -281,7 +280,7 @@ $$
 $$
 ```
 
-Rule of thumb: a lone run of `===…=` or a leading `# ` inside a math block is a
+Rule of thumb: a lone run of `===…=` or a leading `#` inside a math block is a
 conversion artifact -- replace it with `=` / proper `\frac{…}{…}`, then escape
 `%` and `$`.
 
@@ -393,7 +392,6 @@ sed -n "$((n-8)),${n}p" /tmp/proc.md    # inspect the failing region
 The `l.<n>` in the xelatex log points at a line in pandoc's generated `.tex`, *not*
 `chapter.md`; inspect the sed-processed prefix above to map back to the source.
 
-
 ## Common mistakes checklist
 
 - [ ] Math blocks are native `$$ … $$` in source, not the `[ … ]` convention
@@ -421,7 +419,7 @@ The `l.<n>` in the xelatex log points at a line in pandoc's generated `.tex`, *n
 - [ ] `$` escaped as `\$` inside display math
 - [ ] Coefficient–label pairs use `\,` and `\text{}`
 - [ ] Bare words/labels/word-subscripts wrapped in `\text{}`
-- [ ] No `===…=`/leading `# ` artifacts left inside math blocks
+- [ ] No `===…=`/leading `#` artifacts left inside math blocks
 - [ ] Diagrams use `+ - |` boxes, not Unicode box-drawing
 - [ ] No `∈`/glyph-missing chars inside ` ```text ` / ` ```json ` fences
 - [ ] Risky math glyphs in prose (`≈`/`≤`/`≥`/`≠`/`∈`/`⇄`) replaced with inline
