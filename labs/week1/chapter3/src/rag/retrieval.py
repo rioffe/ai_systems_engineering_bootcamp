@@ -19,7 +19,7 @@ class DenseChannel(Protocol):
 
 @runtime_checkable
 class LexicalChannel(Protocol):
-     def search(self, q: str,
+     def search(self, query: str,
                 k: int) -> list[ScoredChunk]:
           ...
 

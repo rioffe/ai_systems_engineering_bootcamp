@@ -140,7 +140,7 @@ def test_hybrid_pool_union_and_minmax_blend():
 
     class FakeBM25:
 
-        def search(self, q, k):
+        def search(self, query, k):
             return [
                 ScoredChunk(chunk=c1, score=0.6, lexical=0.6, rank=1),
                 ScoredChunk(chunk=c3, score=0.7, lexical=0.7, rank=2),
@@ -170,7 +170,7 @@ def test_hybrid_zero_range_channel_normalizes_to_one():
 
     class FakeBM25:
 
-        def search(self, q, k):
+        def search(self, query, k):
             return [
                 ScoredChunk(chunk=c1, score=0.3, lexical=0.3, rank=1),
                 ScoredChunk(chunk=c2, score=0.3, lexical=0.3, rank=2),
@@ -201,7 +201,7 @@ def test_hybrid_alpha_one_is_pure_dense():
 
     class FakeBM25:
 
-        def search(self, q, k):
+        def search(self, query, k):
             return [
                 ScoredChunk(chunk=c1, score=100.0, lexical=100.0, rank=1),
                 ScoredChunk(chunk=c2, score=1.0, lexical=1.0, rank=2),
@@ -229,7 +229,7 @@ def test_hybrid_alpha_zero_is_pure_lexical():
 
     class FakeBM25:
 
-        def search(self, q, k):
+        def search(self, query, k):
             return [
                 ScoredChunk(chunk=c1, score=1.0, lexical=1.0, rank=1),
                 ScoredChunk(chunk=c2, score=0.3, lexical=0.3, rank=2),
