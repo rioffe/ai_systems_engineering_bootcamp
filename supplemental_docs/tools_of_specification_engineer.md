@@ -1,6 +1,6 @@
 # Specification Engineering Tools
 
-I would expect the **Specification Engineer's toolchain to become a new layer of the software-development stack**—not just better requirements-management software.
+The Specification Engineer's toolchain is best understood as a new layer of the software-development stack — not merely better requirements-management software. The preceding chapter described what a Specification Engineer does; this chapter describes what they do it with.
 
 The key shift is from:
 
@@ -10,29 +10,27 @@ to:
 
 > **machine-readable artifacts that constrain, generate, and verify software.**
 
-## 1. The Specification Engineer's toolbox
+## The Specification Engineer's Toolbox
 
-I would organize the tools into nine categories:
+The tools organize into nine categories.
 
 | Tool category             | Purpose                         | Examples today                 | Likely evolution                  |
-| ------------------------- | ------------------------------- | ------------------------------ | --------------------------------- |
-| **Elicitation**           | Extract intent                  | interviews, product docs, LLMs | AI specification agents           |
-| **Specification editors** | Define structured behavior      | Markdown, YAML, JSON Schema    | Spec IDEs                         |
-| **Modeling**              | Model states/workflows          | UML, state machines, BPMN      | executable behavioral models      |
-| **Contracts**             | Define interfaces               | OpenAPI, Protobuf, JSON Schema | contract synthesis                |
-| **Constraints**           | Define what must/mustn't happen | assertions, OCL, policies      | constraint engines                |
-| **Verification**          | Prove/test properties           | unit tests, formal methods     | automated spec verification       |
-| **Evaluation**            | Test probabilistic behavior     | eval frameworks, LLM judges    | specification-derived evals       |
-| **Traceability**          | Connect intent→implementation   | Jira, DOORS, Git               | live traceability graphs          |
-| **Change management**     | Manage evolving specs           | Git, PRs, reviews              | semantic specification versioning |
+| ------------------------- | -------------------------------- | ------------------------------- | ---------------------------------- |
+| **Elicitation**           | Extract intent                   | interviews, product docs, LLMs | AI specification agents           |
+| **Specification editors** | Define structured behavior       | Markdown, YAML, JSON Schema    | Spec IDEs                         |
+| **Modeling**              | Model states/workflows           | UML, state machines, BPMN      | executable behavioral models      |
+| **Contracts**             | Define interfaces                | OpenAPI, Protobuf, JSON Schema | contract synthesis                |
+| **Constraints**           | Define what must/mustn't happen  | assertions, OCL, policies      | constraint engines                |
+| **Verification**          | Prove/test properties            | unit tests, formal methods     | automated spec verification       |
+| **Evaluation**            | Test probabilistic behavior      | eval frameworks, LLM judges    | specification-derived evals       |
+| **Traceability**          | Connect intent→implementation    | Jira, DOORS, Git               | live traceability graphs          |
+| **Change management**     | Manage evolving specs            | Git, PRs, reviews              | semantic specification versioning |
 
-The interesting part is how these categories begin to **converge**.
+The more interesting story is not any one category but how they begin to converge — and why today's version of each tool resists that convergence.
 
----
+## The Fragmented Present
 
-## 2. The current toolchain is fragmented
-
-Today, the Specification Engineer has to stitch together many tools:
+Today, the Specification Engineer must stitch together many tools:
 
 ```mermaid
 flowchart TD
@@ -60,25 +58,11 @@ flowchart TD
     EV --> CI
 ```
 
-The fundamental problem is that **these artifacts don't form one coherent specification graph**.
+The fundamental problem is that these artifacts do not form one coherent specification graph. A requirement in Jira does not necessarily know which API contract implements it. The API does not necessarily know which requirement motivated it. The test does not necessarily know which invariant it verifies. The LLM eval does not necessarily know which behavioral requirement it measures. That is beginning to change, starting with the editing surface itself.
 
-A requirement in Jira doesn't necessarily know which API contract implements it.
+## The Specification IDE
 
-The API doesn't necessarily know which requirement motivated it.
-
-The test doesn't necessarily know which invariant it verifies.
-
-The LLM eval doesn't necessarily know which behavioral requirement it measures.
-
-That's going to change.
-
----
-
-## 3. The first major evolution: the Specification IDE
-
-I think the most important new tool will be something analogous to today's IDE, but for **system behavior rather than source code**.
-
-Imagine:
+The most important new tool is likely to be something analogous to today's IDE, but for **system behavior rather than source code**.
 
 ```text
 +------------------------------------------------------+
@@ -113,15 +97,13 @@ Imagine:
 +------------------------------------------------------+
 ```
 
-The editor would understand the semantics of the artifacts.
-
-For example, if you change:
+The editor understands the semantics of the artifacts. Changing:
 
 ```text
 I1: Users cannot access another user's documents.
 ```
 
-the system could immediately show:
+immediately surfaces:
 
 ```text
 Affected:
@@ -133,15 +115,11 @@ Affected:
   Agent permissions A2
 ```
 
-That's much more powerful than editing a Word document.
+That is considerably more powerful than editing a Word document, and it changes who is expected to write the specification in the first place.
 
----
+## Natural Language as an Interface
 
-## 4. Natural language will become an interface to the specification system
-
-The Specification Engineer won't necessarily write every specification manually.
-
-You might say:
+The Specification Engineer will not necessarily write every specification manually. Consider the statement:
 
 > "The user should be able to share a document with another employee."
 
@@ -159,11 +137,7 @@ The specification agent responds:
 >
 > Should sharing generate an audit event?
 
-The agent is performing **requirements elicitation + ambiguity detection**.
-
-You then approve the resulting structured specification.
-
-This becomes:
+The agent performs **requirements elicitation and ambiguity detection**. The engineer then approves the resulting structured specification:
 
 ```mermaid
 flowchart TD
@@ -173,25 +147,17 @@ flowchart TD
     D --> E[Structured specification]
 ```
 
-This is likely to become one of the most important AI-native engineering workflows.
+This is likely to become one of the most important AI-native engineering workflows — though natural language alone will not carry the full weight of a specification.
 
----
+## A Polyglot Specification Language
 
-## 5. Specification languages will become more important
+Specifications increasingly combine several notations, each suited to a different aspect of the same requirement.
 
-I don't think natural language alone is sufficient.
-
-We'll increasingly see combinations of:
-
-### Natural language
-
-Good for intent:
+Natural language is good for intent:
 
 > Users can share documents.
 
-### Structured schemas
-
-Good for structure:
+Structured schemas are good for structure:
 
 ```yaml
 share_document:
@@ -200,62 +166,36 @@ share_document:
   permission: read
 ```
 
-### Formal constraints
-
-Good for invariants:
+Formal constraints are good for invariants:
 
 ```text
 target.organization == document.organization
 ```
 
-### Executable assertions
-
-Good for verification:
+Executable assertions are good for verification:
 
 ```text
 assert unauthorized_user_cannot_read(document)
 ```
 
-### Evaluation specifications
-
-Good for probabilistic behavior:
+Evaluation specifications are good for probabilistic behavior:
 
 ```text
 groundedness >= 0.95
 citation_accuracy >= 0.98
 ```
 
-So the future specification language may be **polyglot**:
+The future specification language is therefore polyglot — natural language, schemas, contracts, constraints, executable tests, and AI evaluation criteria layered over the same underlying intent. The formal-constraints layer, in particular, opens the door to tooling that has historically stayed outside mainstream development.
 
-```text
-Natural language
-       +
-Schemas
-       +
-Contracts
-       +
-Constraints
-       +
-Executable tests
-       +
-AI evaluation criteria
-```
+## Formal Methods Move Toward the Mainstream
 
----
-
-## 6. Formal methods will move closer to mainstream development
-
-This is another major evolution.
-
-Historically, formal verification has been expensive and specialized.
-
-Specification Engineering creates a natural place for it.
+Historically, formal verification has been expensive and specialized. Specification Engineering creates a natural place for it.
 
 Instead of asking:
 
 > "Can we formally verify the entire application?"
 
-we ask:
+the relevant question becomes:
 
 > "Which properties are important enough to formally constrain?"
 
@@ -275,25 +215,11 @@ Agent invariant:
     agent cannot execute privileged tool without approval
 ```
 
-Tools such as **TLA+**, SMT/SAT solvers, model checkers, type systems, and policy engines can increasingly operate underneath the specification environment.
+Tools such as TLA+, SMT/SAT solvers, model checkers, type systems, and policy engines increasingly operate underneath the specification environment. The Specification Engineer does not necessarily need to be a formal-methods specialist: the AI can translate "a payment cannot be captured twice" into a formal property and ask the solver whether the modeled workflow permits a violation. The same generative relationship — specification in, artifact out — extends beyond formal properties to interface contracts themselves.
 
-The Specification Engineer doesn't necessarily need to be a formal-methods specialist.
+## Contracts as Generative Sources
 
-The AI can translate:
-
-> "A payment cannot be captured twice."
-
-into a formal property and ask the solver whether the modeled workflow permits a violation.
-
----
-
-## 7. Contract tools will become generative rather than descriptive
-
-Today OpenAPI, Protobuf, JSON Schema, etc. primarily describe interfaces.
-
-Future systems will treat the contract as a **generative source**.
-
-For example:
+Today, OpenAPI, Protobuf, and JSON Schema primarily describe interfaces. Future systems treat the contract as a generative source:
 
 ```mermaid
 flowchart TD
@@ -306,21 +232,15 @@ flowchart TD
     A --> G[monitoring rules]
 ```
 
-The Specification Engineer therefore spends less time writing boilerplate and more time defining **semantics**.
+The Specification Engineer therefore spends less time writing boilerplate and more time defining semantics. The same principle applies to database schemas, event schemas, policy definitions, and agent tool definitions — and, most consequentially, to the eval suites that verify AI-specific behavior.
 
-The same principle applies to database schemas, event schemas, policy definitions, and agent tool definitions.
+## Generating the Eval Suite
 
----
-
-## 8. The specification will generate the eval suite
-
-This is particularly important for AI systems.
-
-Suppose the specification says:
+This is particularly important for AI systems. Suppose the specification states:
 
 > The assistant must answer questions using only information contained in authorized documents.
 
-The system should automatically derive tests such as:
+The system automatically derives tests such as:
 
 ```text
 1. Question answerable from authorized document
@@ -332,8 +252,6 @@ The system should automatically derive tests such as:
 7. Ambiguous question
 ```
 
-Then:
-
 ```mermaid
 flowchart TD
     A[Specification] --> B[Test/eval generation]
@@ -343,23 +261,11 @@ flowchart TD
     D --> E
 ```
 
-This creates an extremely important feedback loop:
+This creates an essential feedback loop: the specification defines not only what the agent should do, but how the system determines whether the agent did it. That feedback loop only works, however, if every artifact it touches can be traced back to the specification that produced it.
 
-> **The specification defines not only what the agent should do, but how the system determines whether the agent did it.**
+## Traceability as a Graph
 
----
-
-## 9. Traceability becomes a graph rather than a spreadsheet
-
-I think this will be one of the biggest changes.
-
-Instead of:
-
-```text
-Requirement → ticket → code → test
-```
-
-you get a semantic graph:
+Instead of a linear chain — requirement, ticket, code, test — the result is a semantic graph:
 
 ```mermaid
 flowchart TD
@@ -373,38 +279,18 @@ flowchart TD
     R --- E[Eval]
 ```
 
-The system can then answer questions automatically:
+The system can then answer questions such as which requirements are not covered by tests, which implementation behavior is not justified by a specification, which specifications have contradictory constraints, and which eval failures correspond to specification violations. This is **semantic traceability** rather than project-management traceability, and it changes what a "diff" means.
 
-> "Show me everything affected by changing this requirement."
->
-> "Which requirements aren't covered by tests?"
->
-> "Which implementation behavior isn't justified by a specification?"
->
-> "Which specifications have contradictory constraints?"
->
-> "Which eval failures correspond to specification violations?"
+## Git as Specification Control
 
-That is **semantic traceability** rather than project-management traceability.
-
----
-
-## 10. Git will evolve from source control toward specification control
-
-Today:
-
-```text
-git diff
-```
-
-shows:
+Today, `git diff` shows something like:
 
 ```diff
 - timeout = 30
 + timeout = 10
 ```
 
-A future specification-aware system might say:
+A future specification-aware system reports instead:
 
 ```text
 Behavioral change detected:
@@ -426,51 +312,13 @@ Potential violation:
     S-21 requires recovery within 15s.
 ```
 
-That's a fundamentally richer notion of change management.
+That is a fundamentally richer notion of change management: the important object is not what lines changed, but what system behavior changed. Making that distinction operational is, in practice, the job of a growing roster of specialized agents.
 
-The important object isn't merely **what lines changed**, but:
+## Agents as Specification Engineering Tools
 
-> **What system behavior changed?**
+Several specialized agent roles are likely to emerge: a Specification Analyst that extracts requirements and identifies ambiguity; a Specification Architect that turns requirements into behavioral models and contracts; a Constraint Engineer that finds and formalizes invariants; a Test/Eval Engineer that generates verification from specifications; a Consistency Agent that looks for contradictions; a Traceability Agent that maintains requirement-to-implementation relationships; a Change Impact Agent that analyzes proposed specification changes; and a Review Agent that challenges the specification before implementation begins.
 
----
-
-## 11. AI agents themselves become Specification Engineering tools
-
-Eventually I expect specialized agents:
-
-### Specification Analyst
-
-Extracts requirements and identifies ambiguity.
-
-### Specification Architect
-
-Turns requirements into behavioral models and contracts.
-
-### Constraint Engineer
-
-Finds invariants and formalizes them.
-
-### Test/Eval Engineer
-
-Generates verification from specifications.
-
-### Consistency Agent
-
-Looks for contradictions.
-
-### Traceability Agent
-
-Maintains requirement → specification → implementation → eval relationships.
-
-### Change Impact Agent
-
-Analyzes proposed specification changes.
-
-### Review Agent
-
-Challenges the specification before implementation.
-
-So instead of one coding agent doing everything:
+Instead of one coding agent doing everything:
 
 ```mermaid
 flowchart TD
@@ -483,15 +331,11 @@ flowchart TD
     D --> E[Eval Agents]
 ```
 
-This is much closer to **multi-agent engineering**.
+This is much closer to multi-agent engineering than to a single generalist assistant. Underlying all of these roles is a single capability worth calling out on its own: detecting ambiguity before it reaches implementation.
 
----
+## The Ambiguity Detector
 
-## 12. The Specification Engineer's most important tool may be the "ambiguity detector"
-
-I would actually make this a first-class capability.
-
-Imagine the system reports:
+This deserves treatment as a first-class capability. Consider a system report of the following form:
 
 ```text
 SPECIFICATION ANALYSIS
@@ -509,7 +353,7 @@ For example:
 
 > "The system should respond quickly."
 
-The tool asks:
+The tool responds:
 
 > Define "quickly."
 >
@@ -521,13 +365,9 @@ The tool asks:
 >
 > What availability target?
 
-That turns **specification quality itself into something measurable**.
+This turns specification quality itself into something measurable. Taken together with the Specification IDE, the polyglot language, and the agent roster, it suggests where the primary engineering artifact eventually settles.
 
----
-
-## 13. Eventually, specifications may become the primary engineering artifact
-
-This is the deeper evolution I would predict.
+## The Primary Artifact, Eventually
 
 Today:
 
@@ -553,15 +393,9 @@ flowchart TD
     F --> S
 ```
 
-Code becomes increasingly **derived**.
+Code becomes increasingly derived; specifications become increasingly authoritative. That is the profound change, and it is worth laying out the full stack this implies.
 
-Specifications become increasingly **authoritative**.
-
-That is the profound change.
-
----
-
-## 14. I would define the future Specification Engineering stack like this
+## The Future Specification Engineering Stack
 
 ```text
 +-----------------------------------------------+
@@ -598,24 +432,14 @@ That is the profound change.
 +-----------------------------------------------+
 ```
 
-### The three evolutionary stages
+### Three Evolutionary Stages
 
-I'd summarize the evolution as:
+This stack does not appear fully formed; it arrives in three stages.
 
-#### **Today: Documentation**
+**Today: Documentation.** Specifications are mostly documents that humans interpret.
 
-Specifications are mostly documents that humans interpret.
+**Near term: Structured specification.** Specifications become machine-readable and generate contracts, tests, evals, and implementation scaffolding.
 
-#### **Near term: Structured specification**
+**Long term: Executable specification.** Specifications become active system artifacts that constrain agents, generate implementations, drive verification, monitor production behavior, and evolve from observed failures.
 
-Specifications become machine-readable and generate contracts, tests, evals, and implementation scaffolding.
-
-#### **Long term: Executable specification**
-
-Specifications become **active system artifacts** that constrain agents, generate implementations, drive verification, monitor production behavior, and evolve from observed failures.
-
-That leads to a very different definition of the engineer:
-
-> **The traditional software engineer primarily transforms specifications into code. The AI-native Specification Engineer transforms intent into specifications that machines can implement and verify.**
-
-And I think this is potentially one of the most important new roles in the AI-native software engineering stack—because as the marginal cost of generating code approaches zero, **the bottleneck moves from implementation to precise specification, verification, and control.**
+That trajectory leads to a different definition of the engineer than the one the industry has used for decades: the traditional software engineer primarily transforms specifications into code, while the AI-native Specification Engineer transforms intent into specifications that machines can implement and verify. Across the three chapters in this sequence, the same argument recurs at increasing resolution: as the marginal cost of generating code approaches zero, the bottleneck moves from implementation to precise specification, verification, and control.

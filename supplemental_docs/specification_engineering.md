@@ -1,16 +1,16 @@
 # Specification Engineering
 
-I would treat **Specification Engineering** as a distinct engineering discipline sitting between product intent and implementation.
+Specification Engineering is best treated as a distinct engineering discipline sitting between product intent and implementation. The preceding chapter distinguished specifications from requirements; this chapter examines the discipline that produces them.
 
 The core idea is:
 
 > **Specification Engineering is the systematic transformation of ambiguous human intent into precise, machine-consumable, testable, and maintainable specifications from which implementation and verification can be derived.**
 
-In traditional software engineering, this activity is distributed across product managers, architects, designers, and engineers. In an AI-native environment, it becomes much more explicit because **the specification is one of the primary inputs to the coding agent**.
+In traditional software engineering, this activity is distributed across product managers, architects, designers, and engineers. In an AI-native environment, it becomes far more explicit, because **the specification is one of the primary inputs to the coding agent**.
 
-## 1. The Specification Engineering pipeline
+## The Specification Engineering Pipeline
 
-I envision something like:
+The pipeline can be represented as follows:
 
 ```mermaid
 flowchart TD
@@ -35,17 +35,15 @@ flowchart TD
     N --> P
 ```
 
-The important change is that **the specification becomes a central engineering artifact rather than merely documentation**.
+The important change is that **the specification becomes a central engineering artifact rather than merely documentation**. What that pipeline compresses into a single diagram is, in practice, a set of distinct activities — worth unpacking one at a time.
 
----
+## What a Specification Engineer Actually Does
 
-## 2. What does a Specification Engineer actually do?
+The discipline breaks down into roughly eight activities, beginning with the least structured: turning an unstructured request into something that can be modeled at all.
 
-I would break the discipline into roughly eight activities.
+### Intent Elicitation
 
-### 1. Intent elicitation
-
-Start with something messy:
+The starting point is typically something unstructured:
 
 > "We need a research assistant that can answer questions over our internal documents."
 
@@ -61,43 +59,17 @@ The Specification Engineer extracts:
 * quality attributes
 * unacceptable behaviors
 
-This is partly product analysis and partly systems engineering.
+This work is partly product analysis and partly systems engineering. Once these elements are identified, the next task is to turn them into something with observable structure rather than prose.
 
----
+### Behavioral Modeling
 
-### 2. Behavioral modeling
+Prose is turned into observable behavior. A document-ingestion workflow, for instance, moves through a fixed sequence: the user uploads a document, the system validates it, the document enters a processing state, text is extracted, chunks are generated, embeddings are computed, the index is updated, and only then does the document become searchable.
 
-Turn prose into observable behavior.
+From a sequence like this, the engineer defines states, transitions, events, preconditions, postconditions, and failure transitions — essentially **formal state-machine thinking applied pragmatically**. Once behavior is modeled this way, the natural next step is to define what components promise each other at each boundary.
 
-For example:
+### Contract Definition
 
-```mermaid
-flowchart TD
-    A[User uploads document] --> B[System validates document]
-    B --> C[Document enters processing state]
-    C --> D[Text extracted]
-    D --> E[Chunks generated]
-    E --> F[Embeddings generated]
-    F --> G[Index updated]
-    G --> H[Document becomes searchable]
-```
-
-Now you can define:
-
-* states
-* transitions
-* events
-* preconditions
-* postconditions
-* failure transitions
-
-This is essentially **formal state-machine thinking applied pragmatically**.
-
----
-
-### 3. Contract definition
-
-Define what components promise to each other.
+Contracts define what components promise to each other.
 
 For example:
 
@@ -122,21 +94,11 @@ Errors:
   401 unauthenticated
 ```
 
-The contract becomes useful simultaneously to:
+The contract is useful simultaneously to the coding agent, the API designer, the test generator, the reviewer, and the monitoring system. Contracts describe individual promises; a complete specification also needs properties that hold everywhere at once — invariants.
 
-* the coding agent
-* the API designer
-* the test generator
-* the reviewer
-* the monitoring system
+## Invariants
 
----
-
-## 3. The specification should contain invariants
-
-This is one of the biggest differences from conventional requirements.
-
-An **invariant** says something that must *always* remain true.
+An **invariant** states something that must *always* remain true.
 
 For example:
 
@@ -154,23 +116,17 @@ INV-004:
 A retry of an idempotent operation must not create duplicate side effects.
 ```
 
-These are extraordinarily valuable for AI agents because they constrain the solution space.
+These are extraordinarily valuable for AI agents because they constrain the solution space. The agent can generate many implementations, but every implementation must satisfy the invariant. Invariants describe what must hold; a specification also needs to describe what happens when things go wrong — a dimension conventional requirements handle poorly.
 
-The agent can generate many implementations, but every implementation must satisfy the invariant.
+## Failure Semantics
 
----
-
-## 4. Specifications should describe failure semantics
-
-Traditional requirements tend to emphasize the happy path.
-
-AI-generated systems need much stronger failure specifications.
+Traditional requirements tend to emphasize the happy path. AI-generated systems need much stronger failure specifications.
 
 Instead of:
 
 > "The system retrieves documents."
 
-specify:
+the specification should read:
 
 ```text
 Retrieval failure:
@@ -189,15 +145,11 @@ Never:
     return results from unauthorized documents
 ```
 
-This is particularly important because an LLM-based system has **probabilistic failure modes** that don't exist in conventional deterministic software.
+This matters particularly because an LLM-based system exhibits **probabilistic failure modes** that do not exist in conventional deterministic software — which raises a category of specification that has no real analogue in pre-AI systems.
 
----
+## AI-Specific Behavioral Contracts
 
-## 5. Specification Engineering includes AI-specific behavioral contracts
-
-This is where I think the discipline becomes genuinely new.
-
-A specification for an AI system may need to describe:
+This is where the discipline becomes genuinely new. A specification for an AI system may need to describe model behavior, grounding, uncertainty, tool usage, agent permissions, and stopping conditions.
 
 ### Model behavior
 
@@ -249,19 +201,11 @@ The agent must terminate when:
     no additional information can be obtained.
 ```
 
-This is essentially **behavioral specification for probabilistic components**.
+This is essentially **behavioral specification for probabilistic components**. Once behavior, contracts, invariants, and failure modes are all captured this way, the specification stops being merely descriptive — it becomes something other artifacts can be derived from.
 
----
+## Specifications as Generative Sources
 
-## 6. Specifications become generative
-
-This is perhaps the most interesting consequence.
-
-A good specification should not merely tell an engineer what to build.
-
-It should allow an AI system to derive engineering artifacts.
-
-For example:
+A good specification does not merely tell an engineer what to build. It allows an AI system to derive engineering artifacts directly.
 
 ```mermaid
 flowchart TD
@@ -276,7 +220,7 @@ flowchart TD
     G --> H[Implementation]
 ```
 
-And then:
+And further:
 
 ```mermaid
 flowchart TD
@@ -288,13 +232,9 @@ flowchart TD
     F --> C
 ```
 
-That starts to resemble a **specification → synthesis → verification loop**.
+This resembles a **specification → synthesis → verification loop**. How far a specification can drive that loop depends on how formally it is written — which is a matter of degree, not a binary property.
 
----
-
-## 7. This makes specifications closer to executable contracts
-
-I would distinguish three levels:
+## Three Levels of Formality
 
 ### Level 1 — Prose specification
 
@@ -302,7 +242,7 @@ I would distinguish three levels:
 The system should respond quickly.
 ```
 
-Weak.
+This level carries intent but resists verification.
 
 ### Level 2 — Structured specification
 
@@ -312,7 +252,7 @@ under 100 requests/sec
 for payloads <= 1 MB
 ```
 
-Much better.
+This level is measurable, though it still requires a human or a separate test harness to check.
 
 ### Level 3 — Executable specification
 
@@ -324,26 +264,11 @@ assert p95_latency(
 ) < 500ms
 ```
 
-Now the specification can directly participate in verification.
+At this level, the specification can directly participate in verification. The long-term trajectory moves from natural language, through structured specification and formal constraints, to executable tests and evals. Not every requirement needs to reach the executable level, but the important ones should — and reaching it consistently requires dedicated tooling, which is the subject of the next chapter.
 
-The long-term trajectory is:
+## The Need for a Dedicated Toolchain
 
-```mermaid
-flowchart TD
-    A[Natural language] --> B[Structured specification]
-    B --> C[Formal constraints]
-    C --> D[Executable tests/evals]
-```
-
-Not every requirement needs to reach Level 4. But the important ones should.
-
----
-
-## 8. Specification Engineering needs its own toolchain
-
-I would expect a future Specification Engineering environment to look something like an IDE.
-
-Instead of primarily editing source code, you might have:
+A mature Specification Engineering environment resembles an IDE. Instead of primarily editing source code, the engineer works with a structured view of the product:
 
 ```text
 +---------------------------------------------------------+
@@ -367,35 +292,19 @@ Instead of primarily editing source code, you might have:
 |   API-002 /search                                       |
 |                                                         |
 | EVALS                                                   |
-|   E-001 Retrieval accuracy                              |
-|   E-002 Groundedness                                    |
-|   E-003 Hallucination                                   |
+|   E-001 Retrieval accuracy                               |
+|   E-002 Groundedness                                     |
+|   E-003 Hallucination                                    |
 |                                                         |
 | AGENTS                                                  |
-|   research-agent                                        |
-|   retrieval-agent                                       |
+|   research-agent                                         |
+|   retrieval-agent                                        |
 +---------------------------------------------------------+
 ```
 
-And the system could continuously answer:
+The system continuously answers questions such as which requirements are implemented, which specifications have no tests, which tests fail, which agent changed behavior outside its specification, which specifications conflict, and — most importantly — which requirements remain underspecified. The next chapter treats this toolchain in depth; for now, it is enough to note that answering these questions well requires more than a document — it requires a specification that can be interrogated.
 
-> Which requirements are implemented?
->
-> Which specifications have no tests?
->
-> Which tests fail?
->
-> Which agent changed behavior outside its specification?
->
-> Which specifications conflict?
->
-> Which requirements remain underspecified?
-
-That last question is particularly important.
-
----
-
-## 9. AI can participate in Specification Engineering
+## AI as a Participant in Specification Engineering
 
 The specification itself can become an interactive artifact.
 
@@ -435,21 +344,25 @@ Human:
 
 > "Yes."
 
-The agent is effectively performing **specification elicitation**.
+The agent is effectively performing **specification elicitation**. It identifies ambiguity before implementation:
 
-It identifies ambiguity before implementation.
+```mermaid
+flowchart TD
+    A[Human intent] --> B[Specification Agent]
+    B --> C[Questions / ambiguities]
+    C --> D[Human decisions]
+    D --> E[Structured specification]
+```
 
-This is a major shift:
+This represents a genuine shift in how the agent's role is framed:
 
 > **The AI agent should not merely generate code from specifications. It should help discover and eliminate specification ambiguity before code is generated.**
 
----
+Once ambiguity is resolved this way, the resulting specification needs to stay connected to everything downstream of it — which is the role traceability plays.
 
-## 10. Specifications should have traceability
+## Traceability
 
-I would make traceability a first-class property.
-
-Something like:
+Traceability should be treated as a first-class property.
 
 ```mermaid
 flowchart TD
@@ -464,15 +377,11 @@ flowchart TD
     EV --> EE["Eval E-14"]
 ```
 
-Then a change to R-17 can automatically identify everything affected.
+A change to R-17 then automatically identifies everything affected, producing something close to conventional requirements traceability, but far richer and far more automated. Once specifications are traceable in this way, they start to displace source code as the artifact developers actually treat as authoritative.
 
-This gives you something close to **requirements traceability**, but much richer and much more automated.
+## Specification as the Stable Artifact
 
----
-
-## 11. Specification becomes the stable artifact in an AI-native codebase
-
-This is perhaps the biggest conceptual shift.
+This is the most significant conceptual shift the discipline introduces.
 
 Today:
 
@@ -492,13 +401,7 @@ flowchart TD
     B --> C[Runtime]
 ```
 
-The implementation may become increasingly disposable.
-
-Agents can regenerate or substantially rewrite it.
-
-The specification, contracts, invariants, evaluations, and architectural constraints become the **persistent representation of engineering intent**.
-
-That suggests a very different lifecycle:
+The implementation becomes increasingly disposable. Agents can regenerate or substantially rewrite it. The specification, contracts, invariants, evaluations, and architectural constraints become the **persistent representation of engineering intent**, which implies a different lifecycle:
 
 ```mermaid
 flowchart TD
@@ -511,29 +414,17 @@ flowchart TD
     F --> A
 ```
 
-The system becomes a continuously evolving **specification–implementation–evaluation loop**.
+The system becomes a continuously evolving **specification–implementation–evaluation loop**. Taken together, the pipeline, the eight activities, and this lifecycle point toward a single working definition of the discipline.
 
----
+## Defining Specification Engineering
 
-## 12. I would define Specification Engineering this way
-
-For your book, I think the strongest formulation is:
+The strongest formulation for this discipline is:
 
 > **Specification Engineering is the discipline of transforming human intent into precise behavioral, structural, and operational contracts that can guide AI agents, constrain implementation, and generate automated verification.**
 
-And I would emphasize that it has **four objectives**:
+It has four objectives — removing ambiguity, constraining behavior, enabling generation, and enabling verification — which together make it fundamentally different from merely writing better requirements.
 
-```mermaid
-flowchart TD
-    S[Specification Engineering] --> A[Remove ambiguity]
-    S --> B[Constrain behavior]
-    S --> C[Enable generation]
-    S --> D[Enable verification]
-```
-
-That makes it fundamentally different from merely writing better requirements.
-
-### The resulting AI-native development loop
+### The Resulting AI-Native Development Loop
 
 ```mermaid
 flowchart TD
@@ -552,4 +443,4 @@ flowchart TD
     K --> D
 ```
 
-**That, in my view, is the important idea:** as implementation becomes increasingly automated, **the scarce engineering skill moves upward—from writing code toward precisely specifying what the code must mean and how we will know it is correct.**
+As implementation becomes increasingly automated, the scarce engineering skill moves upward — from writing code toward precisely specifying what the code must mean and how correctness will be verified. The remainder of that skill is largely a question of tooling, which the next chapter addresses directly.
