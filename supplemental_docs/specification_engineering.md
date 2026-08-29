@@ -12,43 +12,27 @@ In traditional software engineering, this activity is distributed across product
 
 I envision something like:
 
-```text
-                    HUMAN INTENT
-                         |
-                         v
-                      PROBLEM
-                         |
-                         v
-                    REQUIREMENTS
-                         |
-                         v
-              +---------------------+
-              | Specification       |
-              | Engineering         |
-              +---------------------+
-                         |
-             +-----------+-----------+
-             v           v           v
-          Behavior    Constraints   Interfaces
-             |           |           |
-             +-----------+-----------+
-             v           v           v
-          Invariants   Edge Cases   Failure Modes
-             |           |           |
-             +-----------+-----------+
-                         v
-                    SPECIFICATION
-                         |
-              +----------+----------+
-              v          v          v
-          AI Agent    Tests/Evals  Architecture
-              |          |          |
-              v          |          |
-        Implementation   |          |
-              |          |          |
-              +----------+----------+
-                         v
-                    VERIFICATION
+```mermaid
+flowchart TD
+    A[HUMAN INTENT] --> B[PROBLEM]
+    B --> C[REQUIREMENTS]
+    C --> D["Specification Engineering"]
+    D --> E[Behavior]
+    D --> F[Constraints]
+    D --> G[Interfaces]
+    E --> H[Invariants]
+    F --> I[Edge Cases]
+    G --> J[Failure Modes]
+    H --> K[SPECIFICATION]
+    I --> K
+    J --> K
+    K --> L[AI Agent]
+    K --> M[Tests/Evals]
+    K --> N[Architecture]
+    L --> O[Implementation]
+    O --> P[VERIFICATION]
+    M --> P
+    N --> P
 ```
 
 The important change is that **the specification becomes a central engineering artifact rather than merely documentation**.
@@ -87,22 +71,15 @@ Turn prose into observable behavior.
 
 For example:
 
-```text
-User uploads document
-        ↓
-System validates document
-        ↓
-Document enters processing state
-        ↓
-Text extracted
-        ↓
-Chunks generated
-        ↓
-Embeddings generated
-        ↓
-Index updated
-        ↓
-Document becomes searchable
+```mermaid
+flowchart TD
+    A[User uploads document] --> B[System validates document]
+    B --> C[Document enters processing state]
+    C --> D[Text extracted]
+    D --> E[Chunks generated]
+    E --> F[Embeddings generated]
+    F --> G[Index updated]
+    G --> H[Document becomes searchable]
 ```
 
 Now you can define:
@@ -286,38 +263,29 @@ It should allow an AI system to derive engineering artifacts.
 
 For example:
 
-```text
-                 SPECIFICATION
-                       |
-        +--------------+---------------+
-        v              v               v
-      APIs           Tests           Data Model
-        |              |               |
-        v              v               v
-     OpenAPI       Test Cases       SQL Schema
-        |              |
-        +-------+------+
-                v
-           Coding Agent
-                |
-                v
-          Implementation
+```mermaid
+flowchart TD
+    S[SPECIFICATION] --> A[APIs]
+    S --> B[Tests]
+    S --> C[Data Model]
+    A --> D[OpenAPI]
+    B --> E[Test Cases]
+    C --> F[SQL Schema]
+    D --> G[Coding Agent]
+    E --> G
+    G --> H[Implementation]
 ```
 
 And then:
 
-```text
-Specification
-      ↓
-Evaluation Cases
-      ↓
-Implementation
-      ↓
-Automated Evaluation
-      ↓
-Specification Violations
-      ↓
-Agent Repair
+```mermaid
+flowchart TD
+    A[Specification] --> B[Evaluation Cases]
+    B --> C[Implementation]
+    C --> D[Automated Evaluation]
+    D --> E[Specification Violations]
+    E --> F[Agent Repair]
+    F --> C
 ```
 
 That starts to resemble a **specification → synthesis → verification loop**.
@@ -360,14 +328,11 @@ Now the specification can directly participate in verification.
 
 The long-term trajectory is:
 
-```text
-Natural language
-      ↓
-Structured specification
-      ↓
-Formal constraints
-      ↓
-Executable tests/evals
+```mermaid
+flowchart TD
+    A[Natural language] --> B[Structured specification]
+    B --> C[Formal constraints]
+    C --> D[Executable tests/evals]
 ```
 
 Not every requirement needs to reach Level 4. But the important ones should.
@@ -415,15 +380,15 @@ Instead of primarily editing source code, you might have:
 And the system could continuously answer:
 
 > Which requirements are implemented?
-
+>
 > Which specifications have no tests?
-
+>
 > Which tests fail?
-
+>
 > Which agent changed behavior outside its specification?
-
+>
 > Which specifications conflict?
-
+>
 > Which requirements remain underspecified?
 
 That last question is particularly important.
@@ -486,21 +451,17 @@ I would make traceability a first-class property.
 
 Something like:
 
-```text
-Requirement R-17
-      |
-      +-- Specification S-42
-      |      |
-      |      +-- Contract C-12
-      |      +-- Invariant I-07
-      |      +-- Edge Cases E-31..E-36
-      |
-      +-- Implementation M-83
-      |
-      +-- Evaluation
-             +-- Test T-91
-             +-- Test T-92
-             +-- Eval E-14
+```mermaid
+flowchart TD
+    R[Requirement R-17] --> S[Specification S-42]
+    R --> M[Implementation M-83]
+    R --> EV[Evaluation]
+    S --> C[Contract C-12]
+    S --> I[Invariant I-07]
+    S --> E["Edge Cases E-31..E-36"]
+    EV --> T1["Test T-91"]
+    EV --> T2["Test T-92"]
+    EV --> EE["Eval E-14"]
 ```
 
 Then a change to R-17 can automatically identify everything affected.
@@ -525,12 +486,10 @@ Documentation describes the source code.
 
 In an AI-heavy future:
 
-```text
-Specification
-      ↓
-Implementation
-      ↓
-Runtime
+```mermaid
+flowchart TD
+    A[Specification] --> B[Implementation]
+    B --> C[Runtime]
 ```
 
 The implementation may become increasingly disposable.
@@ -541,24 +500,15 @@ The specification, contracts, invariants, evaluations, and architectural constra
 
 That suggests a very different lifecycle:
 
-```text
-             SPECIFICATION
-                   |
-          +--------+--------+
-          v                 v
-     Implementation      Evaluation
-          |                 |
-          +--------+--------+
-                   v
-               Runtime
-                   |
-                   v
-             Observations
-                   |
-                   v
-          Specification updates
-                   |
-                   +-------------->
+```mermaid
+flowchart TD
+    A[SPECIFICATION] --> B[Implementation]
+    A --> C[Evaluation]
+    B --> D[Runtime]
+    C --> D
+    D --> E[Observations]
+    E --> F[Specification updates]
+    F --> A
 ```
 
 The system becomes a continuously evolving **specification–implementation–evaluation loop**.
@@ -573,42 +523,33 @@ For your book, I think the strongest formulation is:
 
 And I would emphasize that it has **four objectives**:
 
-```text
-Specification Engineering
-        |
-        +-- Remove ambiguity
-        |
-        +-- Constrain behavior
-        |
-        +-- Enable generation
-        |
-        +-- Enable verification
+```mermaid
+flowchart TD
+    S[Specification Engineering] --> A[Remove ambiguity]
+    S --> B[Constrain behavior]
+    S --> C[Enable generation]
+    S --> D[Enable verification]
 ```
 
 That makes it fundamentally different from merely writing better requirements.
 
 ### The resulting AI-native development loop
 
-```text
-             PROBLEM
-                ↓
-           REQUIREMENTS
-                ↓
-       SPECIFICATION ENGINEERING
-                ↓
-          SPECIFICATION
-          /      ↓       \
-     CONTEXT   AGENTS    EVALS
-        ↓        ↓        ↓
-        +---- IMPLEMENT --+
-                ↓
-           VERIFICATION
-                ↓
-            OBSERVATION
-                ↓
-         SPECIFICATION
-             REFINEMENT
-                ^
+```mermaid
+flowchart TD
+    A[PROBLEM] --> B[REQUIREMENTS]
+    B --> C[SPECIFICATION ENGINEERING]
+    C --> D[SPECIFICATION]
+    D --> E[CONTEXT]
+    D --> F[AGENTS]
+    D --> G[EVALS]
+    E --> H[IMPLEMENT]
+    F --> H
+    G --> H
+    H --> I[VERIFICATION]
+    I --> J[OBSERVATION]
+    J --> K[SPECIFICATION REFINEMENT]
+    K --> D
 ```
 
 **That, in my view, is the important idea:** as implementation becomes increasingly automated, **the scarce engineering skill moves upward—from writing code toward precisely specifying what the code must mean and how we will know it is correct.**

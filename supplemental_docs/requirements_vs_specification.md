@@ -116,28 +116,16 @@ Now an AI agent has substantially less to guess.
 
 You can think of the relationship this way:
 
-```text
-                  Human intent
-                       |
-                       v
-                  Requirements
-                       |
-             "What should exist?"
-                       |
-                       v
-                 Specification
-                       |
-          "Exactly what should it do?"
-                       |
-                       v
-                Implementation
-                       |
-              "How will we build it?"
-                       |
-                       v
-                  Verification
-                       |
-             "Did we build it?"
+```mermaid
+flowchart TD
+    A[Human intent] --> B[Requirements]
+    B --> Q1["What should exist?"]
+    Q1 --> C[Specification]
+    C --> Q2["Exactly what should it do?"]
+    Q2 --> D[Implementation]
+    D --> Q3["How will we build it?"]
+    Q3 --> E[Verification]
+    E --> Q4["Did we build it?"]
 ```
 
 Traditional engineering often treats requirements as the beginning of a **human interpretation process**.
@@ -228,34 +216,25 @@ This is where the distinction becomes particularly important for your **AI Engin
 
 In traditional development:
 
-```text
-Requirements
-     ↓
-Architect interprets
-     ↓
-Engineer designs
-     ↓
-Engineer codes
-     ↓
-Engineer tests
+```mermaid
+flowchart TD
+    A[Requirements] --> B[Architect interprets]
+    B --> C[Engineer designs]
+    C --> D[Engineer codes]
+    D --> E[Engineer tests]
 ```
 
 There are several layers of implicit human reasoning.
 
 In AI-assisted development:
 
-```text
-Problem
-   ↓
-Specification
-   ↓
-Context
-   ↓
-Agent
-   ↓
-Implementation
-   ↓
-Verification
+```mermaid
+flowchart TD
+    A[Problem] --> B[Specification]
+    B --> C[Context]
+    C --> D[Agent]
+    D --> E[Implementation]
+    E --> F[Verification]
 ```
 
 The specification becomes a major part of the **context supplied to the agent**.
@@ -286,33 +265,31 @@ Traditional requirements are often ultimately evaluated by asking:
 
 Specifications can increasingly be transformed into:
 
-```text
-Specification
-      |
-      +-- implementation constraints
-      +-- interface definitions
-      +-- schemas
-      +-- invariants
-      +-- acceptance tests
-      +-- property tests
-      +-- eval cases
-      +-- monitoring conditions
+```mermaid
+flowchart TD
+    S[Specification] --> A[implementation constraints]
+    S --> B[interface definitions]
+    S --> C[schemas]
+    S --> D[invariants]
+    S --> E[acceptance tests]
+    S --> F[property tests]
+    S --> G[eval cases]
+    S --> H[monitoring conditions]
 ```
 
 So the specification becomes a **source from which engineering artifacts can be generated**.
 
 For example:
 
-```text
-Specification
-     |
-     +-- API schema
-     +-- database schema
-     +-- test cases
-     +-- agent instructions
-     +-- eval dataset
-     +-- observability requirements
-     +-- acceptance criteria
+```mermaid
+flowchart TD
+    S[Specification] --> A[API schema]
+    S --> B[database schema]
+    S --> C[test cases]
+    S --> D[agent instructions]
+    S --> E[eval dataset]
+    S --> F[observability requirements]
+    S --> G[acceptance criteria]
 ```
 
 That is considerably more powerful than a conventional requirements document.
@@ -382,26 +359,16 @@ And in the AI-engineering context:
 
 That doesn't mean humans stop defining requirements. Rather, there is a new intermediate engineering activity:
 
-```text
-Human / Product
-      |
-      v
-   Problem
-      |
-      v
- Requirements
-      |
-      v
- Specification  ← increasingly important engineering artifact
-      |
-      v
- AI Agent
-      |
-      v
- Implementation
-      |
-      v
- Automated Verification
+```mermaid
+flowchart TD
+    A[Human / Product] --> B[Problem]
+    B --> C[Requirements]
+    C --> D[Specification]
+    E["increasingly important
+engineering artifact"] -.-> D
+    D --> F[AI Agent]
+    F --> G[Implementation]
+    G --> H[Automated Verification]
 ```
 
 This also explains why **Specification Engineering** may become a distinct skill in the AI-native software development stack.

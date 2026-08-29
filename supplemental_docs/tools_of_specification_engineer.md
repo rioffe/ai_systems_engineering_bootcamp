@@ -34,33 +34,30 @@ The interesting part is how these categories begin to **converge**.
 
 Today, the Specification Engineer has to stitch together many tools:
 
-```text
-Product
-   |
-   +-- Jira / Linear
-   +-- Notion / Confluence
-   +-- Product docs
-          |
-          v
-     Requirements
-          |
-          +-- OpenAPI
-          +-- JSON Schema
-          +-- Protobuf
-          +-- SQL schemas
-          +-- UML
-          +-- Architecture docs
-                  |
-                  v
-              Source Code
-                  |
-          +-------+--------+
-          v                v
-       Tests             Evals
-          |                |
-          +-------+--------+
-                  v
-              CI/CD
+```mermaid
+flowchart TD
+    P[Product] --> A[Jira / Linear]
+    P --> B[Notion / Confluence]
+    P --> C[Product docs]
+    A --> R[Requirements]
+    B --> R
+    C --> R
+    R --> S[OpenAPI]
+    R --> T[JSON Schema]
+    R --> U[Protobuf]
+    R --> V[SQL schemas]
+    R --> W[UML]
+    R --> X[Architecture docs]
+    S --> SC[Source Code]
+    T --> SC
+    U --> SC
+    V --> SC
+    W --> SC
+    X --> SC
+    SC --> TE[Tests]
+    SC --> EV[Evals]
+    TE --> CI[CI/CD]
+    EV --> CI
 ```
 
 The fundamental problem is that **these artifacts don't form one coherent specification graph**.
@@ -151,15 +148,15 @@ You might say:
 The specification agent responds:
 
 > What constitutes an employee?
-
+>
 > Can access be revoked?
-
+>
 > Does revocation take effect immediately?
-
+>
 > Can the recipient reshare?
-
+>
 > What happens to existing cached content?
-
+>
 > Should sharing generate an audit event?
 
 The agent is performing **requirements elicitation + ambiguity detection**.
@@ -168,16 +165,12 @@ You then approve the resulting structured specification.
 
 This becomes:
 
-```text
-Human intent
-     ↓
-Specification Agent
-     ↓
-Questions / ambiguities
-     ↓
-Human decisions
-     ↓
-Structured specification
+```mermaid
+flowchart TD
+    A[Human intent] --> B[Specification Agent]
+    B --> C[Questions / ambiguities]
+    C --> D[Human decisions]
+    D --> E[Structured specification]
 ```
 
 This is likely to become one of the most important AI-native engineering workflows.
@@ -302,17 +295,15 @@ Future systems will treat the contract as a **generative source**.
 
 For example:
 
-```text
-Specification
-      ↓
-API contract
-      ↓
-+-- server stubs
-+-- client SDK
-+-- validation
-+-- test cases
-+-- documentation
-+-- monitoring rules
+```mermaid
+flowchart TD
+    S[Specification] --> A[API contract]
+    A --> B[server stubs]
+    A --> C[client SDK]
+    A --> D[validation]
+    A --> E[test cases]
+    A --> F[documentation]
+    A --> G[monitoring rules]
 ```
 
 The Specification Engineer therefore spends less time writing boilerplate and more time defining **semantics**.
@@ -343,16 +334,13 @@ The system should automatically derive tests such as:
 
 Then:
 
-```text
-Specification
-      ↓
-Test/eval generation
-      ↓
-Golden cases
-      ↓
-Adversarial cases
-      ↓
-Runtime evaluation
+```mermaid
+flowchart TD
+    A[Specification] --> B[Test/eval generation]
+    B --> C[Golden cases]
+    B --> D[Adversarial cases]
+    C --> E[Runtime evaluation]
+    D --> E
 ```
 
 This creates an extremely important feedback loop:
@@ -373,32 +361,28 @@ Requirement → ticket → code → test
 
 you get a semantic graph:
 
-```text
-                 +-- API
-                 |
-Requirement - Specification - Invariant
-                 |      |
-                 |      +-- Policy
-                 |
-                 +-- Agent behavior
-                 |
-                 +-- Implementation
-                 |
-                 +-- Test
-                 |
-                 +-- Eval
+```mermaid
+flowchart TD
+    R[Requirement] --- S[Specification]
+    S --- A[API]
+    S --- I[Invariant]
+    S --- P[Policy]
+    R --- B[Agent behavior]
+    R --- M[Implementation]
+    R --- T[Test]
+    R --- E[Eval]
 ```
 
 The system can then answer questions automatically:
 
 > "Show me everything affected by changing this requirement."
-
+>
 > "Which requirements aren't covered by tests?"
-
+>
 > "Which implementation behavior isn't justified by a specification?"
-
+>
 > "Which specifications have contradictory constraints?"
-
+>
 > "Which eval failures correspond to specification violations?"
 
 That is **semantic traceability** rather than project-management traceability.
@@ -488,19 +472,15 @@ Challenges the specification before implementation.
 
 So instead of one coding agent doing everything:
 
-```text
-                   Specification
-                        |
-          +-------------+--------------+
-          v             v              v
-      Analyst       Architect      Verifier
-          |             |              |
-          +-------------+--------------+
-                        v
-                    Coding Agent
-                        |
-                        v
-                   Eval Agents
+```mermaid
+flowchart TD
+    S[Specification] --> A[Analyst]
+    S --> B[Architect]
+    S --> C[Verifier]
+    A --> D[Coding Agent]
+    B --> D
+    C --> D
+    D --> E[Eval Agents]
 ```
 
 This is much closer to **multi-agent engineering**.
@@ -532,13 +512,13 @@ For example:
 The tool asks:
 
 > Define "quickly."
-
+>
 > Is this p50, p95, or p99?
-
+>
 > What workload?
-
+>
 > What payload size?
-
+>
 > What availability target?
 
 That turns **specification quality itself into something measurable**.
@@ -551,33 +531,26 @@ This is the deeper evolution I would predict.
 
 Today:
 
-```text
-                CODE
-                 |
-       +---------+---------+
-       v         v         v
-     Tests      Docs    Requirements
+```mermaid
+flowchart TD
+    C[CODE] --> A[Tests]
+    C --> B[Docs]
+    C --> D[Requirements]
 ```
 
 Future:
 
-```text
-             SPECIFICATION
-            /      |       \
-           /       |        \
-          v        v         v
-     CODEGEN     EVALS     ARCHITECTURE
-        |          |          |
-        +----------+----------+
-                   v
-                RUNTIME
-                   |
-                   v
-             OBSERVABILITY
-                   |
-                   v
-           SPECIFICATION
-              REFINEMENT
+```mermaid
+flowchart TD
+    S[SPECIFICATION] --> A[CODEGEN]
+    S --> B[EVALS]
+    S --> C[ARCHITECTURE]
+    A --> D[RUNTIME]
+    B --> D
+    C --> D
+    D --> E[OBSERVABILITY]
+    E --> F["SPECIFICATION REFINEMENT"]
+    F --> S
 ```
 
 Code becomes increasingly **derived**.
