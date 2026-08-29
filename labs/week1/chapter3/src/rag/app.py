@@ -26,6 +26,7 @@ import json
 import os
 import sys
 
+from rag.availability import resolve_availability
 from rag.corpus import generate_corpus_and_questions, load_corpus, load_questions
 from rag.embedding import MockEmbedder, OllamaEmbedder
 from rag.judgment import MockJudge, OllamaJudge
@@ -49,27 +50,14 @@ INJECTION_BANNER = (
 )
 
 
-def _availability_banner(mock, model, quiet):
-    """Return the base exit code and print the model-path banner. mock -> DEGRADED_MOCK/0;
-    otherwise reach the Ollama backend or PULL_REQUIRED / 4."""
-    if mock:
-        if not quiet:
-            sys.stderr.write(DEGRADED_MOCK + "\n")
-        return 0
-    try:
-        import httpx
-
-        resp = httpx.get("http://localhost:11434/api/tags", timeout=3.0)
-        resp.raise_for_status()
-        models = resp.json().get("models") or []
-        pulled = any(m.get("name", m.get("model", "")) == model for m in models)
-        if not pulled:
-            sys.stderr.write(PULL_REQUIRED.format(model=model) + "\n")
-            return 4
-    except Exception:    # noqa: BLE001 -- any backend error -> PULL_REQUIRED
-        sys.stderr.write(PULL_REQUIRED.format(model=model) + "\n")
-        return 4
-    return 0
+def _availability_banner(ns):
+# E-13 / R-19 / F-013: resolve the canonical outcome before any work, print its
+# distinct banner, record use_mock, return its exit code. --mock forces DEGRADED_MOCK.
+    outcome = resolve_availability([ns.model, ns.embed_model], mock=ns.mock)
+    if outcome.banner and not ns.quiet:
+        sys.stderr.write(outcome.banner + "\n")
+    ns.use_mock = outcome.use_mock
+    return outcome.exit_code
 
 
 def _select_llm(model_name, mock):
@@ -172,11 +160,11 @@ def _build_for(ns):
         docs,
         strategy=ns.strategy,
         contextual=ns.contextual,
-        embedder=_select_embedder(ns.embed_model, ns.mock),
+        embedder=_select_embedder(ns.embed_model, getattr(ns, "use_mock", ns.mock)),
         overlap=ns.overlap,
         chunk_size=ns.chunk_size,
         embed_model=ns.embed_model,
-        mock=ns.mock,
+        mock=getattr(ns, "use_mock", ns.mock),
     )
     return docs, index
 
@@ -193,7 +181,7 @@ def cmd_build_index(ns):
 
 
 def cmd_eval(ns):
-    ec = _availability_banner(ns.mock, ns.model, ns.quiet)
+    ec = _availability_banner(ns)
     if ec != 0:
         return ec
     _, index = _build_for(ns)
@@ -202,8 +190,8 @@ def cmd_eval(ns):
     if ns.tiers:
         wanted = set(ns.tiers)
         questions = [q for q in questions if getattr(q, "tier", None) in wanted]
-    llm = _select_llm(ns.model, ns.mock)
-    judge = None if not ns.judge else _select_judge(ns.model, ns.mock)
+    llm = _select_llm(ns.model, ns.use_mock)
+    judge = None if not ns.judge else _select_judge(ns.model, ns.use_mock)
     rows = run_dataset(
         questions,
         index,
@@ -228,7 +216,7 @@ def cmd_eval(ns):
 
 
 def cmd_show(ns):
-    ec = _availability_banner(ns.mock, ns.model, ns.quiet)
+    ec = _availability_banner(ns)
     if ec != 0:
         return ec
     _, index = _build_for(ns)
@@ -251,8 +239,8 @@ def cmd_show(ns):
         top_k=ns.k,
         expand=ns.expand,
         n_expand=ns.n_expand,
-        judge=None if not ns.judge else _select_judge(ns.model, ns.mock),
-        llm=_select_llm(ns.model, ns.mock),
+        judge=None if not ns.judge else _select_judge(ns.model, ns.use_mock),
+        llm=_select_llm(ns.model, ns.use_mock),
     )
     m = rows
     sys.stdout.write("[" + m.q_id + "] status=" + str(m.status) + " failure_stage=" + str(m.failure_stage) + "\n")
@@ -322,6 +310,7 @@ def main(argv=None):
     configure(verbose=False, quiet=False)
     parser = _build_parser()
     ns = parser.parse_args(argv)
+    ns.use_mock = ns.mock
         # E-15: --top-n < --k is bad CLI usage -> exit 2, checked before any work.
     if ns.top_n < ns.k:
         sys.stderr.write("ERROR: --top-n (" + str(ns.top_n) + ") < --k (" + str(ns.k) + "); E-15.\n")
