@@ -1,6 +1,6 @@
 # SPECIFICATION — RAG Pipeline System (dense + hybrid retrieval, rerank, contextual, citations, + uv)
 
-> - **Status:** v0.1 — draft for implementation
+> - **Status:** v0.2 — draft for implementation; P0/P1 review findings (F-001/002/003 HIGH + F-004…F-016 MEDIUM) integrated inline (per `SPEC_REVIEW_REPORT.md`; targeting clean Level 3). 8 LOW/P2 findings deferred.
 > - **Language:** Python 3.12 | Retrieval: in-memory dense + (BM25) hybrid | Embeddings: Ollama `nomic-embed-text` (deterministic `MockEmbedder` offline) | GUI: PyQt5
 (optional) | HTTP: httpx | Schema: jsonschema | LLM: local Ollama `qwen3.8:27b-mlx`
 > - **Curriculum source:** `curriculum/week1/chapter3.md` (§1 Why RAG Exists, §2 RAG as a
