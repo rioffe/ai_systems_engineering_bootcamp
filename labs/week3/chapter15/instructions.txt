@@ -1,0 +1,13 @@
+create /Users/rioffe/projects/ai_systems_engineering_bootcamp/labs/week3/chapter15/SPEC.md
+following the spec-writing skill and the prior-art specs in
+labs/week1/chapter1..chapter5; author the chapter15 lab space (labs/week3/chapter15/),
+section by section, with progressive git commits (use todo). The SPEC defines the
+§17 "Build a Minimal Coding Agent" exercise of curriculum/week3/chapter15.md: a closed-loop
+control-system harness (observe→reason→act→verify→feedback) that embeds an LLM policy, with
+context management (§3), a tool controller gated by a permission layer enforced OUTSIDE the model
+(§11), a verifier that closes the loop (§7/§13), an instrumented trajectory log (§17 —
+iteration/tool_calls/tokens/files_read/files_modified/tests_executed/test_results/errors/
+time_per_iteration/final_outcome), and the intentional failure-injection experiment (inject an
+incorrect "parse configuration" implementation; observe detect/diagnose/repair + iteration count).
+Mirror the week-1 reliability split: deterministic harness + MockPolicy double, opt-in Ollama
+policy (model-availability taxonomy DEGRADED_MOCK/PULL_REQUIRED/RUN_REAL). COMMIT INTERMEDIATE WORK.
