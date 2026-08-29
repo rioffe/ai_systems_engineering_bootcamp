@@ -134,7 +134,7 @@ reports — never runs inference itself.
 | **R-01** | The system shall execute the ch4 §2 harness pipeline — **Dataset → Application → Outputs → Evaluator → Metrics → Regression Report** — where the **Application under Evaluation (AoE)** is the ch3 RAG pipeline, reached *only* through the pinned adapter interface (C-02). The harness never re-implements retrieval/generation; it wires, measures, and compares. |
 | **R-02** | The **golden dataset** (§3/§32) SHOULD hold 50–100+ `EvalCase`s (recommendation; the floor binds only under the optional `check --strict` flag, which emits a documented violation — F-004), each with `question`, `reference_answer`, `relevant_chunks` (ground-truth chunk ids), and `category`, plus ch3-carried `gold_facts` for completeness (C-01). `dataset check` MUST validate schema, category membership in the documented `CATEGORY_SET` (ch3's seven failure tiers plus `{adversarial, boundary, regression}`, §21/§35), and **reference closure**: every `relevant_chunks` id MUST exist in the corpus index and every required field MUST be present; violations are deterministic **load errors** (E-02, ch3 I-013 analog). |
 | **R-03** | The evaluator (§5/§7 hierarchy) shall run **deterministic checks before any judge**: answer-schema validity, citation-`chunk_id` membership in the retrieved context, and any property with an exact spec (e.g. `amount >= 0`, enum membership) are checked deterministically. A case whose answer fails schema validation is attributed `PARSING_FAILURE` and is judged on that basis (I-005) — no additional judge call needed (the AoE-returned ch3 verdict is reused verbatim, F-001). |
-| **R-04** | The harness shall compute the §19 **evaluation vector** per case and in aggregate: correctness `A` (from the ch3 verdict `correct`), retrieval `P@k` and `R@k` (ch3 `metrics.py` reuse), groundedness `G` (faithfulness = supported claims / total factual claims, ch3 §21 formula), completeness `C` (reflected `gold_facts` / total `gold_facts`), hallucination rate `H` (unsupported claims / total claims, §15), latency `L` as percentiles $P50/P90/P95/P99$ (near-rank interpolation, §17), and cost `K` per successful case (§18 formulas: `cost_success = sum(input+output tokens × price_table) / successes`). §16 tool-success `T` is a **reserved** slot (retrieval pipeline has no tool loop in ch3 — kept for the agent weeks). |
+| **R-04** | The harness shall compute the §19 **evaluation vector** per case and in aggregate (including the ch3-lineage retrieval metrics mrr@k/map/ndcg@k, F-009): correctness `A` (from the ch3 verdict `correct`), retrieval `P@k` and `R@k` (ch3 `metrics.py` reuse), groundedness `G` (faithfulness = supported claims / total factual claims, ch3 §21 formula), completeness `C` (reflected `gold_facts` / total `gold_facts`), hallucination rate `H` (unsupported claims / total claims, §15), latency `L` as percentiles $P50/P90/P95/P99$ (near-rank interpolation, §17), and cost `K` per successful case (§18 formulas: `cost_success = sum(input+output tokens × price_table) / successes`). §16 tool-success `T` is a **reserved** slot (retrieval pipeline has no tool loop in ch3 — kept for the agent weeks). |
 | **R-05** | **Stratification** (§21/§35): the aggregate report MUST include a `by_category` breakdown over the dataset's declared category set, plus an optional `by_difficulty` breakdown when the dataset carries difficulty metadata. A global-only aggregate is a **report violation** (I-012). |
 | **R-06** | **Regression report** (§23): `compare` reads a baseline `eval.json` and a current `eval.json` (both schema-versioned, R-21) and emits a per-metric Δ table with a documented direction map (I-004: correctness/groundedness/completeness/P/R are higher-better; hallucination rate/latency percentiles/cost are lower-better). Cells lacking the metric on either side render as the explicit marker `n/m` (E-07), not a misleading zero. |
 | **R-07** | **Regression gates** (§24): `gates` evaluates a YAML threshold config (C-07) as **hard directional constraints** — e.g. `accuracy_drop <= 1%`, `hallucination_increase <= 0.5%`, `p95_latency_increase <= 20%` — and returns **exit `0`** (pass) or **exit `1`** (at least one gate fails). A missing metric key on either side **fails closed** with an explicit message (E-11). Per §25, gates are directional constraints and MUST NOT collapse into a weighted composite score. |
@@ -211,6 +211,9 @@ The harness's *only* durable artifacts are files written by `report.py`:
 - `gate_report.json` (from `gates`) — per-gate outcome + aggregate pass/fail (exit code K-03).
 - `judge_check_report.json` (from `judge-check`) — agreement rate + disagreement pairs.
 - `pair_report.json` (from `pair`, optional) — `WinRate` + per-case winners.
+
+Every artifact, **plus config surfaces `gates.yml` and `pair config JSON`** (F-011: schemas/eval.json,
+compare, gates, labels **and** `schemas/pair.json` gated on load), is schema-validated on every read.
 
 All downstream consumers (`compare`, `gates`, the GUI) read **only** these artifacts — they never
 re-run the AoE (I-016).
@@ -291,6 +294,7 @@ class DeterministicChecks:        # §5 — runs BEFORE anything consuming the v
 # metrics.py — reuse ch3 metrics.py for P@k / R@k / MRR / MAP / NDCG; add the §19 vector:
 METRIC_KEYS = [
     "accuracy", "precision_at_k", "recall_at_k",
+    "mrr_at_k", "map", "ndcg_at_k",          # F-009: ch3 metric lineage closed, gates-addressable
     "groundedness", "completeness", "hallucination_rate",
     "latency_p50", "latency_p90", "latency_p95", "latency_p99",
     "cost_per_success",
@@ -332,7 +336,9 @@ lexicographically (I-002 byte-identity).
 ### C-06 Compare report (§23)
 
 `compare(baseline: EvalArtifact, current: EvalArtifact)` emits, per metric key, `baseline`, `current`,
-and `Δ` computed by the **direction map** (I-004): for higher-better keys Δ = `current - baseline`; for
+and `Δ` computed by the **direction map** (I-004): higher-better (per-metric enumeration, closed:
+accuracy, precision@k, recall@k, and the ch3-lineage metrics `mrr_at_k`/`map`/`ndcg_at_k`, plus
+groundedness and completeness — F-009) Δ = `current - baseline`; for
 lower-better keys (`hallucination_rate`, `latency_*`, `cost_per_success`) Δ = `baseline - current`. A
 missing metric renders `n/m` on that row (E-07), never `0`. The human table and JSON are emitted by
 `report.py` (R-18).
@@ -421,7 +427,8 @@ a human completes ground truth, E-02). Deterministic, offline.
 **Usage errors** (missing flags, bad paths, unknown subcommand) exit `2` consistently (K-01). The
 `--force-rebuild` flag is reserved for the experiment path (R-08/E-08); `--force` for `compare`/`gates`
 bypasses eval-report-version mismatch (E-06). Global: `--self-check` (source-scan for I-016, T-02
-analog), `--verbose/--quiet` (loguru level as in ch3), `--model` (real-path judge override).
+analog), `--verbose/--quiet` (loguru level as in ch3); model flags partition (F-010): `--model` = generation model (ch3 parity),
+`--judge-model` = judge override for the real path.
 
 ### 5.2 GUI — optional surface (`rag-eval-gui`, R-16)
 
