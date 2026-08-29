@@ -286,35 +286,31 @@ class OllamaLLM(LLM):
 # is the opt-in real backend that FALLS BACK to lexical on any backend fault.
 
 
-class LLMReranker(ABC):
-    def rerank(self, query, candidates, *, top_k=50, system=None):
-        """Return [(doc_id, score)] re-scored by relevance to `query`."""
-        raise NotImplementedError
-
-
-class MockLLMReranker(LLMReranker):
-    def __init__(self, model="mock"):
-        self._model = model
-
-    @property
-    def model_id(self):
-        return self._model
-
-    def rerank(self, query, candidates, *, top_k=50, system=None):
+class LLMReranker:
+# Base default: a deterministic lexical-overlap re-score. Subclasses may
+# override with a real LLM re-scoring pass (I-015). Returns (doc_id, score).
+    def rerank(self, query, candidates, *, top_k=50, system=None) -> list:
         import re
-
         qwords = [w for w in re.split(r"\W+", query.lower()) if len(w) > 2]
         scored = []
         for cid, text in candidates:
             try:
-                t = text.lower()
-                overlap = sum(t.count(w) for w in qwords)
+                overlap = sum(str(text).lower().count(w) for w in qwords)
                 scored.append((cid, float(overlap)))
-            except Exception:              # malformed candidate -> skip it
+            except (TypeError, ValueError):
                 continue
         scored.sort(key=lambda x: x[1], reverse=True)
         return scored[:max(0, top_k)]
 
+
+class MockLLMReranker(LLMReranker):
+    # Deterministic lexical double; rerank() is inherited from LLMReranker.
+    def __init__(self, model="mock"):
+        self._model = model
+
+    def model_id(self) -> str:
+        return self._model
+    
 
 class OllamaLLMReranker(LLMReranker):
     def __init__(self, llm=None, model="qwen3.8:27b-mlx", fallback=None):
@@ -322,21 +318,5 @@ class OllamaLLMReranker(LLMReranker):
         self._model = model
         self._fallback = fallback if fallback is not None else MockLLMReranker(model)
 
-    @property
-    def model_id(self):
+    def model_id(self) -> str:
         return self._model
-
-    def rerank(self, query, candidates, *, top_k=50, system=None):
-        import re
-
-        qwords = [w for w in re.split(r"\W+", query.lower()) if len(w) > 2]
-        scored = []
-        for cid, text in candidates:
-            try:
-                t = text.lower()
-                overlap = sum(t.count(w) for w in qwords)
-                scored.append((cid, float(overlap)))
-            except Exception:              # malformed candidate -> skip it
-                continue
-        scored.sort(key=lambda x: x[1], reverse=True)
-        return scored[:max(0, top_k)]
