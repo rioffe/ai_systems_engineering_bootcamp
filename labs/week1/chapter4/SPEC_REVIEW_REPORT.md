@@ -472,3 +472,88 @@ Cosmetic mismatch between output formats (annoying, not blocking).
 
 Declare that compare treats group-level presence asymmetric as `n/m` (same marker extended), or
 document explicitly rendering "group absent".
+
+---
+
+## 5. Requirements Review
+
+Requirements (R-01..R-21) are in observability form: every statement names an actor, a condition,
+and a measurable artifact. The hierarchy (R-03, deterministic checks → judge → human validation)
+and the floor of stratification (R-05) are properly normative. Gaps:
+
+- **R-02's dataset-size floor (F-004)** cannot be enforced as specified; demote to a recommendation.
+- **R-06's Δ-table direction map** is one of the strongest requirement (concrete, direction-aware);
+  F-015 surfaced only a minor cosmetical reservation.
+- **R-11 (judge-check agreement) and R-13 (new-case sentinel)** are well-scoped to the §26/§28
+  semantics they encode. R-13 explicitly forbids fabricated ground truth, and yet the C-11 sentinel
+  `REPLACE_ME` wording does not say which validator rejects it — F-012 group.
+
+Missing requirements that would improve the spec: a normative requirement for **evaluator-ownership
+clarification** (F-001) and **status-enum mapping** (F-002); a compare-time **usage_kind guard**
+(F-013); and a **pair config schema** requirement (F-011).
+
+## 6. Interface and Data-Contract Review
+
+The contract level is high: C-01 dataset type with category closed set, C-02 pinned ch3 adapter,
+C-03 verdict status totality, C-05 versioned `eval.json` literal ("0.1"), C-07 gates YAML, C-08
+classifier precedence, C-09 label file format. Weak points:
+
+- C-03's status set vs ch3's richer status (F-002); schema-level import of ch3 `verdict` would add
+  ambiguity unless the mapping is declared explicitly.
+- C-05 carries both `usage_kind` and a boolean that real costs come through only as `cost_usd`;
+  compare-side guard missing (F-013).
+- C-07 gates schema — validation of consistent keys is declared; pairing/units not pinned (F-005).
+- C-09 label shape — label semantics (present-at-least-one-of-fields) adequate; schema reference
+  absent in §11 (omitted from I-010's list).
+- `Dataset`'s lifecycle (one closure imposes `dataset_id` ambiguity — F-003).
+
+Schema granularity is acceptable (jsonschema on every load); the schema-gate list (I-010) needs to
+include `pair` config and label files explicitly (F-011/E-10).
+
+## 7. State and Failure Review
+
+The §3.2 per-case state machine `LOADED → INDEXED → RUN → CHECKED → JUDGED → METRIED → CLASSIFIED`
+is correctly abstracted and total: `PARSE_BLOCKED` at CHECKED; judge skipped; strong detail. Failure
+semantics (§8) enumerate 18 rules covering usage errors, closure violations, zero-denominator,
+parse failures, run-time exceptions, schema drift, classification fallback, and availability
+taxonomies — a robust failure model.
+
+Residual questions: whether `run` revalidates datasets (F-006), whether `PARSE_BLOCKED` zero-values
+propagate to metrics (F-007), and whether label evidence is ingested before or after classification
+(F-008). None is architecturally fatal; each is a semantic gap.
+
+## 8. Determinism and Algorithm Review
+
+Determinism is first-class: I-002 (byte-identity) with fixed `%.4f` rendering and sorted category
+keys; mock latencies are deterministic surrogates by contract (R-14); near-rank percentile method
+(K-05) pinned; the direction-map for Δ arithmetic centralized (I-004). The zero-denominator
+fallbacks (I-001/E-03) enumerate every metric in the `METRIC_KEYS` list with a named fallback —
+excellent.
+
+The one residual algorithmic ambiguity is F-009: whether MRR/MAP/NDCG inherit ch3's math or drop —
+directly affecting the deterministic direction map I-004. And F-007's PARSE_BLOCKED numerics
+(completeness/accuracy values for blocked verdicts) is an algorithm-level gap.
+
+## 9. Edge-Case Review
+
+The §8 table is unusually broad (18 cases). It explicitly covers most of the systematic boundaries:
+empty dataset (E-03 fallbacks), uniform failure (E-05 to E-07), malformed input at two levels
+(E-02/E-14), pinned structural behaviors (E-12 dataset-id equality; E-08 stale-index). The F-012
+findings show five edge cases that lack explicit tests (corpus-unread E-01, run-raise E-05,
+stale-index E-08, schema drift E-14, GUI malformed artifact E-17) — each is spec'd but untested,
+which is a traceability gap rather than a semantic one.
+
+## 10. Non-Functional Requirement Review
+
+Performance: K-02 names an explicit bound (<5 min per 100-case mock run) but "the host" is
+undefined hardware (commenting soft-target instead of hard-is correct — albeit weakly defined,
+LOW). Time-behavior is formally pinned (K-05 near-rank percentiles). Byte-determinism (I-002) and
+the `--mock` CI path are the right NFR for this type of subsystem.
+
+Security (absent-as-appropriate): the harness's own trust boundary is "documented" (§13) via the
+trust boundary between labels/judges and generation inputs (I-011 gold-isolation; I-016 adapter-only);
+external Ollama model-responsibility remains in ch3 (E-13 carried). The spec is scoped to
+single-principal use; security NFR is adequate given stated scope (F-013 usage-kind risk is a side
+risk of data provenance rather than a security fault).
+
+---
