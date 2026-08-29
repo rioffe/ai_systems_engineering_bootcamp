@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import os
+import pathlib
 import random
 
 from rag.types import ChunkMetadata, Document, Question
@@ -13,8 +14,22 @@ from rag.types import ChunkMetadata, Document, Question
 # -- helpers -----------------------------------------------------------------
 
 
+def _safe_path(path: str, base: str | None = None) -> pathlib.Path:
+    """Resolve a path optionally against *base* and reject ``..`` traversal."""
+    p = pathlib.Path(path).resolve()
+    if base is not None:
+        base_dir = pathlib.Path(base).resolve()
+        if not str(p).startswith(str(base_dir)):
+            raise ValueError(
+                f"path traversal: {path!r} escapes base {base!r}")
+    return p
+
+
 def _doc_from_jsonl_line(line: str) -> Document:
-    raw = json.loads(line)
+    try:
+        raw = json.loads(line)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"malformed JSONL entry: {exc}") from exc
     md = raw.get("metadata", {})
     meta = ChunkMetadata(
         chunk_id=raw["doc_id"],
@@ -46,8 +61,12 @@ def load_corpus(path: str) -> list[Document]:
 
 
 def _load_from_file(path: str) -> list[Document]:
-    with open(path) as f:
-        raw = f.read().strip()
+    p = _safe_path(path)
+    try:
+        with p.open() as f:
+            raw = f.read().strip()
+    except OSError as exc:
+        raise ValueError(f"cannot read corpus {path!r}: {exc}") from exc
     if not raw:
         raise ValueError(f"empty corpus (no documents):: {path!r}")
     out: list[Document] = []
@@ -58,7 +77,11 @@ def _load_from_file(path: str) -> list[Document]:
 
 
 def _load_from_dir(path: str) -> list[Document]:
-    files = sorted(f for f in os.listdir(path) if f.endswith(".jsonl"))
+    try:
+        files = sorted(
+            f for f in os.listdir(path) if f.endswith(".jsonl"))
+    except OSError as exc:
+        raise ValueError(f"cannot read dir {path!r}: {exc}") from exc
     if not files:
         raise ValueError(f"No .jsonl files found in {path!r}")
     out: list[Document] = []
@@ -75,8 +98,12 @@ def load_questions(
     *,
     allowed_chunk_ids: set[str] | None = None,
 ) -> list[Question]:
-    with open(path) as f:
-        data = json.loads(f.read())
+    p = _safe_path(path)
+    try:
+        with p.open() as f:
+            data = json.loads(f.read())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"cannot load questions from {path!r}: {exc}") from exc
     raw_qs = (data.get("questions", data)
                 if isinstance(data, dict) else data)
     questions: list[Question] = []
@@ -172,14 +199,21 @@ def generate_corpus_and_questions(
     rng = random.Random(seed)
     fmds = set(failure_mode_docs or [])
     docs_dir = os.path.join(out_dir, "documents")
-    os.makedirs(docs_dir, exist_ok=True)
+    try:
+        os.makedirs(docs_dir, exist_ok=True)
+    except OSError as exc:
+        raise ValueError(
+            f"cannot create docs dir {docs_dir!r}: {exc}") from exc
     corpus_docs = _build_corpus(n_docs, rng, fmds)
     _write_jsonl(corpus_docs, os.path.join(docs_dir, "corpus.jsonl"))
     questions = _build_questions(
         corpus_docs, n_questions, rng
     )
-    with open(os.path.join(out_dir, "questions.json"), "w") as f:
-        f.write(json.dumps({"questions": questions}, indent=2))
+    try:
+        with open(os.path.join(out_dir, "questions.json"), "w") as f:
+            f.write(json.dumps({"questions": questions}, indent=2))
+    except OSError as exc:
+        raise ValueError(f"cannot write questions.json: {exc}") from exc
 
 
 def _build_corpus(
@@ -273,8 +307,11 @@ def _build_corpus(
 
 
 def _write_jsonl(docs: list[dict], path: str) -> None:
-    with open(path, "w") as f:
-        f.writelines(json.dumps(doc) + "\n" for doc in docs)
+    try:
+        with open(path, "w") as f:
+            f.writelines(json.dumps(doc) + "\n" for doc in docs)
+    except OSError as exc:
+        raise ValueError(f"cannot write JSONL {path!r}: {exc}") from exc
 
 
 def _build_questions(

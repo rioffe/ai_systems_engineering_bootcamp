@@ -10,12 +10,12 @@ import json
 import shutil
 
 import pytest
+
 from rag.corpus import (
     generate_corpus_and_questions,
     load_corpus,
     load_questions,
 )
-
 from rag.types import Question
 
 # -- load_corpus -------------------------------------------------------------
@@ -61,7 +61,7 @@ def test_load_corpus_raises_on_empty_file(tmp_path):
 
 
 def test_load_corpus_raises_on_nonexistent_path():
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises((FileNotFoundError, ValueError)):
         load_corpus("/tmp/nonexistent-path-xyz")
 
 
