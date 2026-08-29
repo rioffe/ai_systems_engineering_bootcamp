@@ -1,8 +1,7 @@
 # SPECIFICATION — Eval Harness for the Chapter-3 RAG Pipeline (golden datasets, regression reports, gates, eval-driven development, + uv)
 
-> - **Status:** v0.1 — draft for implementation review. Written one section at a time, following the
->   ch1/ch2/ch3 lab SPEC pattern; a `SPEC_REVIEW` pass (per the `spec-review` skill) is expected before
->   v0.2, exactly as ch3 did.
+> - **Status:** v0.2 — `SPEC_REVIEW` P0 (F-001…F-004) and P1 (F-005…F-011) findings integrated inline
+>   (per `SPEC_REVIEW_REPORT.md`; targeting Level 3). P2 hygiene (F-012…F-015) deferred.
 > - **Language:** Python 3.12 | Application-under-evaluation (AoE): ch3 `rag` lab (imported as a path
 >   dependency) | Evaluators: deterministic checks + `MockJudge` (offline double) / LLM-as-judge over
 >   Ollama (opt-in real) | Schema: jsonschema | Config: PyYAML | HTTP: httpx | GUI: PyQt5 (optional)
@@ -71,9 +70,9 @@ reliability split as ch1/ch2/ch3:
 
 **Evaluation hierarchy discipline (§5–§7).** The ch4 §7 hierarchy — deterministic tests → automated
 metrics → LLM evaluation → human evaluation — is encoded as an *ordered evaluator pipeline*:
-deterministic checks (schema-validity, citation-chunk membership, structure) run first and *before any
-judge*; LLM-the AoE-returned verdicts are gated on those checks; human labels (when present) are used to
-**validate the ch3 judge itself** (§26 via `judge-check`), not as the primary regression groove.
+deterministic checks (schema-validity, citation-chunk membership, structure) run first and gate the
+AoE-returned verdicts; human labels (when present) validate the ch3 judge itself (§26 via
+`judge-check`), not as the primary regression groove.
 
 **The evaluation vector (§19)** is the reporting object. Per-case and aggregate:
 
