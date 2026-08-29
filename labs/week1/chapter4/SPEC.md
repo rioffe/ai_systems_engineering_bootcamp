@@ -346,9 +346,20 @@ gates:
   - {metric: latency_p95,         constraint: "increase", max_pct: 20.0}
 ```
 
-Gate evaluation is per-gate boolean; aggregate = `all(gates)`; exit `0` pass / `1` fail (K-03). `MAY`
-gate types: absolute floors/ceilings (`min_value`, `max_value`) for safety-grade metrics per §25 —
-hard constraints regardless of other deltas. Unknown metric keys are config errors (I-015).
+**Unit semantics (F-005):** two bound forms, exactly one per gate (schema-validated pairing):
+
+- `max_pct_points` — **absolute** change in percentage points (Δ computed per the direction map);
+  for probability-scaled metrics (accuracy, groundedness, completeness, hallucination_rate,
+  precision/recall): `|Δ| > max_pct_points` violates.
+- `max_pct` — **relative** change against the baseline value; for latency/cost metrics
+  (latency_p50..latency_p99, cost_per_success): `baseline * (1 ± max_pct/100)` bound on Δ percent.
+
+A gate carries `constraint` (directional operator `drop` or `increase`) and exactly-one bound of
+{`max_pct_points`, `max_pct`, and MAYble `min_value`/`max_value`}; §25 absolute hard floors/ceilings
+use `min_value`/`max_value` (allowed regardless of direction). Unknown metric keys, wrong
+unit-on-metric, or multiple bounds are **config errors** (I-015) at gate-load, not runtime joins.
+
+Gate evaluation is per-gate boolean; aggregate = `all(gates)`; exit `0` pass / `1` fail (K-03).
 
 ### C-08 Failure classifier precedence (§34)
 
