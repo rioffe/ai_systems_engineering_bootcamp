@@ -14,7 +14,7 @@ The bootcamp covers four key pillars of AI engineering (mapped to Ng's four skil
 ## Table of Contents
 
 Reading order: front matter, then the 30 chapters grouped by week (Weeks 1–4 map to
-the four pillars above). Links point to the source Markdown, which renders on
+the four pillars above), then the Appendix. Links point to the source Markdown, which renders on
 GitHub; for ready-to-read PDFs, see the [assembled book](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book.pdf)
 and the [two-level-TOC book](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book-local.pdf) in the [Repository layout](#repository-layout) below.
 
@@ -65,6 +65,12 @@ and the [two-level-TOC book](https://github.com/rioffe/ai_systems_engineering_bo
 - [Chapter 29: Architecture and Product Review](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter29.md)
 - [Chapter 30: The AI Engineer's Future](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/curriculum/week4/chapter30.md)
 
+### Appendix
+
+- [Appendix A: How requirements differ from specification?](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/supplemental_docs/requirements_vs_specification.md)
+- [Appendix B: Specification Engineering](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/supplemental_docs/specification_engineering.md)
+- [Appendix C: Specification Engineering Tools](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/supplemental_docs/tools_of_specification_engineer.md)
+
 ## Repository layout
 
 - `outline.md`: The top-level, master curriculum structure — 4 weeks / 30 days laid out at a glance.
@@ -74,8 +80,13 @@ and the [two-level-TOC book](https://github.com/rioffe/ai_systems_engineering_bo
     - `day<N>.md` — daily notes / outlines for that day.
     - `chapter<N>.md` (+ its generated `chapter<N>.pdf`) — the canonical numbered chapters (30 total, `chapter1`–`chapter30`).
     - `*_v2.md` — in-progress draft revisions of a few week-1 chapters.
-- [book.pdf](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book.pdf): The full assembled book — the Introduction + all 30 chapters in one PDF, with a master table of contents and title page.
+- [book.pdf](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book.pdf): The full assembled book — the Introduction + all 30 chapters + the Appendix (three supplemental chapters, Appendix A/B/C) in one PDF, with a master table of contents and title page.
 - [book-local.pdf](https://github.com/rioffe/ai_systems_engineering_bootcamp/blob/main/book-local.pdf): The same book with a **two-level table of contents** — a front-matter chapter list plus a compact per-chapter "Contents" page. This is the local working copy (currently carries a name on the title page).
+- `supplemental_docs/`: The three supplemental chapters that form the book's Appendix:
+  - `requirements_vs_specification.md` — Appendix A: How requirements differ from specification.
+  - `specification_engineering.md` — Appendix B: Specification Engineering.
+  - `tools_of_specification_engineer.md` — Appendix C: Specification Engineering Tools.
+  Each has its own generated `*.pdf`; together they are appended after Chapter 30 when building `book.pdf` / `book-local.pdf`.
 - `outline.pdf`: A single-PDF render of `outline.md`, kept for reference.
 - Build tooling:
   - `Makefile`: The build driver — the normal way to generate PDFs (see below).
@@ -104,13 +115,13 @@ Generating PDFs is driven by the **Makefile**, which wraps `md2pdf.sh` (the conv
 | `make` | Build every canonical chapter `*.pdf` (`--toc`; `+--mermaid` where used). |
 | `make ch<N>` | Build a single chapter by number, e.g. `make ch7`. |
 | `make one T=week1/chapter1.md` | Build one chapter by path with auto-detected flags. |
-| `make book` | Assemble the full book → `book.pdf` (master TOC, title page). |
-| `make book-local` | Assemble the book with a two-level TOC → `book-local.pdf`. |
+| `make book` | Assemble the full book → `book.pdf` (master TOC, title page, + Appendix A/B/C). |
+| `make book-local` | Assemble the book with a two-level TOC → `book-local.pdf` (+ Appendix A/B/C). |
 | `make clean` | Remove generated chapter `*.pdf` under `curriculum/week*/`. |
 | `make lint` | `shellcheck md2pdf.sh`. |
 | `make gen-ch` | Regenerate the `ch<N>` target block after adding/removing a chapter (then commit the `Makefile`). |
 
-Overridable variables: `CHAPTERS`, `MERMAID_CHAPTERS`, `TITLE`, `AUTHOR`, and `INTRO=0` (omit the Introduction front matter). A single broken chapter is reported but does not abort the run.
+Overridable variables: `CHAPTERS`, `MERMAID_CHAPTERS`, `TITLE`, `AUTHOR`, `INTRO=0` (omit the Introduction front matter), and `APPENDIX=0` (omit the Appendix). A single broken chapter is reported but does not abort the run.
 
 ### Using `md2pdf.sh` directly
 
@@ -125,6 +136,26 @@ cd curriculum/week1
 ./md2pdf.sh --toc --mermaid chapter1.md # + mermaid diagrams (needs Chrome)
 ```
 
+**Parameters** (`--help` or `-h` prints the same reference):
+
+| Option | Effect |
+| ------ | ------ |
+| `--toc` | Add a table of contents. |
+| `--mermaid` | Render ` ```mermaid ` diagrams (needs Chrome/Chromium, see below). |
+| `--margin MARGIN` | Set page margins on all sides via the `geometry` package (e.g. `0.5in`, `1cm`, `0.3in`). |
+| `-h`, `--help` | Print usage and exit. |
+| `<input_file.md>` | The Markdown source. The output is written next to it as `<input_file>.pdf` (the `.md` extension replaced by `.pdf`). |
+
+**Environment variables** (all optional; mermaid only):
+
+| Variable | Effect |
+| -------- | ------ |
+| `PUPPETEER_EXECUTABLE_PATH` | Chrome/Chromium binary used to render mermaid diagrams; auto-detected when unset. |
+| `MERMAID_FILTER_FORMAT` | Mermaid output format. Defaults to `pdf` (vector, crisp at any zoom); use `png` for a raster image. |
+| `MERMAID_FILTER_SCALE` | Raster scale for the mermaid PNG fallback. Defaults to `3`. |
+
+If `xelatex` fails, the script retries once with pandoc's default PDF engine.
+
 To build the whole book in one go, prefer the Makefile targets above (`make book` / `make book-local`).
 
 ## License
@@ -136,8 +167,8 @@ This work is licensed under a
 
 This project — the curriculum, books, and accompanying tooling — is released under that license ([CC BY 4.0](LICENSE)):
 
-- Deed: https://creativecommons.org/licenses/by/4.0/
-- Legal code: https://creativecommons.org/licenses/by/4.0/legalcode
+- Deed: <https://creativecommons.org/licenses/by/4.0/>
+- Legal code: <https://creativecommons.org/licenses/by/4.0/legalcode>
 
 > **Copyright © 2026 Robert Ioffe — <https://github.com/rioffe>**
 

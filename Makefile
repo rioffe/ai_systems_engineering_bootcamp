@@ -8,7 +8,8 @@
 #                               (--toc; +--mermaid for chapters that use it)
 #   make ch<N>                build a single chapter by number, e.g. make ch7
 #   make ch1                  mermaid chapter (week1/chapter1.md)
-#   make book                -> full book.pdf of all 30 chapters (master TOC, title page)
+#   make book                -> full book.pdf of all 30 chapters + the Appendix
+#                               (master TOC, title page; APPENDIX=0 to omit)
 #   make book-local           -> book-local.pdf, two-level TOC: chapter-only
 #                                master "Contents" + a compact per-chapter "Contents"
 #   make clean                remove generated chapter *.pdf under curriculum/week*/
@@ -27,6 +28,9 @@ CHAPTERS ?= $(shell ls $(CURRICULUM)/week*/chapter[0-9]*.md 2>/dev/null | grep -
 # Chapters that render mermaid diagrams -> add --mermaid.
 MERMAID_CHAPTERS      ?= $(CURRICULUM)/week1/chapter1.md
 
+# Makefile is not shell; shellcheck misparses the ifeq block below. The real
+# lint target only checks md2pdf.sh (see `make lint`).
+# shellcheck disable=SC1073,SC1065,SC1064,SC1072
 ifeq ($(strip $(T)),)
 .DEFAULT_GOAL := all      # bare `make` builds everything
 else
@@ -40,7 +44,8 @@ help:
 	@echo "  make / all          Build every canonical chapter PDF (--toc; +--mermaid where used)."
 	@echo "  make ch<N>          Build one chapter by number, e.g. make ch7."
 	@echo "  make one T=<path>   Build one chapter by path, e.g. make one T=week1/chapter1.md."
-	@echo "  make book          Assemble the full book -> book.pdf (master TOC, title page)."
+	@echo "  make book          Assemble the full book -> book.pdf (master TOC, title page)"
+	@echo "                     + Appendix (supplemental_docs as Appendix A/B/C)."
 	@echo "  make book-local    Assemble the book with a two-level TOC -> book-local.pdf."
 	@echo "  make gen-ch        Regenerate the ch<N> target block (after add/remove a chapter),"
 	@echo "                     then commit the Makefile."
@@ -48,7 +53,8 @@ help:
 	@echo "  make clean         Remove generated chapter *.pdf under curriculum/week*/."
 	@echo
 	@echo "Per-chapter shorthands ch1..ch30 also exist (build one chapter each)."
-	@echo "Overridable variables: CHAPTERS, MERMAID_CHAPTERS, TITLE, AUTHOR, INTRO=0 (omit the Introduction)."
+	@echo "Overridable variables: CHAPTERS, MERMAID_CHAPTERS, TITLE, AUTHOR, INTRO=0 (omit the Introduction),"
+	@echo "                     APPENDIX=0 (omit the Appendix)."
 # Build a list of .md files. Each gets --toc, plus --mermaid when its basename
 # is listed in MERMAID_CHAPTERS (by basename). md2pdf.sh resolves paths relative to its CWD,
 # so we cd into each chapter's directory and pass the basename. A single broken
@@ -183,11 +189,16 @@ lint:
 	shellcheck md2pdf.sh
 
 ## Build the full book: the Introduction front matter + all 30 chapters in one
-## PDF (master TOC, title page, book document class, mermaid in ch1). Output:
-## book.pdf at repo root.  INTRO=0 omits the Introduction.
+## PDF (master TOC, title page, book document class, mermaid in ch1), followed
+## by the Appendix -- the three supplemental_docs chapters, numbered
+## Appendix A/B/C (a raw \appendix marker is injected before the first one).
+## Output:
+## book.pdf at repo root.  INTRO=0 omits the Introduction; APPENDIX=0 omits
+## the Appendix.
 ##   make book                 -> book.pdf
 ##   make book TITLE="..." AUTHOR="..."
 ##   INTRO=0 make book                -> book.pdf without the Introduction
+##   APPENDIX=0 make book             -> book.pdf without the Appendix
 book:
 	bash tools/build-book.sh
 
@@ -196,11 +207,14 @@ book:
 ## (--toc-depth=1), plus a compact per-chapter "Contents" box printed at the top
 ## of each chapter that lists that chapter's own ## sections / ### subsections.
 ## Includes the Introduction as front matter (but not its own local "Contents"
-## page).  Output: book-local.pdf at repo root.  This replaces the ~30-page
-## master TOC.  INTRO=0 omits the Introduction.
+## page) and the Appendix (supplemental_docs as Appendix A/B/C, each with its
+## own local "Contents" page).  Output: book-local.pdf at repo root.  This
+## replaces the ~30-page master TOC.  INTRO=0 omits the Introduction;
+## APPENDIX=0 omits the Appendix.
 ##   make book-local                   -> book-local.pdf
 ##   make book-local TITLE="..." AUTHOR="..."
 ##   INTRO=0 make book-local          -> without the Introduction
+##   APPENDIX=0 make book-local       -> without the Appendix
 book-local:
 	bash tools/build-book-localtoc.sh
 

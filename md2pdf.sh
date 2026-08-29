@@ -4,6 +4,36 @@
 
 set -e
 
+usage() {
+  cat <<'EOF'
+Usage: md2pdf.sh [OPTIONS] <input_file.md>
+
+Convert a Markdown file (with LaTeX math) to PDF via pandoc + XeLaTeX.
+The output is written next to the input as <input_file with .md replaced
+by .pdf>, in the current working directory (the script resolves paths
+relative to its CWD).
+
+Options:
+  --toc            Add a table of contents.
+  --mermaid        Render ```mermaid diagrams (needs Chrome/Chromium).
+  --margin MARGIN  Set page margins on all sides (e.g. 0.5in, 1cm, 0.3in).
+  -h, --help       Show this help and exit.
+
+Environment variables (all optional; mermaid only):
+  PUPPETEER_EXECUTABLE_PATH   Chrome/Chromium binary to use
+                              (auto-detected when unset).
+  MERMAID_FILTER_FORMAT       Mermaid output format (default: pdf = vector,
+                              crisp at any zoom).
+  MERMAID_FILTER_SCALE        Raster scale for the mermaid PNG fallback
+                              (default: 3).
+
+Examples:
+  md2pdf.sh chapter3.md                 # plain
+  md2pdf.sh --toc chapter3.md           # with a table of contents
+  md2pdf.sh --toc --mermaid chapter1.md # + mermaid diagrams (needs Chrome)
+EOF
+}
+
 TOC_FLAG=()
 MERMAID_FLAG=()
 GEOMETRY_FLAG=()
@@ -12,6 +42,10 @@ MARGIN_HEADER_FILE=""
 while [[ $# -gt 0 ]]; do
   echo "Arg: $1"
   case $1 in
+  -h | --help)
+    usage
+    exit 0
+    ;;
   --toc)
     TOC_FLAG=(--toc)
     shift
@@ -40,8 +74,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$INPUT_FILE" ]]; then
-  echo "Usage: $0 [--toc] [--mermaid] [--margin MARGIN] <input_file.md>"
-  echo "    --margin MARGIN   Set page margins on all sides (e.g. 0.5in, 1cm, 0.3in)."
+  usage >&2
   exit 1
 fi
 

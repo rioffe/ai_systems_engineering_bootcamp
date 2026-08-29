@@ -24,6 +24,8 @@
 #
 #   INTRO=0 tools/build-book-localtoc.sh            -> omit the Introduction front
 #                                                    matter (default: on)
+#   APPENDIX=0 tools/build-book-localtoc.sh          -> omit the Appendix (supplemental
+#                                                    docs as Appendix A/B/C; default: on)
 #
 # Why latexmk, not xelatex: a per-chapter \tableofcontents needs several LaTeX
 # passes for the cross-references (page numbers) to stabilise.  pandoc runs its
@@ -51,7 +53,7 @@ LOCAL_DEPTH="${LOCAL_DEPTH:-3}"
 
 # ---- ordered chapter source list (skip day*.md and *_vN drafts) -----------
 chapters="$(
-        python3 - "$CURRIC" <<'PY'
+    python3 - "$CURRIC" <<'PY'
 import os, sys, re
 cur = sys.argv[1]
 fs = []
@@ -69,8 +71,8 @@ PY
 )"
 
 if [ -z "$chapters" ]; then
-        echo "build-book-localtoc: no chapter*.md files found under $CURRIC" >&2
-        exit 1
+    echo "build-book-localtoc: no chapter*.md files found under $CURRIC" >&2
+    exit 1
 fi
 
 # ---- optionally prepend the book's Introduction as front matter -----------
@@ -86,12 +88,36 @@ license_md="$CURRIC/license.md"
 # local "Contents" page on its own. Prepend it first; intro is prepended next,
 # so the final order is intro -> License -> chapters.
 if [ "${LICENSE:-1}" != 0 ] && [ -f "$license_md" ]; then
-        chapters="$license_md"$'\n'"$chapters"
-        echo "build-book-localtoc: including License front matter"
+    chapters="$license_md"$'\n'"$chapters"
+    echo "build-book-localtoc: including License front matter"
 fi
 if [ "${INTRO:-1}" != 0 ] && [ -f "$intro" ]; then
-        chapters="$intro"$'\n'"$chapters"
-        NOLOCAL="$intro"
+    chapters="$intro"$'\n'"$chapters"
+    NOLOCAL="$intro"
+fi
+
+# ---- optionally append the Appendix (supplemental docs) ----------------------
+# The Appendix is the three supplemental_docs chapters, appended after
+# Chapter 30.  The book's chapters are deliberately unnumbered (each title
+# already says "Chapter N"), so a raw \appendix marker would do nothing --
+# instead each appendix doc's H1 is relabelled "Appendix A/B/C: <title>"
+# (in the assembler) so it lands in the master TOC and on the title page.
+# Like regular chapters, each earns its own local "Contents" page.  Opt out
+# with APPENDIX=0.
+APPENDIX_LIST=""
+if [ "${APPENDIX:-1}" != 0 ]; then
+    APPENDIX_LIST="$(
+        for f in \
+            supplemental_docs/requirements_vs_specification.md \
+            supplemental_docs/specification_engineering.md \
+            supplemental_docs/tools_of_specification_engineer.md; do
+            [ -f "$f" ] && printf '%s\n' "$f"
+        done
+    )"
+    if [ -n "$APPENDIX_LIST" ]; then
+        chapters="$chapters"$'\n'"$APPENDIX_LIST"
+        echo "build-book-localtoc: including Appendix ($(printf '%s\n' "$APPENDIX_LIST" | xargs -n1 basename | tr '\n' ' ' | sed 's/ $//'))"
+    fi
 fi
 
 total="$(printf '%s\n' "$chapters" | grep -c .)"
@@ -107,8 +133,8 @@ trap 'rm -f "$SRC" "$PROC" "$LIST" "$ASMPY" "$HEADER"' EXIT
 # LaTeX preamble for the local TOC: load hyperref FIRST so etoc can attach
 # clickable links, then etoc.  pandoc adds "bookmark" + \hypersetup after this.
 printf '%s\n%s\n' \
-     '\usepackage[hidelinks=true]{hyperref}' \
-     '\usepackage{etoc}' > "$HEADER"
+    '\usepackage[hidelinks=true]{hyperref}' \
+    '\usepackage{etoc}' >"$HEADER"
 
 # The assembler reads the ordered chapter paths from LIST (argv[1]) and the local
 # TOC depth from argv[2].  For each chapter it injects -- right after the
@@ -120,12 +146,14 @@ printf '%s\n%s\n' \
 #                          and clickable links, because hyperref is loaded first)
 #    \newpage                                   -> chapter body starts fresh
 # No heading parsing/escaping is needed: etoc reads the real \section titles.
-printf '%s\n' "$chapters" > "$LIST"
-cat > "$ASMPY" <<'PY'
+printf '%s\n' "$chapters" >"$LIST"
+cat >"$ASMPY" <<'PY'
 import re, sys
 
 LIST, DEPTH = sys.argv[1], sys.argv[2]
 NOLOCAL = sys.argv[3] if len(sys.argv) > 3 else ""
+APPENDIX = [p for p in (sys.argv[4] if len(sys.argv) > 4 else "").splitlines() if p]
+LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
 SUBSECTION = re.compile(r"^#{2,4}\s+\S")      # ## .. #### => a local-TOC entry
 BLOCK = (
@@ -142,7 +170,15 @@ for n, path in enumerate(paths):
     with open(path, encoding="utf-8", errors="replace") as f:
         src = f.read().splitlines()
 
-     # a chapter earns a local TOC page only if it has ## /### subsections
+     # appendix docs get their H1 relabelled "Appendix A/B/C: <title>" (the
+    # book's chapters are unnumbered, so the label must live in the title)
+    app_idx = APPENDIX.index(path) if path in APPENDIX else -1
+    if app_idx >= 0:
+        for i, ln in enumerate(src):
+            m = HEADING.match(ln)
+            if m and len(m.group(1)) == 1:
+                src[i] = "# Appendix %s: %s" % (LETTERS[app_idx], m.group(2))
+                break
     is_nolocal = NOLOCAL != "" and path == NOLOCAL
     has_subs = any(SUBSECTION.match(l) for l in src) and not is_nolocal
 
@@ -166,35 +202,41 @@ for n, path in enumerate(paths):
 sys.stdout.write("\n\n".join(out) + "\n")
 PY
 
-python3 "$ASMPY" "$LIST" "$LOCAL_DEPTH" "$NOLOCAL" > "$SRC"
+python3 "$ASMPY" "$LIST" "$LOCAL_DEPTH" "$NOLOCAL" "$APPENDIX_LIST" >"$SRC"
 
 if [ ! -s "$SRC" ]; then
-        echo "build-book-localtoc: assembled source is empty" >&2
-        exit 1
+    echo "build-book-localtoc: assembled source is empty" >&2
+    exit 1
 fi
 
-echo "build-book-localtoc: assembled $total chapters ($(wc -l < "$SRC") source lines)"
+echo "build-book-localtoc: assembled $total chapters ($(wc -l <"$SRC") source lines)"
 
 # ---- apply the SAME [ / ] -> $$ math preprocessor as md2pdf.sh -----------
 sed -e 's/^[[:space:]]*\[[[:space:]]*$/$$\n/' \
     -e 's/^[[:space:]]*\][[:space:]]*$/\n$$/' \
-     "$SRC" > "$PROC"
+    "$SRC" >"$PROC"
 
 # ---- decide on the mermaid-filter, then auto-detect a Chrome/Chromium -----
 mermaid_args=""
 if grep -q '^```mermaid' "$SRC"; then
     if [ -z "${PUPPETEER_EXECUTABLE_PATH:-}" ]; then
         for cand in \
-        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
-        "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary" \
-        "/Applications/Chromium.app/Contents/MacOS/Chromium" \
-        "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"; do
-         [ -x "$cand" ] && { PUPPETEER_EXECUTABLE_PATH="$cand"; break; }
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+            "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary" \
+            "/Applications/Chromium.app/Contents/MacOS/Chromium" \
+            "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"; do
+            [ -x "$cand" ] && {
+                PUPPETEER_EXECUTABLE_PATH="$cand"
+                break
+            }
         done
-          [ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ] || for c in \
+        [ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ] || for c in \
             google-chrome google-chrome-stable chromium chromium-browser; do
             bin="$(command -v "$c" 2>/dev/null || true)"
-             [ -n "$bin" ] && { PUPPETEER_EXECUTABLE_PATH="$bin"; break; }
+            [ -n "$bin" ] && {
+                PUPPETEER_EXECUTABLE_PATH="$bin"
+                break
+            }
         done
     fi
     if [ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]; then
@@ -216,15 +258,15 @@ echo "build-book-localtoc: master TOC depth=1 (chapters); per-chapter local TOC 
 # unquoted on purpose.
 # shellcheck disable=SC2086
 pandoc "$PROC" \
-     --toc --toc-depth=1 \
-     --pdf-engine=latexmk \
-     --pdf-engine-opt="-xelatex" \
-     --pdf-engine-opt="-interaction=nonstopmode" \
-     --include-in-header="$HEADER" \
-     --variable documentclass=book \
-     --variable colorlinks=true \
-     --metadata "title=$TITLE" \
-     --metadata "author=$AUTHOR" \
-     --metadata "date=$DATE" \
-     $mermaid_args \
-     --output "$OUT" && echo "Success! Created '$OUT'."
+    --toc --toc-depth=1 \
+    --pdf-engine=latexmk \
+    --pdf-engine-opt="-xelatex" \
+    --pdf-engine-opt="-interaction=nonstopmode" \
+    --include-in-header="$HEADER" \
+    --variable documentclass=book \
+    --variable colorlinks=true \
+    --metadata "title=$TITLE" \
+    --metadata "author=$AUTHOR" \
+    --metadata "date=$DATE" \
+    $mermaid_args \
+    --output "$OUT" && echo "Success! Created '$OUT'."
