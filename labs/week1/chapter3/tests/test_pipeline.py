@@ -259,7 +259,7 @@ class _FailingJudge(MockJudge):
 
     def judge(
         self,
-           *,
+        *,
         question,
         context,
         answer,
@@ -267,12 +267,12 @@ class _FailingJudge(MockJudge):
         gold_facts,
         max_retries: int = 2,
         on_failure: str | None = None,
-      ) -> Verdict:
+    ) -> Verdict:
         return Verdict(
             q_id=question.q_id,
             status="ERROR",
             rationale="simulated judge failure after retries",
-           )
+        )
 
 
 class _RaisingJudge(MockJudge):
@@ -280,7 +280,7 @@ class _RaisingJudge(MockJudge):
 
     def judge(
         self,
-           *,
+        *,
         question,
         context,
         answer,
@@ -288,7 +288,7 @@ class _RaisingJudge(MockJudge):
         gold_facts,
         max_retries: int = 2,
         on_failure: str | None = None,
-       ) -> Verdict:
+    ) -> Verdict:
         raise RuntimeError("simulated judge crash")
 
 
@@ -297,7 +297,7 @@ class _ErrorAnswerLLM(MockLLM):
 
     def generate(  # type: ignore[override]
         self,
-           *,
+        *,
         system,
         context,
         question,
@@ -307,14 +307,14 @@ class _ErrorAnswerLLM(MockLLM):
         seed: int | None = None,
         max_retries: int = 2,
         on_failure: str | None = None,
-       ) -> Answer:
+    ) -> Answer:
         return Answer(
             q_id=str(schema.get("q_id", "x")),
             text="",
             confidence=0.0,
             status="ERROR",
             error="simulated generation failure",
-           )
+        )
 
 
 def _easy_env(tmp_path):
@@ -324,7 +324,7 @@ def _easy_env(tmp_path):
         n_docs=10,
         n_questions=5,
         seed=42,
-      )
+    )
     docs = load_corpus(str(tmp_path / "gen" / "documents" / "corpus.jsonl"))
     vs, bm = build_index(
         docs,
@@ -335,7 +335,7 @@ def _easy_env(tmp_path):
         chunk_size=50,
         embed_model="mock",
         mock=True,
-      )
+    )
     q = Question(
         q_id="q-t10",
         question="What is the refund limit?",
@@ -344,7 +344,7 @@ def _easy_env(tmp_path):
         relevant_chunks=["doc-0000-1234#0"],
         relevant_docs=["doc-0000-1234"],
         tier="easy",
-      )
+    )
     return (vs, bm), q
 
 
@@ -357,7 +357,7 @@ def test_partial_when_judge_faults_after_generate(tmp_path):
         (vs, bm),
         judge=_FailingJudge(),
         llm=MockLLM(),
-      )
+    )
     assert m.status == "PARTIAL"
     assert m.failure_stage == "judging"
     # Retrieval diagnosis is intact (RETRIEVING cleared before the judge fault).
@@ -420,7 +420,7 @@ def test_failure_stage_single_and_valid(tmp_path):
         "context",
         "generation",
         "judging",
-      }
+    }
     (vs, bm), q = _easy_env(tmp_path)
     m = run_case(q, (vs, bm), judge=_FailingJudge(), llm=MockLLM())
     assert m.status in ("SCORED", "PARTIAL", "ERROR")
