@@ -645,3 +645,98 @@ dependency direction (dataset → aoe → evaluator → metrics → compare/gate
 Architecture consists at Level 3 relatively established modulo P0.
 
 ---
+
+---
+
+## 18. Implementation-Agent Readiness
+
+**NO — MATERIAL QUESTIONS REMAIN.**
+
+Blocking questions (minimum set):
+
+1. **Verdict ownership:** Does `AoEResult.verdict` become the evaluated verdict after deterministic
+   checks, or is it re-judged by `evaluator.py`'s own `judges`? (F-001)
+2. **Status mapping:** How does ch3's `PARTIAL` status map to ch4's `{PASS, FAIL, PARSE_BLOCKED}`?
+   (F-002)
+3. **Dataset idity:** Is `dataset_id` a declared name or a content hash? (F-003)
+4. **Dataset size floor:** Does `check` enforce R-02's 50–100+ bound? (F-004)
+
+Non-blocking clarifications (can be answered during implementation with proportionate cost): gates
+unit semantics (F-005), `run` dataset validation (F-006), PARSE_BLOCKED numerics (F-007),
+label-ingestion timing (F-008), report-only vs gates-addressable metric family (F-009), `--model`
+flag partitioning (F-010), pair config schema (F-011).
+
+## 19. Quality Scorecard
+
+| Dimension | Score (0–5) | Evidence |
+| --------- | ----------: | -------- |
+| Scope clarity | 5 | Single AoE boundary crisp (adapter), in/out scope explicit |
+| Terminology | 4 | AoE/Evaluator/Judge/verdict/etc stable; `pair` label learns small drift |
+| Requirement precision | 4 | Behavioral form mostly; R-02 floor lacks anchoring (F-004) |
+| Interface completeness | 3 | Weak on ch3↔ch4 verdict seam (F-001/F-002) |
+| Data-contract completeness | 4 | Lifecycle enumerated (C-01..C-11); `dataset_id` ambiguity |
+| State/lifecycle definition | 4 | §3.2 state machine with explicit PARSE_BLOCKED path |
+| Algorithm precision | 4 | Zero-denominator fallbacks + directionality (I-001/I-004) |
+| Failure semantics | 4 | §8 table broad, I/O reset consistent (exits 0/1/2/3/4) |
+| Edge-case coverage | 4 | E-01..E-18 listed, some untested (F-012) |
+| Non-functional requirements | 3 | K-02 soft-typed as "host" partly unsupported; percentiles K-05 pinned |
+| Security specification | 3 | Scope-appropriate; gold isolation and trust boundary normative |
+| Observability/provenance | 5 | Trace per case, artifacts versioned, `usage_kind` labeled |
+| Testability | 4 | Granular acceptance + regression fixtures (T-09) − F-001/F-004 blockers |
+| Evaluation/metrics | 4 | Formulas+denominators per I-001; F-009 metric-family ambiguity |
+| Traceability | 4 | §11 matrix fine modulo F-012 ids |
+| Internal consistency | 3 | F-001/F-002/F-003 real conflicts |
+| Architecture consistency | 4 | Adapter+artifact pattern sound; I-016 enforced |
+| Implementation readiness | 3 | Blocking questions listed above |
+**Average:** ≈ 3.8 / 5
+
+## 20. Remediation Plan
+
+### P0 — Blocking (must be resolved before implementation)
+
+| Finding | Resolution |
+| ------- | ---------- |
+| F-001 | Pin evaluator contract: AoE-provided verdict is the evaluated verdict; harness adds DeterministicChecks + classification only; judge wrappers restricted to the `judge-check` purpose |
+| F-002 | Declare the enum-mapping table: `PASS→PASS`, `FAIL→FAIL`, `PARTIAL→FAIL-with-nuance-flag`, `PARSE_BLOCKED` introduced by ch4 only; assert on load (I-010) |
+| F-003 | Resolve `dataset_id` semantics: declared name (not hash-of-content); compare guards on name equality; §28 case appends remain permitted |
+| F-004 | Demote R-02's 50–100+ to SHOULD (or gate behind a `--strict` flag); fix T-01 mode |
+
+### P1 — Important
+
+| F-005 | Gates unit semantics: `max_pct_points` = absolute difference vs `max_pct` = relative-baseline change; pair-with-constraint validation; §25 MAY keys guarded |
+| F-006 | `run` dataset revalidation (recommended) with documented exit node (3) and warning option |
+| F-007 | PARSE_BLOCKED numeric defaults (`correct=false` etc., zero claims) |
+| F-008 | Label-ingestion timing — `judge-check` as post-run with optional backfill; classify which |
+| F-009 | METRIC_KEYS extension or report-only annotation for MRR/MAP/NDCG |
+| F-010 | `--judge-model`/`--gen-model` flag partition (or dedicated docs) |
+| F-011 | `schemas/pair.json` + I-010 gated-list update |
+
+### P2 — Improvement
+
+| F-012 | T-id renumbering (e.g. T-08a→T-08a/T-08c, T-13→T-13/T-24) + dedicated rows for E-01/E-05/E-08/E-14/E-17 |
+| F-013 | usage_kind compare warning/force |
+| F-014 | `run` exit row formatting uniform |
+| F-015 | `by_difficulty` group-asymmetry rendering rule |
+
+Note: the §1 implies that all fifteen can be reviewed within one pass; P0 items are
+implementation-blocking, P1 items define conformance v0.2, P2 items are hygiene.
+
+## 21. Final Verdict
+
+```text
+Specification maturity:
+Level 2 — Implementable
+
+Implementation readiness:
+NOT READY (material blocking questions remain)
+
+Primary blocker:
+Ambiguation of verdict ownership + verdict status mapping between the ch3 AoE and the ch4
+evaluator layer (F-001/F-002).
+
+Most important improvement:
+Declare the ch3→ch4 verdict-status mapping explicitly and pin evaluator-ownership
+responsibility, then downgrade R-02's dataset-size floor to a recommendation (F-004).
+```
+
+---
