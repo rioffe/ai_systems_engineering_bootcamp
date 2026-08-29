@@ -1,0 +1,6 @@
+create /Users/rioffe/projects/ai_systems_engineering_bootcamp/labs/week1/chapter5/SPEC.md file for this assignment following the example of the spec in
+/Users/rioffe/projects/ai_systems_engineering_bootcamp/labs/week1/chapter4 (and chapter1/chapter2/chapter3);
+create the chapter5 lab space (labs/week1/chapter5/) and author the SPEC.md section by section
+with progressive git commits (use todo); the SPEC defines the bounded research-agent runtime
+(agent loop, two tools search/retrieve, authorization, budgets, retries, traces, the ten §34
+failure drills) per curriculum/week1/chapter5.md §34 (Chapter 5 Laboratory). COMMIT INTERMEDIATE WORK.
