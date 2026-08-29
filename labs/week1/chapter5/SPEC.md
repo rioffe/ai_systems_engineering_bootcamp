@@ -1,6 +1,7 @@
 # SPECIFICATION — Bounded Research-Agent Runtime (agentic workflows, tools as APIs, authorization, budgets, traces, research-agent + uv)
 
-> - **Status:** v0.1 — draft for implementation review (targeting Level 3).
+> - **Status:** v0.2 — `SPEC_REVIEW` P0 (F-001…F-003), P1 (F-004…F-007, F-012) and P2
+>   (F-008…F-011) findings integrated inline (per `SPEC_REVIEW_REPORT.md`; targeting Level 3).
 > - **Language:** Python 3.12 | Decision policy: local Ollama `qwen3.8:27b-mlx` (deterministic
 >   `MockPolicy` offline) | Tools: deterministic local-corpus `search` / `retrieve` | Schema:
 >   jsonschema | Config: PyYAML | HTTP: httpx | GUI: PyQt5 (optional)
@@ -753,6 +754,12 @@ C-09 authorization       --> authorize.py + policy.yml                         -
 C-10 loop metrics        --> metrics.py                                        --> T-10, T-10b
 C-11 fault specs         --> drills.py DRILLS                                  --> T-08
 C-12 drill report        --> drills.py + schemas/drill_report.json             --> T-09
+C-13 mock rules          --> policy.py MP rule list                            --> T-03, T-04
+F-001 drill verdicts     --> drills.py expected-verdict table (C-12)           --> T-08a..T-08j, T-09
+F-002 surrogates         --> state.py pinned formulas (C-04)                   --> T-03b
+F-003 decision shape     --> validate.py canonical shapes (C-03)               --> T-04
+F-005 run_id inputs      --> C-07 hash formula                                 --> T-03b
+F-006 conflict markers   --> drills.py conflict_marker protocol (C-11)         --> T-08f
 E-01..E-16               --> §8 rows                                           --> T-01b, T-01c, T-04b, T-05b, T-05c, T-06c, T-08b, T-08f, T-08g, T-09, T-12, T-13b, M-02
 K-01..K-05               --> §7 rows                                           --> T-01c, T-03b, T-05, T-08h, T-09
 ```
