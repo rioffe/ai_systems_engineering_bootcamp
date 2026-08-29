@@ -2,6 +2,7 @@
 
 Implements T-08, T-11a, R-09, R-17, R-18, I-003 from SPEC.md C-09.
 """
+
 from __future__ import annotations
 
 from rag.model import MockLLM, OllamaLLM
@@ -21,7 +22,7 @@ def test_mockllm_produces_completed_answer_from_context():
         context="The refund limit is $5000.",
         question="What is the refund limit?",
         schema={"q_id": "q1"},
-       )
+    )
     assert answer.status == "COMPLETED"
     assert 0.0 <= answer.confidence <= 1.0
     assert len(answer.text) > 0
@@ -34,7 +35,7 @@ def test_mockllm_answer_citations_use_context_chunk_ids():
         context="doc:refund The refund limit is $5000.",
         question="What is the refund limit?",
         schema={},
-       )
+    )
     for c in answer.citations:
         assert len(c.chunk_id) > 0
         assert c.source != ""
@@ -48,7 +49,7 @@ def test_mockllm_does_not_leak_gold_facts():
         context=ctx_text,
         question="What is the refund limit?",
         schema={},
-       )
+    )
     assert "XYZ123" not in answer.text
 
 
@@ -59,7 +60,7 @@ def test_mockllm_empty_context_low_confidence():
         context="",
         question="What is the refund limit?",
         schema={},
-       )
+    )
     assert answer.status in ("COMPLETED", "ERROR")
     if answer.status == "COMPLETED":
         assert answer.confidence < 0.5 or len(answer.citations) == 0
@@ -72,7 +73,7 @@ def test_mockllm_deterministic():
         "context": "The refund limit is $5000.",
         "question": "What is the refund limit?",
         "schema": {},
-       }
+    }
     a1 = llm.generate(**kwargs)
     a2 = llm.generate(**kwargs)
     assert a1.text == a2.text

@@ -1,4 +1,5 @@
 """Pipeline: build_index + run_case + run_dataset (C-12, R-01/R-14/R-15)."""
+
 from __future__ import annotations
 
 import time
@@ -44,7 +45,7 @@ def build_index(
     chunk_size: int = 50,
     embed_model: str = "mock",
     mock: bool = True,
-    ) -> tuple[VectorStore, BM25Index]:
+) -> tuple[VectorStore, BM25Index]:
     """Index-time (R-01): chunk -> contextualize -> embed -> insert."""
     emd = embedder or MockEmbedder()
     chunker = _make_chunker(strategy, chunk_size, overlap)
@@ -69,8 +70,12 @@ def build_index(
     bm.index(all_chunks)
     logger.info(
         "build_index: {} chunks strategy={} contextual={} mock={} model={}",
-        len(vs._data), strategy, contextual, mock, embed_model,
-        )
+        len(vs._data),
+        strategy,
+        contextual,
+        mock,
+        embed_model,
+    )
     return vs, bm
 
 
@@ -93,15 +98,18 @@ def run_case(
     judge: Judge | None = None,
     llm: LLM | None = None,
     cfg: Any = None,
-    ) -> RunMetrics:
+) -> RunMetrics:
     """Query-time pipeline for one question (R-15) -> RunMetrics (R-14)."""
     t0 = time.perf_counter()
     vs, bm = index
     query_text = question.question
 
     retriever = HybridRetriever(
-        store=vs, bm25=bm, cfg=HybridConfig(alpha=alpha), candidates=top_n,
-        )
+        store=vs,
+        bm25=bm,
+        cfg=HybridConfig(alpha=alpha),
+        candidates=top_n,
+    )
     q_vec = _query_embedder().embed(query_text)
     t_r0 = time.perf_counter()
     if hybrid:
@@ -112,11 +120,13 @@ def run_case(
 
     if expand and n_expand > 0:
         expander = MockQueryExpander()
+
         def fetch(q: str, candidates: int) -> list[ScoredChunk]:
             qv = _query_embedder().embed(q)
             if hybrid:
-                return (retriever.retrieve(qv, q, candidates=candidates))
+                return retriever.retrieve(qv, q, candidates=candidates)
             return vs.search(qv, candidates)
+
         raw = multi_query(expander, fetch, query_text, n=n_expand, candidates=top_n)
 
     if rerank:
@@ -143,7 +153,7 @@ def run_case(
         question=query_text,
         schema={"question": question.q_id},
         seed=42,
-        )
+    )
     generate_ms = (time.perf_counter() - t_g0) * 1000.0
 
     citation_result: CitationResult = citer.grounding_gate(answer, provenance)
@@ -157,7 +167,7 @@ def run_case(
             claims=citer.extract_claims(answer.text),
             gold_facts=question.gold_facts,
             on_failure="empty",
-            )
+        )
 
     retrieved_ids = [sc.chunk.chunk_id for sc in chunk_list]
     rel = set(question.relevant_chunks or [])
@@ -181,7 +191,7 @@ def run_case(
         generate_ms=round(generate_ms, 4),
         total_latency_ms=round((time.perf_counter() - t0) * 1000.0, 4),
         status="SCORED",
-        )
+    )
     if verdict is not None:
         m.correct = verdict.correct
         m.supported = verdict.supported
@@ -210,16 +220,24 @@ def run_dataset(
     judge: Judge | None = None,
     llm: LLM | None = None,
     cfg: Any = None,
-    ) -> list[RunMetrics]:
+) -> list[RunMetrics]:
     results: list[RunMetrics] = []
     for q in questions:
         try:
             m = run_case(
-                q, index,
-                hybrid=hybrid, alpha=alpha, rerank=rerank, top_n=top_n,
-                top_k=top_k, expand=expand, n_expand=n_expand,
-                judge=judge, llm=llm, cfg=cfg,
-                )
+                q,
+                index,
+                hybrid=hybrid,
+                alpha=alpha,
+                rerank=rerank,
+                top_n=top_n,
+                top_k=top_k,
+                expand=expand,
+                n_expand=n_expand,
+                judge=judge,
+                llm=llm,
+                cfg=cfg,
+            )
         except (AttributeError, TypeError, ValueError, KeyError) as exc:
             qid = getattr(q, "q_id", None)
             if qid is None:

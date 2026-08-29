@@ -24,7 +24,6 @@ _CHAT_PATH = "/api/chat"
 
 
 class OllamaClient:
-
     def __init__(
         self,
         url: str = _OLLAMA_URL,
@@ -50,10 +49,12 @@ class OllamaClient:
 
         msgs = [{"role": "system", "content": system}]
         if context:
-            msgs.append({
-                "role": "user",
-                "content": f"Context:\n{context}\n\nQuestion: {question}",
-            })
+            msgs.append(
+                {
+                    "role": "user",
+                    "content": f"Context:\n{context}\n\nQuestion: {question}",
+                }
+            )
         else:
             msgs.append({"role": "user", "content": question})
         payload = {
@@ -84,7 +85,6 @@ class OllamaClient:
 
 
 class LLM(ABC):
-
     @property
     def model_id(self) -> str:  # pragma: no cover
         raise NotImplementedError
@@ -125,11 +125,13 @@ def _extract_citations_from_context(context: str) -> list[Citation]:
         if cid in chunk_ids:
             continue
         chunk_ids.add(cid)
-        citations.append(Citation(
-            claim="derived from evidence",
-            source=source,
-            chunk_id=cid,
-        ))
+        citations.append(
+            Citation(
+                claim="derived from evidence",
+                source=source,
+                chunk_id=cid,
+            )
+        )
     return citations
 
 
@@ -165,7 +167,6 @@ def _validate_answer(answer: Answer, schema: dict) -> Answer:
 
 
 class MockLLM(LLM):
-
     @property
     def model_id(self) -> str:
         return "mock"
@@ -212,7 +213,6 @@ class MockLLM(LLM):
 
 
 class OllamaLLM(LLM):
-
     def __init__(
         self,
         model: str = "qwen3.8:27b-mlx",
@@ -267,7 +267,7 @@ class OllamaLLM(LLM):
                 )
                 return answer
             except (ConnectionError, TimeoutError, OSError) as exc:
-                last_error = f"attempt {attempt+1}: {exc}"
+                last_error = f"attempt {attempt + 1}: {exc}"
                 logger.warning("OllamaLLM chat: {}", last_error)
         return Answer(
             q_id=schema.get("q_id", "unknown"),

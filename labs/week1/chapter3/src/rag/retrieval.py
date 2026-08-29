@@ -217,4 +217,3 @@ class MockReranker(Reranker):
         for i, sc in enumerate(scored[:top_k], start=1):
             sc.rank = i
         return scored[:top_k]
-

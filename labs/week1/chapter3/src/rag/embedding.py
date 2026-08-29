@@ -38,12 +38,14 @@ def tokenizer(text: str) -> list[str]:
 
 class Embedder(abc.ABC):
     """Abstract interface; concrete subclasses provide model_id + dim."""
+
     model_id: str = ""
     dim: int = 256
 
     @abc.abstractmethod
     def embed(self, text: str) -> tuple[float, ...]:
         """Return a dense vector of size `dim` for the given text."""
+
 
 class MockEmbedder(Embedder):
     # O-1: deterministic hashed bag-of-words, L2-normalized, process-independent.
