@@ -123,3 +123,45 @@ def test_aggregate_by_tier_and_non_none_means():
     assert "multi" in agg.by_tier
     assert agg.by_tier["easy"].n == 2
     assert agg.by_tier["multi"].n == 1
+
+
+def test_aggregate_by_capability_populated():
+    """T-08b / I-012: by_capability has one sub-aggregate per TOGGLED stage;
+    a disabled capability (on=False) yields no key. This is the case that was
+    dead before run_case populated capability_flags.
+        """
+    rows = [
+        RunMetrics(
+            q_id="q1",
+            tier="easy",
+            precision=1.0,
+            recall=1.0,
+            capability_flags={"hybrid": True, "rerank": False, "expand": True},
+            ),
+        RunMetrics(
+            q_id="q2",
+            tier="easy",
+            precision=0.5,
+            recall=0.5,
+            capability_flags={"hybrid": True, "rerank": True, "expand": False},
+            ),
+    ]
+    agg = aggregate(rows)
+    # Only ENABLED capabilities get a sub-aggregate; keys are '+<cap>'.
+    assert set(agg.by_capability) == {"+hybrid", "+rerank", "+expand"}
+    # '+hybrid' aggregates both rows (both had hybrid=True).
+    assert agg.by_capability["+hybrid"].n == 2
+    # '+rerank' aggregates only q2.
+    assert agg.by_capability["+rerank"].n == 1
+    # '+expand' aggregates only q1.
+    assert agg.by_capability["+expand"].n == 1
+
+
+def test_by_capability_empty_when_no_flags():
+    """I-012: with no capability_flags, by_capability stays empty (the old
+    dead-aggregation case); means are still computed over all rows.
+        """
+    rows = [RunMetrics(q_id="q1", tier="easy", precision=1.0, recall=1.0)]
+    agg = aggregate(rows)
+    assert agg.by_capability == {}
+    assert agg.means()["precision"] == pytest.approx(1.0)

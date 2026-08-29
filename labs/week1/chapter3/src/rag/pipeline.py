@@ -149,6 +149,17 @@ def run_case(
     query_text = question.question
     m = RunMetrics(q_id=question.q_id, tier=question.tier)
 
+    # capability_flags drives AggregateMetrics.by_capability (I-012 / T-08b):
+    # which query-time §22 toggles are ON for this run. Population happens here,
+    # before any stage fault, so a FAILED run still carries its flags and the
+    # by_capability diff is never dead. (Index-time caps -- --contextual/
+    # --strategy -- are set at build_index, not here.)
+    m.capability_flags = {
+        "hybrid": bool(hybrid),
+        "rerank": bool(rerank),
+        "expand": bool(expand and n_expand > 0),
+    }
+
     # -- RETRIEVE -----------------------------------------------------------
     retriever = HybridRetriever(
         store=vs,
