@@ -132,7 +132,7 @@ reports — never runs inference itself.
 | ID | Statement |
 | -- | --------- |
 | **R-01** | The system shall execute the ch4 §2 harness pipeline — **Dataset → Application → Outputs → Evaluator → Metrics → Regression Report** — where the **Application under Evaluation (AoE)** is the ch3 RAG pipeline, reached *only* through the pinned adapter interface (C-02). The harness never re-implements retrieval/generation; it wires, measures, and compares. |
-| **R-02** | The **golden dataset** (§3/§32) shall hold 50–100+ `EvalCase`s, each with `question`, `reference_answer`, `relevant_chunks` (ground-truth chunk ids), and `category`, plus ch3-carried `gold_facts` for completeness (C-01). `dataset check` MUST validate schema, category membership in the documented `CATEGORY_SET` (ch3's seven failure tiers ∪ `{adversarial, boundary, regression}`, §21/§35), and **reference closure**: every `relevant_chunks` id MUST exist in the corpus index and every required field MUST be present; violations are deterministic **load errors** (E-02, ch3 I-013 analog). |
+| **R-02** | The **golden dataset** (§3/§32) shall hold 50–100+ `EvalCase`s, each with `question`, `reference_answer`, `relevant_chunks` (ground-truth chunk ids), and `category`, plus ch3-carried `gold_facts` for completeness (C-01). `dataset check` MUST validate schema, category membership in the documented `CATEGORY_SET` (ch3's seven failure tiers plus `{adversarial, boundary, regression}`, §21/§35), and **reference closure**: every `relevant_chunks` id MUST exist in the corpus index and every required field MUST be present; violations are deterministic **load errors** (E-02, ch3 I-013 analog). |
 | **R-03** | The evaluator (§5/§7 hierarchy) shall run **deterministic checks before any judge**: answer-schema validity, citation-`chunk_id` membership in the retrieved context, and any property with an exact spec (e.g. `amount >= 0`, enum membership) are checked deterministically. A case whose answer fails schema validation is attributed `PARSING_FAILURE` and is judged on that basis (I-005) — no LLM verdict needed. |
 | **R-04** | The harness shall compute the §19 **evaluation vector** per case and in aggregate: correctness `A` (from the ch3 verdict `correct`), retrieval `P@k` and `R@k` (ch3 `metrics.py` reuse), groundedness `G` (faithfulness = supported claims / total factual claims, ch3 §21 formula), completeness `C` (reflected `gold_facts` / total `gold_facts`), hallucination rate `H` (unsupported claims / total claims, §15), latency `L` as percentiles $P50/P90/P95/P99$ (near-rank interpolation, §17), and cost `K` per successful case (§18 formulas: `cost_success = sum(input+output tokens × price_table) / successes`). §16 tool-success `T` is a **reserved** slot (retrieval pipeline has no tool loop in ch3 — kept for the agent weeks). |
 | **R-05** | **Stratification** (§21/§35): the aggregate report MUST include a `by_category` breakdown over the dataset's declared category set, plus an optional `by_difficulty` breakdown when the dataset carries difficulty metadata. A global-only aggregate is a **report violation** (I-012). |
@@ -328,8 +328,8 @@ lexicographically (I-002 byte-identity).
 ### C-06 Compare report (§23)
 
 `compare(baseline: EvalArtifact, current: EvalArtifact)` emits, per metric key, `baseline`, `current`,
-and `Δ` computed by the **direction map** (I-004): for higher-better keys Δ = `current − baseline`; for
-lower-better keys (`hallucination_rate`, `latency_*`, `cost_per_success`) Δ = `baseline − current`. A
+and `Δ` computed by the **direction map** (I-004): for higher-better keys Δ = `current - baseline`; for
+lower-better keys (`hallucination_rate`, `latency_*`, `cost_per_success`) Δ = `baseline - current`. A
 missing metric renders `n/m` on that row (E-07), never `0`. The human table and JSON are emitted by
 `report.py` (R-18).
 
