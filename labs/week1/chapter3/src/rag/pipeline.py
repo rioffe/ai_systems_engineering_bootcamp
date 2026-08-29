@@ -22,6 +22,7 @@ from rag.retrieval import (
     MockReranker,
     VectorStore,
 )
+from rag.schemas import validate_answer, validate_verdict
 from rag.types import RunMetrics, ScoredChunk
 
 
@@ -252,6 +253,12 @@ def run_case(
     m.answer_status = answer.status
     m.generate_ms = round(generate_ms, 4)
 
+    # I-010: gate the emitted answer -- only a schema-valid object scores.
+    try:
+        validate_answer(answer)
+    except Exception as exc:   # noqa: BLE001
+        return _fail_case(m, "generation", exc, t0)
+
     citation_result: CitationResult = citer.grounding_gate(answer, provenance)
     m.grounding_violation = citation_result.grounding_violation
     if answer.status == "ERROR":  # E-11: generation terminal-faulted
@@ -269,6 +276,11 @@ def run_case(
                 on_failure="empty",
             )
         except Exception as exc:  # noqa: BLE001
+            return _partial_case(m, exc, t0)
+        # I-010: gate the verdict -- only a schema-valid object scores.
+        try:
+            validate_verdict(verdict)
+        except Exception as exc:   # noqa: BLE001
             return _partial_case(m, exc, t0)
         if verdict.status == "ERROR":  # E-11: judge exhausted its retries
             return _partial_case(m, verdict.rationale or "judge failed", t0)

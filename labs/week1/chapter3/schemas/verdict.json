@@ -1,0 +1,32 @@
+{
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "$id": "https://ai-systems-bootcamp/rag/verdict.json",
+   "title": "Verdict",
+   "description": "Judge's structured verdict (R-10, I-010, C-10). Validated on the judging path: a malformed verdict -> reject-retry-ERROR (T-08). `faithfulness`/`completeness`/`citation_quality` are null until a clean verdict; `which_field_decided` is one of version/updated_at or null.",
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["q_id", "status"],
+   "properties": {
+     "q_id": { "type": "string" },
+     "correct": { "type": "boolean" },
+     "supported": { "type": "boolean" },
+     "complete": { "type": "boolean" },
+     "unsupported_claims": {
+       "type": "array",
+       "minItems": 0,
+       "items": { "type": "string" }
+     },
+     "total_factual_claims": { "type": "integer", "minimum": 0 },
+     "faithfulness": { "type": ["number", "null"] },
+     "completeness": { "type": ["number", "null"] },
+     "citation_quality": { "type": ["number", "null"] },
+     "injection_warning": { "type": "boolean" },
+     "grounding_violation": { "type": "boolean" },
+     "which_field_decided": {
+       "type": ["string", "null"],
+       "enum": ["version", "updated_at", null]
+     },
+     "rationale": { "type": "string" },
+     "status": { "type": "string", "enum": ["JUDGED", "ERROR", "SKIPPED"] }
+   }
+}

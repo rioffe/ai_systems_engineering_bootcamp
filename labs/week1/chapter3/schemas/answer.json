@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-systems-bootcamp/rag/answer.json",
+  "title": "Answer",
+  "description": "Structured, grounded, cited answer emitted by the LLM (R-09, C-05). Validated on the generation path: out-of-range `confidence` or a missing `required` field -> reject-retry-ERROR (I-010, T-08). `citations` may be empty when the answer is \"I cannot answer from the provided documents\" (minItems:0).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["q_id", "text", "confidence", "status"],
+  "properties": {
+    "q_id": {"type": "string"},
+    "text": {"type": "string"},
+    "confidence": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+    "citations": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim", "source", "chunk_id"],
+        "properties": {
+          "claim": {"type": "string"},
+          "source": {"type": "string"},
+          "chunk_id": {"type": "string"},
+          "section": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 0,
+      "properties": {
+        "prompt_tokens": {"type": "integer", "minimum": 0},
+        "completion_tokens": {"type": "integer", "minimum": 0},
+        "total_tokens": {"type": "integer", "minimum": 0}
+      }
+    },
+    "status": {"type": "string", "enum": ["COMPLETED", "ERROR"]},
+    "error": {"type": ["string", "null"]}
+  }
+}
