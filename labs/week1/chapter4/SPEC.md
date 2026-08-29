@@ -30,7 +30,7 @@
 > - **Principle:** ch4 §31/§30 — the evaluation suite is the *bridge between probabilistic behavior and
 >   engineering discipline*; an eval does not specify an exact output string, it specifies a
 >   **behavioral contract** and measures whether the probabilistic system satisfies it
->   (`f(x) ∈ Y_acceptable`, §37). Requirements express *intent*; this specification *operationalizes*
+>   ($f(x) \in Y_{\text{acceptable}}$, §37). Requirements express *intent*; this specification *operationalizes*
 >   intent into observable behavior plus the conditions under which we know it is correct.
 
 ---
@@ -152,5 +152,237 @@ reports — never runs inference itself.
 | **R-19** | **Schema gate** (ch3 R-09/R-10/I-010 carried): the `eval.json` schema and the gates-config schema are validated with jsonschema on **every** load; the evaluator's verdict record is validated before metrics are computed (C-03). A malformed artifact failing validation is rejected deterministically (E-06, E-14). |
 | **R-20** | **Gold isolation** (ch3 F-001 carried): the AoE's generation path sees only `system`/`context`/`question`; the evaluator's expected values (`reference_answer`, `relevant_chunks`, `gold_facts`) never flow into generation and are consumed *only* by the evaluator/metrics stage (I-011). |
 | **R-21** | **Report versioning**: every `eval.json` carries a literal `eval_report_version == "0.1"` field; `compare` and `gates` refuse mismatched versions unless `--force` (E-06). The single literal string is the compatibility surface. |
+
+---
+
+## 3. Behavior and state model
+
+### 3.1 Lifecycle scope
+
+The harness has a single execution scope per eval — **eval time** — but it must consciously honor the
+AoE's built-in **index-time / query-time** split (ch3 §3.1, F-003). Experiment flags that ch3 classifies
+as index-time (`--chunk-size`, `--strategy`, `--contextual`, `--embed-model`) force a fresh
+`build_index` **before** any case runs; query-time flags (`--k`, `--top-n`, `--hybrid`, `--rerank`,
+`--expand`, `--alpha`, `--model`) recompute on the existing index. The harness carries both classes in
+one experiment config object; passing a *stale index mismatch* to `compare` is refused unless
+`--force-rebuild` (R-08, E-08).
+
+### 3.2 The eval-time flow (one dataset run)
+
+```text
+             golden dataset (loaded, validated)
+                    |
+                    v
+             build_index (once; honors index-time flags)
+                    |
+                    v
+        +------------------------------------------+
+        |  per EvalCase (sequential, deterministic) |
+        |    run_case (AoE adapter, C-02)           |
+        |      -> deterministic checks (C-03)       |
+        |      -> judge (MockJudge / OllamaJudge)   |
+        |      -> per-case metrics row + trace      |
+        |      -> failure classification (C-08)     |
+        +------------------------------------------+
+                    |
+                    v
+           aggregate vector + by_category breakdown
+                    |
+                    v
+                eval.json (R-21 versioned)
+                    |
+                    v
+      compare(v1, v2) -> human report + gates exit 0/1
+```
+
+Each `EvalCase` moves through the deterministic state machine
+`LOADED → INDEXED → RUN → CHECKED → JUDGED → METRIED → CLASSIFIED`. A case that fails the
+deterministic state-machine transition (e.g. its answer JSON fails validation) is marked
+`PARSE_BLOCKED` at `CHECKED` — the `JUDGED` stage is skipped, verdict.status records
+`PARSE_BLOCKED` (I-005), and classification lands on `PARSING_FAILURE` (I-006 / C-08).
+
+### 3.3 The report pipeline (artifacts are the interface)
+
+The harness's *only* durable artifacts are files written by `report.py`:
+
+- `dataset_report.json` (from `check`) — validation outcome: `ok`, violations[] enumerated.
+- `eval.json` (from `run`) — the versioned, schema-gated eval artifact (C-05).
+- `compare_report.json` + human-readable Δ table (from `compare`).
+- `gate_report.json` (from `gates`) — per-gate outcome + aggregate pass/fail (exit code K-03).
+- `judge_check_report.json` (from `judge-check`) — agreement rate + disagreement pairs.
+- `pair_report.json` (from `pair`, optional) — `WinRate` + per-case winners.
+
+All downstream consumers (`compare`, `gates`, the GUI) read **only** these artifacts — they never
+re-run the AoE (I-016).
+
+---
+
+## 4. Interfaces / contracts
+
+### C-01 Golden dataset types
+
+```python
+# dataset.py
+CATEGORY_SET = {
+    "easy", "multi", "chunking", "distractor", "conflict", "recency", "injection",
+    "adversarial", "boundary", "regression",      # ch4 §21/§35 extension categories
+}
+
+@dataclass
+class EvalCase:                  # one golden row; ch3 question row shape extended (§32)
+    case_id: str                 # unique; duplicate ids are a load error (E-02)
+    question: str
+    reference_answer: str
+    relevant_chunks: list[str]    # ground-truth chunk ids; must be subset of corpus ids (E-02)
+    category: str                # must be in CATEGORY_SET (E-02)
+    gold_facts: list[str]         # completeness reference (ch3 carried)
+    difficulty: str | None = None  # optional -> by_difficulty stratification (R-05)
+    source: str = "golden"        # "golden" | "production" (§28 filed cases)
+
+@dataclass
+class Dataset:
+    dataset_id: str               # stable name/hash; compare requires equal ids (E-12)
+    cases: list[EvalCase]
+```
+
+### C-02 AoE adapter (pinned ch3 interface)
+
+```python
+# aoe.py — the ONLY module allowed to import the ch3 rag package (I-016)
+def build_index(corpus_dir: str, index_flags: dict) -> Index: ...
+def run_case(case: EvalCase, index: Index, query_flags: dict) -> AoEResult: ...
+
+@dataclass
+class AoEResult:                  # everything the evaluator/metrics need; the §34 trace record
+    question: str
+    retrieved_chunks: list[str]   # ordered chunk ids (for P@k / R@k / MRR)
+    scores: list[float]
+    raw_output: str
+    parsed_answer: dict | None    # None on parse failure -> PARSE_BLOCKED
+    verdict: dict                 # ch3 verdict record (R-19 schema-gated)
+    failure_stage: str | None     # ch3 stage: retrieval|expansion|reranking|context|generation|judging
+    usage_kind: str               # "synthetic" (mock) | "measured" (real)
+    usage_tokens: int             # synthetic: est(context+question)+est(answer); real: counted
+    latency_ms: float             # synthetic: deterministic content-derived; real: wall clock
+    cost_usd: float | None        # real only (price_table); synthetic -> None (E-07)
+```
+
+The adapter splits `index_flags` vs `query_flags` per ch3 §3.1 (F-003); mock-vs-real resolution
+follows the ch3 E-13 taxonomy (R-15).
+
+### C-03 Evaluator pipeline
+
+```python
+# evaluator.py
+class DeterministicChecks:        # §5 — runs BEFORE any judge (I-003)
+    def check(self, aoe_result: AoEResult) -> list[dict]  # pass/fail records, deterministic-first
+
+class MockJudge:                  # offline double, ground-truth-derived verdict (ch3 MockJudge)
+class OllamaJudge:                # real LLM-as-judge (§6/§26 — itself validated via judge-check)
+# Verdict record (JSON-schema gated, R-19): {correct, supported, complete, unsupported_claims,
+#   total_factual_claims, faithfulness, completeness, citation_quality, rationale, status}
+# status set: PASS | FAIL | PARSE_BLOCKED (I-005)
+```
+
+### C-04 Metrics math (pure; zero-denominator guarded, I-001)
+
+```python
+# metrics.py — reuse ch3 metrics.py for P@k / R@k / MRR / MAP / NDCG; add the §19 vector:
+METRIC_KEYS = [
+    "accuracy", "precision_at_k", "recall_at_k",
+    "groundedness", "completeness", "hallucination_rate",
+    "latency_p50", "latency_p90", "latency_p95", "latency_p99",
+    "cost_per_success",
+]
+# accuracy        = mean(verdict.correct)            (zero cases -> 0, documented)
+# precision_at_k  = |retrieved_k & relevant| / k     (k == 0 -> 0; ch3 carried)
+# recall_at_k     = |retrieved_k & relevant| / |relevant|   (no relevant -> 0, documented)
+# groundedness    = faithfulness = supported / total_factual_claims (documented zero rule:
+#                   0 claims -> 1.0, "nothing to contradict", per ch3 zero-denominator rule, E-03)
+# completeness    = reflected gold_facts / len(gold_facts) (empty -> 1.0, documented)
+# hallucination_rate = len(unsupported_claims) / total_factual_claims (0 claims -> 0.0)
+# latency_pXX     = near-rank percentile over ALL cases (sorted, rank = ceil(p/100 * n)) (§17)
+# cost_per_success = sum(cost over successes) / count(successes)   (0 successes -> n/m, E-03)
+```
+
+Output formatting: floats are rendered to fixed `%.4f` and `by_category` keys sorted
+lexicographically (I-002 byte-identity).
+
+### C-05 `eval.json` artifact (versioned, R-21)
+
+```json
+{
+  "eval_report_version": "0.1",
+  "dataset_id": "golden-v1",
+  "usage_kind": "synthetic",
+  "judge_role": "mock",
+  "capabilities": {"rerank": true, "expand": false, "top_k": 5},
+  "cases": [ { "case_id": "q-001", "category": "easy", "verdict": {}, "metrics": {},
+             "trace": { "retrieved_chunks": [], "scores": [], "raw_output": "..." } } ],
+  "aggregate": { "accuracy": 0.9333, "precision_at_k": 0.7200, "by_category": { "easy": {"accuracy": 0.98}, "multi": {"accuracy": 0.91} } }
+}
+```
+
+(Rows shown abridged; the schema in `schemas/eval.json` is authoritative and gated on load, R-19.)
+
+### C-06 Compare report (§23)
+
+`compare(baseline: EvalArtifact, current: EvalArtifact)` emits, per metric key, `baseline`, `current`,
+and `Δ` computed by the **direction map** (I-004): for higher-better keys Δ = `current − baseline`; for
+lower-better keys (`hallucination_rate`, `latency_*`, `cost_per_success`) Δ = `baseline − current`. A
+missing metric renders `n/m` on that row (E-07), never `0`. The human table and JSON are emitted by
+`report.py` (R-18).
+
+### C-07 Gates config (§24/§25)
+
+```yaml
+# gates.yml — directional hard constraints; validated by schemas/gates.json on load (R-19)
+version: 1
+gates:
+  - {metric: accuracy,            constraint: "drop",    max_pct_points: 1.0}
+  - {metric: groundedness,        constraint: "drop",    max_pct_points: 1.0}
+  - {metric: hallucination_rate,  constraint: "increase", max_pct_points: 0.5}
+  - {metric: latency_p95,         constraint: "increase", max_pct: 20.0}
+```
+
+Gate evaluation is per-gate boolean; aggregate = `all(gates)`; exit `0` pass / `1` fail (K-03). `MAY`
+gate types: absolute floors/ceilings (`min_value`, `max_value`) for safety-grade metrics per §25 —
+hard constraints regardless of other deltas. Unknown metric keys are config errors (I-015).
+
+### C-08 Failure classifier precedence (§34)
+
+Evaluate in this exact order (I-006):
+
+1. `PARSING_FAILURE` — the AoE answer failed schema validation at `CHECKED`.
+2. Label-evidence: `EVALUATION_FAILURE` — present in the human-label disagreement set (and only when
+   such evidence exists; never auto-asserted, E-16).
+3. `RETRIEVAL_FAILURE` — ch3 `failure_stage` in `{retrieval, expansion, reranking, chunking}`.
+4. `CONTEXT_FAILURE` — ch3 stage `context` (retrieved but omitted from assembled context).
+5. `GENERATION_FAILURE` — ch3 stage `generation`/`judging` (evidence present, answer wrong).
+6. Fallback `GENERATION_FAILURE` when no stage is available (the §34 set is total).
+
+### C-09 Human labels + judge validation (§26)
+
+```json
+{"q-001": {"correct": true, "supported": true, "complete": false, "note": "vague on scope"}}
+```
+
+`judge-check` computes, per verdict field, agreement = `agreements / (cases with human labels for
+that field)`; emits disagreement pairs (`case_id`, field, judge-value, human-value). Long-term
+practice per §26: an agreement below a tracked threshold is an evaluator regression, not an
+application regression.
+
+### C-10 Pairwise evaluation (§27, optional)
+
+`pair(config_a, config_b)` runs both over the identical dataset; for each case the judge emits
+`winner in {A, B, TIE}`; `WinRate(A) = A_wins / comparisons` — ties count in the denominator, not the
+numerator (E-15). Per-case verdicts preserved in `pair_report.json`.
+
+### C-11 Production → golden scaffold (§28, optional)
+
+`new-case --trace <AoEResult.json> --case-id <id>` emits an `EvalCase` JSON template with `question`
+pre-filled and `reference_answer` / `relevant_chunks` / `gold_facts` carrying the sentinel
+`"REPLACE_ME"`; `check` deliberately treats `REPLACE_ME` as a violation (a scaffold is not golden until
+a human completes ground truth, E-02). Deterministic, offline.
 
 ---
