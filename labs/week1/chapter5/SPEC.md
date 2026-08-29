@@ -328,7 +328,9 @@ class AgentState:                # S_t = (G, H_t, O_t, M_t, P)
 ```
 
 All loop-relevant state lives in this object; the policy receives a **serialization** of it
-(I-010). `seen_actions` keys are canonical JSON (sorted keys) so argument dicts compare by value.
+(I-010). `seen_actions` keys are canonical JSON (sorted keys) so argument dicts compare by
+value, and it records **every validated-or-denied canonical `(tool, arguments)` pair** — denials
+and invalid pairs included (post-canonicalization), `final` decisions excluded (F-010 closed).
 
 ### C-05 The runtime loop (§5/§31, pinned order)
 
@@ -420,7 +422,8 @@ default: deny                              # unregistered/unknown tools are deni
 The engine evaluates `(tool, arguments)` → `allow | deny` **in code**; there is no flag, prompt,
 or argument that overrides a rule at runtime (I-002). Denials are traced and counted (R-07).
 (§16 human-in-the-loop `confirm` effects are out of scope for the two-tool lab: the rule set is
-`allow | deny` only — noted as the extension point, O-2.)
+`allow | deny` only — noted as the extension point, O-2. Optionality tags: **O-1** = offline
+mock double, **O-2** = HITL `confirm` extension — convention carried from ch3/ch4, F-011 closed.)
 
 ### C-10 Loop metrics (§27/§33.9)
 
@@ -538,7 +541,7 @@ for the wrong reason fails even if it terminates (E-10).
 | Subcommand | Behavior | Exit |
 | ---------- | -------- | ---- |
 | `research-agent run --question <text> [--mock] [--real] [--budgets budgets.yml] [--corpus <dir>] --out trace.json` | Load corpus + budgets (validated), resolve policy availability (E-13), execute one bounded episode (C-05), emit `trace.json` + human summary (K-04). | `0` completed (also `DEGRADED_MOCK`; `insufficient_evidence` is success, E-03) / `2` usage / `3` corpus violations / `4` PULL_REQUIRED |
-| `research-agent drill --name <drill> [--mock] [--budgets budgets.yml] --out drill_report.json` | Inject the named C-11 fault, run the episode, emit `drill_report.json` with the §34 four-question report + pass verdict (C-12). | `0` drill expectation met / `1` verdict fail (E-10) / `2` usage / `3` corpus violations / `4` PULL_REQUIRED |
+| `research-agent drill --name <drill> [--budgets budgets.yml] --out drill_report.json` | Inject the named C-11 fault on the **MockPolicy** (drills are mock-only; `--real` on `drill` is a usage error — F-008 closed), run the episode, emit `drill_report.json` with the §34 four-question report + pass verdict (C-12). | `0` drill expectation met / `1` verdict fail (E-10) / `2` usage / `3` corpus violations |
 | `research-agent trace <trace.json>` | Schema-gate the artifact (R-19), render the §20-style human trace (typed reasoning/action/observation per step, termination record, loop metrics). Never re-runs anything. | `0` / `2` usage or artifact rejected (E-06) |
 
 **Usage errors** (missing flags, unknown subcommand, unknown drill name, bad paths, malformed
@@ -547,6 +550,8 @@ I-012, T-02), `--verbose`/`--quiet` (loguru level, ch3 analog), `--model <name>`
 model override, default `qwen3.8:27b-mlx`). `--mock` short-circuits the E-13 taxonomy. The E-13
 banners on the real path are ch3's exact strings: `[REAL→MOCK] Ollama unreachable; running
 deterministic mock doubles` / `MODEL_MISSING: run 'ollama pull <m>' — or pass --mock` (E-13).
+**Exit precedence** (F-009 closed): error classes evaluate in fixed order — usage → config →
+corpus → episode → verdict; the first failing class sets the exit code.
 
 ### 5.2 GUI — optional surface (`research-agent-gui`, R-15)
 
