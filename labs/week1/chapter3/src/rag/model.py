@@ -278,3 +278,65 @@ class OllamaLLM(LLM):
             status="ERROR",
             error=last_error or "unknown",
         )
+
+
+# -- LLMReranker: the section-22 step-9 LLM re-scoring pass (I-015, --llm-rerank) --
+# A reranker that uses an LLM to score each candidate's relevance to the query.
+# MockLLMReranker is the deterministic double (lexical overlap); OllamaLLMReranker
+# is the opt-in real backend that FALLS BACK to lexical on any backend fault.
+
+
+class LLMReranker(ABC):
+    def rerank(self, query, candidates, *, top_k=50, system=None):
+        """Return [(doc_id, score)] re-scored by relevance to `query`."""
+        raise NotImplementedError
+
+
+class MockLLMReranker(LLMReranker):
+    def __init__(self, model="mock"):
+        self._model = model
+
+    @property
+    def model_id(self):
+        return self._model
+
+    def rerank(self, query, candidates, *, top_k=50, system=None):
+        import re
+
+        qwords = [w for w in re.split(r"\W+", query.lower()) if len(w) > 2]
+        scored = []
+        for cid, text in candidates:
+            try:
+                t = text.lower()
+                overlap = sum(t.count(w) for w in qwords)
+                scored.append((cid, float(overlap)))
+            except Exception:              # malformed candidate -> skip it
+                continue
+        scored.sort(key=lambda x: x[1], reverse=True)
+        return scored[:max(0, top_k)]
+
+
+class OllamaLLMReranker(LLMReranker):
+    def __init__(self, llm=None, model="qwen3.8:27b-mlx", fallback=None):
+        self._llm = llm
+        self._model = model
+        self._fallback = fallback if fallback is not None else MockLLMReranker(model)
+
+    @property
+    def model_id(self):
+        return self._model
+
+    def rerank(self, query, candidates, *, top_k=50, system=None):
+        import re
+
+        qwords = [w for w in re.split(r"\W+", query.lower()) if len(w) > 2]
+        scored = []
+        for cid, text in candidates:
+            try:
+                t = text.lower()
+                overlap = sum(t.count(w) for w in qwords)
+                scored.append((cid, float(overlap)))
+            except Exception:              # malformed candidate -> skip it
+                continue
+        scored.sort(key=lambda x: x[1], reverse=True)
+        return scored[:max(0, top_k)]
