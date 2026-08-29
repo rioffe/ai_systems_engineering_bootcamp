@@ -37,3 +37,7 @@ target-version = "py312"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.pyright]
+extraPaths = ["src"]
+include = ["src", "tests"]

@@ -27,10 +27,10 @@ def _doc_from_jsonl_line(line: str) -> Document:
         updated_at=raw.get("updated_at", md.get("updated_at")),
         version=raw.get("version", md.get("version")),
         access_level=raw.get("access_level",
-                             md.get("access_level", "employee")),
+                            md.get("access_level", "employee")),
     )
     return Document(doc_id=raw["doc_id"],
-                   text=raw["text"], metadata=meta)
+                    text=raw["text"], metadata=meta)
 
 
 # -- load_corpus -------------------------------------------------------------
@@ -78,7 +78,7 @@ def load_questions(
     with open(path) as f:
         data = json.loads(f.read())
     raw_qs = (data.get("questions", data)
-              if isinstance(data, dict) else data)
+                if isinstance(data, dict) else data)
     questions: list[Question] = []
     for raw in raw_qs:
         questions.append(_make_question(raw, allowed_chunk_ids))
@@ -93,7 +93,7 @@ def _make_question(
 ) -> Question:
     qid = raw.get("q_id", "?")
     for req in ("question", "gold_answer",
-                 "gold_facts", "relevant_chunks", "tier"):
+                "gold_facts", "relevant_chunks", "tier"):
         if req not in raw:
             raise ValueError(
                 f"Question {qid!r} missing {req!r}")
@@ -126,7 +126,7 @@ def _make_question(
 # -- generate_corpus_and_questions ------------------------------------------
 
 _TIERS = ("easy", "multi", "chunking", "distractor",
-          "conflict", "recency", "injection")
+        "conflict", "recency", "injection")
 
 _FACT_POOL = [
     "The refund limit is $5000 for all cabin classes.",
