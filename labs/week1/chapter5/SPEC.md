@@ -131,7 +131,7 @@ PyQt5 GUI (`research-agent-gui`) that browses saved traces — never runs infere
 | Actor | Goals |
 | ----- | ----- |
 | **User** (human, single process) | Run one bounded research episode (mock or real policy); inject a §34 failure and read the drill report; render a saved trace; optionally browse traces in the GUI. (**single-principal** — no inter-principal authorization, ch3 F-009 / ch4 carried; the §15 policy engine governs *tool* authorization, not users.) |
-| **Policy / LLM** (`policy.py`: `OllamaPolicy` real, `MockPolicy` offline double) | Given the serialized state + tool definitions + agent prompt (§19), emit exactly one decision per step: `{type: "tool_call", tool, arguments}` or `{type: "final", report}`. **Proposes only** — never executes tools, never self-authorizes, never terminates the loop (I-001/I-002). The `MockPolicy` is a documented, input-determined rule script (search → retrieve top hit → finalize; O-1) consuming no RNG (ch3 R-18 analog). |
+| **Policy / LLM** (`policy.py`: `OllamaPolicy` real, `MockPolicy` offline double) | Given the serialized state + tool definitions + agent prompt (§19), emit exactly one decision per step in the **canonical C-03 shape** (`type`-discriminated; F-003 pin). **Proposes only** — never executes tools, never self-authorizes, never terminates the loop (I-001/I-002). The `MockPolicy` is a documented, input-determined rule script (rule list C-13; O-1) consuming no RNG (ch3 R-18 analog). |
 | **Runtime** (`runtime.py`) | Own the §5/§31 control loop: initialize state, check stopping conditions *before every model call*, dispatch validate → authorize → execute-with-retry, update state, and guarantee termination with a recorded reason (I-001/I-011). Never itself calls the LLM API. |
 | **State store** (`state.py`) | Hold the explicit §6 state $S_t = (G, H_t, O_t, M_t, P)$: goal, messages, observations, artifacts, step_count, budget counters, failure history. State lives here, **not** implicitly inside a prompt (§33 principle 3, I-010). |
 | **Tool router & tools** (`tools.py`) | §3 API contracts: typed, schema-validated `search(query)` and `retrieve(document_id)` over a deterministic local fixture corpus; plus a registered-but-prohibited `delete_file(path)` existing solely to exercise §25 (C-02). Tools are deterministic: same input → same output, no network (I-003). |
@@ -163,7 +163,7 @@ PyQt5 GUI (`research-agent-gui`) that browses saved traces — never runs infere
 | **R-10** | **Non-termination defense** (§10/§23): the runtime SHALL detect semantic repetition — an `(tool, canonical(arguments))` pair seen `repeat_threshold` times — and terminate with `termination_reason: "repeated_state"` (C-06). A drill whose tool always yields nothing useful (§23) MUST end in `repeated_state` or `max_steps`, never in a hang (K-02). |
 | **R-11** | **Observability** (§20/§27/§33.9): every run SHALL emit a versioned `trace.json` (C-07) carrying the full §27 field list — run id, question, model, model parameters, prompt version, per-step state snapshot reference, decision, tool name, arguments, tool latency, tool result, token usage, cost, errors, retries, `termination_reason`, final report — plus a **loop-metrics** row (C-10): steps used, tool-call mix, invalid-argument count, retry count, denial count, unnecessary-call estimate, latency, token/cost totals. *Evaluate the loop, not just the final answer* (§33 principle 9). |
 | **R-12** | **Evidence evaluation** (§22/§24): observations SHALL carry provenance metadata (`source_id`, `quality: "primary" | "secondary" | "marketing"`, published date) separate from the model's interpretation (§7). The final report schema SHALL include a`conflicts` list: when two retrieved sources assert contradictory values for the same quantity (§24), the report MUST represent the conflict explicitly — never silently adopt the convenient value (E-08) — and MUST mark conclusions resting on `marketing`-quality sources with a`low_quality_evidence` caveat (E-09). |
-| **R-13** | **Offline determinism** (ch3 R-17/R-18 carried): the *entire automated suite* runs offline via the `MockPolicy` double + fixture corpus; the mock path is **byte-identical for identical inputs** (floats at fixed `%.4f`, I-003), with **deterministic surrogates** for tokens/latency/cost derived from content lengths, explicitly labeled `usage_kind: "synthetic"` in the trace (ch4 R-14 analog). The `MockPolicy` consumes no seed/RNG — it is a pure function of `(state, tools)` (ch3 R-18 analog). The real Ollama path is opt-in/manual and best-effort. |
+| **R-13** | **Offline determinism** (ch3 R-17/R-18 carried): the *entire automated suite* runs offline via the `MockPolicy` double + fixture corpus; the mock path is **byte-identical for identical inputs** (floats at fixed `%.4f`, I-003), with **deterministic surrogates** for tokens/latency/cost whose formulas are **pinned in C-04** (F-002 closed), explicitly labeled `usage_kind: "synthetic"` in the trace (ch4 R-14 analog). The `MockPolicy` consumes no seed/RNG — it is a pure function of `(state, tools)` (ch3 R-18 analog). The real Ollama path is opt-in/manual and best-effort. |
 | **R-14** | **Model-availability taxonomy** (ch3 R-19/E-13 carried): on `--real` start the runtime resolves `DEGRADED_MOCK` (daemon unreachable → mock policy + banner, exit `0`), `PULL_REQUIRED` (model not pulled → exact `ollama pull <m>` remediation + exit `4`, never a crash), or `RUN_REAL` (pulled → real, no banner, exit `0`). Each outcome carries ch3's exact distinct banner text so a human never misreads why a mock policy ran (E-13). |
 | **R-15** | An **optional PyQt5 GUI** (`research-agent-gui`, `MAY`) SHALL browse saved `trace.json` / `drill_report.json` artifacts offline — step timeline with typed action/observation/reasoning panes, budget gauges, termination banner, drill four-question view — without ever running inference (ch3 R-16 analog; offscreen-testable, T-13). |
 | **R-16** | The **deterministic core** (`runtime.py`, `state.py`, `tools.py`, `validate.py`, `authorize.py`, `budgets.py`, `retry.py`, `trace.py`, `drills.py`, `metrics.py`, `report.py`) is **LLM- and network-free** — asserted by an import/graph source scan (T-02, ch3 I-009/R-20 analog). Only `policy.py` MAY import the LLM client (I-012). |
@@ -283,18 +283,21 @@ arguments MUST return byte-identical results (I-003). No tool MAY perform networ
 ### C-03 Decision + report validation
 
 ```python
-# validate.py
-DECISION_SCHEMA = {              # the policy's entire output language
-    "tool_call": {"tool": "str — must be registered", "arguments": "per ToolSpec.input_schema"},
-    "final":     {"report": "per REPORT_SCHEMA"},
-}
+# validate.py — the canonical decision wire shape (F-003 pin; `type` is the SOLE
+# discriminator; E-07/validate.py reject any other lexical form):
+#   {"type": "tool_call", "tool": <registered name>, "arguments": {...}}
+#   {"type": "final",     "report": <REPORT_SCHEMA object>}
 REPORT_SCHEMA = {                # the final research report (R-08/R-12)
-    "status": "ok | insufficient_evidence",
+    "status": "enum: ok | insufficient_evidence",
     "answer": "str",
     "citations": "list[doc_id] — every id MUST have been retrieved this episode (I-014)",
     "conflicts": "list[{quantity, sources[], values[]}] — may be empty, never dropped (E-08)",
     "caveats": "list[str] — e.g. low_quality_evidence (E-09)",
 }
+# Literal examples (the ONLY accepted forms):
+#   {"type": "tool_call", "tool": "search", "arguments": {"query": "..."}}
+#   {"type": "final", "report": {"status": "ok", "answer": "...",
+#                                  "citations": [], "conflicts": [], "caveats": []}}
 # Rejection shape (§21 Failure 3, verbatim field names):
 # {"error": "invalid_arguments", "field": <name>, "message": <reason>}
 ```
@@ -315,6 +318,13 @@ class AgentState:                # S_t = (G, H_t, O_t, M_t, P)
     consecutive_tool_failures: int
     seen_actions: dict[str, int] # canonical (tool, arguments) -> count (R-10)
     started_monotonic: float     # synthetic on mock path (R-13)
+```
+
+```python
+# Pinned surrogate formulas for the mock path (F-002 closed; I-003 byte-identity):
+#   tokens_used := sum over trace entries of ceil(len(canonical_json(entry)) / 4)
+#   latency_ms  := int(sha256(canonical_json(entry)).hexdigest()[:8], 16) % 1000 / 10.0
+#   cost_usd    := tokens_used * 0.000001   # pinned price table: 1 USD per 1M surrogate tokens
 ```
 
 All loop-relevant state lives in this object; the policy receives a **serialization** of it
@@ -429,7 +439,7 @@ LOOP_METRIC_KEYS = [
 ```python
 # drills.py — DRILLS: dict[str, FaultSpec]; the ONLY fault-injection surface (R-09)
 DRILLS = {
-  "search_timeout":        FaultSpec(tool="search",   error="TRANSIENT",  rate=1.0),
+  "search_timeout":        FaultSpec(tool="search",   error="TRANSIENT",  schedule=[1]),
   "empty_results":         FaultSpec(tool="search",   result=[]),
   "malformed_arguments":   FaultSpec(policy_fault="null_query"),   # forces §21 Failure 3
   "retrieval_failure":     FaultSpec(tool="retrieve", error="PERMANENT", rate=1.0),
@@ -461,8 +471,23 @@ I-015). `rate` is a deterministic schedule (every Nth call), not RNG (I-003).
 ```
 
 `expected_*` fields are **pinned per drill** in `drills.py` (the §34 "what should have happened"
-is part of the spec, not an observation); `pass` compares expectation to the executed trace — a
-drill that terminates for the wrong reason fails even if it terminates (E-10).
+is part of the spec, not an observation). The expected-verdict table is normative (F-001 closed):
+
+| Drill | Expected termination | Additional pass predicates (all must hold) |
+| ------ | -------------------- | ------------------------------------------ |
+| `search_timeout` | `goal_complete` | `retry_count >= 1` (recovered after the `schedule=[1]` fault) |
+| `empty_results` | `goal_complete` | `report.status == "insufficient_evidence"` |
+| `malformed_arguments` | `goal_complete` | `invalid_argument_count >= 1` |
+| `retrieval_failure` | `goal_complete` | `report.status == "insufficient_evidence"` with `citations == []` |
+| `duplicate_searches` | `repeated_state` | — |
+| `contradictory_sources` | `goal_complete` | `conflicts` covers every `conflict_marker` among retrieved docs (C-11) |
+| `low_quality_sources` | `goal_complete` | `caveats` contains `low_quality_evidence` |
+| `infinite_loop` | `repeated_state` | E-11 precedence over `max_steps` |
+| `max_steps_exhaustion` | `max_steps` | — |
+| `unauthorized_tool_call` | `goal_complete` | `denial_count == 1`; `delete_file` executed zero times |
+
+`pass` = (`actual_termination` == expected) AND all predicates; a drill that terminates
+for the wrong reason fails even if it terminates (E-10).
 
 ---
 
@@ -600,7 +625,7 @@ acceptance row is a `T-NN` id registered in §11.
 ### 9.8 The ten §34 drills (R-09/R-10/R-12, C-11/C-12)
 
 - **T-08** all ten drills execute offline on `MockPolicy` and emit schema-valid `drill_report.json` (R-19).
-- **T-08a** `search_timeout` → retries then recovery; expected termination `goal_complete` (or documented fallback); drill passes.
+- **T-08a** `search_timeout` → retries then recovery; expected termination `goal_complete` per the C-12 expected-verdict table (no fallback allowed); drill passes (F-001 closed).
 - **T-08b** `empty_results` → `insufficient_evidence` report stating the limitation; no fabricated answer (R-08/E-03).
 - **T-08c** `malformed_arguments` → repair loop exercised; `invalid_argument_count >= 1`; recovers or bounds out (T-04 path).
 - **T-08d** `retrieval_failure` → retry → alternative-or-limitation path (§13); never a hallucinated substitute.
