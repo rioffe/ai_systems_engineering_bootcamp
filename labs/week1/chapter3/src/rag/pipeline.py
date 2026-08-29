@@ -84,6 +84,38 @@ def _query_embedder() -> Embedder:
     return MockEmbedder()
 
 
+# -- terminal-state helpers (I-008: exactly one failure_stage) --------------
+
+
+def _score_case(m: RunMetrics, t0: float) -> RunMetrics:
+    """All stages ok -> SCORED; no failure_stage (I-008)."""
+    m.status = "SCORED"
+    m.total_latency_ms = round((time.perf_counter() - t0) * 1000.0, 4)
+    logger.debug("run_case {} -> SCORED", m.q_id)
+    return m
+
+
+def _fail_case(m: RunMetrics, stage: str, err: BaseException | str, t0: float) -> RunMetrics:
+    """A stage before judging terminal-faulted -> ERROR naming that ONE stage
+    (I-008/R-15); the deterministic boundary never fabricates a stage."""
+    m.failure_stage = stage
+    m.status = "ERROR"
+    m.total_latency_ms = round((time.perf_counter() - t0) * 1000.0, 4)
+    logger.warning("run_case {} -> ERROR (failure_stage={}): {}", m.q_id, stage, err)
+    return m
+
+
+def _partial_case(m: RunMetrics, err: BaseException | str, t0: float) -> RunMetrics:
+    """Judge failed after a successful generate (E-11) -> PARTIAL: the
+    retrieval + generation diagnosis is intact; only the generation-QA metrics
+    (from the verdict) are absent, and failure_stage == 'judging'."""
+    m.failure_stage = "judging"
+    m.status = "PARTIAL"
+    m.total_latency_ms = round((time.perf_counter() - t0) * 1000.0, 4)
+    logger.warning("run_case {} -> PARTIAL (failure_stage=judging): {}", m.q_id, err)
+    return m
+
+
 def run_case(
     question,
     index,
@@ -99,11 +131,25 @@ def run_case(
     llm: LLM | None = None,
     cfg: Any = None,
 ) -> RunMetrics:
-    """Query-time pipeline for one question (R-15) -> RunMetrics (R-14)."""
+    """Query-time (§3.2) state machine over the *pre-built* `index` (R-14/R-15).
+
+    RETRIEVE -> (EXPAND) -> (RERANK) -> CONTEXT -> CITE -> GENERATE -> (JUDGE)
+    -> metrics. Per §3.2 / I-008 / R-15, a terminal `ERROR`/`PARTIAL` names
+    exactly ONE `failure_stage`; the retrieval-stage fields are populated for any
+    case that cleared `RETRIEVING`, so a later-stage fault still yields a COMPLETE
+    retrieval diagnosis (§21 "where did it fail?").
+
+    - generation/judge fault -> ERROR (`failure_stage='generation'`) or PARTIAL
+      (`failure_stage='judging'`, E-11) with the retrieval diagnosis intact.
+    - `judge is None` (--judge off, E-12): the JUDGING stage is skipped; the
+      generation-QA metrics stay `None` and the case SCORES retrieval-only.
+    """
     t0 = time.perf_counter()
     vs, bm = index
     query_text = question.question
+    m = RunMetrics(q_id=question.q_id, tier=question.tier)
 
+    # -- RETRIEVE -----------------------------------------------------------
     retriever = HybridRetriever(
         store=vs,
         bm25=bm,
@@ -112,12 +158,16 @@ def run_case(
     )
     q_vec = _query_embedder().embed(query_text)
     t_r0 = time.perf_counter()
-    if hybrid:
-        raw = retriever.retrieve(q_vec, query_text, candidates=top_n)
-    else:
-        raw = vs.search(q_vec, top_n)
+    try:
+        if hybrid:
+            raw = retriever.retrieve(q_vec, query_text, candidates=top_n)
+        else:
+            raw = vs.search(q_vec, top_n)
+    except Exception as exc:  # noqa: BLE001 -- attribute, never fabricate
+        return _fail_case(m, "retrieval", exc, t0)
     retrieve_ms = (time.perf_counter() - t_r0) * 1000.0
 
+    # -- EXPAND (opt-in) ----------------------------------------------------
     if expand and n_expand > 0:
         expander = MockQueryExpander()
 
@@ -127,72 +177,92 @@ def run_case(
                 return retriever.retrieve(qv, q, candidates=candidates)
             return vs.search(qv, candidates)
 
-        raw = multi_query(expander, fetch, query_text, n=n_expand, candidates=top_n)
+        try:
+            raw = multi_query(expander, fetch, query_text, n=n_expand, candidates=top_n)
+        except Exception as exc:  # noqa: BLE001
+            return _fail_case(m, "expansion", exc, t0)
 
+    # -- RERANK (opt-in) ----------------------------------------------------
     if rerank:
         t_rr0 = time.perf_counter()
-        reranked = MockReranker().rerank(query_text, raw, top_k=top_k)
+        try:
+            reranked = MockReranker().rerank(query_text, raw, top_k=top_k)
+        except Exception as exc:  # noqa: BLE001
+            return _fail_case(m, "reranking", exc, t0)
         rerank_ms = (time.perf_counter() - t_rr0) * 1000.0
     else:
         reranked = raw
         rerank_ms = 0.0
 
-    ctx = build_context(reranked, token_budget=8192)
-    chunk_list = list(ctx.docs)[:top_k]
-    context_str = " ".join(sc.chunk.text for sc in chunk_list)
+    # -- CONTEXT + CITE -----------------------------------------------------
+    try:
+        ctx = build_context(reranked, token_budget=8192)
+        chunk_list = list(ctx.docs)[:top_k]
+        context_str = " ".join(sc.chunk.text for sc in chunk_list)
+    except Exception as exc:  # noqa: BLE001
+        return _fail_case(m, "context", exc, t0)
 
+    # RETRIEVING cleared: populate the COMPLETE retrieval diagnosis NOW so a
+    # later-stage fault still yields it (I-008 / §21 "did retrieval provide
+    # the evidence?").
     citer = Citer()
     provenance = {sc.chunk.chunk_id for sc in chunk_list}
     injection_result: InjectionResult = citer.scan_injection(chunk_list)
+    retrieved_ids: list[str] = [sc.chunk.chunk_id for sc in chunk_list]
+    rel = set(question.relevant_chunks or [])
+    m.retrieved = retrieved_ids
+    m.expected = list(question.relevant_chunks or [])
+    m.precision = precision(rel, retrieved_ids, top_k)
+    m.recall = recall(rel, retrieved_ids, top_k)
+    m.mrr = mrr(rel, retrieved_ids, 10)
+    m.ap = ap(rel, retrieved_ids, top_k)
+    m.ndcg = ndcg(rel, retrieved_ids, top_k)
+    m.context_tokens = ctx.tokens
+    m.truncated = ctx.truncated
+    m.injection_warning = injection_result.injection_warning
+    m.retrieve_ms = round(retrieve_ms, 4)
+    m.rerank_ms = round(rerank_ms, 4)
 
+    # -- GENERATE -----------------------------------------------------------
     t_g0 = time.perf_counter()
-    llm = llm if llm is not None else MockLLM()
-    answer = llm.generate(
-        system="You are a precise, well-cited assistant.",
-        context=context_str,
-        question=query_text,
-        schema={"question": question.q_id},
-        seed=42,
-    )
+    active_llm = llm if llm is not None else MockLLM()
+    try:
+        answer = active_llm.generate(
+            system="You are a precise, well-cited assistant.",
+            context=context_str,
+            question=query_text,
+            schema={"question": question.q_id},
+            seed=42,
+        )
+    except Exception as exc:  # noqa: BLE001
+        m.generate_ms = round((time.perf_counter() - t_g0) * 1000.0, 4)
+        return _fail_case(m, "generation", exc, t0)
     generate_ms = (time.perf_counter() - t_g0) * 1000.0
+    m.answer_status = answer.status
+    m.generate_ms = round(generate_ms, 4)
 
     citation_result: CitationResult = citer.grounding_gate(answer, provenance)
+    m.grounding_violation = citation_result.grounding_violation
+    if answer.status == "ERROR":  # E-11: generation terminal-faulted
+        return _fail_case(m, "generation", answer.error or "generation failed", t0)
 
-    verdict = None
+    # -- JUDGE (E-11 PARTIAL on judge fault; E-12 skip when --judge off) ---
     if judge is not None:
-        verdict = judge.judge(
-            question=question,
-            context=context_str,
-            answer=answer,
-            claims=citer.extract_claims(answer.text),
-            gold_facts=question.gold_facts,
-            on_failure="empty",
-        )
-
-    retrieved_ids = [sc.chunk.chunk_id for sc in chunk_list]
-    rel = set(question.relevant_chunks or [])
-    m = RunMetrics(
-        q_id=question.q_id,
-        tier=question.tier,
-        retrieved=retrieved_ids,
-        expected=list(question.relevant_chunks or []),
-        precision=precision(rel, retrieved_ids, top_k),
-        recall=recall(rel, retrieved_ids, top_k),
-        mrr=mrr(rel, retrieved_ids, 10),
-        ap=ap(rel, retrieved_ids, top_k),
-        ndcg=ndcg(rel, retrieved_ids, top_k),
-        context_tokens=ctx.tokens,
-        truncated=ctx.truncated,
-        answer_status=answer.status,
-        injection_warning=injection_result.injection_warning,
-        grounding_violation=citation_result.grounding_violation,
-        retrieve_ms=round(retrieve_ms, 4),
-        rerank_ms=round(rerank_ms, 4),
-        generate_ms=round(generate_ms, 4),
-        total_latency_ms=round((time.perf_counter() - t0) * 1000.0, 4),
-        status="SCORED",
-    )
-    if verdict is not None:
+        try:
+            verdict = judge.judge(
+                question=question,
+                context=context_str,
+                answer=answer,
+                claims=citer.extract_claims(answer.text),
+                gold_facts=question.gold_facts,
+                on_failure="empty",
+            )
+        except Exception as exc:  # noqa: BLE001
+            return _partial_case(m, exc, t0)
+        if verdict.status == "ERROR":  # E-11: judge exhausted its retries
+            return _partial_case(m, verdict.rationale or "judge failed", t0)
+        # record generation-QA metrics ONLY on a clean verdict; otherwise they
+        # stay None so the "did the model use it" side is honestly absent.
         m.correct = verdict.correct
         m.supported = verdict.supported
         m.complete = verdict.complete
@@ -202,8 +272,8 @@ def run_case(
         m.unsupported_claims = verdict.unsupported_claims
         m.injection_warning = verdict.injection_warning
         m.which_field_decided = verdict.which_field_decided
-    logger.debug("run_case {} tier={} recall={}", question.q_id, question.tier, m.recall)
-    return m
+
+    return _score_case(m, t0)
 
 
 def run_dataset(
