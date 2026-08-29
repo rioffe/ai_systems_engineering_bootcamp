@@ -114,7 +114,7 @@ reports — never runs inference itself.
 | Actor | Goals |
 | ----- | ----- |
 | **User** (human, single process) | Validate the golden dataset; run the evaluation over the AoE (mock or real); compare two runs (regression report with per-metric Δ); enforce gates in CI (exit `0`/`1`); classify failures by the §34 taxonomy; optionally browse a run report in the GUI. (**single-principal** — no inter-principal authorization, ch3 F-009 carried; `access_level` is carried but not consumed.) |
-| **Dataset / Generator** (`dataset.py`) | Load the golden dataset (50–100+ `EvalCase`s), validate schema, category membership, and **reference closure** (every `relevant_chunks` id exists in the corpus); emit load errors deterministically (ch3 I-013 analog). |
+| **Dataset / Generator** (`dataset.py`) | Load the golden dataset (SHOULD-be 50–100+ `EvalCase`s; `check --strict` enforces the floor, F-004), validate schema, category membership, and **reference closure** (every `relevant_chunks` id exists in the corpus); emit load errors deterministically (ch3 I-013 analog). |
 | **AoE adapter** (`aoe.py`) | Drive the ch3 application through its **pinned interface** (C-02): `build_index(...)` (index-time flags), `run_case(question, index, query_time_flags)` → `AoEResult` (answer, retrieved chunks, scores, raw/parsed output, verdict, usage tokens, latency, trace). Wraps ch3; never re-implements RAG. |
 | **Evaluator** (`evaluator.py`) | Run deterministic structure checks first (§5); the **evaluated verdict itself is the AoE-returned ch3 verdict** (F-001: no second verdict path is constructed); the evaluator adds checks, metrics rows, and failure classification (C-08). `judge_check.py` wraps ch3's `judgment.py` Judge pair (MockJudge/OllamaJudge) for the §26 agreement run only. |
 | **Metrics** (`metrics.py`) | Reuse ch3 `metrics.py` for P@k / R@k / MRR / MAP / NDCG; add the §19 evaluation-vector math (groundedness, completeness, hallucination rate, latency percentiles, cost per success). Pure, headless, testable. |
@@ -132,7 +132,7 @@ reports — never runs inference itself.
 | ID | Statement |
 | -- | --------- |
 | **R-01** | The system shall execute the ch4 §2 harness pipeline — **Dataset → Application → Outputs → Evaluator → Metrics → Regression Report** — where the **Application under Evaluation (AoE)** is the ch3 RAG pipeline, reached *only* through the pinned adapter interface (C-02). The harness never re-implements retrieval/generation; it wires, measures, and compares. |
-| **R-02** | The **golden dataset** (§3/§32) shall hold 50–100+ `EvalCase`s, each with `question`, `reference_answer`, `relevant_chunks` (ground-truth chunk ids), and `category`, plus ch3-carried `gold_facts` for completeness (C-01). `dataset check` MUST validate schema, category membership in the documented `CATEGORY_SET` (ch3's seven failure tiers plus `{adversarial, boundary, regression}`, §21/§35), and **reference closure**: every `relevant_chunks` id MUST exist in the corpus index and every required field MUST be present; violations are deterministic **load errors** (E-02, ch3 I-013 analog). |
+| **R-02** | The **golden dataset** (§3/§32) SHOULD hold 50–100+ `EvalCase`s (recommendation; the floor binds only under the optional `check --strict` flag, which emits a documented violation — F-004), each with `question`, `reference_answer`, `relevant_chunks` (ground-truth chunk ids), and `category`, plus ch3-carried `gold_facts` for completeness (C-01). `dataset check` MUST validate schema, category membership in the documented `CATEGORY_SET` (ch3's seven failure tiers plus `{adversarial, boundary, regression}`, §21/§35), and **reference closure**: every `relevant_chunks` id MUST exist in the corpus index and every required field MUST be present; violations are deterministic **load errors** (E-02, ch3 I-013 analog). |
 | **R-03** | The evaluator (§5/§7 hierarchy) shall run **deterministic checks before any judge**: answer-schema validity, citation-`chunk_id` membership in the retrieved context, and any property with an exact spec (e.g. `amount >= 0`, enum membership) are checked deterministically. A case whose answer fails schema validation is attributed `PARSING_FAILURE` and is judged on that basis (I-005) — no additional judge call needed (the AoE-returned ch3 verdict is reused verbatim, F-001). |
 | **R-04** | The harness shall compute the §19 **evaluation vector** per case and in aggregate: correctness `A` (from the ch3 verdict `correct`), retrieval `P@k` and `R@k` (ch3 `metrics.py` reuse), groundedness `G` (faithfulness = supported claims / total factual claims, ch3 §21 formula), completeness `C` (reflected `gold_facts` / total `gold_facts`), hallucination rate `H` (unsupported claims / total claims, §15), latency `L` as percentiles $P50/P90/P95/P99$ (near-rank interpolation, §17), and cost `K` per successful case (§18 formulas: `cost_success = sum(input+output tokens × price_table) / successes`). §16 tool-success `T` is a **reserved** slot (retrieval pipeline has no tool loop in ch3 — kept for the agent weeks). |
 | **R-05** | **Stratification** (§21/§35): the aggregate report MUST include a `by_category` breakdown over the dataset's declared category set, plus an optional `by_difficulty` breakdown when the dataset carries difficulty metadata. A global-only aggregate is a **report violation** (I-012). |
@@ -241,7 +241,8 @@ class EvalCase:                  # one golden row; ch3 question row shape extend
 
 @dataclass
 class Dataset:
-    dataset_id: str               # stable name/hash; compare requires equal ids (E-12)
+    dataset_id: str               # DECLARED stable name (F-003): e.g. "golden-v1"; content appends
+                                  # (§28 production-loop) keep the id; compare requires equal names.
     cases: list[EvalCase]
 ```
 
@@ -485,7 +486,7 @@ real Ollama path is §9.11 manual-only. Test ids use ch3's naming discipline: ea
 
 ### 9.1 Dataset (C-01, R-02/R-13)
 
-- **T-01** `check` on a valid 5-row dataset exits `0` and produces a valid `dataset_report.json` (schema-gated).
+- **T-01** `check` on a valid 5-row dataset in default (non-strict) mode exits `0` and produces a valid `dataset_report.json` (schema-gated); in `--strict` mode the same 5-row dataset exits `3` with a documented floor violation (R-02/F-004).
 - **T-01b** dataset with a duplicate `case_id` → `check` exit `3` + enumerated violation.
 - **T-01c** dataset with `REPLACE_ME` sentinel (scaffold) → violation (the scaffold is not golden, C-11).
 - **T-15** corrupt JSON input → `check` enumerates schema violations; exit `3` (ch3 I-013 analog).
