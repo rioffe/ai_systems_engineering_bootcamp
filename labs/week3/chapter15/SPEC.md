@@ -143,4 +143,234 @@ own ad-hoc serialization.
 | **R-15** | **Policy isolation / determinism boundary** (§2/§11 analog of core-import discipline): the deterministic harness core (`control_loop.py`, `context.py`, `tools.py`, `permissions.py`, `verifier.py`, `instrument.py`, `report.py`) MUST be **LLM- and network-free**, asserted by an import/graph source scan (T-02). Only `policy.py` (the `OllamaPolicy` branch) MAY import the network/model client; `MockPolicy` does not. |
 | **R-16** | The **primary product surface** is the CLI `agent` with subcommands `run`, `experiment`, `inspect` (§5.1). All durable artifacts (`trajectory.json`, `experiment.json`) are written by one `report.py`; no subcommand prints its own ad-hoc serialization. |
 | **R-17** | **Schema gate** (carried): `trajectory.json` and `experiment.json` carry a literal `trajectory_version`/`experiment_version == "0.1"` field; `inspect`/`experiment` refuse a mismatched version unless `--force` (E-06). A malformed artifact failing validation is a deterministic load error (E-05). |
-| **R-18** | **System-A vs System-B demonstration** (ch15 §16, `SHOULD`): the CLI MAY run a `--baseline` "System A" (`patch-only: read task → propose → write → stop`, no verify/loop) alongside the full "System B" to make §16's thesis observable — same task, same (mock) model, different loop, divergent capability — and record both trajectories. Not required for acceptance.
+| **R-18** | **System-A vs System-B demonstration** (ch15 §16, `SHOULD`): the CLI MAY run a `--baseline` "System A" (`patch-only: read task → propose → write → stop`, no verify/loop) alongside the full "System B" to make §16's thesis observable — same task, same (mock) model, different loop, divergent capability — and record both trajectories. Not required for acceptance. |
+
+---
+
+## 3. Behavior and state model
+
+### 3.1 Lifecycle scope
+
+One **run** is one closed-loop task execution. Each run moves through a finite state machine whose
+drive is the §1 controller; the *durable artifact* is the trajectory over that run, not the loop's
+transient memory. Within one run, three nested scopes operate:
+
+- **Per-iteration** (`OBSERVE → REASON → ACT → VERIFY → FEEDBACK`): compose `C_t`, let the `Policy`
+  pick `A_t`, gate `A_t` through the permission layer, execute the approved tool(s) in the sandbox,
+  run the verifier, capture the verdict + feedback, advance `t`. Each iteration is one row of the
+  §17 instrumentation.
+- **Per-run** (whole loop): accumulate iterations until a **stopping condition** (R-08) fires;
+  emit `trajectory.json` + a human summary.
+- **Per-experiment** (`experiment` subcommand, §17): wrap one or more runs over the
+  injection→repair scenario; emit `experiment.json` summarizing the detect/diagnose/repair arc and
+  the iteration count.
+
+The **deterministic/probabilistic seam**: `context`, `permissions`, `tools`, `verifier`, and
+`loop` are deterministic; only `policy` (its `OllamaPolicy` branch) is probabilistic. On the mock
+path no probabilistic component participates (R-13).
+
+### 3.2 The control loop (one run)
+
+```text
+              Task (task file / --task string)
+                         |
+                        v
+          +----------------------------------------------------+
+          |  OBSERVE    O_t <- environment (sandbox repo state) |
+          |  REASON     C_t = ContextManager(task, history, O_t)|
+          |              A_t = Policy(C_t, O_t)   [#1 pi_theta] |
+          |  PERMIT     decision = PermissionLayer(A_t) [R-05]  |
+          |       - if DENY: record, skip, -> next REASON        |
+          |  ACT        exec approved tool(s) in SANDBOX [R-04] |
+          |              S_{t+1} = T(S_t, A_t)                   |
+          |  VERIFY     verdict = Verifier(sandbox)   [R-06]    |
+          |  FEEDBACK   if verdict == VERIFIED: STOP (VERIFIED)  |
+          |              else: feedback(O_{t+1}) -> OBSERVE      |
+          +----------------------------------------------------+
+                         |
+         stopping condition?                 | yes
+   (VERIFIED | BUDGET_EXHAUSTED | STALLED)   v
+                         |           trajectory.json (R-09)
+                        v               + human summary + exit code (K-03)
+```
+
+The agent moves through states `RECEIVED → OBSERVING → REASONING → PERMITTING → ACTING →
+VERIFYING → FEEDBACK`, cycling back to `OBSERVING` on any `FAILED` verdict, and settling in a
+terminal state `{VERIFIED, BUDGET_EXHAUSTED, STALLED, DENIED_LOOP, ERROR}`. A `DENY` at the
+PERMIT stage does **not** end the run — it routes to the next `REASON`; only a *repeated*
+denial cycle (`DENIED_LOOP`) or a permission-layer misconfiguration terminates.
+
+### 3.3 The instrumented-artifact pipeline
+
+The agent's *only* durable artifacts are files written by `report.py`:
+
+- `trajectory.json` (from `run`) — the versioned, schema-gated record (C-06): per-iteration rows +
+   top-level `final_outcome`, `policy` (`mock`/`ollama`), model-availability banner (R-14), and
+   the §17 field set.
+- `experiment.json` (from `experiment`) — the versioned record (C-07): the injected-failure
+   scenario, per-run `detect`/`diagnose`/`repair` phase markers, the iteration-to-`VERIFIED` count,
+   plus the embedded `trajectory.json` ref.
+
+All downstream readers (`inspect`, the optional `--baseline` System-A/B compare, R-18) read **only**
+these artifacts — they never re-run the loop or re-touch the sandbox (I-006).
+
+---
+
+## 4. Interfaces / contracts
+
+### C-01 Task specification
+
+```python
+# task.py — the input to one run
+@dataclass
+class Task:
+    task_id: str                  # stable id, e.g. "parse-config"
+    prompt: str                   # natural-language task (the --task string or task file body)
+    target_repo: str              # path to the repo to be copied into the sandbox
+    verifier: "VerifySpec"        # C-05: which verification closes the loop
+    success_token: str | None = None    # MAY: a substring/regex the repaired artifact must contain
+    acceptance_test: str | None = None  # MAY: a specific test id that must pass to count as VERIFIED
+```
+
+### C-02 Policy interface
+
+```python
+# policy.py — the ONLY module that MAY call the model/network (R-15)
+class Policy(Protocol):
+    def select(self, context: Context, observation: Observation) -> Action: ...
+
+# Action is a closed tag-union (I-004):
+#   ToolCall(name: str, args: dict)    # -> routed to PermissionLayer then ToolController
+#   STOP(final_outcome: "VERIFIED")    # policy may declare completion, but only a
+#                                       #  VERIFIED verifier may settle the run (see loop)
+#   NOOP(note: str)                    # -> feeds STALLED detection (R-08)
+```
+
+`MockPolicy` is deterministic: it is a **scripted** list of `Action`s (for fixed acceptance
+experiments) or a **rule-driven** policy (read→inspect→search→edit→verify→repair rules, for the
+injection experiment). `OllamaPolicy` wraps the model with a fixed **seed** where supported;
+otherwise it is labeled `seed=None` and excluded from byte-identity (I-002 applies to the mock
+path only).
+
+### C-03 Tool schema (pinned; closed set)
+
+```python
+# tools.py — each tool is a (name, input schema, output schema, sandbox-bound) callable
+TOOL_SET = {
+   "list_files":  {"in":  {"path": str, "glob": str?},                   "out": "list[str]"},
+   "read_file":   {"in":  {"path": str},                                 "out": "str"},
+   "search":      {"in":  {"query": str, "path_glob": str?},            "out": "list[Hit]"},   # grep-like
+   "edit_file":   {"in":  {"path": str, "op": enum[replace|append|prepend], "old"?: str, "new": str},
+                    "out": "EditResult{applied: bool, diff: str}"},
+   "run_shell":  {"in":  {"command": str, "cwd": str?},                "out": "ProcResult{exit: int, out: str, err: str}"},
+}
+```
+
+Every tool resolves its `path`/`cwd` strictly *inside* the sandbox root (R-12, I-003). `edit_file`
+is the only mutation tool; `run_shell` is used for *verification* (tests/typecheck/lint/build) and
+is itself permission-gated.
+
+### C-04 Permission decision
+
+```python
+# permissions.py — evaluated BEFORE any tool executes (R-05)
+ALLOW = {"tool": str, "args": dict, "reason": "ALLOWED"}
+DENY  = {"tool": str, "args": dict, "reason": "NOT_IN_ALLOWLIST" | "PATH_OUTSIDE_SANDBOX"
+                                | "COMMAND_FORBIDDEN" | "RULE_DENIED", "detail": str}
+
+def authorize(tool_call: Action, sandbox_root: str, pconfig: PermsConfig) -> "ALLOW | DENY": ...
+```
+
+`PermsConfig` declares: `allow_list` (tools/operations, static §11.1), `sandbox_root` + path check
+(dynamic §11.2), and MAY a `rule` function (policy-based §11.3). Evaluation precedence: (1)
+path-in-sandbox, (2) command-prefix allow for `run_shell`, (3) tool in `allow_list`, (4) MAY rule
+override. First `DENY` wins.
+
+### C-05 Verifier specification + verdict
+
+```python
+@dataclass
+class VerifySpec:
+    kind: enum["tests", "typecheck", "lint", "build", "repo_specific"]   # §7.1–5
+    command: str            # e.g. "pytest -q" / "python -m mypy" / "python -m ruff"
+    success_exit: int = 0
+
+@dataclass
+class Verdict:
+    status: "VERIFIED" | "FAILED" | "ERROR"    # §7
+    checks: list[dict]     # per-check {kind, command, exit, output_tail}
+    output: str            # captured stdout/stderr tail; fed into the next OBSERVE (§13)
+```
+
+A run *settles* `VERIFIED` only when the verdict is `VERIFIED` for the run's `VerifySpec` (R-06).
+`FAILED` (non-zero exit, captured) and `ERROR` (verifier could not run, e.g. import failure / runner
+missing) are distinct: `ERROR` is reported but does not by itself terminate (it feeds the next
+iteration) unless it recurs (E-03).
+
+### C-06 `trajectory.json` artifact (versioned, R-17)
+
+```jsonc
+{
+   "trajectory_version": "0.1",
+   "task_id": "parse-config",
+   "policy": "mock",
+   "availability_banner": null,     # set only on DEGRADED_MOCK, else null
+   "sandbox_root": "/tmp/agent-sbx/...",
+   "iterations": [
+     {
+       "iteration": 0,
+       "tool_calls": [{"name": "list_files", "args": {"path": "."}}, {"name": "read_file", "args": {"path": "src/..."}}],
+       "tokens": {"estimated": 1820, "mode": "synthetic"},
+       "files_read": ["src/config.py"],
+       "files_modified": [],
+       "tests_executed": 0,
+       "test_results": null,
+       "errors": [],
+       "time_ms": 42,
+       "verdict": "PENDING",
+       "phase": "observe|inspect|search|propose|modify|verify|repair|stop"
+     }
+   ],
+   "final_outcome": "VERIFIED",
+   "iterations_used": 4,
+   "total_tokens": {"estimated": 9140, "mode": "synthetic"}
+}
+```
+
+The §17 field set (`iteration`, `tool_calls`, `tokens`, `files_read`, `files_modified`,
+`tests_executed`, `test_results`, `errors`, `time_per_iteration` → `time_ms`, `final_outcome`)
+MUST be present on every iteration row (R-09). `tokens.mode == "synthetic"` when `policy == "mock"`
+(R-13/E-04).
+
+### C-07 `experiment.json` artifact (versioned, R-17)
+
+```jsonc
+{
+   "experiment_version": "0.1",
+   "task_id": "parse-config",
+   "injection": {"file": "src/config.py", "symbol": "parse_config",
+                 "injected_defect": "wrong split delimiter",
+                 "pre_injection_verdict": "FAILED"},
+   "phases": [
+     {"phase": "detect",   "iteration": 1, "evidence": "test_parse_basic FAILS"},
+     {"phase": "diagnose", "iteration": 2, "evidence": "delimiter == '=' vs expected '=='"},
+     {"phase": "repair",   "iteration": 3, "evidence": "edit_file applied to src/config.py"}
+   ],
+   "final_outcome": "VERIFIED",
+   "iterations_to_verified": 3,
+   "trajectory_ref": "trajectory.json"
+}
+```
+
+The experiment MUST record detect/diagnose/repair (R-11) and the iteration-to-`VERIFIED` count.
+
+### C-08 Stopping conditions and `final_outcome` closure
+
+```text
+STOPPING (R-08):
+   VERIFIED           -> final_outcome VERIFIED          exit 0
+   BUDGET_EXHAUSTED   -> final_outcome BUDGET_EXHAUSTED  exit 1
+   STALLED            -> final_outcome STALLED           exit 1   (MAY)
+   DENIED_LOOP        -> final_outcome DENIED_LOOP       exit 1   (permission misconfig)
+   ERROR              -> final_outcome ERROR             exit 1 / 4
+```
