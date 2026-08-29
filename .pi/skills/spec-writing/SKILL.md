@@ -181,6 +181,3 @@ commit `docs(chN): bump SPEC.md v0.1->v0.2 (P0/P1 …; P2 hygiene deferred)`. Or
 - **12-S template order** preserved (Intent→Actors→Requirements→Behavior→Contracts→
   Interfaces→Invariants→Constraints→Edges→Tests→Deps→Traceability).
 - **Traceability rows** mention literal module/behavior/test ids.
-EOF
-
-echo "done"
