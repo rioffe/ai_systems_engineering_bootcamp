@@ -110,7 +110,7 @@ own ad-hoc serialization.
 | Actor | Goals |
 | ----- | ----- |
 | **User** (human, single process) | Supply a coding task (task file or `--task` string) against a **target repository** (a local clone / sandbox, never the bootcamp repo itself); run the agent offline (mock policy) or against Ollama (`--real`); launch the §17 failure-injection experiment; read the instrumented trajectory and experiment report; optionally inspect a saved trajectory. (**single-principal** — no inter-principal authorization; permissions are *action-scoping*, not *user*-scoping, ch15 §11.) |
-| **Policy** (`policy.py`) | The LLM-driven policy `π_θ(A | C_t, O_t)` (§1): given the current context `C_t` and observation `O_t`, select the next action `A_t` (a tool call / an edit / "stop"). Two implementations: **`MockPolicy`** (deterministic, offline — a scripted or rule-driven action sequence, the CI double) and **`OllamaPolicy`** (opt-in real, `qwen3.8`). Only `policy.py` calls the model (§11 analog of the core-import discipline, R-15). |
+| **Policy** (`policy.py`) | The LLM-driven policy `π_θ(A | C_t, O_t)` (§1): given the current context `C_t` and observation `O_t`, select the next action`A_t`(a tool call / an edit / "stop"). Two implementations: **`MockPolicy`** (deterministic, offline — a scripted or rule-driven action sequence, the CI double) and **`OllamaPolicy`** (opt-in real,`qwen3.8`). Only`policy.py` calls the model (§11 analog of the core-import discipline, R-15). |
 | **ContextManager** (`context.py`) | Compose `C_t` from the task, the trajectory-so-far, and the repository state (§3) *without* blindly passing the entire codebase (`SHOULD`-level context engineering); implement **compaction** (§9) — preserve salient state, discard irrelevant trajectory history — behind the token budget. Pure, deterministic. |
 | **ToolController** (`tools.py`) | Define and dispatch the tool set (§4/§6): `list_files`, `read_file`, `search`, `edit_file`, `run_shell` (tests / typecheck / lint / build). Each tool has a fixed schema and executes inside the **target repo sandbox only**; no tool may escape the sandbox root. |
 | **PermissionLayer** (`permissions.py`) | Gate *every* action **before** execution (§11): map each tool call to an authorization decision (`ALLOW` / `DENY`) from an explicitly declared policy — a static allow-list of tools/operations, a dynamic check (path in-sandbox, command prefix), and MAY a rule-based policy. **Enforced outside the model** — the policy may *request* an action; only the permission layer *permits* it (ch15 §18.10). |
@@ -126,7 +126,7 @@ own ad-hoc serialization.
 
 | ID | Statement |
 | -- | --------- |
-| **R-01** | The system executes the ch15 §17 **minimal coding-agent pipeline** in a closed loop — *receive task → inspect repository files → search the codebase → read relevant files → propose implementation → modify files → run tests → read failures → iterate → **stop when verification succeeds*** — arranged over the §17 architecture `Task → Context builder → LLM → Tool selection → Permission check → Tool execution → Verifier → Feedback ↺`. The loop is the §1/§18.2 controller `observe → reason → act → verify → feedback → repeat` (`A_t ∼ π_θ(A | C_t, O_t)`, `S_{t+1} = T(S_t, A_t)`); it terminates only on a defined **stopping condition** (R-08), never by accident. |
+| **R-01** | The system executes the ch15 §17 **minimal coding-agent pipeline** in a closed loop — *receive task → inspect repository files → search the codebase → read relevant files → propose implementation → modify files → run tests → read failures → iterate → **stop when verification succeeds*** — arranged over the §17 architecture `Task → Context builder → LLM → Tool selection → Permission check → Tool execution → Verifier → Feedback ↺`. The loop is the §1/§18.2 controller `observe → reason → act → verify → feedback → repeat` (`A_t ∼ π_θ(A | C_t, O_t)`,`S_{t+1} = T(S_t, A_t)`); it terminates only on a defined **stopping condition** (R-08), never by accident. |
 | **R-02** | The system is an **agent harness** (§2), not an LLM: it wires `policy → permission → tool → verifier → feedback` and owns tool definitions, tool execution, and **state management** across iterations (§2). The LLM is reached *only* through the `Policy` interface (R-15); the harness itself contains no model call. |
 | **R-03** | **Context engineering** (§3/§18.4): the `ContextManager` composes `C_t` dynamically from the task, the trajectory-so-far, and observed repository state `O_t`, selecting the *relevant* slice of the repository rather than passing the entire codebase (`C_t` MUST NOT be the whole repo by default; I-005). Context composition MUST be **deterministic** for identical inputs. |
 | **R-04** | **Tool use** (§4/§6): the `ToolController` dispatches a fixed, schema-pinned tool set — `list_files`, `read_file`, `search`, `edit_file`, `run_shell` (running tests / typecheck / lint / build) — each with a declared input/output contract (C-03). Tool execution extends the model into the filesystem/shell/verification *environment* (§18.5). |
@@ -373,4 +373,224 @@ STOPPING (R-08):
    STALLED            -> final_outcome STALLED           exit 1   (MAY)
    DENIED_LOOP        -> final_outcome DENIED_LOOP       exit 1   (permission misconfig)
    ERROR              -> final_outcome ERROR             exit 1 / 4
+```
+
+---
+
+## 5. Interface specification
+
+### 5.1 CLI — primary surface (`agent`, R-16)
+
+| Subcommand | Behavior | Exit |
+| ---------- | -------- | ---- |
+| `agent run --task <file\|string> --repo <path> [--mock\|--real] [--max-iterations N] [--no-compact] --out trajectory.json` | One closed-loop run over a sandbox copy of `--repo`; emits `trajectory.json` (C-06) + a human summary. `--max-iterations` defaults to a finite cap (R-08). | `0` VERIFIED / `1` BUDGET_EXHAUSTED·STALLED·DENIED_LOOP / `4` PULL_REQUIRED / `2` usage |
+| `agent experiment --task parse-config --repo <path> [--inject-defect <spec>] [--mock] --out experiment.json` | The §17 failure-injection experiment (R-11): inject a known defect, run loop, record detect/diagnose/repair + iteration-to-`VERIFIED` count; emits `experiment.json` (C-07). | `0` / `1` did-not-reach-`VERIFIED` / `4` PULL_REQUIRED / `2` usage |
+| `agent inspect --in trajectory.json [--force]` | Load + render a saved `trajectory.json` offline (§17); refuse mismatched version unless `--force` (R-17/E-06). | `0` / `3` malformed artifact / `2` usage |
+
+**Usage errors** (missing flags, bad paths, unknown subcommand) exit `2` consistently (K-01). The
+`--force` flag on `inspect`/`experiment` bypasses the `*_version` mismatch gate (R-17/E-06). Global
+flags: `--verbose`/`--quiet` (log level), `--seed N` (Ollama reproducibility where supported;
+no-op on mock, recorded in the banner), `--sandbox <root>` (ephemeral sandbox root; default
+`$TMPDIR/agent-sbx/…`). The `--baseline` flag (R-18) MAY run a System-A patch-only trace alongside a
+System-B full-loop trace and diff their iteration/cost/tokens.
+
+### 5.2 GUI
+
+None by default (`MAY`). No GUI is specified at Level 1; a read-only trajectory browser MAY be added
+without running inference (I-007).
+
+---
+
+## 6. Invariants (must hold in every valid implementation)
+
+| ID | Invariant |
+| -- | --------- |
+| **I-001** | **Bounded loop / termination:** the control loop runs strictly fewer than `--max-iterations`+1 iterations; a run MUST terminate in `{VERIFIED, BUDGET_EXHAUSTED, STALLED, DENIED_LOOP, ERROR}`. No unbounded loop. |
+| **I-002** | **Byte-deterministic mock path:** on `MockPolicy` over identical inputs, `trajectory.json`/`experiment.json` are byte-identical. Iteration order is fixed; per-iteration `tokens`/`time_ms` are deterministic surrogates labeled `synthetic`; per-iteration arrays are emitted in iteration order. The Ollama path is excluded (opt-in, best-effort). |
+| **I-003** | **Sandbox isolation:** every `list_files`/`read_file`/`search`/`edit_file`/`run_shell` resolves strictly inside the sandbox root; no tool may escape (`../`, symlinks, absolute, or `$VAR`). Enforcement is in the tool layer *and* the permission layer (defense in depth). |
+| **I-004** | **Closed action/tool spaces:** `Action` is the `ToolCall | STOP | NOOP` tag-union and `TOOL_SET` is the pinned C-03 set; an unrecognizable policy output is a deterministic `ERROR` action (E-02), never a silent no-op. |
+| **I-005** | **Context is selected, not bulk:** `C_t` MUST NOT be the entire repository by default; only the task, recent feedback, and a dynamically-selected working set reach the policy. A context exceeding the token budget triggers compaction (R-10), not a pass-through. |
+| **I-006** | **Verdict-driven stop:** the *only* path to a `VERIFIED` `final_outcome` is a `VERIFIED` `Verdict` for the run's `VerifySpec`. A policy-declared `STOP` is *accepted* as `VERIFIED` only when the verifier also returned `VERIFIED`; otherwise it is a `FAILED`-with-promise and the loop continues (or hits budget). |
+| **I-007** | **Verifier as a runtime signal, not just a final gate (§13):** the verifier is invoked *after every modification*, not only at end; its captured `output` is written into the next iteration's `C_t` so subsequent actions read it. |
+| **I-008** | **Permission precedes execution:** `PermissionLayer.authorize` is called *before* any tool side-effect; a `DENY` produces no side-effect and is recorded in that iteration's `errors`/`tool_calls`. |
+| **I-009** | **Deterministic core is LLM/network-free** (R-15): `control_loop.py`, `context.py`, `tools.py`, `permissions.py`, `verifier.py`, `instrument.py`, `report.py` MUST NOT import any model/network client. Only `policy.py:OllamaPolicy` MAY. Asserted by a source/graph scan (T-02). |
+| **I-010** | **Trajectory field totality (§17):** every `trajectory.json` iteration row carries exactly the C-06 field set; no row is dropped, none omits `final_outcome`. |
+| **I-011** | **Sandbox is ephemeral + non-recursive:** edits land on the sandbox copy only; the agent's loop cannot operate on its own source tree (a recursive self-edit would deadlock the test). The bootcamp repo is never a valid `--repo`. |
+| **I-012** | **Schema gate on load** (R-17): `trajectory.json`/`experiment.json` are validated against their `"0.1"` schema on every read; a malformed artifact is a deterministic load error (E-05), not a silent partial read. |
+| **I-013** | **Failure-injection is reproducible:** the §17 experiment injects a *fixed* defect via a versioned injection spec (C-07); the mock-path repair arc is therefore byte-reproducible (I-002) and the iteration-to-`VERIFIED` count is reproducible, not "whatever the model did today." |
+
+---
+
+## 7. Constraints (precise and measurable)
+
+| ID | Constraint |
+| -- | ---------- |
+| **K-01** | All **usage errors** (missing flags, bad paths, unknown subcommand) exit `2` (universal). |
+| **K-02** | `run` exit: `0` `VERIFIED`; `1` `BUDGET_EXHAUSTED`/`STALLED`/`DENIED_LOOP`/terminal `ERROR`; `4` `PULL_REQUIRED`. `experiment` mirrors `run` plus `1` on not-reaching-`VERIFIED`. `inspect` exit `3` on malformed artifact. |
+| **K-03** | `--max-iterations` defaults to a finite `N=8`; any explicit `N` is a positive integer (0 is a usage error, E-07); the run never runs more than `N` iterations (I-001). |
+| **K-04** | **Sandbox size bound:** the sandbox copy is bounded (e.g. a user-configured file-count/byte cap) and the verifier runs in a bounded subprocess (time, output tail length) so a hung or noisy target repo cannot wedge the run. Output tails are length-capped and recorded as such. |
+| **K-05** | **Token / compaction budget:** `ContextManager` enforces a fixed token budget; when ` | C_t | > BUDGET` compaction fires (R-10) rather than overflowing; the budget and its post-compaction size are recorded in the trajectory. |
+| **K-06** | **Mock path zero-network:** the entire automated test suite runs over `MockPolicy` with no outbound sockets; a socket-opening path in the deterministic core is a source-scan failure (T-02). |
+| **K-07** | **Determinism of surrogate fields:** on `MockPolicy`, `tokens.estimated` and `time_ms` are pure functions of the iteration's content and index (a fixed formula, e.g. `len(C_t chars)+4*len(tool_calls)`), explicitly labeled `synthetic` (E-04). Wall-clock timing is NOT reported on the mock path. |
+
+---
+
+## 8. Edge cases and failure semantics
+
+| ID | Case | Semantics |
+| -- | ---- | --------- |
+| **E-01** | **Task file missing / empty** | `agent run` exits `2` (usage); no trajectory written, no sandbox allocated. |
+| **E-02** | **Policy emits an unrecognizable action** (unknown tool, malformed args) | The action is coerced to the `ERROR` tag (I-004); the iteration records it in `errors` and the loop continues to the next iteration. After `K-04` consecutive `ERROR` iterations the run terminates `ERROR` (exit `1`/`4`). |
+| **E-03** | **Verifier `ERROR`** (runner missing, import failure, non-reproducible setup) | The `Verdict.status` is `ERROR` (distinct from `FAILED`); the loop *continues* with the captured output as feedback. `N` consecutive `ERROR` iterations terminate the run `ERROR` (E-02 path). |
+| **E-04** | **Mock surrogate fields** | `tokens.mode == "synthetic"` and `time_ms` is the K-07 formula on mock; the real Ollama path reports real counters with `mode == "measured"`. Mixing is a schema violation (E-05). |
+| **E-05** | **Malformed `trajectory.json`/`experiment.json`** | `inspect`/subsequent `compare` exit `3` (malformed load) with a diagnostic naming the JSON-path, not a silent skip. Bypass with `--force` only for `inspect`/`experiment` (R-17). |
+| **E-06** | **Version mismatch on read** | `inspect --in x.json` on a `trajectory_version != "0.1"` without `--force` exits `3` naming the offending field. `--force` admits it with a banner. |
+| **E-07** | **`--max-iterations 0`** | Usage error (exit `2`); the positive-`N` constraint (K-03) MUST be checked before sandbox allocation. |
+| **E-08** | **`--repo` points at the bootcamp repo itself or the agent's own source tree** | Refused deterministically with exit `2` + a diagnostic (I-011) — a self-editing sandbox would deadlock its own test harness. |
+| **E-09** | **Policy requests a tool not in `allow_list`** | `DENY NOT_IN_ALLOWLIST`; no side-effect; recorded in that iteration's `errors`; if the policy repeats the same denied call across `K` consecutive iterations the run terminates `DENIED_LOOP` (exit `1`). |
+| **E-10** | **Sandbox root un-writable or non-existent** | Sandbox allocation fails; `agent` exits `4` with a remediation string (check `$TMPDIR`, permissions). |
+| **E-11** | **Ollama daemon unreachable on `--real`** | `DEGRADED_MOCK` with distinct banner + trajectory `availability_banner: "DEGRADED_MOCK: …"`; the run continues on `MockPolicy` and exits `0` (R-13/R-14). |
+| **E-12** | **`--real` but `qwen3.8` not pulled** | `PULL_REQUIRED` with a remediation string (e.g. `ollama pull qwen3.8`) + exit `4` (no silent degrade). |
+| **E-13** | **`--no-compact` under budget pressure** | Context overflows the token budget (`K-05`); the CLI emits an explicit "budget exceeded, compaction disabled" diagnostic and terminates `STALLED` — never silently truncates. |
+
+---
+
+## 9. Acceptance criteria, tests, and evals
+
+### 9.1 Closed-loop correctness
+
+- **T-01** Over a *good* task (an easy "add a function that parses configuration" over a trivial
+   fixture repo), the mock agent reaches `VERIFIED` in one iteration and emits a trajectory
+   (C-06) with `final_outcome == "VERIFIED"` and `iterations_used == 1`.
+- **T-02** A source/graph scan asserts the deterministic core (R-15/I-009) imports **no** model/
+   network client; `MockPolicy` has zero sockets. (Advisory: no test that opens a socket may run
+   under `pytest`.)
+- **T-03** The permission layer, under a default `PermsConfig`, allows `list_files`/`read_file`/
+   `search`/`edit_file`/`run_shell` for allowed prefixes and `DENY`s `edit_file`/`run_shell` on
+   paths outside the sandbox root (I-003) — asserted by both a unit test and by the permission
+   layer rejecting an injected `../escape` tool call.
+
+### 9.2 Failure injection (§17 / R-11)
+
+- **T-04** The §17 experiment: inject a `parse_config` defect (wrong delimiter) into a fixture repo;
+   the mock agent detects the `FAILED` verdict on iteration 1, diagnoses via read/search on iteration
+   2, repairs via `edit_file` on iteration 3, and `final_outcome == "VERIFIED"` with
+   `iterations_to_verified == 3` (a *reproducible* number, not a model-dependent one).
+- **T-05** A *deliberately-misconfigured* policy (a mock that never touches the offending file across
+   `N` iterations) terminates `BUDGET_EXHAUSTED` with `final_outcome != VERIFIED`; the agent does
+   NOT report success it did not achieve (I-006).
+
+### 9.3 Termination and instrumentation
+
+- **T-06** Over a task where the policy never achieves `VERIFIED`, a run with `--max-iterations 5`
+   stops at iteration 5 with `final_outcome == BUDGET_EXHAUSTED` and exit `1`; no row past `5` is
+   written into the trajectory (I-001).
+- **T-07** `trajectory.json` for T-04 contains exactly the C-06 §17 field set on every iteration
+   row (I-010); a schema-validator test rejects a trajectory missing any required field.
+- **T-08** `inspect --in trajectory.json` for T-04 renders a human summary offline (no sockets) and
+   exits `0`; a hand-edited (version-bumped) trajectory fails with exit `3` unless `--force` (R-17/E-06).
+
+### 9.4 Determinism and offline core
+
+- **T-09** Two `agent run` invocations over the same task/repo/perms with `--mock` produce
+   **byte-identical** `trajectory.json` (I-002); mutating the input changes the output. Tokens and
+   `time_ms` on the mock path carry `mode == "synthetic"` and are the K-07 formula.
+- **T-10** A `--repo` pointing at the bootcamp repo or the agent's own source directory is refused
+   (E-08, exit `2`).
+- **T-11** `agent experiment --mock` produces byte-identical `experiment.json` on rerun (I-013);
+   the `iterations_to_verified` field is stable across runs.
+
+### 9.5 Model-availability taxonomy
+
+- **T-12** With Ollama down on `--real`, the run degrades to `DEGRADED_MOCK`, banner is recorded in
+   the trajectory (E-11), and exit is `0`;
+   with Ollama up but `qwen3.8` absent, exit `4` + remediation string (E-12);
+   with `qwen3.8` present, real mode runs, banner `null`, no `synthetic` tokens.
+
+### 9.6 Compaction and context engineering
+
+- **T-13** A crafted run whose `C_t` exceeds `K-05`'s budget *without* `--no-compact` triggers
+   compaction and records the pre/post sizes in the trajectory; with `--no-compact` the same run
+   ends `STALLED` with the explicit diagnostic (E-13). (This test is a *behavioral* check — it
+   asserts the recorded sizes, not that the model "understands" anything.)
+
+---
+
+## 10. Dependencies and environment
+
+**Host prerequisites:** Python 3.12, `uv`, a shell (`bash`/`zsh`); a git-like layout is not
+required for the agent itself (only for the bootcamp repo that hosts the lab). Ollama (opt-in, at
+`http://localhost:11434` with `qwen3.8` pulled) for the real policy path; `DEGRADED_MOCK`
+absorbs its absence, so the offline suite never requires Ollama.
+
+**Python packages (`[project]` in `pyproject.toml`):**
+
+- Standard library: `json`, `pathlib`, `subprocess`, `shutil`, `tempfile`, `typing`, `enum`,
+   `dataclasses`, `argparse` (or `click` MAY) — enough for the control loop, the tool controller,
+   the permission layer, the sandbox, the verifier, and the trajectory serializer.
+- `jsonschema` — gate `trajectory.json`/`experiment.json` on read (R-17/I-012).
+- Test: `pytest`; `pytest-qt` **only** if the MAY-GUI is implemented (out-of-scope default).
+- **No** model/network client in the default `[project]`; the `ollama` (or any HTTP client) lives
+   in an optional extra (`[project.optional-dependencies] agents-real`) so that the default install
+   stays mock-only (K-06). This mirrors week-1's "real = optional, deterministic = default" split.
+
+**Build/deploy:** `uv venv && uv pip install -e '.[agents-real]'` for the full surface; `uv pip
+install -e .` for the offline core (default). A `Makefile`/`justfile` MAY expose `make run`,
+`make experiment`, `make test` (mock only) as convenience wrappers.
+
+---
+
+## 11. Traceability matrix (id → where realized)
+
+```
+R-01  10-step closed loop (ch15 S17, S1)    -> control_loop.py::run()      -> T-01, T-04, T-06
+R-02  harness as runtime (S2)              -> control_loop.py wiring      -> T-01, T-02
+R-03  context engineering (S3)             -> context.py                  -> T-13
+R-04  tool controller (S4/S6)              -> tools.py / C-03             -> T-03
+R-05  permission gate (S11, outside model) -> permissions.py / C-04       -> T-03, E-09
+R-06  verifier closes the loop (S7/S13)    -> verifier.py / C-05         -> T-01, T-04, T-07
+R-07  feedback as next observation (S8)    -> control_loop.py FEEDBACK    -> T-04, T-05
+R-08  stopping conditions (S8)             -> C-08, loop stop logic       -> T-06
+R-09  trajectory instrumentation (S17)     -> instrument.py / report.py   -> T-07, T-09
+R-10  compaction (state mgmt, S9)            -> context.py::compact()        -> T-13
+R-11  failure-injection experiment (S17)   -> experiment subcommand       -> T-04, T-05, T-11
+R-12  sandbox isolation (S12)              -> tools.py + permissions.py   -> T-10, I-003, I-011
+R-13  offline determinism (week-1 carried) -> MockPolicy / instrument      -> T-02, T-09, T-11
+R-14  model-availability taxonomy (carried)-> policy.py::resolve()        -> T-12 (E-11/E-12)
+R-15  policy isolation / LLM-free core     -> source-scan / I-009         -> T-02
+R-16  CLI primary surface (R-18 SHOULD)    -> cli/agent.py                -> S5.1, T-08
+R-17  schema gate on artifact load         -> schemas/*.json, report.py   -> T-07, T-08, E-05/E-06
+R-18  System-A vs System-B demo (S16)      -> --baseline flag             -> (SHOULD; not gated on a test)
+C-01  Task dataclass                      -> task.py                     -> R-01
+C-02  Policy interface                    -> policy.py                    -> R-02, R-15
+C-03  Tool schema (closed set)            -> tools.py                     -> R-04, I-003
+C-04  Permission decision                 -> permissions.py               -> R-05, E-09
+C-05  VerifySpec / Verdict                -> verifier.py                  -> R-06
+C-06  trajectory.json schema              -> schemas/trajectory.json      -> R-09, T-07, T-09
+C-07  experiment.json schema              -> schemas/experiment.json      -> R-11, T-04, T-11
+C-08  Stopping conditions closure         -> control_loop.py              -> R-08, T-06
+I-001 Bounded loop / termination          -> control_loop.py              -> T-06, K-03
+I-002 Byte-deterministic mock path        -> instrument.py + context.py   -> T-09, T-11
+I-003 Sandbox isolation                   -> tools.py + permissions.py    -> T-03, T-10, E-08
+I-004 Closed action/tool spaces           -> C-02/C-03 + coerce           -> E-02
+I-005 Context selected not bulk           -> context.py                   -> T-13
+I-006 Verdict-driven stop only            -> control_loop.py stop gate    -> R-06, T-01, T-05
+I-007 Verifier is a runtime signal        -> control_loop.py FEEDBACK     -> T-04
+I-008 Permission precedes execution       -> control_loop.py PERMIT       -> R-05, T-03
+I-009 Deterministic core LLM/network-free -> source-scan test             -> T-02, K-06
+I-010 Trajectory S17 field totality       -> instrument.py                -> T-07
+I-011 Sandbox non-recursive / no self     -> cli::validate_repo           -> E-08, T-10
+I-012 Schema gate on load                 -> report.py + jsonschema       -> T-08, E-05
+I-013 Failure-injection reproducible      -> experiment + C-07            -> T-04, T-11
+K-03  --max-iterations positive           -> cli::parse_args              -> E-07, T-06
+K-04  Sandbox/subprocess bounds           -> sandbox.py, verifier.py      -> E-02, E-03
+K-05  Context token budget                -> context.py                   -> E-13, T-13
+K-06  Mock path zero-network              -> [project] default            -> T-02
+K-07  Deterministic surrogate fields      -> instrument.py                -> E-04, T-09
+E-02  Unrecognizable action -> ERROR      -> policy.py coerce             -> T-02
+E-05  Malformed artifact load error       -> report.py load               -> T-08
+E-06  Version mismatch                    -> report.py load               -> T-08, R-17
+E-08  Self-repo / self-source refused     -> cli::validate_repo           -> T-10
+E-11  DEGRADED_MOCK on Ollama down        -> policy.py::resolve()         -> T-12
+E-12  PULL_REQUIRED on missing model      -> policy.py::resolve()         -> T-12
 ```
