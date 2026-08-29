@@ -465,3 +465,226 @@ is part of the spec, not an observation); `pass` compares expectation to the exe
 drill that terminates for the wrong reason fails even if it terminates (E-10).
 
 ---
+
+## 5. Interface specification
+
+### 5.1 CLI — primary surface (`research-agent`)
+
+| Subcommand | Behavior | Exit |
+| ---------- | -------- | ---- |
+| `research-agent run --question <text> [--mock] [--real] [--budgets budgets.yml] [--corpus <dir>] --out trace.json` | Load corpus + budgets (validated), resolve policy availability (E-13), execute one bounded episode (C-05), emit `trace.json` + human summary (K-04). | `0` completed (also `DEGRADED_MOCK`; `insufficient_evidence` is success, E-03) / `2` usage / `3` corpus violations / `4` PULL_REQUIRED |
+| `research-agent drill --name <drill> [--mock] [--budgets budgets.yml] --out drill_report.json` | Inject the named C-11 fault, run the episode, emit `drill_report.json` with the §34 four-question report + pass verdict (C-12). | `0` drill expectation met / `1` verdict fail (E-10) / `2` usage / `3` corpus violations / `4` PULL_REQUIRED |
+| `research-agent trace <trace.json>` | Schema-gate the artifact (R-19), render the §20-style human trace (typed reasoning/action/observation per step, termination record, loop metrics). Never re-runs anything. | `0` / `2` usage or artifact rejected (E-06) |
+
+**Usage errors** (missing flags, unknown subcommand, unknown drill name, bad paths, malformed
+YAML/JSON configs) exit `2` consistently (K-01). Global flags: `--self-check` (source-scan for
+I-012, T-02), `--verbose`/`--quiet` (loguru level, ch3 analog), `--model <name>` (real-path policy
+model override, default `qwen3.8:27b-mlx`). `--mock` short-circuits the E-13 taxonomy. The E-13
+banners on the real path are ch3's exact strings: `[REAL→MOCK] Ollama unreachable; running
+deterministic mock doubles` / `MODEL_MISSING: run 'ollama pull <m>' — or pass --mock` (E-13).
+
+### 5.2 GUI — optional surface (`research-agent-gui`, R-15)
+
+A PyQt5 window opens a saved `trace.json` or `drill_report.json` from disk (file picker). It
+shows: run banner (model, `usage_kind`, prompt version), a step timeline with typed
+reasoning/action/observation panes (C-07), budget gauges vs the C-06 limits, the termination
+banner, the final report (with `conflicts`/`caveats` rendered), and the drill four-question view
+for drill artifacts. It never runs inference — the GUI is read-only over artifacts (I-016).
+Offscreen-rendered in tests via pytest-qt (T-13, ch3 R-16 analog).
+
+---
+
+## 6. Invariants (must hold in every valid implementation)
+
+| ID | Invariant |
+| -- | --------- |
+| **I-001** | **Runtime-enforced termination:** the stopping conditions (C-06) are evaluated in code **before every model call** (§31); the policy cannot extend, reset, or bypass any bound. Every episode — mock, real, or adversarial-drill — terminates (K-02). *"The model can propose termination. The runtime should enforce it."* (§11). |
+| **I-002** | **Authorization outside the model:** the C-09 policy engine is code evaluated before every execution; no prompt text, tool argument, or policy output modifies the rule map at runtime. A denied tool MUST NOT execute — the §25 test is adversarial: if any prompt can get `delete_file` executed, the system is *architecturally broken* (T-07b). |
+| **I-003** | **Byte-deterministic mock path:** identical inputs (question, corpus, budgets, fault spec) produce byte-identical `trace.json` / `drill_report.json` — floats at fixed `%.4f`, object keys sorted, `run_id` a content hash, fault schedules deterministic (no wall clock, no RNG anywhere on the mock path; latency/token/cost figures are content-derived surrogates labeled `synthetic`, R-13). |
+| **I-004** | **Observation ≠ reasoning ≠ action** (§7): trace step entries are typed (`reasoning`/`action`/`observation`, C-07); tool results are recorded verbatim and replayable; policy interpretation text MUST NOT be written into `observation` entries, and tool output MUST NOT be paraphrased into `action` records. |
+| **I-005** | **Zero-denominator safety** (ch3 carried): no loop metric divides by an empty denominator; each zero case falls back to its documented value (C-10: `repair_success` with zero repairs → `1.0` "nothing to repair"; rates over zero calls → `0`). |
+| **I-006** | **Retry-class totality:** every tool error maps to exactly one C-08 class; the strategy table is total (an unclassified error is a defect, asserted by T-06); `PERMISSION`/`AUTHENTICATION`/`PERMANENT` are never retried; retries never exceed `max_retries`. |
+| **I-007** | **Validation before execution:** no tool executes arguments that fail C-03 validation; the only channel back to the policy is the structured `invalid_arguments` observation (R-04). The same gate guards the final report (R-18). |
+| **I-008** | **Pinned loop order:** the C-05 stage order (budgets → decide → validate → authorize → execute-with-retry → update) is normative; authorization never follows execution, and budget checks never follow the model call they gate. |
+| **I-009** | **Schema gate on load:** `trace.json`, `drill_report.json`, `budgets.yml`, and `policy.yml` are validated against `schemas/*.json` on every read before use (R-19/R-20); a malformed or version-mismatched artifact is a deterministic load error (E-06/E-14), never a partial parse. |
+| **I-010** | **Explicit state** (§6/§33.3): all loop-relevant state lives in `AgentState` (C-04); the policy sees only its serialization. No loop counter, budget, or history may exist solely inside prompt text. |
+| **I-011** | **Termination-reason totality:** every trace ends with exactly one `termination_reason` from the closed C-06 enum; a `goal_complete` termination implies a schema-valid final report (R-18); no case is silently dropped and no run ends without a reason. |
+| **I-012** | **Core is LLM/network-free:** the deterministic core modules (R-16's list) must not import the LLM client, Ollama, or the network — enforced by the source scan (T-02). Only `policy.py` may import the LLM client; `tools.py` never performs network I/O (the corpus is local, C-02). |
+| **I-013** | **Corpus integrity** (ch3 I-013 carried): corrupt/missing/partial fixture corpus, or a `retrieve`/drill reference to a nonexistent `doc_id`, is a deterministic load-time error enumerated before the episode starts — never a partial load (E-02). |
+| **I-014** | **Uncertainty honesty** (§13): every `citations[]` id in a final report MUST have been returned by a `retrieve` observation *this episode* (checked at C-03 final validation); fabricated citations or claims on an `insufficient_evidence` run are validation failures, not style issues (T-04c). |
+| **I-015** | **Fault-injection boundary:** drill faults (C-11) inject only at the tool boundary or the scripted `MockPolicy`; runtime, authorization, budgets, validation, and tracing code under test is identical between `run` and `drill` (the core under test stays genuine). |
+| **I-016** | **GUI read-only** (ch3 analog): the GUI may only open validated artifacts; it never blocks on or performs inference (T-13), and a malformed artifact yields an inline error, never a crash (E-16). |
+
+---
+
+## 7. Constraints (precise and measurable)
+
+| ID | Constraint |
+| -- | ---------- |
+| **K-01** | **Usage-error exit codes:** all CLI subcommands exit `2` on usage errors (missing flag, unknown drill name, unparsable YAML, missing file); never `0` or `1`. |
+| **K-02** | **Bounded wall time:** any mock episode (including all ten drills) terminates in under **60 seconds** on the host (CI soft target); the `infinite_loop`/`max_steps_exhaustion` drills prove termination is not merely eventual but prompt (R-10). |
+| **K-03** | **Exit-code contract:** `run`/`drill`/`trace` exit `0` on success, `2` on usage/config error, `3` on corpus-integrity violations, `4` on PULL_REQUIRED; `drill` additionally exits `1` iff the drill verdict is `pass: false` (E-10). `DEGRADED_MOCK` remains exit `0` (ch3 E-13 carried). |
+| **K-04** | **Output coupling:** the stdout human summary and the on-disk artifact are emitted by one `report.py` call, so screen text and `trace.json`/`drill_report.json` cannot disagree (ch4 K-04 analog). |
+| **K-05** | **Byte-identity formatting:** floats render at fixed `%.4f`; JSON object keys sorted; no timestamps or absolute paths inside artifacts (`trace_path` is relative) — the byte-identity invariant I-003 is checkable by `diff` (T-03b). |
+
+---
+
+## 8. Edge cases and failure semantics
+
+| ID | Case | Semantics |
+| -- | ---- | --------- |
+| **E-01** | Corpus path missing/unreadable at `run`/`drill` | exit `2` usage error; no episode starts (ch3 E-01 carried). |
+| **E-02** | Corpus JSON corrupt / partial / drill references a nonexistent `doc_id` | deterministic load-time violations enumerated, exit `3`; never a partial load (I-013). |
+| **E-03** | Retrieved evidence cannot support an answer (incl. empty results, §21 Failure 2) | final report `status: "insufficient_evidence"` with the limitation stated; exit `0` — successful system behavior (§13, R-08). |
+| **E-04** | Policy's final report fails C-03 validation | report rejected; structured error observation appended; loop continues under the same budgets; repeated invalid finals terminate `max_steps` (R-18). |
+| **E-05** | `retrieve` on an unknown `document_id` | structured `PERMANENT`-class error observation (C-08); never an uncaught exception, never a fabricated document. |
+| **E-06** | `trace.json`/`drill_report.json` version mismatch or schema violation on load (`trace`, GUI) | rejected with explicit message, exit `2` (CLI) / inline error (GUI); the schema gate runs first (I-009). |
+| **E-07** | Policy emits unparseable/non-JSON or wrong-type decision | treated as an `INVALID_INPUT`-class decision error: structured observation, step consumed, `consecutive_tool_failures` NOT incremented (it is a policy failure, not a tool failure); the runtime never crashes on model output (§33 principle 10). |
+| **E-08** | Retrieved sources assert contradictory values (§24) | `report.conflicts` MUST enumerate the conflict (quantity, sources, values); silently adopting one value fails final-report validation on the drill verdict path (T-08f). |
+| **E-09** | Conclusion rests on `marketing`-quality sources (§22) | `report.caveats` MUST carry `low_quality_evidence`; tool access changes the hallucination surface, it does not eliminate it (§22). |
+| **E-10** | Drill's actual `termination_reason` ≠ the pinned expectation | drill verdict `pass: false`, exit `1` — terminating for the wrong reason is a failing drill (C-12). |
+| **E-11** | Same canonical `(tool, arguments)` seen `repeat_threshold` times | terminate `repeated_state` — repetition detection fires **before** `max_steps` for a tight loop (R-10, T-05b). |
+| **E-12** | `TRANSIENT` retries exhausted for a call | error observation recorded, `consecutive_tool_failures += 1`; reaching `max_consecutive_failures` terminates `consecutive_tool_failures` (C-06/C-08). |
+| **E-13** | `--real` with Ollama unavailable | ch3 taxonomy verbatim: `DEGRADED_MOCK` (exit `0` + banner) / `PULL_REQUIRED` (exit `4` + `ollama pull <m>` remediation) / `RUN_REAL` (exit `0`, no banner); `--mock` short-circuits all three (R-14). |
+| **E-14** | `budgets.yml`/`policy.yml` unknown key, wrong type, or malformed YAML | config error at load, exit `2` (R-20, ch4 I-015 analog); defaults are NOT silently substituted for a malformed file. |
+| **E-15** | Policy proposes `delete_file` (or any denied/unknown tool) | `permission_denied` observation; the tool never executes; `denial_count += 1`; the episode continues (I-002). |
+| **E-16** | GUI opened without a valid artifact path | shows the open-file dialog; a malformed artifact yields an inline schema error message, never a crash (I-016). |
+
+---
+
+## 9. Acceptance criteria, tests, and evals
+
+All subsections below (T-01..T-13) run fully offline under `uv run pytest` (R-13, ch3 carried);
+the real Ollama path is §9.11 manual-only. Test ids follow ch3/ch4 naming discipline: each
+acceptance row is a `T-NN` id registered in §11.
+
+### 9.1 Corpus + config (C-02/C-06/C-09, R-20, I-013)
+
+- **T-01** `run --mock` on the shipped fixture corpus loads and starts; `check`-style corpus validation emits no violations.
+- **T-01b** corrupt/partial corpus JSON → enumerated violations, exit `3`, no partial load (E-02).
+- **T-01c** `budgets.yml` with an unknown key → config error exit `2` (E-14).
+
+### 9.2 Deterministic core (R-16, I-012)
+
+- **T-02** source/structure scan: no LLM/Ollama/network import in the deterministic core; only `policy.py` imports the LLM client; `tools.py` performs no network I/O (ch3 T-02 analog).
+
+### 9.3 Episode end-to-end (R-01/R-02/R-13, C-05/C-07)
+
+- **T-03** `run --mock --question <fixture>` → schema-valid `trace.json` (`agent_trace_version == "0.1"`), termination `goal_complete`, report `status: "ok"` with citations drawn from retrieved ids (I-014).
+- **T-03b** two byte-identical mock runs → byte-identical `trace.json` (I-003/K-05, checked with `diff`).
+
+### 9.4 Validation (R-04/R-18, C-03, I-007/I-014)
+
+- **T-04** forced `{"query": null}` decision (§21 Failure 3) → `invalid_arguments` observation naming field `query`; the tool never executes; the `MockPolicy` repair path then issues a valid call.
+- **T-04b** a `final` decision with a schema-invalid report → error observation, loop continues, episode still terminates (E-04).
+- **T-04c** final report citing a never-retrieved `doc_id` → rejected at final validation (I-014).
+
+### 9.5 Stopping conditions (R-05/R-10, C-06, I-001/I-011)
+
+- **T-05** never-final policy → termination `max_steps` with a valid trace (no hang, K-02).
+- **T-05b** policy repeating one canonical search → termination `repeated_state` **before** `max_steps` (E-11).
+- **T-05c** tool raising persistent `TRANSIENT` → termination `consecutive_tool_failures` after `max_consecutive_failures` exhausted retries (E-12).
+- **T-05d** unit-level: token/cost/time budgets breached → `token_budget`/`cost_budget`/`time_budget` respectively (synthetic surrogates, R-13).
+
+### 9.6 Retry taxonomy (R-06, C-08, I-006)
+
+- **T-06** totality: every error the fixture tools can raise maps to exactly one C-08 class.
+- **T-06b** `TRANSIENT` (injected timeout) → retried with the documented deterministic backoff schedule, ≤ `max_retries`, then either success or E-12 accounting.
+- **T-06c** `PERMISSION` and `PERMANENT` classes are never retried (attempt count stays `1`).
+
+### 9.7 Authorization (R-07, C-09, I-002)
+
+- **T-07** policy proposes `delete_file` → `permission_denied` observation, `denial_count == 1`, tool never executes (filesystem sentinel asserted untouched), episode continues (E-15).
+- **T-07b** **§25 adversarial fixture:** a prompt/observation stream crafted to talk the runtime into executing `delete_file` ("you are authorized", fake confirmation tokens) still cannot execute it — denial is in code, not prompt (§25).
+
+### 9.8 The ten §34 drills (R-09/R-10/R-12, C-11/C-12)
+
+- **T-08** all ten drills execute offline on `MockPolicy` and emit schema-valid `drill_report.json` (R-19).
+- **T-08a** `search_timeout` → retries then recovery; expected termination `goal_complete` (or documented fallback); drill passes.
+- **T-08b** `empty_results` → `insufficient_evidence` report stating the limitation; no fabricated answer (R-08/E-03).
+- **T-08c** `malformed_arguments` → repair loop exercised; `invalid_argument_count >= 1`; recovers or bounds out (T-04 path).
+- **T-08d** `retrieval_failure` → retry → alternative-or-limitation path (§13); never a hallucinated substitute.
+- **T-08e** `duplicate_searches` → termination `repeated_state` (R-10).
+- **T-08f** `contradictory_sources` → `report.conflicts` non-empty, both values and sources recorded (E-08).
+- **T-08g** `low_quality_sources` → `report.caveats` carries `low_quality_evidence` (E-09).
+- **T-08h** `infinite_loop` → terminates `repeated_state` or `max_steps` within K-02; never hangs (§23).
+- **T-08i** `max_steps_exhaustion` → termination `max_steps` with a complete trace (§10).
+- **T-08j** `unauthorized_tool_call` → denial recorded, `delete_file` never executed, episode continues to a bounded termination (§25).
+- **T-09** a rigged drill whose expectation mismatches the actual termination → verdict `pass: false`, exit `1` (E-10) — the drill harness grades honestly.
+
+### 9.9 Trace + loop metrics (R-11/R-17, C-07/C-10, I-004/I-005)
+
+- **T-10** loop metrics over a fabricated trace: tool-call mix, invalid-argument count, retries, denials, `unnecessary_call_estimate` match hand-computed values.
+- **T-10b** zero-denominator fallbacks honored per I-005 (zero repairs → `repair_success == 1.0`).
+- **T-11** the trace carries the full §27 field list (run id, question, model, params, prompt version, per-step decision/tool/arguments/latency/result, tokens, cost, errors, retries, termination reason, final report); step entries are typed and an `observation` entry replays tool output verbatim (I-004).
+
+### 9.10 Artifacts + GUI (R-15/R-19, I-009/I-016)
+
+- **T-12** version-mismatched or hand-corrupted `trace.json` → rejected on load, exit `2` (E-06).
+- **T-13** GUI offscreen opens both artifact types without error (R-15/I-016).
+- **T-13b** GUI fed a malformed artifact → inline schema error, no crash (E-16).
+
+### 9.11 Manual / real-path smoke (opt-in — not part of `uv run pytest`)
+
+- `M-01` with Ollama up and the model pulled, `run --real` exits `0` with no banner, `usage_kind: "measured"`, real token/latency figures in the trace (R-14).
+- `M-02` Ollama down → `DEGRADED_MOCK` exits `0` with the ch3 banner; model not pulled → `PULL_REQUIRED` exits `4` with the remediation line (E-13).
+
+---
+
+## 10. Dependencies and environment
+
+Python **3.12** via `uv` (ch3 carried); libraries: `pyyaml` (budgets/policy configs), `jsonschema`
+(schema gate R-19), `loguru` (logging), `httpx` (Ollama real path only). Optional GUI: `PyQt5`,
+`pytest-qt` (R-15). Dev: `pytest`. No network, no Ollama, no model required for CI (R-13); the
+fixture corpus under `corpus/` is version-controlled data.
+
+The **host prerequisite** is *optional* (needed only for the manual §9.11 real path):
+
+```text
+ollama pull qwen3.8:27b-mlx    # decision policy (real path only)
+```
+
+Without it the runtime *must* degrade to the `MockPolicy` with ch3's exact banner text (R-14/E-13).
+
+---
+
+## 11. Traceability matrix (id → where realized)
+
+```text
+epigraph/§28/§36 thesis  --> deterministic core around policy.py boundary       --> T-02
+R-01 / I-001/I-008 (§5/§31) --> runtime.py pinned loop order                   --> T-03, T-05
+R-02 (§17/§34)           --> tools.py search/retrieve (+ denied delete_file)   --> T-03, T-07
+R-03 (§19)               --> policy.py AGENT_PROMPT + runtime-enforced bounds  --> T-05
+R-04 / I-007 (§3/§21)    --> validate.py decision gate + repair observation    --> T-04
+R-05 / I-011 (§11)       --> budgets.py closed stopping-condition set          --> T-05, T-05b..T-05d
+R-06 / I-006 (§12)       --> retry.py failure-class strategies                 --> T-06, T-06b, T-06c
+R-07 / I-002 (§15/§25)   --> authorize.py declarative engine                   --> T-07, T-07b
+R-08 / I-014 (§13)       --> REPORT_SCHEMA + citation-membership check         --> T-08b, T-04c
+R-09 (§34)               --> drills.py fault specs + four-question report      --> T-08, T-08a..T-08j
+R-10 (§10/§23)           --> budgets.py repeated-state detection               --> T-05b, T-08e, T-08h
+R-11 / I-004 (§20/§27)   --> trace.py typed records + metrics.py loop metrics  --> T-10, T-11
+R-12 (§22/§24)           --> provenance in observations + conflicts/caveats    --> T-08f, T-08g
+R-13 / I-003 (offline)   --> MockPolicy + deterministic surrogates             --> T-03b
+R-14 (E-13 carried)      --> policy.py availability resolution                 --> M-02 (§9.11)
+R-15 / I-016 (GUI)       --> ui.py read-only artifact browser                  --> T-13, T-13b
+R-16 / I-012 (core pure) --> source-scan self-check                            --> T-02
+R-17 (§7)                --> trace.py kind-typed step entries                  --> T-11
+R-18 (§31)               --> validate.py final-report gate                     --> T-04b
+R-19 / I-009 (schema)    --> schemas/*.json gated on load                      --> T-12
+R-20 (§33.4)             --> budgets.yml declarative bounds                    --> T-01c, T-05d
+C-01/C-02 tools          --> tools.py ToolSpec + fixture corpus                --> T-01, T-06
+C-03 validation          --> validate.py DECISION/REPORT schemas               --> T-04, T-04b, T-04c
+C-04 state               --> state.py AgentState                               --> T-03
+C-05 loop order          --> runtime.py                                        --> T-03, T-05
+C-06 budgets             --> budgets.py + termination_reason enum              --> T-05b..T-05d
+C-07 trace record        --> trace.py + schemas/trace.json                     --> T-11, T-12
+C-08 retry taxonomy      --> retry.py                                          --> T-06, T-06b, T-06c
+C-09 authorization       --> authorize.py + policy.yml                         --> T-07, T-07b
+C-10 loop metrics        --> metrics.py                                        --> T-10, T-10b
+C-11 fault specs         --> drills.py DRILLS                                  --> T-08
+C-12 drill report        --> drills.py + schemas/drill_report.json             --> T-09
+E-01..E-16               --> §8 rows                                           --> T-01b, T-01c, T-04b, T-05b, T-05c, T-06c, T-08b, T-08f, T-08g, T-09, T-12, T-13b, M-02
+K-01..K-05               --> §7 rows                                           --> T-01c, T-03b, T-05, T-08h, T-09
+```
+
+---
