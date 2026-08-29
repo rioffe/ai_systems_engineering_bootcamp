@@ -4,9 +4,11 @@ from rag.model import LLMReranker, MockLLMReranker, OllamaLLMReranker
 
 
 def _cands():
-    return [("a", "the cat sat on the mat"),
-            ("b", "deep learning models and training"),
-            ("c", "a mat for the cat")]
+    return [
+        ("a", "the cat sat on the mat"),
+        ("b", "deep learning models and training"),
+        ("c", "a mat for the cat"),
+    ]
 
 
 def test_llmreranker_is_abstract():
@@ -15,9 +17,9 @@ def test_llmreranker_is_abstract():
     cands = _cands()
     r = MockLLMReranker().rerank("cat on the mat", cands, top_k=3)
     assert isinstance(r, list)
-      # the most relevant candidate (two query words) ranks first
+    # the most relevant candidate (two query words) ranks first
     assert r[0][0] == "a"
-      # top_k is honoured
+    # top_k is honoured
     assert len(r) <= 3
 
 

@@ -8,13 +8,39 @@ from rag.app import main
 
 
 def _gen(tmp):
-    main(["gen-corpus", "--dir", tmp, "--n-docs", "8", "--n-questions", "5", "--seed", "7", "--quiet"])
+    main(
+        [
+            "gen-corpus",
+            "--dir",
+            tmp,
+            "--n-docs",
+            "8",
+            "--n-questions",
+            "5",
+            "--seed",
+            "7",
+            "--quiet",
+        ]
+    )
 
 
 def test_eval_emits_report(tmp_path):
     _gen(str(tmp_path))
     out = str(tmp_path / "out.json")
-    rc = main(["eval", "--corpus", str(tmp_path / "documents"), "--dataset", str(tmp_path / "questions.json"), "--out", out, "--mock", "on", "--quiet"])
+    rc = main(
+        [
+            "eval",
+            "--corpus",
+            str(tmp_path / "documents"),
+            "--dataset",
+            str(tmp_path / "questions.json"),
+            "--out",
+            out,
+            "--mock",
+            "on",
+            "--quiet",
+        ]
+    )
     assert rc == 0
     report = json.loads((tmp_path / "out.json").read_text())
     assert report["n_cases"] >= 1
@@ -24,7 +50,20 @@ def test_eval_emits_report(tmp_path):
 
 def test_happy_path_exit_zero(tmp_path):
     _gen(str(tmp_path))
-    rc = main(["eval", "--corpus", str(tmp_path / "documents"), "--dataset", str(tmp_path / "questions.json"), "--out", str(tmp_path / "out.json"), "--mock", "on", "--quiet"])
+    rc = main(
+        [
+            "eval",
+            "--corpus",
+            str(tmp_path / "documents"),
+            "--dataset",
+            str(tmp_path / "questions.json"),
+            "--out",
+            str(tmp_path / "out.json"),
+            "--mock",
+            "on",
+            "--quiet",
+        ]
+    )
     assert rc == 0
 
 
@@ -34,7 +73,18 @@ def test_e15_topn_lt_k_exit_two():
 
 
 def test_load_failure_exit_three():
-    rc = main(["eval", "--corpus", "/nonexistent-corporus-xyz", "--mock", "on", "--quiet", "--out", "/dev/null"])
+    rc = main(
+        [
+            "eval",
+            "--corpus",
+            "/nonexistent-corporus-xyz",
+            "--mock",
+            "on",
+            "--quiet",
+            "--out",
+            "/dev/null",
+        ]
+    )
     assert rc == 3
 
 

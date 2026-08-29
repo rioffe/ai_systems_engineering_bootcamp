@@ -19,7 +19,7 @@ def test_unreachable_degrades_to_mock():
 
 
 def test_pull_required(monkeypatch):
-      # the stand-in accepts any args/kwargs -- resolve calls _probe(url, timeout=..)
+    # the stand-in accepts any args/kwargs -- resolve calls _probe(url, timeout=..)
     monkeypatch.setattr("rag.availability._probe", lambda *a, **k: (True, {"the-model"}))
     o = resolve_availability(["not-pulled", "the-model"], mock=False)
     assert o.kind == Availability.PULL_REQUIRED and o.exit_code == 4
@@ -36,6 +36,6 @@ def test_run_real(monkeypatch):
 
 def test_outcome_is_a_dataclass_with_three_outcomes():
     assert dataclasses.is_dataclass(Outcome)
-      # the three E-13 outcomes are mutually exclusive: exactly three enum members
+    # the three E-13 outcomes are mutually exclusive: exactly three enum members
     assert len(list(Availability)) == 3
     assert getattr(Outcome, "__dataclass_params__", None) is not None

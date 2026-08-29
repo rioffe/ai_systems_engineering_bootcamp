@@ -287,10 +287,11 @@ class OllamaLLM(LLM):
 
 
 class LLMReranker:
-# Base default: a deterministic lexical-overlap re-score. Subclasses may
-# override with a real LLM re-scoring pass (I-015). Returns (doc_id, score).
+    # Base default: a deterministic lexical-overlap re-score. Subclasses may
+    # override with a real LLM re-scoring pass (I-015). Returns (doc_id, score).
     def rerank(self, query, candidates, *, top_k=50, system=None) -> list:
         import re
+
         qwords = [w for w in re.split(r"\W+", query.lower()) if len(w) > 2]
         scored = []
         for cid, text in candidates:
@@ -300,7 +301,7 @@ class LLMReranker:
             except (TypeError, ValueError):
                 continue
         scored.sort(key=lambda x: x[1], reverse=True)
-        return scored[:max(0, top_k)]
+        return scored[: max(0, top_k)]
 
 
 class MockLLMReranker(LLMReranker):
@@ -310,7 +311,7 @@ class MockLLMReranker(LLMReranker):
 
     def model_id(self) -> str:
         return self._model
-    
+
 
 class OllamaLLMReranker(LLMReranker):
     def __init__(self, llm=None, model="qwen3.8:27b-mlx", fallback=None):

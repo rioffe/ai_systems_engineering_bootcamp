@@ -37,22 +37,20 @@ from rag.pipeline import build_index, run_case, run_dataset
 from rag.schemas import using_jsonschema
 
 DEGRADED_MOCK = (
-        "DEGRADED_MOCK: no live Ollama backend; "
-        "running on deterministic doubles (offline-safe)."
+    "DEGRADED_MOCK: no live Ollama backend; running on deterministic doubles (offline-safe)."
 )
 PULL_REQUIRED = (
-        "PULL_REQUIRED: cannot use the Ollama backend for {model!r}; "
-        "run `ollama pull {model!r}` or pass --mock."
+    "PULL_REQUIRED: cannot use the Ollama backend for {model!r}; "
+    "run `ollama pull {model!r}` or pass --mock."
 )
 INJECTION_BANNER = (
-        "INJECTION! {n} chunk(s) flagged {ids} -- "
-        "payload treated as data, not instructions"
+    "INJECTION! {n} chunk(s) flagged {ids} -- payload treated as data, not instructions"
 )
 
 
 def _availability_banner(ns):
-# E-13 / R-19 / F-013: resolve the canonical outcome before any work, print its
-# distinct banner, record use_mock, return its exit code. --mock forces DEGRADED_MOCK.
+    # E-13 / R-19 / F-013: resolve the canonical outcome before any work, print its
+    # distinct banner, record use_mock, return its exit code. --mock forces DEGRADED_MOCK.
     outcome = resolve_availability([ns.model, ns.embed_model], mock=ns.mock)
     if outcome.banner and not ns.quiet:
         sys.stderr.write(outcome.banner + "\n")
@@ -97,11 +95,23 @@ def _summary_lines(agg, k):
     """Human-readable per-metric means + breakdowns (R-14.1)."""
     means = agg.means()
     out = ["RAG eval report -- per-metric means over non-None rows"]
-    names = ("precision", "recall", "mrr", "ap", "ndcg", "faithfulness",
-            "completeness", "citation_quality")
+    names = (
+        "precision",
+        "recall",
+        "mrr",
+        "ap",
+        "ndcg",
+        "faithfulness",
+        "completeness",
+        "citation_quality",
+    )
     for name in names:
         val = means.get(name)
-        label = name if name in ("mrr", "faithfulness", "completeness", "citation_quality") else f"{name}@{k}"
+        label = (
+            name
+            if name in ("mrr", "faithfulness", "completeness", "citation_quality")
+            else f"{name}@{k}"
+        )
         rendered = "n/a" if val is None else f"{val:.4f}"
         out.append("    " + label + ": " + rendered)
     if agg.failure_breakdown:
@@ -112,8 +122,14 @@ def _summary_lines(agg, k):
         out.append("  by_tier:")
         for tier, tm in sorted(agg.by_tier.items()):
             tmean = tm.means()
-            out.append("    " + tier + " (n=" + str(tm.n) + "): " + str(
-                {"precision": tmean.get("precision"), "ndcg": tmean.get("ndcg")}))
+            out.append(
+                "    "
+                + tier
+                + " (n="
+                + str(tm.n)
+                + "): "
+                + str({"precision": tmean.get("precision"), "ndcg": tmean.get("ndcg")})
+            )
     out.append("  schema_validation: " + ("jsonschema" if using_jsonschema() else "structural"))
     return out
 
@@ -135,7 +151,7 @@ def _emit_report(out_path, rows, agg, k, extra):
         except OSError as exc:
             sys.stderr.write(
                 "WARN: could not write report " + repr(out_path) + ": " + str(exc) + "\n"
-                )
+            )
     return report
 
 
@@ -149,7 +165,9 @@ def cmd_gen_corpus(ns):
         failure_mode_docs=ns.failure_mode_docs.split(",") if ns.failure_mode_docs else None,
     )
     if not ns.quiet:
-        sys.stdout.write("generated corpus + questions into " + out_dir + " (seed=" + str(ns.seed) + ")\n")
+        sys.stdout.write(
+            "generated corpus + questions into " + out_dir + " (seed=" + str(ns.seed) + ")\n"
+        )
     return 0
 
 
@@ -172,9 +190,18 @@ def _build_for(ns):
 def cmd_build_index(ns):
     _, index = _build_for(ns)
     n = len(index[0]._data)
-    line = ("built index: " + str(n) + " chunks strategy=" + ns.strategy
-            + " contextual=" + str(ns.contextual) + " overlap=" + str(ns.overlap)
-            + " mock=" + str(ns.mock))
+    line = (
+        "built index: "
+        + str(n)
+        + " chunks strategy="
+        + ns.strategy
+        + " contextual="
+        + str(ns.contextual)
+        + " overlap="
+        + str(ns.overlap)
+        + " mock="
+        + str(ns.mock)
+    )
     if not ns.quiet:
         sys.stdout.write(line + "\n")
     return 0
@@ -211,7 +238,9 @@ def cmd_eval(ns):
         sys.stdout.write("\n".join(_summary_lines(agg, ns.k)) + "\n")
     if banner and ns.show_banners:
         sys.stderr.write(banner + "\n")
-    _emit_report(ns.out, rows, agg, ns.k, {"injection_banner": banner, "tiers": list(ns.tiers or [])})
+    _emit_report(
+        ns.out, rows, agg, ns.k, {"injection_banner": banner, "tiers": list(ns.tiers or [])}
+    )
     return 0
 
 
@@ -243,7 +272,9 @@ def cmd_show(ns):
         llm=_select_llm(ns.model, ns.use_mock),
     )
     m = rows
-    sys.stdout.write("[" + m.q_id + "] status=" + str(m.status) + " failure_stage=" + str(m.failure_stage) + "\n")
+    sys.stdout.write(
+        "[" + m.q_id + "] status=" + str(m.status) + " failure_stage=" + str(m.failure_stage) + "\n"
+    )
     sys.stdout.write("  retrieved: " + str(m.retrieved) + "\n")
     if m.injection_warning:
         sys.stdout.write(INJECTION_BANNER.format(n=1, ids=[m.q_id]) + "\n")
@@ -281,8 +312,11 @@ def _add_common(p):
     p.add_argument("--judge", type=_parse_onoff, default=True, help="run LLM-as-judge")
     p.add_argument("--mock", type=_parse_onoff, default=True, help="force deterministic doubles")
     p.add_argument("--seed", type=int, default=42, help="gen-corpus seed (ignored on --mock)")
-    p.add_argument("--tiers", nargs="+", choices=[
-        "easy", "multi", "chunking", "distractor", "conflict", "recency", "injection"])
+    p.add_argument(
+        "--tiers",
+        nargs="+",
+        choices=["easy", "multi", "chunking", "distractor", "conflict", "recency", "injection"],
+    )
     p.add_argument("--stop-on-error", action="store_true")
     p.add_argument("--quiet", action="store_true", help="suppress per-case / summary output")
     p.add_argument("--verbose", action="store_true", help="loguru per-stage trace")
@@ -311,9 +345,11 @@ def main(argv=None):
     parser = _build_parser()
     ns = parser.parse_args(argv)
     ns.use_mock = ns.mock
-        # E-15: --top-n < --k is bad CLI usage -> exit 2, checked before any work.
+    # E-15: --top-n < --k is bad CLI usage -> exit 2, checked before any work.
     if ns.top_n < ns.k:
-        sys.stderr.write("ERROR: --top-n (" + str(ns.top_n) + ") < --k (" + str(ns.k) + "); E-15.\n")
+        sys.stderr.write(
+            "ERROR: --top-n (" + str(ns.top_n) + ") < --k (" + str(ns.k) + "); E-15.\n"
+        )
         return 2
     try:
         if ns.command == "gen-corpus":
@@ -329,7 +365,7 @@ def main(argv=None):
     except (ValueError, OSError) as exc:
         sys.stderr.write("LOAD_FAILURE: " + str(exc) + "\n")
         return 3
-    except Exception as exc:     # noqa: BLE001 -- a live-backend fault is
+    except Exception as exc:  # noqa: BLE001 -- a live-backend fault is
         # PULL_REQUIRED (E-13 / R-19): fatal exit 4 on the real path. The
         # --mock path degrades to DEGRADED_MOCK (exit 0) so its run still
         # completes even when a backend call would 404.

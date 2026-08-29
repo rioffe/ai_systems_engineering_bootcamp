@@ -15,25 +15,51 @@ MANDATED = {
     "chunking.py": {"Chunker", "FixedChunker", "HeadingChunker", "ContextualChunker"},
     "embedding.py": {"Embedder", "MockEmbedder", "OllamaEmbedder"},
     "retrieval.py": {
-        "DenseChannel", "LexicalChannel", "VectorStore", "BM25Index",
-        "HybridRetriever", "Reranker", "MockReranker", "cosine",
+        "DenseChannel",
+        "LexicalChannel",
+        "VectorStore",
+        "BM25Index",
+        "HybridRetriever",
+        "Reranker",
+        "MockReranker",
+        "cosine",
     },
     "judgment.py": {"Judge", "MockJudge", "OllamaJudge"},
     "model.py": {
-        "LLM", "MockLLM", "OllamaLLM", "OllamaClient",
-        "LLMReranker", "MockLLMReranker", "OllamaLLMReranker",
+        "LLM",
+        "MockLLM",
+        "OllamaLLM",
+        "OllamaClient",
+        "LLMReranker",
+        "MockLLMReranker",
+        "OllamaLLMReranker",
     },
     "expand.py": {"QueryExpander", "MockQueryExpander", "LLMQueryExpander"},
     "corpus.py": {"load_corpus", "load_questions", "generate_corpus_and_questions"},
     "pipeline.py": {"build_index", "run_case", "run_dataset"},
     "metrics.py": {
-        "precision", "recall", "mrr", "ndcg", "completeness", "faithfulness", "citation_quality",
+        "precision",
+        "recall",
+        "mrr",
+        "ndcg",
+        "completeness",
+        "faithfulness",
+        "citation_quality",
         "aggregate",
     },
     "types.py": {
-        "CaseState", "ChunkMetadata", "Document", "Chunk", "ScoredChunk",
-        "Citation", "Question", "Usage", "Answer", "Verdict",
-        "RunMetrics", "AggregateMetrics",
+        "CaseState",
+        "ChunkMetadata",
+        "Document",
+        "Chunk",
+        "ScoredChunk",
+        "Citation",
+        "Question",
+        "Usage",
+        "Answer",
+        "Verdict",
+        "RunMetrics",
+        "AggregateMetrics",
     },
     "availability.py": {"Availability", "Outcome", "resolve_availability"},
     "schemas.py": {"validate_answer", "validate_verdict"},
@@ -85,7 +111,7 @@ def test_cli_subcommands_present():
 
 
 def test_semanticchunker_is_intentionally_optional():
-      # spec §4 marks SemanticChunker OPTIONAL (Q-04); its ABSENCE is allowed.
+    # spec §4 marks SemanticChunker OPTIONAL (Q-04); its ABSENCE is allowed.
     present = _top_level_names(_SRC / "chunking.py")
     src = (_SRC / "chunking.py").read_text()
     assert "SemanticChunker" not in present or "SemanticChunker" in src

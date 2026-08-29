@@ -39,9 +39,9 @@ def transform(src: str) -> str:
         is_closing = in_triple and (count % 2 == 1)
         is_interior = in_triple and (not is_closing)
         if is_interior:
-            out.append(raw)      # interior string content: cosmetic
+            out.append(raw)  # interior string content: cosmetic
         elif raw.lstrip(" ") == "":
-            out.append(raw)      # blank line: byte-identical
+            out.append(raw)  # blank line: byte-identical
         else:
             out.append(snap(raw))
         if is_opening:

@@ -23,9 +23,10 @@ _SCHEMA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "schemas")
 
 try:
     from jsonschema import Draft202012Validator
+
     HAVE_JSONSCHEMA: bool = True
 except ImportError:
-    Draft202012Validator = None    # type: ignore[assignment]
+    Draft202012Validator = None  # type: ignore[assignment]
     HAVE_JSONSCHEMA: bool = False
 
 
@@ -36,7 +37,7 @@ class SchemaError(ValueError):
 def _load(name: str) -> dict:
     path = os.path.join(_SCHEMA_DIR, name)
     try:
-         with open(path, encoding="utf-8") as fh:
+        with open(path, encoding="utf-8") as fh:
             return json.load(fh)
     except (OSError, json.JSONDecodeError) as exc:
         raise SchemaError(f"cannot load schema {name!r} from {path!r}: {exc}") from exc
@@ -128,7 +129,7 @@ def _validate_against(obj: Any, schema: dict, source: str) -> None:
 
 
 def _jsonable(obj: Any) -> Any:
-    result = asdict(obj) if is_dataclass(obj) else obj   # type: ignore[call-overload]
+    result = asdict(obj) if is_dataclass(obj) else obj  # type: ignore[call-overload]
     return result
 
 
@@ -149,7 +150,7 @@ def emit(out_dir: str, kind: str, obj: Any) -> str:
         raise SchemaError(f"unknown artifact kind {kind!r} (expected answer|verdict)")
     dst = os.path.join(out_dir, f"{kind}.json")
     try:
-         with open(dst, "w", encoding="utf-8") as fh:
+        with open(dst, "w", encoding="utf-8") as fh:
             fh.write(json.dumps(_jsonable(obj), indent=2))
     except OSError as exc:
         raise SchemaError(f"cannot write {dst!r}: {exc}") from exc

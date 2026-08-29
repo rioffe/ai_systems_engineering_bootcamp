@@ -256,7 +256,7 @@ def run_case(
     # I-010: gate the emitted answer -- only a schema-valid object scores.
     try:
         validate_answer(answer)
-    except Exception as exc:   # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
         return _fail_case(m, "generation", exc, t0)
 
     citation_result: CitationResult = citer.grounding_gate(answer, provenance)
@@ -280,7 +280,7 @@ def run_case(
         # I-010: gate the verdict -- only a schema-valid object scores.
         try:
             validate_verdict(verdict)
-        except Exception as exc:   # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
             return _partial_case(m, exc, t0)
         if verdict.status == "ERROR":  # E-11: judge exhausted its retries
             return _partial_case(m, verdict.rationale or "judge failed", t0)
