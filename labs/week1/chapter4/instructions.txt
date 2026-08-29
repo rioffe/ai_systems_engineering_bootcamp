@@ -1,0 +1,5 @@
+create /Users/rioffe/projects/ai_systems_engineering_bootcamp/labs/week1/chapter4/SPEC.md file for this assignment following the example of the spec in
+/Users/rioffe/projects/ai_systems_engineering_bootcamp/labs/week1/chapter3 (and chapter1/chapter2);
+create the chapter4 lab space (labs/week1/chapter4/) and author the SPEC.md section by section
+with progressive git commits (use todo); the SPEC defines the eval harness that wraps the
+chapter3 RAG pipeline per curriculum/week1/chapter4.md §32 (The Chapter 4 Exercise). COMMIT INTERMEDIATE WORK.
