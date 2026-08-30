@@ -275,6 +275,16 @@ the loan cannot be fully amortized with the specified payment.
 
 The calculator must detect this condition rather than returning a meaningless result.
 
+At zero interest, the positive-rate formulas are not used. The calculator MUST use:
+
+```text
+M = P / n
+P = M * n
+n = P / M, only when the quotient is within integer tolerance
+```
+
+A non-integral inverse payment count MUST be rejected rather than silently rounded.
+
 ---
 
 ## A.4.4 Calculate Interest Rate
@@ -344,16 +354,17 @@ For example:
 
 The application determines which field is missing.
 
-The internal representation should use normalized units.
+The internal representation MUST use normalized monthly units. The conversion boundary is:
 
-For example:
+| Human input | Canonical representation |
+| ----------- | ------------------------ |
+| `$500,000` | `principal = 500000` |
+| `6.5% annual` | `periodic_rate = 0.065 / 12` |
+| `0.005 monthly` | `periodic_rate = 0.005` |
+| `30 years` | `payments = 360` |
+| `$3,000 per month` | `payment = 3000` |
 
-```text
-$500,000             → 500000
-6.5% annual         → 0.065 annual
-6.5% monthly        → 0.0054166667 monthly
-30 years            → 360 payments
-```
+Annual rates are percentages at the user-interface boundary; monthly rates are decimal values inside the calculator. Years MUST be converted to monthly payments before calculation. The system MUST NOT silently treat an annual percentage as a monthly decimal.
 
 This separation between **human representation** and **computational representation** is important.
 
@@ -364,7 +375,7 @@ The user may say:
 The calculator should receive:
 
 ```text
-annual_rate = 0.065
+periodic_rate = 0.065 / 12
 payments = 360
 ```
 
@@ -533,11 +544,11 @@ For example:
   "principal": 500000,
   "periodic_rate": 0.0054166667,
   "payments": 360,
-  "payment": 3159.38,
+  "payment": 3160.340117464819,
   "annual_rate": 0.065,
   "term_years": 30,
-  "total_paid": 1137376.80,
-  "total_interest": 637376.80
+  "total_paid": 1137722.442287335,
+  "total_interest": 637722.442287335
 }
 ```
 
@@ -756,26 +767,26 @@ The MVP can be implemented as five logical components.
                         +------------------+
 ```
 
-A simple implementation could use:
+The implemented Chapter 31 lab uses:
 
 ```text
 Frontend:
-    Streamlit / React / simple HTML
+    PyQt5 desktop GUI
 
 Application:
-    Python
+    Python CLI + service layer
 
 LLM:
-    API model or local model
+    Offline mock adapter or local Ollama
 
 Tool interface:
-    Function calling / structured output
+    Structured calculator tool
 
 Calculation:
-    Pure Python
+    Pure Decimal-based Python
 
 Tests:
-    pytest
+    pytest + hypothesis + pytest-qt
 ```
 
 The architecture should remain independent of any particular model provider.
@@ -841,7 +852,7 @@ annual rate = 6%
 term = 30 years
 ```
 
-The expected payment can be computed independently and used as a regression test.
+The expected payment can be computed independently and used as a regression test. For `P=100000`, annual rate `6%`, and `n=360`, the expected unrounded payment is `599.550525152752`; presentation rounds it to `$599.55`.
 
 ---
 
@@ -1008,7 +1019,7 @@ The model should:
 9. Avoid presenting estimates as lender-specific quotes.
 10. Preserve the calculator's numerical precision until final presentation.
 
-These are examples of **application-level AI safety**, rather than relying exclusively on model behavior.
+These are examples of **application-level AI safety**, rather than relying exclusively on model behavior. Explicit user values take precedence over model guesses; model units are re-normalized deterministically; the calculator result is validated before explanation; and contradictory or incomplete model explanations are replaced with deterministic text. Raw prompts and responses are exposed only at `DEBUG` verbosity.
 
 ---
 
@@ -1116,7 +1127,7 @@ The calculation module should have no dependency on the LLM.
 
 # A.23 MVP Development Sequence
 
-The project should be built incrementally.
+The project should be built incrementally. The reference implementation exposes the resulting CLI as `mortgage` and the desktop surface as `mortgage-gui`.
 
 ## Step 1 — Mathematical core
 
@@ -1329,3 +1340,122 @@ The result is not an **LLM-powered mortgage calculator**.
 It is a **mortgage calculator with an LLM interface**.
 
 That distinction is small in wording but fundamental in AI systems engineering.
+
+---
+
+# A.27 Implemented Chapter 31 Surface
+
+The reference implementation for this appendix lives in `labs/week4/chapter31/`. It preserves the deterministic/probabilistic boundary while providing both a command-line interface and a desktop interface.
+
+The implementation is organized as:
+
+```text
+src/mortgage/
+    models.py          typed requests, results, errors, and metadata
+    validation.py      domain and quantity validation
+    calculator.py      four inverse calculations and rate solver
+    amortization.py    deterministic O(n) schedule
+    tool.py            structured calculator tool
+    service.py         public result envelope
+    llm.py             mock and Ollama adapters
+    presentation.py    text/JSON formatting and disclaimer
+    cli.py             command-line entry point
+    ui.py              PyQt5 desktop interface
+```
+
+The deterministic core has no dependency on an LLM provider. The model adapter can be replaced without changing the financial engine.
+
+# A.28 CLI and GUI Usage
+
+Install the project with Python 3.12 and `uv`:
+
+```bash
+cd labs/week4/chapter31
+uv sync --extra test --extra gui
+```
+
+The primary commands are:
+
+```bash
+uv run mortgage calculate --principal 500000 --rate 6.5 --term-years 30
+uv run mortgage ask --adapter mock 'What is the payment on $500,000 at 6.5% for 30 years?'
+uv run mortgage amortize --principal 500000 --rate 6.5 --term-years 30 --format json
+uv run mortgage eval --dataset evals/mortgage_questions.jsonl --adapter mock --out eval_report.json
+uv run mortgage-gui
+```
+
+The GUI provides Calculator and Natural language modes, an optional amortization schedule, a local-model dropdown, a Refresh models action, and `Off`, `INFO`, and `DEBUG` diagnostics levels. Ollama model discovery uses `GET /api/tags` in a background worker so the interface remains responsive.
+
+# A.29 Local Ollama Integration
+
+The optional real adapter uses a locally running Ollama daemon:
+
+```bash
+ollama pull llama3.2
+uv run mortgage ask --adapter real --model llama3.2 \
+  'What is the payment on a 5% a year $100,000 30-year loan?'
+```
+
+The default endpoint is `http://localhost:11434`; override it with `OLLAMA_HOST` or `--host`. The default model is `llama3.2`; override it with `OLLAMA_MODEL` or `--model`.
+
+The adapter makes one structured interpretation request and one explanation request. The interpretation is normalized and validated before the calculator runs. Model output never supplies the authoritative numeric result. If the model returns prose around JSON, a JSON fence, token-space markers, common field aliases, or an incorrect clarification, the adapter uses deterministic parsing and explicit user text where available. An unavailable daemon or malformed response becomes `MODEL_ERROR` rather than triggering arithmetic fallback.
+
+When shell prompts contain dollar amounts, use single quotes or escape the dollar sign. Otherwise the shell may expand `$100` before the calculator receives the question:
+
+```bash
+# Safe
+uv run mortgage ask --adapter real \
+  'What is the payment on a $100,000 loan?'
+
+# Also safe
+uv run mortgage ask --adapter real \
+  "What is the payment on a \$100,000 loan?"
+```
+
+# A.30 Evaluation Dataset and Reports
+
+The `mortgage eval` command evaluates natural-language interpretation against a JSONL dataset and checks all numeric results using the deterministic calculator. It does not use an LLM judge.
+
+The bundled dataset is `evals/mortgage_questions.jsonl`. A case contains:
+
+```json
+{
+  "case_id": "payment-basic",
+  "category": "payment",
+  "question": "What is the payment on a $100,000 mortgage at 5% for 30 years?",
+  "expected": {
+    "intent": "payment",
+    "outcome": "calculated",
+    "fields": {"principal": "100000", "payments": 360},
+    "result": {"payment": "536.821623012139", "tolerance": "0.01"}
+  }
+}
+```
+
+The versioned `eval_report.json` contains overall counts, intent/field/numeric/clarification/scope accuracy, and a per-case record with:
+
+* the question;
+* expected outcome, intent, fields, and result;
+* actual outcome, intent, result, clarification, or error;
+* individual checks;
+* failure classification;
+* failure reasons.
+
+A failed evaluation prints each failed question in the terminal as well as writing the detailed report. Case mismatches return exit code `1`; malformed datasets return `2`; real-model failures return `5`.
+
+# A.31 Deterministic Safety Boundary
+
+The model is an interpreter and explainer, not a financial authority. The application enforces the following sequence:
+
+```text
+user text
+   -> model interpretation
+   -> deterministic normalization and user-text recovery
+   -> typed calculator request
+   -> validation
+   -> deterministic calculation
+   -> validated result
+   -> checked explanation
+```
+
+Explicit user values take precedence over model guesses. A model cannot invent a rate or term, override calculator validation, or change a calculated result. The system distinguishes principal-and-interest payments from excluded housing costs, and it replaces an explanation that omits or contradicts the validated quantity with deterministic text.
