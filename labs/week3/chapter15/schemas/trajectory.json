@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bootcamp.local/schemas/trajectory.json",
+  "title": "Coding Agent Trajectory (C-06, version 0.1)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "trajectory_version",
+    "task_id",
+    "policy",
+    "availability_banner",
+    "sandbox_root",
+    "iterations",
+    "final_outcome",
+    "iterations_used",
+    "total_tokens"
+  ],
+  "properties": {
+    "trajectory_version": {"type": "string"},
+    "task_id": {"type": "string"},
+    "policy": {"enum": ["mock", "ollama"]},
+    "availability_banner": {"type": ["string", "null"]},
+    "sandbox_root": {"type": "string"},
+    "iterations": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/iteration"}
+    },
+    "final_outcome": {
+      "enum": [
+        "VERIFIED",
+        "BUDGET_EXHAUSTED",
+        "STALLED:NOOP",
+        "STALLED:BUDGET",
+        "DENIED_LOOP",
+        "ERROR"
+      ]
+    },
+    "iterations_used": {"type": "integer", "minimum": 1},
+    "total_tokens": {"$ref": "#/$defs/token_counter"}
+  },
+  "$defs": {
+    "tool_call": {
+      "type": "object",
+      "required": ["name", "args"],
+      "properties": {
+        "name": {"type": "string"},
+        "args": {"type": "object"}
+      }
+    },
+    "token_counter": {
+      "type": "object",
+      "required": ["estimated", "mode"],
+      "properties": {
+        "estimated": {"type": "integer", "minimum": 0},
+        "mode": {"enum": ["synthetic", "measured"]}
+      }
+    },
+    "iteration": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "iteration",
+        "tool_calls",
+        "tokens",
+        "files_read",
+        "files_modified",
+        "tests_executed",
+        "test_results",
+        "errors",
+        "time_ms",
+        "verdict",
+        "phase"
+      ],
+      "properties": {
+        "iteration": {"type": "integer", "minimum": 1},
+        "tool_calls": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/tool_call"}
+        },
+        "tokens": {"$ref": "#/$defs/token_counter"},
+        "files_read": {"type": "array", "items": {"type": "string"}},
+        "files_modified": {"type": "array", "items": {"type": "string"}},
+        "tests_executed": {"type": "integer", "minimum": 0},
+        "test_results": {"type": ["object", "null"]},
+        "errors": {"type": "array"},
+        "time_ms": {"type": "number", "minimum": 0},
+        "verdict": {"enum": ["PENDING", "VERIFIED", "FAILED", "ERROR"]},
+        "phase": {
+          "enum": [
+            "observe",
+            "inspect",
+            "search",
+            "propose",
+            "modify",
+            "verify",
+            "repair",
+            "stop"
+          ]
+        }
+      }
+    }
+  }
+}

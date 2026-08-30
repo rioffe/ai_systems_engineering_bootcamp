@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bootcamp.local/schemas/experiment.json",
+  "title": "Coding Agent Experiment Record (C-07, version 0.1)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "experiment_version",
+    "task_id",
+    "injection",
+    "phases",
+    "final_outcome",
+    "iterations_to_verified",
+    "trajectory_ref"
+  ],
+  "properties": {
+    "experiment_version": {"type": "string"},
+    "task_id": {"type": "string"},
+    "injection": {
+      "type": "object",
+      "required": ["file", "symbol", "injected_defect", "pre_injection_verdict"],
+      "properties": {
+        "file": {"type": "string"},
+        "symbol": {"type": "string"},
+        "injected_defect": {"type": "string"},
+        "pre_injection_verdict": {"type": "string"}
+      }
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["phase", "iteration", "evidence"],
+        "properties": {
+          "phase": {"enum": ["detect", "diagnose", "repair"]},
+          "iteration": {"type": "integer", "minimum": 1},
+          "evidence": {"type": "string"}
+        }
+      }
+    },
+    "final_outcome": {
+      "enum": [
+        "VERIFIED",
+        "BUDGET_EXHAUSTED",
+        "STALLED:NOOP",
+        "STALLED:BUDGET",
+        "DENIED_LOOP",
+        "ERROR"
+      ]
+    },
+    "iterations_to_verified": {"type": "integer", "minimum": 0},
+    "trajectory_ref": {"type": "string"}
+  }
+}

@@ -1,0 +1,22 @@
+{
+ "extraPaths": [
+  "src"
+ ],
+ "pythonVersion": "3.12",
+ "typeCheckingMode": "off",
+ "include": [
+  "src",
+  "tests"
+ ],
+ "exclude": [
+  "__pycache__",
+  ".venv",
+  ".pytest_cache",
+  "fixtures",
+  "tools",
+  "schemas",
+  "uv.lock"
+ ],
+ "reportMissingImports": "none",
+ "reportGeneralTypeIssues": false
+}

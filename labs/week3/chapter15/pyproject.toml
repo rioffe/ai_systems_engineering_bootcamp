@@ -1,0 +1,71 @@
+[project]
+name = "coding-agent"
+version = "0.1.0"
+description = "A minimal coding agent (ch15 / SPEC): a closed-loop control-system harness that embeds an LLM policy -- observe -> reason -> act -> verify -> feedback -- over a sandboxed target repository, with context management, a permission gate enforced OUTSIDE the model, a verifier that closes the loop, and an instrumented trajectory log. Deterministic core + MockPolicy (offline double); opt-in Ollama qwen3.8 real policy (DEGRADED_MOCK / PULL_REQUIRED / RUN_REAL)."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+
+# Runtime dependencies (see SPEC.md section 10 "Dependencies and Environment"
+# for rationale). The default install is MOCK-ONLY: no model/network client
+# (K-06). A run needs no Ollama and no keys; the real path is an opt-in extra.
+dependencies = [
+    "jsonschema>=4.21",   # schema-gate trajectory.json / experiment.json on read (R-17 / I-012)
+]
+
+[project.optional-dependencies]
+# The ONLY place a model/network client may live (R-15 / K-06 / I-009). The
+# default install stays offline; `uv pip install -e .[agents-real]` adds it.
+agents-real = [
+    "httpx>=0.27",
+]
+
+[project.scripts]
+# R-16: the primary product surface is the `agent` CLI (run/experiment/inspect/compare).
+agent = "coding_agent.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/coding_agent"]
+
+[tool.uv]
+# Source layout under src/ (mirrors week1/chapter1).
+package = true
+
+[tool.pyright]
+# The C-09 fixtures/parse-config/ tree is a FOREIGN target repo the agent copies
+# into its ephemeral sandbox and runs `pytest -q` inside; conftest.py puts its
+# `repo/` on sys.path at RUNTIME, so no static resolver can see `from config
+# import parse_config` (a runtime path). Type-analysis therefore scopes to the
+# OWN lab code (src/tests) plus the fixture's repo on the extra search path so
+# the foreign import resolves here too. fixtures/tools/schemas stay excluded
+# from analysis proper (I-011: the agent never analyses its own source tree).
+pythonVersion = "3.12"
+extraPaths = ["src", "fixtures/parse-config/repo"]
+include = ["src", "tests"]
+exclude = ["fixtures", "tools", "schemas", "__pycache__", ".venv", ".pytest_cache"]
+reportMissingImports = "none"
+
+[tool.pytest.ini_options]
+# The full automated suite runs offline over MockPolicy with no Ollama / no
+# sockets (R-13 / K-06 / T-02). testpaths keeps runs hermetic.
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# I-007: the verifier/loop intentionally surface a broad fault to the next
+# observe step; BLE001 (blind except) stays enabled by default -- a broad handler
+# that swallows is a smell, but the loop's except routes faults, never swallows.
+ignore = []
