@@ -1,10 +1,17 @@
 """T-02/K-06/I-009: deterministic core has no model/network imports."""
+
 import ast
 from pathlib import Path
 
 CORE = (
-    "sandbox.py", "control_loop.py", "context.py", "tools.py", "permissions.py",
-    "verifier.py", "instrument.py", "report.py",
+    "sandbox.py",
+    "control_loop.py",
+    "context.py",
+    "tools.py",
+    "permissions.py",
+    "verifier.py",
+    "instrument.py",
+    "report.py",
 )
 FORBIDDEN = {"httpx", "requests", "urllib", "socket", "ollama", "openai"}
 
