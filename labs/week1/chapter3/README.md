@@ -153,6 +153,26 @@ the built index is a *load-time* error, never a silent 0-recall). Per-case fault
   `http://localhost:11434` — are an **opt-in manual smoke** (§9.11/K-05).
 - PyQt5 is an **optional** extra; the suite never needs Qt (and runs `offscreen` when it is).
 
+## The four CLI subcommands (`rag --help`)
+
+| Command | Scope | What it does | Output |
+| -------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `gen-corpus` | offline | deterministic corpus + question generator (R-13/T-01); `--seed` is the only thing it governs | `documents/corpus.jsonl` + `questions.json` |
+| `build-index` | **index-time** | chunk (`--strategy`/`--chunk-size`/`--overlap`) -> contextualize (`--contextual`) -> embed (`--embed-model`, or the mock) -> insert into `VectorStore` + `BM25Index` | a one-line summary: `built index: 100 chunks strategy=heading contextual=False overlap=200 mock=True` |
+| `eval` | query-time | the full §22 pipeline over `questions.json` -> per-case `RunMetrics` -> `AggregateMetrics` | human summary on stdout + `report.json` |
+| `show` | query-time | one case's retrieved ranking + `status` + `failure_stage` ("what world did the model see?") | that one row, printed |
+
+**`build-index` writes nothing to disk.** It builds the `(VectorStore, BM25Index)` in memory,
+prints the chunk count and the *resolved* index-time flags, and exits -- there is no pickle
+cache and no `--index` path flag. So it is a **probe** ("how many chunks did these index-time
+flags produce?"), **not** a prerequisite for `eval`: `eval` and `show` each rebuild the index
+from `--corpus` on whatever index-time flags *they* are handed (F-003 is satisfied because
+`eval` can never see a stale index -- it always rebuilds). A full mock rebuild is ~0.06s, so
+the SPEC §5.1 pickle cache is an unimplemented option under no budget pressure (Status).
+
+To make the §14 "+contextual" diff, put `--contextual on` on the **`eval`** that produces the
+report -- not (only) on a separate `build-index` whose output is thrown away.
+
 ## Development setup
 
 ```bash
@@ -167,9 +187,11 @@ uv run pytest                               # the SPEC §9 suite -- FULLY OFFLIN
 uv run rag eval --mock on                   # §22 baseline -> report.json (<5s, K-02)
 uv run rag eval --mock on --hybrid on --alpha 0.3   # +hybrid on the SAME index -> by_capability diff
 uv run rag eval --mock on --rerank on --expand on   # query-time toggles: no rebuild needed
-uv run rag build-index --mock on --contextual on    # index-time toggle: REBUILD first (F-003)...
-uv run rag eval --mock on --contextual on   # ...then eval the same dataset (§14 recovery)
-uv run rag show --qid q-chunking-00         # what world did the model see, and what did it cite?
+uv run rag show --qid q-chunking-00             # one case's ranking + status + failure_stage
+
+# index-time: change what the *eval* rebuilds -- pass the flag to the eval that reports (F-003)
+uv run rag build-index --mock on --contextual on     # PROBE: chunk count + resolved flags; writes nothing
+uv run rag eval --mock on --contextual on             # the report: eval rebuilds the contextual index itself (§14 recovery)
 
 uv run rag eval --mock off --model qwen3.8:27b-mlx --embed-model nomic-embed-text  # REAL (opt-in, minutes)
 uv run rag-gui                              # optional GUI surface (see Status)
@@ -250,6 +272,12 @@ The real Ollama path is **only** the opt-in §9.11 smoke and never runs in `uv r
 ## Status (implementation vs. SPEC v0.2)
 
 Everything above is implemented and green **except** these known divergences:
+
+- **`build-index` is a no-op probe (SPEC §5.1 "May persist the index to a pickle" is
+  unimplemented).** `cmd_build_index` builds the index, prints the chunk count, and discards
+  it -- no pickle cache, no `--index` path; a following `eval` rebuilds from `--corpus`. The
+  design stays safe only because every command rebuilds, and no CLI test covers the command
+  itself (T-03 exercises `pipeline.build_index` directly, not the `build-index` subcommand).
 
 - **`SPEC.md §10`'s repro block is wrong as written.** It uses `uv sync` (which does not
   install the `dev`/`gui` extras, so `uv run pytest` fails on a fresh clone) and bare
