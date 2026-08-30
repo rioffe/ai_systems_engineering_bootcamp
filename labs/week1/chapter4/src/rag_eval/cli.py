@@ -20,7 +20,8 @@ from .report import (
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="rag-eval")
-    sub = parser.add_subparsers(dest="command", required=True)
+    parser.add_argument("--self-check", action="store_true")
+    sub = parser.add_subparsers(dest="command")
     check = sub.add_parser("check"); check.add_argument("--dataset", required=True); check.add_argument("--strict", action="store_true"); check.add_argument("--out", default="dataset_report.json")
     run = sub.add_parser("run"); run.add_argument("--dataset", required=True); run.add_argument("--corpus", required=True); run.add_argument("--out", required=True); run.add_argument("--mock", action="store_true"); run.add_argument("--top-k", type=int, default=5)
     compare = sub.add_parser("compare"); compare.add_argument("--baseline", required=True); compare.add_argument("--current", required=True); compare.add_argument("--out", default="compare_report.json"); compare.add_argument("--force", action="store_true")
@@ -33,6 +34,11 @@ def _parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     try:
         args = _parser().parse_args(argv)
+        if args.self_check:
+            root = Path(__file__).parent
+            forbidden = ("import httpx", "import ollama", "from rag", "import rag")
+            core = ("dataset.py", "schema.py", "evaluator.py", "metrics.py", "compare.py", "gates.py", "failure.py", "report.py")
+            return 1 if any(any(token in (root / name).read_text() for token in forbidden) for name in core) else 0
         if args.command == "check":
             dataset = load_dataset(args.dataset, validate=False)
             violations = validate_dataset(dataset, strict=args.strict)
