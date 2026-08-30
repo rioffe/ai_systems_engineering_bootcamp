@@ -66,6 +66,7 @@ The system accepts either a structured request or a natural-language question. S
 | **R-18** | The system MUST classify failures as validation, unsupported scope, clarification-required, solver/convergence, tool, or model/explanation failures. |
 | **R-19** | The CLI MUST provide an explicit disclaimer that results are estimates for principal and interest only and are not lender-specific quotes or financial advice. |
 | **R-20** | The project MUST be reproducible with Python 3.12 and `uv`, and its implementation MUST follow the module boundaries and test obligations in this specification. |
+| **R-21** | The project MUST provide a PyQt5 desktop UI through `mortgage-gui` with calculator and natural-language modes, result metrics, validation/clarification states, and optional amortization display. |
 
 ---
 
@@ -314,6 +315,10 @@ class ResponseMetadata:
 
 JSON output MUST be machine-readable and MUST include either `{ "ok": true, "result": ... }` or `{ "ok": false, "error": ... }`, never both. Every JSON envelope MUST include `metadata` with `schema_version`, `adapter`, `assumptions`, and `calculation_config`. `Decimal` values MUST serialize as base-10 JSON strings; integer counts MUST serialize as JSON integers; NaN and Infinity MUST be rejected.
 
+### C-10 GUI contract
+
+`MainWindow` in `ui.py` MUST expose the controls and result widgets named in §5.2, use the service/tool path for calculations, and keep real Ollama requests in an `OllamaWorker(QThread)` rather than the Qt main thread. The GUI MUST show `Calculated`, `Clarification required`, or `Error: <code>` status text and MUST never replace a calculator result with model-generated arithmetic.
+
 ---
 
 ## 5. Interface specification
@@ -340,9 +345,18 @@ Representative natural-language invocation:
 mortgage ask "What is the monthly payment on $500,000 at 6.5% for 30 years?"
 ```
 
-### 5.2 Optional GUI (`mortgage-gui`)
+### 5.2 GUI (`mortgage-gui`), implemented PyQt5 surface
 
-A GUI MAY be implemented after the CLI. If present, it MUST use `service.py`/`tool.py`, MUST display validation and clarification states, and MUST NOT contain financial formulas. GUI behavior is not required for v0.1 acceptance.
+`mortgage-gui` MUST launch a PyQt5 window titled `Hybrid Mortgage Calculator`. The window MUST use a two-column layout: controls on the left and validated results on the right.
+
+The controls MUST provide:
+
+- Mode selector: `Calculator` or `Natural language`.
+- Calculator fields for principal, rate, rate units, term years, payments, and payment.
+- Natural-language prompt, adapter selector (`Mock` or `Ollama`), model, and Ollama host fields.
+- Amortization toggle, display-precision control, and `Calculate` button.
+
+The result area MUST provide monthly payment, principal, annual rate, term, total paid, total interest, assumptions, status/error or clarification text, a schedule table, and the principal-and-interest disclaimer. The UI MUST use `service.py`/`tool.py`, MUST NOT contain financial formulas, and MUST keep Ollama calls off the Qt main thread using a worker. The mock path MUST remain synchronous and offline. GUI behavior is covered by T-35..T-39 and is required for v0.2.
 
 ### 5.3 Configuration
 
@@ -482,6 +496,14 @@ A real adapter endpoint MAY be configured through `OLLAMA_HOST` or the CLI `--ho
 - **T-31** Run the four conversational examples from §A.11 through `mortgage ask`; confirm tool invocation, clarification, invalid-payment explanation, and scope disclaimer.
 - **T-32** Run one direct and one natural-language request with equivalent inputs; compare the displayed payment, total paid, total interest, and optional schedule.
 
+### 9.8 GUI acceptance (offscreen)
+
+- **T-35** With `QT_QPA_PLATFORM=offscreen`, `mortgage-gui` constructs a window titled `Hybrid Mortgage Calculator` with the required controls, result labels, and schedule table.
+- **T-36** Calculator mode submits `P=500000`, annual rate `6.5%`, term `30` and displays a monthly payment containing `$3,160.34` plus the disclaimer.
+- **T-37** Invalid calculator input displays an error state and does not fabricate a result.
+- **T-38** Mock natural-language mode displays the deterministic calculator result and assumptions without network access.
+- **T-39** Ollama mode executes through a worker and leaves the UI thread responsive; a mocked transport failure displays an error state and restores the Calculate button.
+
 ---
 
 ## 10. Dependencies and environment
@@ -496,7 +518,7 @@ A real adapter endpoint MAY be configured through `OLLAMA_HOST` or the CLI `--ho
 | Testing | `pytest` and `hypothesis` | Formula, inverse, boundary, and generated-case coverage; T-33 is mandatory. |
 | LLM adapter | Protocol plus `MockLLMAdapter`; optional provider-specific adapter | Keeps model choice outside the deterministic core. |
 | Network/model | None required for tests or mock CLI path | Satisfies offline reproducibility. |
-| GUI | Optional and out of v0.1 acceptance | CLI and headless core are the primary surface. |
+| GUI | PyQt5 `>=5.15,<6`; `pytest-qt >=4.4,<5` in the `gui` extra | Implemented desktop UI and offscreen tests for `mortgage-gui`. |
 
 Expected project structure:
 
@@ -523,6 +545,7 @@ labs/week4/chapter31/
     +-- test_tool_contract.py
     +-- test_llm_adapter.py
     +-- test_cli.py
+    +-- test_ui.py
 ```
 
 Reproducibility commands:
@@ -549,7 +572,9 @@ R-11/R-13      --> llm.py (typed interpretation and clarification) --> T-20..T-2
 R-12/R-15      --> llm.py + tool.py (calculator authority and adapter seam) --> T-15, T-26, T-26a
 R-14/R-19      --> presentation.py + llm.py (scope boundary and disclaimer) --> T-18, T-25
 R-16/R-20      --> pyproject.toml + MockLLMAdapter + tests/ --> T-16, T-28, T-29
+R-21           --> ui.py + pyproject.toml (`mortgage-gui`) --> T-35..T-39
 R-17           --> cli.py + service.py (direct and natural-language modes) --> T-27, T-28, T-32
+C-10           --> ui.py (PyQt5 two-mode surface and worker) --> T-35..T-39
 R-18           --> models.py + validation.py + llm.py (error taxonomy) --> T-06..T-10, T-17, T-26a
 I-001/I-002    --> validation.py + CalculationRequest --> T-06, T-07
 I-003/I-004    --> calculator.py + normalization --> T-02..T-04, T-19

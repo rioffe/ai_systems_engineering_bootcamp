@@ -10,9 +10,14 @@ test = [
     "hypothesis>=6.100,<7",
     "pytest>=8,<9",
 ]
+gui = [
+    "PyQt5>=5.15,<6",
+    "pytest-qt>=4.4,<5",
+]
 
 [project.scripts]
 mortgage = "mortgage.cli:main"
+mortgage-gui = "mortgage.ui:run_gui"
 
 [build-system]
 requires = ["hatchling>=1.25,<2"]

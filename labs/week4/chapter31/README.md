@@ -52,7 +52,7 @@ Python 3.12 and `uv` are required.
 
 ```bash
 cd labs/week4/chapter31
-uv sync --extra test
+uv sync --extra test --extra gui
 ```
 
 The test environment is self-contained. Tests do not require:
@@ -60,7 +60,7 @@ The test environment is self-contained. Tests do not require:
 - An API key.
 - A running Ollama daemon.
 - Network access.
-- A GUI display.
+- A visible GUI display; GUI tests use `QT_QPA_PLATFORM=offscreen`.
 
 ## Quick start
 
@@ -175,6 +175,27 @@ The JSON response is a discriminated envelope:
 ```
 
 Decimal values are serialized as strings so consumers do not lose precision. Integer counts remain JSON integers. Non-finite values are rejected.
+
+## Desktop UI
+
+Launch the PyQt5 desktop application with:
+
+```bash
+uv run mortgage-gui
+```
+
+The window has two modes:
+
+- **Calculator:** enter principal, rate, term/payments, and optionally a payment; the UI calculates the missing quantity through the deterministic service.
+- **Natural language:** enter a mortgage question and choose `Mock` for the offline adapter or `Ollama` for a local model. Ollama requests run in a worker thread so the UI remains responsive.
+
+The result panel displays payment, principal, annual rate, term, total paid, total interest, assumptions, status/error text, the optional amortization table, and the principal-and-interest disclaimer. Invalid inputs and missing natural-language parameters are rendered as status messages rather than guessed results.
+
+Run the offscreen UI tests with:
+
+```bash
+QT_QPA_PLATFORM=offscreen uv run pytest tests/test_ui.py -q
+```
 
 ## Amortization schedules
 
@@ -372,7 +393,7 @@ The Ollama adapter tests do not open a socket. To manually exercise the real pat
 
 ```bash
 cd labs/week4/chapter31
-uv sync --extra test
+uv sync --extra test --extra gui
 uv run pytest -q
 uv run mortgage calculate --principal 500000 --rate 6.5 --term-years 30
 uv run mortgage ask --adapter mock 'What is the payment on $500,000 at 6.5% for 30 years?'
