@@ -1,0 +1,6 @@
+{
+  "pythonPath": ".venv/bin/python3",
+  "extraPaths": ["src"],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "off"
+}

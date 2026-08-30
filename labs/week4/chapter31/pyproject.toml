@@ -1,0 +1,31 @@
+[project]
+name = "hybrid-mortgage-calculator"
+version = "0.1.0"
+description = "Deterministic fixed-rate mortgage calculator with a structured language boundary"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[project.optional-dependencies]
+test = [
+    "hypothesis>=6.100,<7",
+    "pytest>=8,<9",
+]
+
+[project.scripts]
+mortgage = "mortgage.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mortgage"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.pyright]
+include = ["src", "tests"]
+extraPaths = ["src"]
+executionEnvironments = [{ root = ".", extraPaths = ["src"] }]
