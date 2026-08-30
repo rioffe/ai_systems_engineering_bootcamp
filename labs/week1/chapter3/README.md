@@ -132,8 +132,11 @@ row contributes nothing to a mean. Aggregates carry `by_tier` **and** `by_capabi
 | Outcome | Condition | Banner | Exit |
 | ----------------- | ------------------------------------- | ------------------------------------- | ---- |
 | `RUN_REAL` | daemon up, both models pulled | none | `0` |
-| `DEGRADED_MOCK` | daemon **unreachable** | `[REAL>MOCK] ...` -> doubles keep running | `0` |
+| `DEGRADED_MOCK` | `--mock` forced **or** daemon unreachable | `[REAL>MOCK] ...` -> doubles keep running | `0` |
 | `PULL_REQUIRED` | daemon up, model **not pulled** | `MODEL_MISSING: run ollama pull <m>` | `4` |
+
+(One wording bug: the forced-`--mock` case reuses the *unreachable* banner, so a deliberate
+`--mock on` on a live daemon still prints `Ollama unreachable` — see Status.)
 
 Other CLI exit codes (§5.1): `2` bad usage (e.g. `--top-n < --k`, E-15), `3` corpus /
 questions / index **load** failure (E-01/E-14/I-013 — a `relevant_chunks` id absent from
@@ -142,7 +145,9 @@ the built index is a *load-time* error, never a silent 0-recall). Per-case fault
 
 ## Requirements
 
-- Python **3.12** (managed by `uv`).
+- Python **3.12** (managed by `uv`). **`uv sync --all-extras`** is the setup command: the
+  test deps (`pytest`, `pytest-qt`) and `PyQt5` are *optional extras* in `pyproject.toml`,
+  so a plain `uv sync` yields a CLI-only env and would even *remove* an existing pytest.
 - **No Ollama, no network, no embed model** for the default `--mock` path or the whole test
   suite. The real backends — served by [Ollama](https://ollama.com) at
   `http://localhost:11434` — are an **opt-in manual smoke** (§9.11/K-05).
@@ -155,20 +160,27 @@ the built index is a *load-time* error, never a silent 0-recall). Per-case fault
 #   ollama pull nomic-embed-text     # embedding
 #   ollama pull qwen3.8:27b-mlx      # generation + judge (ID 5642e97495e1, ~18GB)
 
-uv sync                                     # .venv (Python 3.12) + deps
+uv sync --all-extras                        # .venv (3.12) + dev (pytest, pytest-qt) + gui (PyQt5)
 uv run rag gen-corpus --seed 42             # -> documents/corpus.jsonl + questions.json (<1s, T-01)
 uv run pytest                               # the SPEC §9 suite -- FULLY OFFLINE (K-01/I-011)
 
-uv run rag eval --mock                      # §22 baseline -> report.json (<5s, K-02)
-uv run rag eval --hybrid on --alpha 0.3     # +hybrid on the SAME index -> by_capability diff
-uv run rag eval --rerank on --expand on     # query-time toggles: no rebuild needed
-uv run rag build-index --contextual on      # index-time toggle: REBUILD first (F-003)...
-uv run rag eval --contextual on             # ...then eval the same dataset (§14 recovery)
+uv run rag eval --mock on                   # §22 baseline -> report.json (<5s, K-02)
+uv run rag eval --mock on --hybrid on --alpha 0.3   # +hybrid on the SAME index -> by_capability diff
+uv run rag eval --mock on --rerank on --expand on   # query-time toggles: no rebuild needed
+uv run rag build-index --mock on --contextual on    # index-time toggle: REBUILD first (F-003)...
+uv run rag eval --mock on --contextual on   # ...then eval the same dataset (§14 recovery)
 uv run rag show --qid q-chunking-00         # what world did the model see, and what did it cite?
 
-uv run rag eval --model qwen3.8:27b-mlx --embed-model nomic-embed-text   # REAL (opt-in, minutes)
+uv run rag eval --mock off --model qwen3.8:27b-mlx --embed-model nomic-embed-text  # REAL (opt-in, minutes)
 uv run rag-gui                              # optional GUI surface (see Status)
 ```
+
+**Toggle syntax:** `--mock`, `--hybrid`, `--rerank`, `--expand`, `--contextual`, `--judge`
+and `--show-banners` are `type=on|off` **value** options, not bare switches — write
+`--mock on`, never `--mock` alone (argparse rejects it with exit `2`). Accepted values are
+`on|true|1|yes` and `off|false|0|no`, and **`--mock` already defaults to `on`**, so an
+offline eval can omit it entirely. `--llm-rerank` and `--llm-expand` are bare flags but
+currently unwired (Status).
 
 A `--mock` eval prints the human summary and writes the machine-readable report:
 
@@ -238,6 +250,15 @@ The real Ollama path is **only** the opt-in §9.11 smoke and never runs in `uv r
 ## Status (implementation vs. SPEC v0.2)
 
 Everything above is implemented and green **except** these known divergences:
+
+- **`SPEC.md §10`'s repro block is wrong as written.** It uses `uv sync` (which does not
+  install the `dev`/`gui` extras, so `uv run pytest` fails on a fresh clone) and bare
+  `rag eval --mock` (which argparse rejects, exit `2`). Corrected above; the spec text
+  still needs the same fix.
+- **The `DEGRADED_MOCK` banner lies when `--mock` is forced.** `resolve_availability`
+  short-circuits on `mock` and returns the *unreachable* banner, so `--mock on` prints
+  `Ollama unreachable` even on a box where Ollama is running. R-19/F-013 asks for distinct
+  banners per condition; a forced-mock case is not the same fact as an unreachable daemon.
 
 - **`rag-gui` is a headless console fallback, not the §5.2 workbench.** `ui.py` probes for a
   Qt binding and then delegates to the CLI `show` view (R-16/F-012: it must degrade, never
