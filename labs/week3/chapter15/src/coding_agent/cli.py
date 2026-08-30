@@ -330,8 +330,12 @@ def main(argv=None) -> int:
     try:
         args = parser.parse_args(argv)
     except SystemExit as e:
+        # argparse uses SystemExit(0) for successful --help and SystemExit(2)
+        # for invalid usage; preserve that distinction for the testable API.
         code = e.code
-        return EXIT_USAGE if code in (None, 0, 2) else int(code)
+        if code == 0:
+            return EXIT_OK
+        return EXIT_USAGE if code in (None, 2) else int(code)
     if not getattr(args, "handler", None):
         parser.print_help()
         return EXIT_USAGE

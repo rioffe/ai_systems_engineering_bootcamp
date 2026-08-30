@@ -22,8 +22,9 @@ through the `Policy` interface.
   and no sockets**, so artifacts are **byte-identical** on the mock path (R-13 /
   I-002 / K-06).
 - **`OllamaPolicy`** — opt-in, real `qwen3.8` over `http://localhost:11434`.
-  Isolated behind `Policy` (R-15 / I-009); on the default install it isn't even
-  present. A missing daemon is resolved by the model-availability taxonomy
+  Isolated behind `Policy` (R-15 / I-009); the implementation ships with the lab,
+  but its optional `httpx` dependency is not installed by the default mock-only
+  environment. A missing daemon is resolved by the model-availability taxonomy
   **`DEGRADED_MOCK` / `PULL_REQUIRED` / `RUN_REAL`** (R-14 / E-11 / E-12) so a
   degraded run is never ambiguous in the trajectory.
 
@@ -56,15 +57,55 @@ src/coding_agent/
   cli.py           # R-16 the `agent` CLI: run / experiment / inspect / compare
 fixtures/parse-config/   # the C-09 pinned unit under test + its verifier
 schemas/                   # C-06 trajectory.json + C-07 experiment.json (R-17 gate)
-tests/             # SPEC §9 suite: T-01..T-13 (fully offline)
+tests/             # SPEC §9 behavioral coverage for T-01..T-13 (fully offline)
 ```
+
+## CLI quickstart
+
+All commands below run from this directory. The default path is deterministic and
+uses the offline `MockPolicy`; each run copies the repository into an ephemeral
+sandbox and removes that sandbox when it finishes.
+
+```bash
+# Verify an already-repaired repository; writes trajectory.json.
+uv run agent run \
+--task "parse the configuration" \
+--repo fixtures/parse-config \
+--mock \
+--out trajectory.json
+
+# Run the pinned §17 failure-injection experiment; writes both artifacts.
+uv run agent experiment \
+--task parse-config \
+--repo fixtures/parse-config \
+--mock \
+--out experiment.json
+
+# Inspect a saved trajectory without running inference or touching a repository.
+uv run agent inspect --in trajectory.json
+
+# Compare two saved trajectories; writes compare_report.json by default.
+uv run agent compare \
+--baseline trajectory.json \
+--current trajectory.json
+
+# Help is a successful command and exits 0.
+uv run agent --help
+```
+
+Use `--script actions.json` with `run --mock` to provide deterministic action
+batches. A script is a JSON array of batches; each action is either
+`{"type":"tool","name":"read_file","args":{"path":"repo/config.py"}}`,
+`{"type":"stop"}`, or `{"type":"noop"}`. Use `--sandbox PATH` when a stable
+artifact path is useful for reproducibility. See `SPEC.md` §5.1 and §17 for the
+complete interface and artifact contracts.
 
 ## Development setup
 
 ```bash
 uv sync                     # default install: MOCK-ONLY, no model/network client
-uv run pytest               # the SPEC §9 suite — fully offline, no Ollama, no sockets
-uv run agent --help         # the CLI (R-16)
+uv run pytest               # behavioral coverage for SPEC T-01..T-13; fully offline
+uv run agent --help         # the CLI (R-16), exits 0
 
 # opt in to the real Ollama policy (adds httpx; still never required by the suite):
 uv pip install -e '.[agents-real]'

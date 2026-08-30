@@ -88,6 +88,11 @@ def test_inspect_and_compare_are_offline(tmp_path, capsys):
     assert json.loads(report.read_text())["regression"] is False
 
 
+def test_help_returns_success(tmp_path, capsys):
+    assert main(["--help"]) == 0
+    assert "usage:" in capsys.readouterr().out.lower()
+
+
 def test_usage_errors_return_two(tmp_path):
     assert main([]) == 2
     assert main(["run", "--task", "", "--repo", fixture_repo(), "--out", str(tmp_path / "x")]) == 2
