@@ -396,8 +396,10 @@ class Embedder(ABC):
     @abstractmethod
     def embed(self, text: str) -> tuple[float, ...]: ...   # -> L2-normalized vector in R^dim
 
-class OllamaEmbedder(Embedder):   # real: POST /api/embed {model: nomic-embed-text} -> embedding[0]
-    # only module that names an /api/embed shape (I-002 / T-02 analog)
+class OllamaEmbedder(Embedder):   # real: POST /api/embed {model: nomic-embed-text:latest, input} -> embeddings[0] (768-d)
+    # only module that names an /api/embed shape (I-002 / T-02 analog). The batch endpoint
+    # takes "input"; a "prompt" body (the legacy /api/embeddings field) is silently accepted
+    # and returns {"embeddings": []} with HTTP 200.
 class MockEmbedder(Embedder):     # deterministic double -> hashed bag-of-words (O-1)
 ```
 
@@ -871,7 +873,7 @@ Common options:
    --chunk-size N      characters for strategy=fixed (default 800, K-03)
    --overlap N          chunk overlap window (default 200, K-03)
    --model NAME        LLM for generate + judge (default qwen3.8:27b-mlx)
-   --embed-model NAME  embedding model (default nomic-embed-text)
+   --embed-model NAME  embedding model (default nomic-embed-text:latest)
    --judge on|off      run LLM-as-judge (default on); off = retrieval-only eval (E-10 analog)
    --mock              force the deterministic doubles (no Ollama, no network)
    --seed N            gen-corpus seed (default 42); doubles are input-determined, so **ignored on the mock path** (R-18/F-016)
@@ -972,7 +974,7 @@ cited answer, the verdict pills, and — when the `injection` tier is exercised 
 | **K-02** | The deterministic boundary (build_index on the mock + retrieve/hybrid/rerank-mock/context/metrics) runs the **entire default ~100-doc / 25-question dataset** in `< 5`s with all mocks; the real path is exempt. | T-13 |
 | **K-03** | Default parameters (all CLI-overridable, §5.1): `k=5`, `top_n=20`, `alpha=0.5`, `hybrid=off`, `rerank=off`, `expand=off`, `contextual=off`, `strategy=heading`, `chunk_size=800` (chars), `overlap=200`, `n_expand=3`, `max_retries=2`, `timeout_s=60`, `seed=42`, `D_mock=256`. | T-13 |
 | **K-04** | The deterministic boundary (chunk + vector + hybrid-math + rerank-mock + expand-mock + contextualize + context + citation + metrics) is **network- and LLM/embed-free** — importable and runnable with zero external services (R-20, I-009). | T-02 |
-| **K-05** | A single real end-to-end `--model qwen3.8:27b-mlx --embed-model nomic-embed-text` eval of the full default dataset may take minutes (27B inference + per-question judging + embeddings); it is **opt-in / manual only**, **never** in `uv run pytest` (I-011). | §9.5 smoke |
+| **K-05** | A single real end-to-end `--model qwen3.8:27b-mlx --embed-model nomic-embed-text:latest` eval of the full default dataset may take minutes (27B inference + per-question judging + embeddings); it is **opt-in / manual only**, **never** in `uv run pytest` (I-011). | §9.5 smoke |
 
 ---
 
@@ -1116,7 +1118,7 @@ model calls are the **manual smoke** (§9.11). Every failure mode of §14–§19
 - `uv run rag eval --mock` runs the **full §22 pipeline offline** over the generated dataset: prints the human summary + `by_tier`/`by_capability` + `failure_breakdown` and writes `report.json` (< 5 s, K-02). A human reviews a `distractor`- and a `chunking`-tier case to confirm the precision/recovery effects are *observable* (§15/§14).
 - `uv run rag eval --hybrid on` (then `--rerank on`, `--expand on`, `--alpha 0.3`) re-runs on the **same** *index* — these are **query-time** toggles (F-003); the `by_capability` diff shows *which metric moved* per toggle, the operational thesis of §22/§21.
 - An index-time toggle (`--contextual on`, `--strategy fixed`, `--chunk-size`/`--overlap`) **rebuilds first** — `uv run rag build-index --contextual on` (or `--strategy fixed`) → then `uv run rag eval ...` — so a "+contextual"/"+strategy" diff (§14, T-21) re-runs the *same* dataset against a *freshly rebuilt* index, never a stale one (**re-build $\neq$ re-eval**, §3.1).
-- `uv run rag eval --model qwen3.8:27b-mlx --embed-model nomic-embed-text` runs the **real** dense + hybrid pipeline over the dataset (K-05, minutes on a 27B local model); the report is compared to the `--mock` run so the human sees *which* differences are retrieval-driven vs model-driven (the core diagnostic of §21/§25). **This is the only automated path that talks to Ollama**; it is **never** in `uv run pytest` (I-011).
+- `uv run rag eval --model qwen3.8:27b-mlx --embed-model nomic-embed-text:latest` runs the **real** dense + hybrid pipeline over the dataset (K-05, minutes on a 27B local model); the report is compared to the `--mock` run so the human sees *which* differences are retrieval-driven vs model-driven (the core diagnostic of §21/§25). **This is the only automated path that talks to Ollama**; it is **never** in `uv run pytest` (I-011).
 - **GUI smoke (offscreen + one real interactive run):** launch `uv run rag-gui`; confirm the ranked→reranked→contextualized ranking + per-stage scores + truncation badge + cited answer + verdict pills + (when the `injection` tier is hit) the INJECTION! badge render for a `--model` run *and* for the `--mock` run (ch1/§5.2 analog).
 
 ---
@@ -1182,7 +1184,7 @@ uv run rag eval --mock                   # full §22 baseline offline -> report.
 uv run rag eval --hybrid on              # +hybrid on the same dataset; by_capability diff (R-14/§22)
 uv run rag build-index --contextual on     # +contextual is INDEX-TIME (F-003): REBUILD the index first
 uv run rag eval                             #     ...then eval the same dataset; shows the boundary recovery (§14)
-uv run rag eval --model qwen3.8:27b-mlx --embed-model nomic-embed-text   # REAL path (opt-in; K-05)
+uv run rag eval --model qwen3.8:27b-mlx --embed-model nomic-embed-text:latest   # REAL path (opt-in; K-05)
 uv run rag-gui                           # optional GUI over the same pipeline (Ollama if reachable, else mock)
 ```
 

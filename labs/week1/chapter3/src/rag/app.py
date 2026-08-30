@@ -308,7 +308,7 @@ def _add_common(p):
     p.add_argument("--chunk-size", type=int, default=800)
     p.add_argument("--overlap", type=int, default=200)
     p.add_argument("--model", default=os.environ.get("RAG_MODEL", "qwen3.8:27b-mlx"))
-    p.add_argument("--embed-model", default="nomic-embed-text")
+    p.add_argument("--embed-model", default="nomic-embed-text:latest")
     p.add_argument("--judge", type=_parse_onoff, default=True, help="run LLM-as-judge")
     p.add_argument("--mock", type=_parse_onoff, default=True, help="force deterministic doubles")
     p.add_argument("--seed", type=int, default=42, help="gen-corpus seed (ignored on --mock)")

@@ -87,3 +87,77 @@ def test_ollama_embedder_interface():
     assert hasattr(OllamaEmbedder, "embed")
     assert hasattr(OllamaEmbedder, "dim")
     assert hasattr(OllamaEmbedder, "model_id")
+
+
+# ---------------------------------------------------------------------------
+# OllamaEmbedder live contract (offline via a monkeypatched httpx.post).
+# The batch endpoint /api/embed takes "input"; the LEGACY /api/embeddings
+# endpoint took "prompt". Posting "prompt" to /api/embed is silently accepted
+# and returns {"embeddings": []} with HTTP 200 -- so the field name is
+# load-bearing and the error paths must say what actually happened.
+# ---------------------------------------------------------------------------
+
+
+def _fake_ollama(monkeypatch, payload):
+    captured = {}
+
+    def fake_post(url, json=None, timeout=None):
+        captured["url"] = url
+        captured["json"] = json
+
+        class _Resp:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return payload
+
+        return _Resp()
+
+    monkeypatch.setattr("httpx.post", fake_post)
+    return captured
+
+
+def test_ollama_embedder_posts_input_not_prompt(monkeypatch):
+    captured = _fake_ollama(monkeypatch, {"embeddings": [[0.5, -0.25, 0.0, 1.0]]})
+    vec = OllamaEmbedder(model="nomic-embed-text:latest").embed("hello")
+    assert captured["json"] == {"model": "nomic-embed-text:latest", "input": "hello"}
+    assert "prompt" not in captured["json"]
+    assert vec == (0.5, -0.25, 0.0, 1.0)
+
+
+def test_ollama_embedder_default_model_is_the_pulled_tag(monkeypatch):
+    # availability._probe exact-matches --embed-model against /api/tags names,
+    # and Ollama serves this model only as "nomic-embed-text:latest"; the
+    # untagged default would always be PULL_REQUIRED.
+    assert OllamaEmbedder().model == "nomic-embed-text:latest"
+
+
+def test_ollama_embedder_legacy_single_embedding_shape(monkeypatch):
+    # The legacy /api/embeddings shape {"embedding": [...]} is still accepted.
+    _fake_ollama(monkeypatch, {"embedding": [0.1, 0.2]})
+    assert OllamaEmbedder().embed("x") == (0.1, 0.2)
+
+
+def test_ollama_embedder_empty_embeddings_is_a_useful_error(monkeypatch):
+    # A "prompt" body against /api/embed yields {"embeddings": []} (HTTP 200);
+    # the error must name the empty result and the field the endpoint wants.
+    _fake_ollama(monkeypatch, {"embeddings": []})
+    try:
+        OllamaEmbedder().embed("x")
+        assert False, "expected ValueError"
+    except ValueError as exc:
+        msg = str(exc)
+        assert "empty" in msg
+        assert "embeddings" in msg
+        assert "input" in msg
+        assert "unexpected /api/embed response shape" not in msg
+
+
+def test_ollama_embedder_top_level_error_surfaced(monkeypatch):
+    _fake_ollama(monkeypatch, {"error": "model 'nope' not found"})
+    try:
+        OllamaEmbedder().embed("x")
+        assert False, "expected ValueError"
+    except ValueError as exc:
+        assert "model 'nope' not found" in str(exc)

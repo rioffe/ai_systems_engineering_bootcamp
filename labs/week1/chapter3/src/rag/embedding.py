@@ -66,14 +66,17 @@ class MockEmbedder(Embedder):
 
 
 class OllamaEmbedder(Embedder):
-    # Real path: POST /api/embed {model, prompt} -> embedding[0].
+    # Real path: POST /api/embed {model, input} -> embeddings[0] (768-d
+    # nomic-embed-text:latest). The batch endpoint takes "input"; the legacy
+    # /api/embeddings endpoint took "prompt" -- posting "prompt" here is
+    # silently accepted and returns {"embeddings": []}.
     # Used only in the manual smoke (K-05); never in the test suite (I-011).
     dim = 768  # nomic-embed-text default dimension.
 
     def __init__(
         self,
         *,
-        model: str = "nomic-embed-text",
+        model: str = "nomic-embed-text:latest",
         base_url: str = "http://localhost:11434",
         dim: int | None = None,
     ) -> None:
@@ -89,15 +92,21 @@ class OllamaEmbedder(Embedder):
 
         resp = httpx.post(
             f"{self.base_url}/api/embed",
-            json={"model": self.model, "prompt": text},
+            json={"model": self.model, "input": text},
             timeout=60.0,
         )
         resp.raise_for_status()
         data = resp.json()
-        # /api/embed returns either {"embeddings": [[...]]} or {"embedding": [...]}.
-        raw = data.get("embeddings") or data.get("embedding")
+        if isinstance(data, dict) and data.get("error"):
+            raise ValueError("ollama /api/embed error: " + str(data["error"]))
+        raw = data.get("embeddings")
         if raw is None:
-            raise ValueError("unexpected /api/embed response shape")
+            raw = data.get("embedding")  # legacy /api/embeddings shape
+        if not raw:
+            raise ValueError(
+                "empty /api/embed response (does the request carry 'input', "
+                "not 'prompt'?): raw=" + str(data)[:200]
+            )
         if isinstance(raw, list) and raw and isinstance(raw[0], list):
             raw = raw[0]
         try:
