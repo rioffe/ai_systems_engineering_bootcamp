@@ -49,7 +49,7 @@ class VerifySpec:
 class Verdict:
     """C-05: the structured verdict that closes the loop (R-06 / I-007)."""
 
-    status: str      # STATUS_VERIFIED | STATUS_FAILED | STATUS_ERROR
+    status: str  # STATUS_VERIFIED | STATUS_FAILED | STATUS_ERROR
     checks: list[dict] = field(default_factory=list)
     output: str = ""
 
@@ -58,7 +58,9 @@ class Verdict:
         return self.status == STATUS_VERIFIED
 
 
-def run_verify(spec: VerifySpec, *, cwd: str, timeout_s: float = 120.0, max_output: int = 8000) -> Verdict:
+def run_verify(
+    spec: VerifySpec, *, cwd: str, timeout_s: float = 120.0, max_output: int = 8000
+) -> Verdict:
     """Run `spec` inside `cwd` (the sandbox root) and return a `Verdict`.
 
     K-04 bounds: a hard `timeout_s` and a length-captured `output` tail so a hung
@@ -81,26 +83,44 @@ def run_verify(spec: VerifySpec, *, cwd: str, timeout_s: float = 120.0, max_outp
         # E-03: the runner itself could not start (missing binary / shell).
         return Verdict(
             status=STATUS_ERROR,
-            checks=[{"kind": spec.kind, "command": spec.command, "exit": None,
-                    "output_tail": f"runner not found: {exc}"}],
+            checks=[
+                {
+                    "kind": spec.kind,
+                    "command": spec.command,
+                    "exit": None,
+                    "output_tail": f"runner not found: {exc}",
+                }
+            ],
             output=f"runner not found: {exc}",
-    )
+        )
     except subprocess.TimeoutExpired:
         # K-04: a hung runner is an ERROR, never a false VERIFIED.
         return Verdict(
             status=STATUS_ERROR,
-            checks=[{"kind": spec.kind, "command": spec.command, "exit": None,
-                    "output_tail": f"timeout after {timeout_s}s"}],
+            checks=[
+                {
+                    "kind": spec.kind,
+                    "command": spec.command,
+                    "exit": None,
+                    "output_tail": f"timeout after {timeout_s}s",
+                }
+            ],
             output=f"timeout after {timeout_s}s",
-    )
+        )
 
     raw = f"{proc.stdout}\n{proc.stderr}".rstrip()
     tail = raw[-max_output:] if len(raw) > max_output else raw
     status = STATUS_VERIFIED if proc.returncode == spec.success_exit else STATUS_FAILED
     return Verdict(
         status=status,
-        checks=[{"kind": spec.kind, "command": spec.command,
-                "exit": proc.returncode, "output_tail": tail}],
+        checks=[
+            {
+                "kind": spec.kind,
+                "command": spec.command,
+                "exit": proc.returncode,
+                "output_tail": tail,
+            }
+        ],
         output=tail,
     )
 

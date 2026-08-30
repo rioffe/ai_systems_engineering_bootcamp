@@ -21,7 +21,7 @@ def test_task_carries_the_c01_fields():
         prompt="parse key=value lines",
         target_repo="fixtures/parse-config/repo",
         verifier=V,
-     )
+    )
     assert t.task_id == "parse-config"
     assert t.prompt.startswith("parse")
     assert t.target_repo == "fixtures/parse-config/repo"
@@ -42,27 +42,27 @@ def test_task_accepts_optional_subcriteria():
         verifier=V,
         success_token="delimiter not in",
         acceptance_test="test_parse_basic",
-     )
+    )
     assert t.success_token == "delimiter not in"
     assert t.acceptance_test == "test_parse_basic"
 
 
 def test_task_is_immutable():
-       # frozen dataclass: an attribute rebind raises FrozenInstanceError
+    # frozen dataclass: an attribute rebind raises FrozenInstanceError
     t = Task(task_id="t", prompt="p", target_repo="repo", verifier=V)
     with pytest.raises(dataclasses.FrozenInstanceError):
         t.prompt = "mutated!"
 
 
 @pytest.mark.parametrize(
-   "bad",
-   [
+    "bad",
+    [
         {"task_id": "", "prompt": "p", "target_repo": "r", "verifier": V},
         {"task_id": "t", "prompt": "", "target_repo": "r", "verifier": V},
         {"task_id": "t", "prompt": "p", "target_repo": "", "verifier": V},
     ],
 )
 def test_task_rejects_empty_required_fields(bad):
-      # an empty required field is a construction error (before the loop, cf. E-01)
+    # an empty required field is a construction error (before the loop, cf. E-01)
     with pytest.raises(ValueError):
         Task(**bad)

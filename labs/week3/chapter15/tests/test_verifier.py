@@ -38,7 +38,7 @@ def test_run_verify_passes_on_success_exit(tmp_path):
 def test_run_verify_fails_on_nonzero_exit(tmp_path):
     spec = VerifySpec(kind="tests", command=f"{PY} -c 'import sys; sys.exit(1)'")
     verdict = run_verify(spec, cwd=str(tmp_path))
-    assert verdict.status == "FAILED"    # non-zero, not a runner fault
+    assert verdict.status == "FAILED"  # non-zero, not a runner fault
     assert verdict.checks[0]["exit"] == 1
 
 
@@ -66,7 +66,7 @@ def test_run_verify_output_tail_is_length_capped(tmp_path):
     )
     verdict = run_verify(spec, cwd=str(tmp_path), max_output=1000)
     assert len(verdict.output) <= 1000
-    assert verdict.status == "VERIFIED"    # still ran; only the tail is capped
+    assert verdict.status == "VERIFIED"  # still ran; only the tail is capped
 
 
 def test_run_verify_error_when_timeout_holds():
