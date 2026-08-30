@@ -9,28 +9,28 @@
         "outcome": "calculated",
         "result": {
           "annual_rate": "0.05000000000000000000000000000",
-          "exact_payments": "30",
-          "exact_term_years": "2.5",
+          "exact_payments": "360",
+          "exact_term_years": "30",
           "missing_quantity": "payment",
-          "payment": "3552.9364363376514303952430395989593491296235329798",
-          "payments": 30,
+          "payment": "536.82162301213898482849257913700082535018395745315",
+          "payments": 360,
           "periodic_rate": "0.004166666666666666666666666667",
           "principal": "100000",
           "schedule": null,
-          "term_years": "2.5",
-          "total_interest": "6588.0930901295429118572912",
-          "total_paid": "106588.0930901295429118572912"
+          "term_years": "30",
+          "total_interest": "93255.7842843700345382573285",
+          "total_paid": "193255.7842843700345382573285"
         }
       },
-      "case_id": "payment-basic",
+      "case_id": "payment-basic-01",
       "category": "payment",
       "checks": {
-        "fields": false,
+        "fields": true,
         "intent": true,
-        "numeric_result": false,
+        "numeric_result": true,
         "outcome": true
       },
-      "duration_ms": 5816,
+      "duration_ms": 2931,
       "expected": {
         "fields": {
           "payments": 360,
@@ -43,23 +43,216 @@
           "tolerance": "0.01"
         }
       },
-      "failure_classification": "field_mismatch",
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payments": true,
+        "principal": true
+      },
+      "numeric_checks": {
+        "payment": true
+      },
+      "question": "What is the monthly payment on a $100,000 mortgage at 5% for 30 years?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "payment",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.07250000000000000000000000000",
+          "exact_payments": "360",
+          "exact_term_years": "30",
+          "missing_quantity": "payment",
+          "payment": "5116.3221004214391987808878843024687207812735771305",
+          "payments": 360,
+          "periodic_rate": "0.006041666666666666666666666667",
+          "principal": "750000",
+          "schedule": null,
+          "term_years": "30",
+          "total_interest": "1091875.956151718111561119638",
+          "total_paid": "1841875.956151718111561119638"
+        }
+      },
+      "case_id": "payment-high-rate-02",
+      "category": "payment",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 1544,
+      "expected": {
+        "fields": {
+          "payments": 360,
+          "principal": "750000"
+        },
+        "intent": "payment",
+        "outcome": "calculated"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payments": true,
+        "principal": true
+      },
+      "numeric_checks": {},
+      "question": "Calculate the payment for a $750,000 fixed-rate loan at 7.25% for 30 years.",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "payment",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.04500",
+          "exact_payments": "180",
+          "exact_term_years": "15",
+          "missing_quantity": "payment",
+          "payment": "1912.4832220336293625393512646175322378837119085643",
+          "payments": 180,
+          "periodic_rate": "0.00375",
+          "principal": "250000",
+          "schedule": null,
+          "term_years": "15",
+          "total_interest": "94246.9799660532852570832276",
+          "total_paid": "344246.9799660532852570832276"
+        }
+      },
+      "case_id": "payment-short-term-03",
+      "category": "payment",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 1805,
+      "expected": {
+        "fields": {
+          "payments": 180,
+          "principal": "250000"
+        },
+        "intent": "payment",
+        "outcome": "calculated"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payments": true,
+        "principal": true
+      },
+      "numeric_checks": {},
+      "question": "What would I pay monthly for $250,000 at 4.5% over 15 years?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": "The annual interest rate is not provided, thus it is not possible to calculate the payment amount. A zero-interest loan means there will be no interest, but the repayment term is not specified in full months (it is assumed to be 10 years).",
+        "error": null,
+        "intent": null,
+        "outcome": "clarification",
+        "result": null
+      },
+      "case_id": "payment-zero-rate-04",
+      "category": "payment",
+      "checks": {
+        "fields": false,
+        "intent": false,
+        "numeric_result": false,
+        "outcome": false
+      },
+      "duration_ms": 1362,
+      "expected": {
+        "fields": {
+          "payments": 120,
+          "principal": "120000"
+        },
+        "intent": "payment",
+        "outcome": "calculated",
+        "result": {
+          "payment": "1000",
+          "tolerance": "0.01"
+        }
+      },
+      "failure_classification": "outcome_mismatch",
       "failure_reasons": [
+        "outcome",
+        "intent",
         "fields",
         "numeric_result",
+        "field.principal",
         "field.payments",
         "numeric_result.payment"
       ],
-      "failure_stage": "none",
+      "failure_stage": "interpretation",
       "field_checks": {
         "payments": false,
-        "principal": true
+        "principal": false
       },
       "numeric_checks": {
         "payment": false
       },
-      "question": "What is the payment on a $100,000 mortgage at 5% for 30 years?",
+      "question": "What is the payment on a $120,000 zero-interest loan for 10 years?",
       "status": "FAIL",
+      "tool_calls": 0
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "payment",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.06700000000000000000000000000",
+          "exact_payments": "240",
+          "exact_term_years": "20",
+          "missing_quantity": "payment",
+          "payment": "1514.7884994935975226775342255357018782110889760584",
+          "payments": 240,
+          "periodic_rate": "0.005583333333333333333333333333",
+          "principal": "200000",
+          "schedule": null,
+          "term_years": "20",
+          "total_interest": "163549.2398784634054426082141",
+          "total_paid": "363549.2398784634054426082141"
+        }
+      },
+      "case_id": "payment-monthly-rate-05",
+      "category": "payment",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 2585,
+      "expected": {
+        "fields": {
+          "payments": 240,
+          "principal": "200000"
+        },
+        "intent": "payment",
+        "outcome": "calculated"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payments": true,
+        "principal": true
+      },
+      "numeric_checks": {},
+      "question": "What is the payment on $200,000 at a monthly rate of 0.004 for 20 years?",
+      "status": "PASS",
       "tool_calls": 1
     },
     {
@@ -70,28 +263,28 @@
         "outcome": "calculated",
         "result": {
           "annual_rate": "0.060",
-          "exact_payments": "30",
-          "exact_term_years": "2.5",
+          "exact_payments": "360",
+          "exact_term_years": "30",
           "missing_quantity": "principal",
           "payment": "3000",
-          "payments": 30,
+          "payments": 360,
           "periodic_rate": "0.005",
-          "principal": "83382.161895311116097381191786951210938450357421872",
+          "principal": "500374.84317700588205036674550627464530200959704158",
           "schedule": null,
-          "term_years": "2.5",
-          "total_interest": "6617.838104688883902618808213",
-          "total_paid": "90000"
+          "term_years": "30",
+          "total_interest": "579625.1568229941179496332545",
+          "total_paid": "1080000"
         }
       },
-      "case_id": "principal-affordability",
+      "case_id": "principal-affordability-06",
       "category": "principal",
       "checks": {
-        "fields": false,
+        "fields": true,
         "intent": true,
-        "numeric_result": false,
+        "numeric_result": true,
         "outcome": true
       },
-      "duration_ms": 5071,
+      "duration_ms": 2240,
       "expected": {
         "fields": {
           "payment": "3000",
@@ -104,22 +297,426 @@
           "tolerance": "1000"
         }
       },
-      "failure_classification": "field_mismatch",
-      "failure_reasons": [
-        "fields",
-        "numeric_result",
-        "field.payments",
-        "numeric_result.principal"
-      ],
+      "failure_classification": "none",
+      "failure_reasons": [],
       "failure_stage": "none",
       "field_checks": {
         "payment": true,
-        "payments": false
+        "payments": true
+      },
+      "numeric_checks": {
+        "principal": true
+      },
+      "question": "I can afford $3,000 per month at 6% for 30 years. How much can I borrow?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "principal",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.05500000000000000000000000000",
+          "exact_payments": "360",
+          "exact_term_years": "30",
+          "missing_quantity": "principal",
+          "payment": "2500",
+          "payments": 360,
+          "periodic_rate": "0.004583333333333333333333333333",
+          "principal": "440304.40781154384818352588673479193982769186743667",
+          "schedule": null,
+          "term_years": "30",
+          "total_interest": "459695.5921884561518164741133",
+          "total_paid": "900000"
+        }
+      },
+      "case_id": "principal-budget-07",
+      "category": "principal",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 2231,
+      "expected": {
+        "fields": {
+          "payment": "2500",
+          "payments": 360
+        },
+        "intent": "principal",
+        "outcome": "calculated"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payment": true,
+        "payments": true
+      },
+      "numeric_checks": {},
+      "question": "How much mortgage principal can I afford with a $2,500 monthly payment at 5.5% for 30 years?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "payment",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.04000000000000000000000000000",
+          "exact_payments": "180",
+          "exact_term_years": "15",
+          "missing_quantity": "payment",
+          "payment": "14.793758512185405186221730319730616710260215369889",
+          "payments": 180,
+          "periodic_rate": "0.003333333333333333333333333333",
+          "principal": "2000",
+          "schedule": null,
+          "term_years": "15",
+          "total_interest": "662.876532193372933519911458",
+          "total_paid": "2662.876532193372933519911458"
+        }
+      },
+      "case_id": "principal-short-term-08",
+      "category": "principal",
+      "checks": {
+        "fields": false,
+        "intent": false,
+        "outcome": true
+      },
+      "duration_ms": 1778,
+      "expected": {
+        "fields": {
+          "payment": "2000",
+          "payments": 180
+        },
+        "intent": "principal",
+        "outcome": "calculated"
+      },
+      "failure_classification": "intent_mismatch",
+      "failure_reasons": [
+        "intent",
+        "fields",
+        "field.payment"
+      ],
+      "failure_stage": "none",
+      "field_checks": {
+        "payment": false,
+        "payments": true
+      },
+      "numeric_checks": {},
+      "question": "At 4% for 15 years, what loan amount corresponds to a $2,000 monthly payment?",
+      "status": "FAIL",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": "Unable to calculate principal without the annual interest rate.",
+        "error": null,
+        "intent": null,
+        "outcome": "clarification",
+        "result": null
+      },
+      "case_id": "principal-zero-rate-09",
+      "category": "principal",
+      "checks": {
+        "fields": false,
+        "intent": false,
+        "numeric_result": false,
+        "outcome": false
+      },
+      "duration_ms": 703,
+      "expected": {
+        "fields": {
+          "payment": "1000",
+          "payments": 120,
+          "periodic_rate": "0"
+        },
+        "intent": "principal",
+        "outcome": "calculated",
+        "result": {
+          "principal": "120000",
+          "tolerance": "0.01"
+        }
+      },
+      "failure_classification": "outcome_mismatch",
+      "failure_reasons": [
+        "outcome",
+        "intent",
+        "fields",
+        "numeric_result",
+        "field.periodic_rate",
+        "field.payments",
+        "field.payment",
+        "numeric_result.principal"
+      ],
+      "failure_stage": "interpretation",
+      "field_checks": {
+        "payment": false,
+        "payments": false,
+        "periodic_rate": false
       },
       "numeric_checks": {
         "principal": false
       },
-      "question": "I can afford $3,000 a month at 6% for 30 years. How much can I borrow?",
+      "question": "If there is no interest and I can pay $1,000 each month for 10 years, what principal can I borrow?",
+      "status": "FAIL",
+      "tool_calls": 0
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "principal",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.06250000000000000000000000000",
+          "exact_payments": "360",
+          "exact_term_years": "30",
+          "missing_quantity": "principal",
+          "payment": "3500",
+          "payments": 360,
+          "periodic_rate": "0.005208333333333333333333333333",
+          "principal": "568442.78470314096993827300173987128866242465410464",
+          "schedule": null,
+          "term_years": "30",
+          "total_interest": "691557.2152968590300617269983",
+          "total_paid": "1260000"
+        }
+      },
+      "case_id": "principal-down-payment-10",
+      "category": "principal",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 4033,
+      "expected": {
+        "fields": {
+          "payment": "3500",
+          "payments": 360
+        },
+        "intent": "principal",
+        "outcome": "calculated"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payment": true,
+        "payments": true
+      },
+      "numeric_checks": {},
+      "question": "I can pay $3,500 a month at 6.25% for 30 years. How much can I borrow before taxes and insurance?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "term",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.05000000000000000000000000000",
+          "exact_payments": "285.14208077120185910106919687748200925793273931274",
+          "exact_term_years": "23.761840064266821591755766406456834104827728276062",
+          "missing_quantity": "payments",
+          "payment": "600",
+          "payments": 286,
+          "periodic_rate": "0.004166666666666666666666666667",
+          "principal": "100000",
+          "schedule": null,
+          "term_years": "23.761840064266821591755766406456834104827728276062",
+          "total_interest": "71600",
+          "total_paid": "171600"
+        }
+      },
+      "case_id": "term-standard-11",
+      "category": "term",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 2545,
+      "expected": {
+        "fields": {
+          "payment": "600",
+          "principal": "100000"
+        },
+        "intent": "term",
+        "outcome": "calculated"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payment": true,
+        "principal": true
+      },
+      "numeric_checks": {},
+      "question": "How long will it take to pay off $100,000 at 5% if I pay $600 per month?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "term",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.060",
+          "exact_payments": "359.24702887430622966044602613653870430753476453958",
+          "exact_term_years": "29.937252406192185805037168844711558692294563711632",
+          "missing_quantity": "payments",
+          "payment": "3000",
+          "payments": 360,
+          "periodic_rate": "0.005",
+          "principal": "500000",
+          "schedule": null,
+          "term_years": "29.937252406192185805037168844711558692294563711632",
+          "total_interest": "580000",
+          "total_paid": "1080000"
+        }
+      },
+      "case_id": "term-fractional-12",
+      "category": "term",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "numeric_result": true,
+        "outcome": true
+      },
+      "duration_ms": 2274,
+      "expected": {
+        "fields": {
+          "payment": "3000",
+          "principal": "500000"
+        },
+        "intent": "term",
+        "outcome": "calculated",
+        "result": {
+          "exact_term_years": "29.937252406192",
+          "tolerance": "0.0001"
+        }
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payment": true,
+        "principal": true
+      },
+      "numeric_checks": {
+        "exact_term_years": true
+      },
+      "question": "How long will it take to pay off $500,000 at 6% if I pay $3,000?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": "The user has requested the number of months to repay a principal amount with monthly payments at zero interest rate. However, the principal amount is not specified, and only one payment is provided. Without the principal amount, it is not possible to calculate the number of payments needed to repay the loan.",
+        "error": null,
+        "intent": null,
+        "outcome": "clarification",
+        "result": null
+      },
+      "case_id": "term-zero-rate-13",
+      "category": "term",
+      "checks": {
+        "fields": false,
+        "intent": false,
+        "numeric_result": false,
+        "outcome": false
+      },
+      "duration_ms": 1574,
+      "expected": {
+        "fields": {
+          "payment": "1000",
+          "periodic_rate": "0",
+          "principal": "12000"
+        },
+        "intent": "term",
+        "outcome": "calculated",
+        "result": {
+          "exact_payments": "12",
+          "tolerance": "0.0001"
+        }
+      },
+      "failure_classification": "outcome_mismatch",
+      "failure_reasons": [
+        "outcome",
+        "intent",
+        "fields",
+        "numeric_result",
+        "field.principal",
+        "field.periodic_rate",
+        "field.payment",
+        "numeric_result.exact_payments"
+      ],
+      "failure_stage": "interpretation",
+      "field_checks": {
+        "payment": false,
+        "periodic_rate": false,
+        "principal": false
+      },
+      "numeric_checks": {
+        "exact_payments": false
+      },
+      "question": "How many months to repay $12,000 with zero interest and $1,000 monthly payments?",
+      "status": "FAIL",
+      "tool_calls": 0
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": {
+          "code": "PAYMENT_TOO_LOW",
+          "details": {},
+          "message": "payment must exceed first-period interest",
+          "parameter": null
+        },
+        "intent": "term",
+        "outcome": "payment_too_low",
+        "result": null
+      },
+      "case_id": "term-low-payment-14",
+      "category": "term",
+      "checks": {
+        "fields": false,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 960,
+      "expected": {
+        "fields": {
+          "payment": "2000",
+          "principal": "500000"
+        },
+        "intent": "term",
+        "outcome": "payment_too_low"
+      },
+      "failure_classification": "field_mismatch",
+      "failure_reasons": [
+        "fields",
+        "field.principal",
+        "field.payment"
+      ],
+      "failure_stage": "calculator",
+      "field_checks": {
+        "payment": false,
+        "principal": false
+      },
+      "numeric_checks": {},
+      "question": "How long will it take to pay off $500,000 at 6% if I pay $2,000?",
       "status": "FAIL",
       "tool_calls": 1
     },
@@ -136,24 +733,36 @@
         "outcome": "payment_too_low",
         "result": null
       },
-      "case_id": "term-payment-too-low",
+      "case_id": "term-interest-only-15",
       "category": "term",
       "checks": {
+        "fields": false,
         "intent": true,
         "outcome": true
       },
-      "duration_ms": 2806,
+      "duration_ms": 1149,
       "expected": {
+        "fields": {
+          "payment": "2500",
+          "principal": "300000"
+        },
         "intent": "term",
         "outcome": "payment_too_low"
       },
-      "failure_classification": "none",
-      "failure_reasons": [],
+      "failure_classification": "field_mismatch",
+      "failure_reasons": [
+        "fields",
+        "field.principal",
+        "field.payment"
+      ],
       "failure_stage": "calculator",
-      "field_checks": {},
+      "field_checks": {
+        "payment": false,
+        "principal": false
+      },
       "numeric_checks": {},
-      "question": "How long will it take to pay off $500,000 at 6% if I pay $2,000?",
-      "status": "PASS",
+      "question": "How long will it take to repay $300,000 at 10% if I pay $2,500 per month?",
+      "status": "FAIL",
       "tool_calls": 1
     },
     {
@@ -177,7 +786,7 @@
           "total_paid": "180000"
         }
       },
-      "case_id": "rate-basic",
+      "case_id": "rate-standard-16",
       "category": "rate",
       "checks": {
         "fields": true,
@@ -185,7 +794,7 @@
         "numeric_result": true,
         "outcome": true
       },
-      "duration_ms": 5336,
+      "duration_ms": 3120,
       "expected": {
         "fields": {
           "payment": "500",
@@ -218,29 +827,314 @@
       "actual": {
         "clarification": null,
         "error": null,
+        "intent": "rate",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.05176150338411389384418725968",
+          "exact_payments": "180",
+          "exact_term_years": "15",
+          "missing_quantity": "periodic_rate",
+          "payment": "2000",
+          "payments": 180,
+          "periodic_rate": "0.004313458615342824487015604973",
+          "principal": "250000",
+          "schedule": null,
+          "term_years": "15",
+          "total_interest": "110000",
+          "total_paid": "360000"
+        }
+      },
+      "case_id": "rate-yearly-17",
+      "category": "rate",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 1526,
+      "expected": {
+        "fields": {
+          "payment": "2000",
+          "payments": 180,
+          "principal": "250000"
+        },
+        "intent": "rate",
+        "outcome": "calculated"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payment": true,
+        "payments": true,
+        "principal": true
+      },
+      "numeric_checks": {},
+      "question": "What is the yearly interest rate on a $250,000 loan with $2,000 payments for 15 years?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "rate",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0",
+          "exact_payments": "120",
+          "exact_term_years": "10",
+          "missing_quantity": "periodic_rate",
+          "payment": "1000",
+          "payments": 120,
+          "periodic_rate": "0",
+          "principal": "120000",
+          "schedule": null,
+          "term_years": "10",
+          "total_interest": "0",
+          "total_paid": "120000"
+        }
+      },
+      "case_id": "rate-zero-18",
+      "category": "rate",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "numeric_result": true,
+        "outcome": true
+      },
+      "duration_ms": 1924,
+      "expected": {
+        "fields": {
+          "payment": "1000",
+          "payments": 120,
+          "principal": "120000"
+        },
+        "intent": "rate",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0",
+          "tolerance": "0.0001"
+        }
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payment": true,
+        "payments": true,
+        "principal": true
+      },
+      "numeric_checks": {
+        "annual_rate": true
+      },
+      "question": "What interest rate would make a $120,000 loan paid off in 120 payments at $1,000 each?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": "The user requested the annual rate that would result in $1,500 monthly payments on a $200,000 loan over 20 years.",
+        "error": null,
+        "intent": null,
+        "outcome": "clarification",
+        "result": null
+      },
+      "case_id": "rate-monthly-payment-19",
+      "category": "rate",
+      "checks": {
+        "fields": false,
+        "intent": false,
+        "outcome": false
+      },
+      "duration_ms": 1726,
+      "expected": {
+        "fields": {
+          "payment": "1500",
+          "payments": 240,
+          "principal": "200000"
+        },
+        "intent": "rate",
+        "outcome": "calculated"
+      },
+      "failure_classification": "outcome_mismatch",
+      "failure_reasons": [
+        "outcome",
+        "intent",
+        "fields",
+        "field.principal",
+        "field.payments",
+        "field.payment"
+      ],
+      "failure_stage": "interpretation",
+      "field_checks": {
+        "payment": false,
+        "payments": false,
+        "principal": false
+      },
+      "numeric_checks": {},
+      "question": "What annual rate corresponds to $1,500 monthly payments on a $200,000 20-year loan?",
+      "status": "FAIL",
+      "tool_calls": 0
+    },
+    {
+      "actual": {
+        "clarification": "The user provided monthly payment and principal but did not specify the interest rate; hence, the annual rate cannot be determined.",
+        "error": null,
+        "intent": null,
+        "outcome": "clarification",
+        "result": null
+      },
+      "case_id": "rate-affordability-20",
+      "category": "rate",
+      "checks": {
+        "fields": false,
+        "intent": false,
+        "outcome": false
+      },
+      "duration_ms": 1639,
+      "expected": {
+        "fields": {
+          "payment": "2800",
+          "payments": 360,
+          "principal": "400000"
+        },
+        "intent": "rate",
+        "outcome": "calculated"
+      },
+      "failure_classification": "outcome_mismatch",
+      "failure_reasons": [
+        "outcome",
+        "intent",
+        "fields",
+        "field.principal",
+        "field.payments",
+        "field.payment"
+      ],
+      "failure_stage": "interpretation",
+      "field_checks": {
+        "payment": false,
+        "payments": false,
+        "principal": false
+      },
+      "numeric_checks": {},
+      "question": "I owe $400,000, pay $2,800 per month, and have 30 years remaining. What yearly rate does that imply?",
+      "status": "FAIL",
+      "tool_calls": 0
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
         "intent": "payment",
         "outcome": "calculated",
         "result": {
-          "annual_rate": "0.06700000000000000000000000000",
-          "exact_payments": "30",
-          "exact_term_years": "2.5",
+          "annual_rate": "0.2000000000000000000000000000",
+          "exact_payments": "360",
+          "exact_term_years": "30",
           "missing_quantity": "payment",
-          "payment": "18147.825178212103626310119507656381590984965350339",
-          "payments": 30,
-          "periodic_rate": "0.005583333333333333333333333333",
-          "principal": "500000",
+          "payment": "10026.112117483814787453965337584462008229659931860",
+          "payments": 360,
+          "periodic_rate": "0.01666666666666666666666666667",
+          "principal": "600000",
           "schedule": null,
-          "term_years": "2.5",
-          "total_interest": "44434.7553463631087893035852",
-          "total_paid": "544434.7553463631087893035852"
+          "term_years": "30",
+          "total_interest": "3009400.362294173323483427522",
+          "total_paid": "3609400.362294173323483427522"
         }
       },
-      "case_id": "clarification-missing-rate",
+      "case_id": "down-payment-21",
+      "category": "down_payment",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 1958,
+      "expected": {
+        "fields": {
+          "payments": 360
+        },
+        "intent": "payment",
+        "outcome": "calculated"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payments": true
+      },
+      "numeric_checks": {},
+      "question": "I want to buy a $600,000 house with 20% down at 6.25% for 30 years. What is my payment?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": null,
+        "intent": "payment",
+        "outcome": "calculated",
+        "result": {
+          "annual_rate": "0.1000000000000000000000000000",
+          "exact_payments": "360",
+          "exact_term_years": "30",
+          "missing_quantity": "payment",
+          "payment": "3949.0720653995944559965203475315077750526416718770",
+          "payments": 360,
+          "periodic_rate": "0.008333333333333333333333333333",
+          "principal": "450000",
+          "schedule": null,
+          "term_years": "30",
+          "total_interest": "971665.943543854004158747325",
+          "total_paid": "1421665.943543854004158747325"
+        }
+      },
+      "case_id": "down-payment-22",
+      "category": "down_payment",
+      "checks": {
+        "fields": true,
+        "intent": true,
+        "outcome": true
+      },
+      "duration_ms": 2945,
+      "expected": {
+        "fields": {
+          "payments": 360
+        },
+        "intent": "payment",
+        "outcome": "calculated"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "none",
+      "field_checks": {
+        "payments": true
+      },
+      "numeric_checks": {},
+      "question": "With a $450,000 purchase price, 10% down, 5.5% interest, and a 30-year term, what is the mortgage payment?",
+      "status": "PASS",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": {
+          "code": "INVALID_QUANTITY_COUNT",
+          "details": {},
+          "message": "Exactly one primary quantity must be missing.",
+          "parameter": null
+        },
+        "intent": "rate",
+        "outcome": "invalid_request",
+        "result": null
+      },
+      "case_id": "clarification-missing-rate-23",
       "category": "clarification",
       "checks": {
         "outcome": false
       },
-      "duration_ms": 4332,
+      "duration_ms": 407,
       "expected": {
         "outcome": "clarification"
       },
@@ -248,7 +1142,7 @@
       "failure_reasons": [
         "outcome"
       ],
-      "failure_stage": "none",
+      "failure_stage": "calculator",
       "field_checks": {},
       "numeric_checks": {},
       "question": "What would the payment be on a $500,000 mortgage for 30 years?",
@@ -257,18 +1151,136 @@
     },
     {
       "actual": {
-        "clarification": "The user is asking about the impact of taxes and insurance on monthly housing costs, not a fixed-rate mortgage request.  Therefore, no mortgage details can be extracted.",
+        "clarification": null,
+        "error": {
+          "code": "INVALID_QUANTITY_COUNT",
+          "details": {},
+          "message": "Exactly one primary quantity must be missing.",
+          "parameter": null
+        },
+        "intent": "term",
+        "outcome": "invalid_request",
+        "result": null
+      },
+      "case_id": "clarification-missing-term-24",
+      "category": "clarification",
+      "checks": {
+        "outcome": false
+      },
+      "duration_ms": 335,
+      "expected": {
+        "outcome": "clarification"
+      },
+      "failure_classification": "outcome_mismatch",
+      "failure_reasons": [
+        "outcome"
+      ],
+      "failure_stage": "calculator",
+      "field_checks": {},
+      "numeric_checks": {},
+      "question": "What is the payment on a $500,000 mortgage at 6%?",
+      "status": "FAIL",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": "The principal amount is missing; the annual interest rate is provided, but the loan term and the number of payments per year are not specified.",
         "error": null,
         "intent": null,
         "outcome": "clarification",
         "result": null
       },
-      "case_id": "unsupported-housing-costs",
-      "category": "scope",
+      "case_id": "clarification-missing-principal-25",
+      "category": "clarification",
+      "checks": {
+        "outcome": true
+      },
+      "duration_ms": 1180,
+      "expected": {
+        "outcome": "clarification"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "interpretation",
+      "field_checks": {},
+      "numeric_checks": {},
+      "question": "What is the monthly payment at 6% for 30 years?",
+      "status": "PASS",
+      "tool_calls": 0
+    },
+    {
+      "actual": {
+        "clarification": "Principal, loan term, and initial payment amount are required to calculate the monthly mortgage payment at a five percent interest rate.",
+        "error": null,
+        "intent": null,
+        "outcome": "clarification",
+        "result": null
+      },
+      "case_id": "clarification-ambiguous-rate-26",
+      "category": "clarification",
+      "checks": {
+        "outcome": true
+      },
+      "duration_ms": 535,
+      "expected": {
+        "outcome": "clarification"
+      },
+      "failure_classification": "none",
+      "failure_reasons": [],
+      "failure_stage": "interpretation",
+      "field_checks": {},
+      "numeric_checks": {},
+      "question": "What is my payment at five percent?",
+      "status": "PASS",
+      "tool_calls": 0
+    },
+    {
+      "actual": {
+        "clarification": null,
+        "error": {
+          "code": "INVALID_QUANTITY_COUNT",
+          "details": {},
+          "message": "Exactly one primary quantity must be missing.",
+          "parameter": null
+        },
+        "intent": "principal",
+        "outcome": "invalid_request",
+        "result": null
+      },
+      "case_id": "scope-taxes-27",
+      "category": "unsupported_scope",
       "checks": {
         "outcome": false
       },
-      "duration_ms": 1897,
+      "duration_ms": 390,
+      "expected": {
+        "outcome": "unsupported_scope"
+      },
+      "failure_classification": "outcome_mismatch",
+      "failure_reasons": [
+        "outcome"
+      ],
+      "failure_stage": "calculator",
+      "field_checks": {},
+      "numeric_checks": {},
+      "question": "What will property taxes add to my total monthly housing payment?",
+      "status": "FAIL",
+      "tool_calls": 1
+    },
+    {
+      "actual": {
+        "clarification": "Homeowners insurance and HOA dues are not included in the mortgage calculation. These are considered additional expenses for the property owner and are not factored into the principal, interest, or monthly mortgage payment.",
+        "error": null,
+        "intent": null,
+        "outcome": "clarification",
+        "result": null
+      },
+      "case_id": "scope-insurance-28",
+      "category": "unsupported_scope",
+      "checks": {
+        "outcome": false
+      },
+      "duration_ms": 941,
       "expected": {
         "outcome": "unsupported_scope"
       },
@@ -279,23 +1291,79 @@
       "failure_stage": "interpretation",
       "field_checks": {},
       "numeric_checks": {},
-      "question": "What will taxes and insurance add to my monthly housing cost?",
+      "question": "Can you include homeowners insurance and HOA dues in the mortgage calculation?",
+      "status": "FAIL",
+      "tool_calls": 0
+    },
+    {
+      "actual": {
+        "clarification": "An adjustable-rate mortgage with annually changing interest rates cannot be calculated without specific details on the starting rate, margin, and the rate adjustment index and cap structure. Additional data is required to provide an accurate request.",
+        "error": null,
+        "intent": null,
+        "outcome": "clarification",
+        "result": null
+      },
+      "case_id": "scope-arm-29",
+      "category": "unsupported_scope",
+      "checks": {
+        "outcome": false
+      },
+      "duration_ms": 622,
+      "expected": {
+        "outcome": "unsupported_scope"
+      },
+      "failure_classification": "outcome_mismatch",
+      "failure_reasons": [
+        "outcome"
+      ],
+      "failure_stage": "interpretation",
+      "field_checks": {},
+      "numeric_checks": {},
+      "question": "Calculate an adjustable-rate mortgage whose interest changes every year.",
+      "status": "FAIL",
+      "tool_calls": 0
+    },
+    {
+      "actual": {
+        "clarification": "To provide a lender-specific mortgage quote, the principal amount of the house, the desired loan term, and the down payment are needed. Additionally, the lender's current interest rate and loan type information would be required. Without this data, a precise quote cannot be generated.",
+        "error": null,
+        "intent": null,
+        "outcome": "clarification",
+        "result": null
+      },
+      "case_id": "scope-advice-30",
+      "category": "unsupported_scope",
+      "checks": {
+        "outcome": false
+      },
+      "duration_ms": 1323,
+      "expected": {
+        "outcome": "unsupported_scope"
+      },
+      "failure_classification": "outcome_mismatch",
+      "failure_reasons": [
+        "outcome"
+      ],
+      "failure_stage": "interpretation",
+      "field_checks": {},
+      "numeric_checks": {},
+      "question": "Should I buy this house, and can you give me a lender-specific mortgage quote?",
       "status": "FAIL",
       "tool_calls": 0
     }
   ],
   "eval_version": "0.1",
   "metrics": {
-    "clarification_accuracy": 0.0,
-    "field_accuracy": 0.7142857142857143,
-    "intent_accuracy": 1.0,
-    "numeric_result_accuracy": 0.3333333333333333,
+    "clarification_accuracy": 0.5,
+    "field_accuracy": 0.6122448979591837,
+    "intent_accuracy": 0.7272727272727273,
+    "numeric_result_accuracy": 0.625,
     "scope_accuracy": 0.0
   },
-  "model": "gemma3n:e4b",
+  "model": "phi4-mini:latest",
   "summary": {
-    "failed": 4,
-    "passed": 2,
-    "total": 6
+    "failed": 14,
+    "passed": 16,
+    "total": 30
   }
 }
