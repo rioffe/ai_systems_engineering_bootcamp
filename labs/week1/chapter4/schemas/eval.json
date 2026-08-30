@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["eval_report_version", "dataset_id", "usage_kind", "cases", "aggregate"],
+  "additionalProperties": false,
+  "properties": {
+    "eval_report_version": {"const": "0.1"},
+    "dataset_id": {"type": "string"},
+    "usage_kind": {"enum": ["synthetic", "measured"]},
+    "judge_role": {"type": "string"},
+    "capabilities": {"type": "object"},
+    "cases": {"type": "array", "items": {"type": "object"}},
+    "aggregate": {"type": "object", "required": ["by_category"], "properties": {"by_category": {"type": "object"}}, "additionalProperties": true}
+  }
+}

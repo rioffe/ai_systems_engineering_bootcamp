@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["version", "gates"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": 1},
+    "gates": {"type": "array", "items": {"$ref": "#/$defs/gate"}}
+  },
+  "$defs": {
+    "gate": {
+      "type": "object",
+      "required": ["metric", "constraint"],
+      "additionalProperties": false,
+      "properties": {
+        "metric": {"type": "string"},
+        "constraint": {"enum": ["drop", "increase"]},
+        "max_pct_points": {"type": "number", "minimum": 0},
+        "max_pct": {"type": "number", "minimum": 0},
+        "min_value": {"type": "number"},
+        "max_value": {"type": "number"}
+      },
+      "oneOf": [
+        {"required": ["max_pct_points"], "not": {"anyOf": [{"required": ["max_pct"]}, {"required": ["min_value"]}, {"required": ["max_value"]}]}},
+        {"required": ["max_pct"], "not": {"anyOf": [{"required": ["max_pct_points"]}, {"required": ["min_value"]}, {"required": ["max_value"]}]}},
+        {"required": ["min_value"], "not": {"anyOf": [{"required": ["max_pct_points"]}, {"required": ["max_pct"]}, {"required": ["max_value"]}]}},
+        {"required": ["max_value"], "not": {"anyOf": [{"required": ["max_pct_points"]}, {"required": ["max_pct"]}, {"required": ["min_value"]}]}}
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["dataset", "corpus_dir", "index_flags", "query_flags"],
+  "additionalProperties": false,
+  "properties": {
+    "dataset": {"type": "string"},
+    "corpus_dir": {"type": "string"},
+    "index_flags": {"type": "object"},
+    "query_flags": {"type": "object"},
+    "model": {"type": "string"},
+    "judge_model": {"type": "string"}
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["dataset_id", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "dataset_id": {"type": "string", "minLength": 1},
+    "cases": {"type": "array", "items": {"$ref": "#/$defs/case"}}
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "required": ["case_id", "question", "reference_answer", "relevant_chunks", "category", "gold_facts"],
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "question": {"type": "string"},
+        "reference_answer": {"type": "string"},
+        "relevant_chunks": {"type": "array", "items": {"type": "string"}},
+        "category": {"type": "string"},
+        "gold_facts": {"type": "array", "items": {"type": "string"}},
+        "difficulty": {"type": ["string", "null"]},
+        "source": {"type": "string", "enum": ["golden", "production"]}
+      }
+    }
+  }
+}

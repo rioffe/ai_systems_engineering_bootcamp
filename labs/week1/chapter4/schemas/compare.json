@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["eval_report_version", "dataset_id", "metrics"],
+  "additionalProperties": false,
+  "properties": {
+    "eval_report_version": {"const": "0.1"},
+    "dataset_id": {"type": "string"},
+    "metrics": {"type": "object"},
+    "by_category": {"type": "object"},
+    "warnings": {"type": "array", "items": {"type": "string"}}
+  }
+}
