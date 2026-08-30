@@ -3,7 +3,9 @@ name = "hybrid-mortgage-calculator"
 version = "0.1.0"
 description = "Deterministic fixed-rate mortgage calculator with a structured language boundary"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "loguru>=0.7,<1",
+]
 
 [project.optional-dependencies]
 test = [

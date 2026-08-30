@@ -67,6 +67,8 @@ The system accepts either a structured request or a natural-language question. S
 | **R-19** | The CLI MUST provide an explicit disclaimer that results are estimates for principal and interest only and are not lender-specific quotes or financial advice. |
 | **R-20** | The project MUST be reproducible with Python 3.12 and `uv`, and its implementation MUST follow the module boundaries and test obligations in this specification. |
 | **R-21** | The project MUST provide a PyQt5 desktop UI through `mortgage-gui` with calculator and natural-language modes, result metrics, validation/clarification states, and optional amortization display. |
+| **R-22** | The CLI and GUI MUST provide opt-in levelled diagnostics: omitted verbosity is quiet, bare `--verbose`/`INFO` emits metadata, and `DEBUG` additionally emits raw model prompts/responses; diagnostics MUST NOT alter calculation results or normal result output. CLI diagnostics MUST go to stderr and GUI diagnostics MUST appear in a dedicated status label. |
+| **R-23** | When Ollama is selected in the GUI, the application MUST query `/api/tags` off the Qt main thread and display the locally available model names in a sorted dropdown; refresh failures MUST be visible without crashing the UI. |
 
 ---
 
@@ -294,7 +296,16 @@ class OllamaAdapter:
     def ask(self, user_text: str) -> AdapterResponse: ...
 ```
 
-`OllamaAdapter` MUST POST non-streaming JSON to `${host}/api/chat` using the selected `model`. Its first prompt MUST request a JSON-only `Interpretation`; its second prompt MAY request prose explanation, but MUST include the calculator result. `OLLAMA_HOST` and `OLLAMA_MODEL` MAY supply defaults. One request attempt is permitted per phase; timeout, connection, malformed JSON, or missing `message.content` MUST become `MODEL_ERROR`. No model output may replace or alter the calculator-tool result.
+`OllamaAdapter` MUST POST non-streaming JSON to `${host}/api/chat` using the selected `model`. Its first prompt MUST request a JSON-only `Interpretation`; its second prompt MAY request prose explanation, but MUST include the calculator result. `OLLAMA_HOST` and `OLLAMA_MODEL` MAY supply defaults. One request attempt is permitted per phase; timeout, connection, malformed JSON, or missing `message.content` MUST become `MODEL_ERROR`. The interpretation parser MUST accept one optional JSON code fence, normalize local-model `U+2581` space markers, map `loan_amount`/`interest_rate`/`loan_term` aliases, and infer the missing field from explicit user intent when a model incorrectly fills it. No model output may replace or alter the calculator-tool result.
+
+### C-08b Ollama model discovery
+
+```python
+class OllamaClient:
+    def list_models(self) -> list[str]: ...
+```
+
+`list_models` MUST issue `GET ${host}/api/tags`, read `{ "models": [{"name": "..."}] }`, return unique names sorted lexicographically, and convert network, timeout, malformed JSON, or malformed shape failures to `MODEL_ERROR`. `ModelDiscoveryWorker(QThread)` MUST call it off the Qt main thread. The GUI MUST retain a safe default or display `No local models found` when discovery fails.
 
 ### C-09 Presentation contract
 
@@ -331,7 +342,7 @@ JSON output MUST be machine-readable and MUST include either `{ "ok": true, "res
 | `mortgage ask TEXT` | Send text to the selected adapter (`--adapter mock \| real`); for `real`, use `--model` (default `llama3.2`) and `--host` (default `http://localhost:11434`); print a clarification or invoke the calculator tool and explain its validated result. | `0` success or clarification; `2` usage/validation; `3` solver/tool failure; `4` unsupported scope; `5` model failure. |
 | `mortgage amortize` | Require all four canonical values, or first calculate a missing payment and then schedule it; `--payments` and `--term-years` are mutually exclusive. | `0` success; `2` usage/validation; `3` solver/tool failure. |
 
-`--rate-period` defaults to `annual`. `--rate-period monthly` requires a decimal rate. `--term-years` MUST be a positive integer or a decimal whose multiplication by 12 is an integer; otherwise it is a usage error. The default adapter MUST be `mock`; real model use MUST be opt-in. The CLI MUST print the disclaimer from R-19 in text mode and include a `disclaimer` field in JSON mode. All commands use the same exit partition: `0` success; `2` usage, validation, or clarification; `3` solver/tool failure; `4` unsupported scope; `5` real-model failure.
+`--verbose` MAY appear before or after the subcommand. It accepts no value (equivalent to `INFO`) or the explicit levels `INFO` and `DEBUG`. `INFO` MUST emit metadata only; `DEBUG` MUST additionally emit raw model prompts and responses for model-backed operations. Diagnostics MUST go to stderr and stdout MUST be byte-equivalent to a non-verbose successful invocation. `--rate-period` defaults to `annual`. `--rate-period monthly` requires a decimal rate. `--term-years` MUST be a positive integer or a decimal whose multiplication by 12 is an integer; otherwise it is a usage error. The default adapter MUST be `mock`; real model use MUST be opt-in. The CLI MUST print the disclaimer from R-19 in text mode and include a `disclaimer` field in JSON mode. All commands use the same exit partition: `0` success; `2` usage, validation, or clarification; `3` solver/tool failure; `4` unsupported scope; `5` real-model failure.
 
 Representative direct invocation:
 
@@ -353,10 +364,10 @@ The controls MUST provide:
 
 - Mode selector: `Calculator` or `Natural language`.
 - Calculator fields for principal, rate, rate units, term years, payments, and payment.
-- Natural-language prompt, adapter selector (`Mock` or `Ollama`), model, and Ollama host fields.
+- Natural-language prompt, adapter selector (`Mock` or `Ollama`), a model dropdown populated from Ollama `/api/tags`, a `Refresh models` button, and Ollama host field.
 - Amortization toggle, display-precision control, and `Calculate` button.
 
-The result area MUST provide monthly payment, principal, annual rate, term, total paid, total interest, assumptions, status/error or clarification text, a schedule table, and the principal-and-interest disclaimer. The UI MUST use `service.py`/`tool.py`, MUST NOT contain financial formulas, and MUST keep Ollama calls off the Qt main thread using a worker. The mock path MUST remain synchronous and offline. GUI behavior is covered by T-35..T-39 and is required for v0.2.
+The result area MUST provide monthly payment, principal, annual rate, term, total paid, total interest, assumptions, status/error or clarification text, a schedule table, and the principal-and-interest disclaimer. Selecting `Ollama` MUST trigger model discovery; the refresh control MUST be disabled while discovery is active and re-enabled when it settles. When `Include schedule` is selected, the UI MUST generate and display a schedule from every successful validated result, including natural-language and rate-solving results. The UI MUST use `service.py`/`tool.py`, MUST NOT contain financial formulas, and MUST keep Ollama calls off the Qt main thread using a worker. The mock path MUST remain synchronous and offline. The Options panel MUST provide a `Verbosity` selector with `Off`, `INFO`, and `DEBUG`; `INFO` MUST show metadata and `DEBUG` MUST additionally show raw model prompts/responses in the diagnostics label. GUI behavior is covered by T-35..T-39 and is required for v0.2.
 
 ### 5.3 Configuration
 
@@ -503,6 +514,11 @@ A real adapter endpoint MAY be configured through `OLLAMA_HOST` or the CLI `--ho
 - **T-37** Invalid calculator input displays an error state and does not fabricate a result.
 - **T-38** Mock natural-language mode displays the deterministic calculator result and assumptions without network access.
 - **T-39** Ollama mode executes through a worker and leaves the UI thread responsive; a mocked transport failure displays an error state and restores the Calculate button.
+- **T-44** A successful natural-language result with `Include schedule` selected displays the full validated amortization schedule, including for a rate-solving request.
+- **T-42** A mocked `GET /api/tags` response returns unique lexicographically sorted names and populates the GUI dropdown without a network call.
+- **T-43** A mocked discovery failure displays a model-discovery error, leaves a safe dropdown state, and does not crash the GUI.
+- **T-40** CLI `--verbose` is accepted before and after a subcommand, writes diagnostics only to stderr, and leaves normal stdout and exit code unchanged.
+- **T-41** GUI `Verbosity` defaults to `Off`; `INFO` displays metadata and `DEBUG` displays metadata plus raw model prompts/responses in the dedicated diagnostics label.
 
 ---
 
@@ -573,6 +589,8 @@ R-12/R-15      --> llm.py + tool.py (calculator authority and adapter seam) --> 
 R-14/R-19      --> presentation.py + llm.py (scope boundary and disclaimer) --> T-18, T-25
 R-16/R-20      --> pyproject.toml + MockLLMAdapter + tests/ --> T-16, T-28, T-29
 R-21           --> ui.py + pyproject.toml (`mortgage-gui`) --> T-35..T-39
+R-22           --> cli.py + ui.py (opt-in diagnostics) --> T-40, T-41
+R-23           --> llm.py:OllamaClient.list_models + ui.py:ModelDiscoveryWorker --> T-42, T-43
 R-17           --> cli.py + service.py (direct and natural-language modes) --> T-27, T-28, T-32
 C-10           --> ui.py (PyQt5 two-mode surface and worker) --> T-35..T-39
 R-18           --> models.py + validation.py + llm.py (error taxonomy) --> T-06..T-10, T-17, T-26a
@@ -597,6 +615,7 @@ E-10/E-11    --> tool.py + llm.py --> T-17, T-28
 E-12         --> amortization.py --> T-13, T-14
 E-13/E-14    --> cli.py + scope policy --> T-10, T-27
 C-08a        --> llm.py:OllamaClient/OllamaAdapter + cli.py flags --> T-34
+C-08b        --> llm.py + ui.py model discovery worker --> T-42, T-43
 F-001..F-003 --> §4 C-04 + §5.1 + §5.3 (normalization, zero-rate, bisection) --> T-03..T-05, T-10a
 F-004..F-005 --> C-06 + C-09 (schedule payoff and Decimal JSON) --> T-14, T-18a
 F-006..F-008 --> §5.1 + §5.3 + K-05a (bounds, errors, exits) --> T-10a, T-27

@@ -7,6 +7,7 @@ from decimal import Decimal, InvalidOperation
 import sys
 from typing import Sequence
 
+from .diagnostics import configure_verbosity, metadata
 from .llm import MockLLMAdapter, OllamaAdapter
 from .models import CalculationRequest
 from .presentation import to_json, to_text
@@ -51,7 +52,35 @@ def _request(args: argparse.Namespace, *, include_schedule: bool) -> Calculation
     return CalculationRequest(principal, periodic_rate, payments, payment, include_schedule, args.rounding_places)
 
 
+def _add_verbose_arg(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--verbose",
+        nargs="?",
+        const="INFO",
+        choices=("INFO", "DEBUG"),
+        default=argparse.SUPPRESS,
+        help="emit INFO metadata or DEBUG raw model payload diagnostics",
+    )
+
+
+def _verbose_log(args: argparse.Namespace, message: str) -> None:
+    if getattr(args, "verbose", None):
+        metadata("verbose {}", message)
+
+
+def _normalize_verbose_args(argv: Sequence[str]) -> list[str]:
+    normalized: list[str] = []
+    for index, argument in enumerate(argv):
+        normalized.append(argument)
+        if argument == "--verbose" and (
+            index + 1 == len(argv) or argv[index + 1] not in {"INFO", "DEBUG"}
+        ):
+            normalized.append("INFO")
+    return normalized
+
+
 def _add_calculation_args(parser: argparse.ArgumentParser) -> None:
+    _add_verbose_arg(parser)
     parser.add_argument("--principal")
     parser.add_argument("--rate")
     parser.add_argument("--rate-period", choices=("annual", "monthly"), default="annual")
@@ -75,10 +104,19 @@ def _exit_for_error(code: str) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="mortgage")
+    parser.add_argument(
+        "--verbose",
+        nargs="?",
+        const="INFO",
+        choices=("INFO", "DEBUG"),
+        default=None,
+        help="emit INFO metadata or DEBUG raw model payload diagnostics",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
     calculate_parser = subparsers.add_parser("calculate")
     _add_calculation_args(calculate_parser)
     ask_parser = subparsers.add_parser("ask")
+    _add_verbose_arg(ask_parser)
     ask_parser.add_argument("--adapter", choices=("mock", "real"), default="mock")
     ask_parser.add_argument("--model", default=None)
     ask_parser.add_argument("--host", default=None)
@@ -90,9 +128,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
+    raw_argv = list(argv) if argv is not None else sys.argv[1:]
+    args = parser.parse_args(_normalize_verbose_args(raw_argv))
+    if getattr(args, "verbose", None):
+        configure_verbosity(args.verbose)
     try:
         if args.command == "ask":
+            _verbose_log(args, f"mode=natural-language adapter={args.adapter}")
             adapter = (
                 OllamaAdapter(model=args.model, host=args.host)
                 if args.adapter == "real"
@@ -110,6 +152,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 0
 
         request = _request(args, include_schedule=args.command == "amortize" or args.include_schedule)
+        _verbose_log(args, f"mode={args.command} principal={request.principal} periodic_rate={request.periodic_rate} payments={request.payments} payment={request.payment}")
         payload = calculate(request, adapter="direct")
         if args.format == "json":
             print(to_json(payload))

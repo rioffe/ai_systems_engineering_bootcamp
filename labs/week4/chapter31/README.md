@@ -133,6 +133,20 @@ uv run mortgage calculate --principal 500000 --rate 0.005 --rate-period monthly 
 
 ### JSON output
 
+Use `--format json` for automation. Add `--verbose` before or after the subcommand for levelled diagnostics:
+
+- No flag: quiet.
+- `--verbose` or `--verbose INFO`: colored metadata only, including mode, adapter, model, phase, normalized inputs, payload sizes, and tool status.
+- `--verbose DEBUG`: INFO metadata plus raw model prompts and responses.
+
+CLI diagnostics are written to `stderr`; normal result output stays on `stdout` and is unchanged.
+
+```bash
+uv run mortgage --verbose calculate --principal 500000 --rate 6.5 --term-years 30
+uv run mortgage --verbose DEBUG ask --adapter real --model llama3.2 'What is the payment on $500,000 at 6.5% for 30 years?'
+uv run mortgage calculate --verbose INFO --principal 500000 --rate 6.5 --term-years 30
+```
+
 Use `--format json` for automation:
 
 ```bash
@@ -187,9 +201,9 @@ uv run mortgage-gui
 The window has two modes:
 
 - **Calculator:** enter principal, rate, term/payments, and optionally a payment; the UI calculates the missing quantity through the deterministic service.
-- **Natural language:** enter a mortgage question and choose `Mock` for the offline adapter or `Ollama` for a local model. Ollama requests run in a worker thread so the UI remains responsive.
+- **Natural language:** enter a mortgage question and choose `Mock` for the offline adapter or `Ollama` for a local model. Selecting Ollama queries `/api/tags` in a background worker and fills the model dropdown; use **Refresh models** to query again. Ollama requests run in a worker thread so the UI remains responsive.
 
-The result panel displays payment, principal, annual rate, term, total paid, total interest, assumptions, status/error text, the optional amortization table, and the principal-and-interest disclaimer. Invalid inputs and missing natural-language parameters are rendered as status messages rather than guessed results.
+The result panel displays payment, principal, annual rate, term, total paid, total interest, assumptions, status/error text, the optional amortization table, and the principal-and-interest disclaimer. The selected amortization option applies to both calculator and natural-language results, including rate-solving requests. Invalid inputs and missing natural-language parameters are rendered as status messages rather than guessed results. Use the **Verbosity** selector (`Off`, `INFO`, `DEBUG`) in the Options panel: `INFO` shows metadata and `DEBUG` additionally shows raw model prompts/responses.
 
 Run the offscreen UI tests with:
 
@@ -272,7 +286,16 @@ The Ollama adapter makes two non-streaming `/api/chat` requests:
 1. Request a JSON-only structured interpretation with normalized monthly fields.
 2. Send the calculator result to the model for a natural-language explanation.
 
-The adapter calls the calculator tool between those phases. A timeout, connection failure, malformed model response, or missing `message.content` returns `MODEL_ERROR` with exit code `5`. It never substitutes model-generated arithmetic.
+The adapter calls the calculator tool between those phases. In the GUI, selecting Ollama calls `GET /api/tags` in a background worker, deduplicates and sorts the returned model names, and fills the model dropdown. **Refresh models** repeats the query; a discovery failure leaves a safe default or displays `No local models found` with an error status. The adapter accepts one optional JSON code fence and normalizes local-model `U+2581` space markers before parsing. It also maps common aliases such as `loan_amount`, `interest_rate`, and `loan_term` to canonical fields, then infers the missing field from the user’s intent before calling the tool. A timeout, connection failure, malformed model response, or missing `message.content` returns `MODEL_ERROR` with exit code `5`. It never substitutes model-generated arithmetic.
+
+When entering prompts in a shell, use single quotes or escape dollar signs so the shell does not expand currency amounts:
+
+```bash
+uv run mortgage ask --adapter real --model gemma3n:e4b \
+  'What is the payment on a 5% a year $100,000 30-year loan?'
+```
+
+Do not use unescaped `$100,000` inside double quotes.
 
 ## Architecture and module map
 
@@ -384,7 +407,8 @@ The suite covers:
 - Decimal-string JSON and structured error envelopes.
 - Mock natural-language extraction, clarification, scope handling, and evidence.
 - Ollama interpretation/explanation sequencing using an offline fake transport.
-- CLI output and exit-code behavior.
+- CLI output, levelled Loguru diagnostics, and exit-code behavior.
+- GUI verbosity selector and diagnostic status behavior.
 - Property-based payment/principal and payment/rate round trips over 100 generated cases.
 
 The Ollama adapter tests do not open a socket. To manually exercise the real path, use a locally running Ollama daemon and an installed model.

@@ -26,24 +26,43 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from .llm import MockLLMAdapter, OllamaAdapter
+from .diagnostics import configure_verbosity, metadata
+from .llm import MockLLMAdapter, OllamaAdapter, OllamaClient
 from .models import CalculationRequest
 from .presentation import DISCLAIMER
 from .service import calculate
 
 
-class OllamaWorker(QThread):
-    completed = pyqtSignal(object)
+class ModelDiscoveryWorker(QThread):
+    models_found = pyqtSignal(object)
     failed = pyqtSignal(str)
 
-    def __init__(self, text: str, model: str, host: str) -> None:
+    def __init__(self, host: str) -> None:
         super().__init__()
-        self.text = text
-        self.model = model
         self.host = host
 
     def run(self) -> None:
         try:
+            self.models_found.emit(OllamaClient(host=self.host).list_models())
+        except Exception as exc:
+            self.failed.emit(str(exc))
+
+
+class OllamaWorker(QThread):
+    completed = pyqtSignal(object)
+    failed = pyqtSignal(str)
+    diagnostic = pyqtSignal(str)
+
+    def __init__(self, text: str, model: str, host: str, verbosity: str) -> None:
+        super().__init__()
+        self.text = text
+        self.model = model
+        self.host = host
+        self.verbosity = verbosity
+
+    def run(self) -> None:
+        try:
+            configure_verbosity(self.verbosity, sink=self.diagnostic.emit)
             self.completed.emit(OllamaAdapter(model=self.model, host=self.host).ask(self.text))
         except Exception as exc:
             self.failed.emit(str(exc))
@@ -55,6 +74,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Hybrid Mortgage Calculator")
         self.resize(1100, 720)
         self._worker: OllamaWorker | None = None
+        self._model_worker: ModelDiscoveryWorker | None = None
         self._build_ui()
         self._set_mode("Calculator")
 
@@ -103,12 +123,17 @@ class MainWindow(QMainWindow):
         self.prompt_input.setMaximumHeight(130)
         self.adapter_combo = QComboBox(objectName="adapter_combo")
         self.adapter_combo.addItems(["Mock", "Ollama"])
-        self.model_input = QLineEdit("llama3.2", objectName="model_input")
+        self.adapter_combo.currentTextChanged.connect(self._adapter_changed)
+        self.model_combo = QComboBox(objectName="model_combo")
+        self.model_combo.addItem("llama3.2")
         self.host_input = QLineEdit("http://localhost:11434", objectName="host_input")
+        self.refresh_models_button = QPushButton("Refresh models", objectName="refresh_models_button")
+        self.refresh_models_button.clicked.connect(self.refresh_model_choices)
         language_form.addRow("Question", self.prompt_input)
         language_form.addRow("Adapter", self.adapter_combo)
-        language_form.addRow("Model", self.model_input)
+        language_form.addRow("Model", self.model_combo)
         language_form.addRow("Ollama host", self.host_input)
+        language_form.addRow("Local models", self.refresh_models_button)
         layout.addWidget(self.language_box)
 
         options = QGroupBox("Options")
@@ -118,8 +143,11 @@ class MainWindow(QMainWindow):
         self.rounding_input = QSpinBox(objectName="rounding_input")
         self.rounding_input.setRange(0, 10)
         self.rounding_input.setValue(2)
+        self.verbosity_combo = QComboBox(objectName="verbosity_combo")
+        self.verbosity_combo.addItems(["Off", "INFO", "DEBUG"])
         options_layout.addRow("Amortization", self.include_schedule)
         options_layout.addRow("Display decimals", self.rounding_input)
+        options_layout.addRow("Diagnostics", self.verbosity_combo)
         layout.addWidget(options)
 
         self.calculate_button = QPushButton("Calculate", objectName="calculate_button")
@@ -155,10 +183,13 @@ class MainWindow(QMainWindow):
         self.assumptions_value = QLabel("None", objectName="assumptions_value")
         self.explanation_label = QLabel("", objectName="explanation_label")
         self.explanation_label.setWordWrap(True)
+        self.verbose_label = QLabel("", objectName="verbose_label")
+        self.verbose_label.setStyleSheet("color: #666; font-family: monospace; font-size: 11px;")
         layout.addWidget(self.status_label)
         layout.addWidget(QLabel("Assumptions"))
         layout.addWidget(self.assumptions_value)
         layout.addWidget(self.explanation_label)
+        layout.addWidget(self.verbose_label)
 
         self.schedule_table = QTableWidget(objectName="schedule_table")
         self.schedule_table.setColumnCount(6)
@@ -212,10 +243,19 @@ class MainWindow(QMainWindow):
 
     def _on_calculate(self) -> None:
         try:
+            verbosity = self.verbosity_combo.currentText().upper()
+            configure_verbosity(verbosity, sink=self._append_diagnostic)
+            if verbosity != "OFF":
+                metadata("mode={}", self.mode_combo.currentText())
+            else:
+                self.verbose_label.setText("")
             if self.mode_combo.currentText() == "Natural language":
                 if self.adapter_combo.currentText() == "Ollama":
                     self.calculate_button.setEnabled(False)
-                    self._worker = OllamaWorker(self.prompt_input.toPlainText(), self.model_input.text(), self.host_input.text())
+                    self._worker = OllamaWorker(
+                        self.prompt_input.toPlainText(), self.model_combo.currentText(), self.host_input.text(), verbosity
+                    )
+                    self._worker.diagnostic.connect(self._append_diagnostic)
                     self._worker.completed.connect(self._show_adapter_response)
                     self._worker.failed.connect(self._show_worker_error)
                     self._worker.finished.connect(lambda: self.calculate_button.setEnabled(True))
@@ -226,6 +266,35 @@ class MainWindow(QMainWindow):
             self._show_payload(calculate(self._calculator_request(), adapter="direct"))
         except (TypeError, ValueError) as exc:
             self.status_label.setText(f"Error: {exc}")
+            if self.verbosity_combo.currentText() != "Off":
+                self.verbose_label.setText(f"Verbose: error={type(exc).__name__}")
+
+    def _append_diagnostic(self, message: str) -> None:
+        self.verbose_label.setText(f"Verbose: {message}")
+
+    def _adapter_changed(self, adapter: str) -> None:
+        self.refresh_models_button.setEnabled(adapter == "Ollama")
+        if adapter == "Ollama":
+            self.refresh_model_choices()
+
+    def set_model_choices(self, models: list[str]) -> None:
+        models = sorted(set(models))
+        current = self.model_combo.currentText()
+        self.model_combo.clear()
+        self.model_combo.addItems(models or ["No local models found"])
+        if current in models:
+            self.model_combo.setCurrentText(current)
+
+    def refresh_model_choices(self) -> None:
+        if self._model_worker is not None and self._model_worker.isRunning():
+            return
+        self.refresh_models_button.setEnabled(False)
+        self.status_label.setText("Loading Ollama models...")
+        self._model_worker = ModelDiscoveryWorker(self.host_input.text())
+        self._model_worker.models_found.connect(self.set_model_choices)
+        self._model_worker.failed.connect(lambda message: self.status_label.setText(f"Model discovery error: {message}"))
+        self._model_worker.finished.connect(lambda: self.refresh_models_button.setEnabled(self.adapter_combo.currentText() == "Ollama"))
+        self._model_worker.start()
 
     def _show_worker_error(self, message: str) -> None:
         self.status_label.setText(f"Error: {message}")
@@ -269,7 +338,19 @@ class MainWindow(QMainWindow):
         self.total_value.setText(f"${Decimal(result['total_paid']):,.2f}")
         self.interest_value.setText(f"${Decimal(result['total_interest']):,.2f}")
         self.assumptions_value.setText("; ".join(assumptions) if assumptions else "None")
-        self._show_schedule(None)
+        schedule = None
+        if self.include_schedule.currentIndex() == 1:
+            from .amortization import amortize
+            try:
+                schedule = amortize(
+                    Decimal(result["principal"]),
+                    Decimal(result["periodic_rate"]),
+                    int(result["payments"]),
+                    Decimal(result["payment"]),
+                )
+            except (TypeError, ValueError) as exc:
+                self.status_label.setText(f"Error: {exc}")
+        self._show_schedule(schedule)
 
     def _show_schedule(self, schedule: Any) -> None:
         rows = schedule or ()

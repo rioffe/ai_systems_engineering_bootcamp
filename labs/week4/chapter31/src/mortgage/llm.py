@@ -9,8 +9,10 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Callable, Protocol
 from urllib.error import URLError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+from .diagnostics import metadata, raw
 from .models import CalculationRequest, FieldEvidence, Interpretation
 from .tool import calculate_mortgage_tool
 
@@ -36,11 +38,110 @@ class AdapterResponse:
 
 _CURRENCY = re.compile(r"\$\s*([\d,]+(?:\.\d+)?)")
 _PERCENT = re.compile(r"(\d+(?:\.\d+)?)\s*%")
-_YEARS = re.compile(r"(\d+(?:\.\d+)?)\s*(?:years?|yr)")
+_YEARS = re.compile(r"(\d+(?:\.\d+)?)\s*-?\s*(?:years?|yr)")
+_MONTHLY_PAYMENT = re.compile(r"\$\s*([\d,]+(?:\.\d+)?)(?=\s*(?:per\s+month|monthly))", re.IGNORECASE)
+
+
+def _normalize_model_json(response: str) -> str:
+    """Extract one JSON object from prose/fences and normalize local-model spaces."""
+    text = response.strip()
+    fenced = re.search(r"```(?:json)?\s*(.*?)```", text, re.IGNORECASE | re.DOTALL)
+    if fenced:
+        text = fenced.group(1).strip()
+    else:
+        start, end = text.find("{"), text.rfind("}")
+        if start >= 0 and end > start:
+            text = text[start:end + 1]
+    return text.replace("\u2581", " ")
 
 
 def _decimal(match: re.Match[str]) -> Decimal:
     return Decimal(match.group(1).replace(",", ""))
+
+
+def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, Any]:
+    """Map common model aliases and enforce the missing field implied by the question."""
+    canonical = dict(data)
+    if canonical.get("principal") is None and canonical.get("loan_amount") is not None:
+        canonical["principal"] = canonical["loan_amount"]
+    if canonical.get("periodic_rate") is None and canonical.get("interest_rate") is not None:
+        canonical["periodic_rate"] = Decimal(str(canonical["interest_rate"])) / Decimal(12)
+    if canonical.get("payments") is None and canonical.get("loan_term") is not None:
+        try:
+            term = Decimal(str(canonical["loan_term"]).split()[0])
+            monthly_term = term * Decimal(12)
+            if monthly_term != monthly_term.to_integral_value():
+                raise ValueError("loan term is not a whole number of monthly payments")
+            canonical["payments"] = int(monthly_term)
+        except (ArithmeticError, TypeError, ValueError, InvalidOperation) as exc:
+            raise ValueError(f"MODEL_ERROR: invalid loan term: {exc}") from exc
+
+    user_lower = user_text.lower()
+    user_amounts = [_decimal(match) for match in _CURRENCY.finditer(user_text)]
+    user_rates = [_decimal(match) / Decimal(100) for match in _PERCENT.finditer(user_text)]
+    user_years = [_decimal(match) for match in _YEARS.finditer(user_text)]
+    user_monthly_payments = [_decimal(match) for match in _MONTHLY_PAYMENT.finditer(user_text)]
+    if user_amounts and canonical.get("principal") is None:
+        canonical["principal"] = str(user_amounts[0])
+    if user_rates and any(marker in user_lower for marker in ("a year", "annual", "per annum")):
+        canonical["periodic_rate"] = str(user_rates[0] / Decimal(12))
+    if user_years and canonical.get("payments") is None:
+        monthly_term = user_years[0] * Decimal(12)
+        if monthly_term != monthly_term.to_integral_value():
+            raise ValueError("MODEL_ERROR: user term is not a whole number of monthly payments")
+        try:
+            canonical["payments"] = int(monthly_term)
+        except (ArithmeticError, TypeError, ValueError) as exc:
+            raise ValueError("MODEL_ERROR: user term conversion failed") from exc
+
+    evidence = data.get("evidence") or []
+    for item in evidence:
+        field = str(item.get("field", "")).lower()
+        origin = str(item.get("origin", "")).lower()
+        source = str(item.get("source_text", "")).lower()
+        if "interest rate" in field and ("annual" in origin or "per annum" in source or "a year" in source):
+            canonical["periodic_rate"] = Decimal(str(item["normalized_value"])) / Decimal(12)
+
+    text = user_text.lower()
+    rate_intent = (
+        ("interest rate" in text and ("what" in text or "yearly" in text or "annual" in text))
+        or "what rate" in text
+        or "effectively" in text
+    )
+    if rate_intent and canonical.get("principal") is not None:
+        canonical["periodic_rate"] = None
+        if user_monthly_payments:
+            canonical["payment"] = str(user_monthly_payments[0])
+        if user_years:
+            monthly_term = user_years[0] * Decimal(12)
+            if monthly_term != monthly_term.to_integral_value():
+                raise ValueError("MODEL_ERROR: user term is not a whole number of monthly payments")
+            try:
+                canonical["payments"] = int(monthly_term)
+            except (ArithmeticError, TypeError, ValueError) as exc:
+                raise ValueError("MODEL_ERROR: user term conversion failed") from exc
+    elif ("borrow" in text or "afford" in text) and canonical.get("periodic_rate") is not None and canonical.get("payments") is not None:
+        canonical["principal"] = None
+    elif ("how long" in text or "how many years" in text or "pay off" in text) and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None:
+        canonical["payments"] = None
+    elif "payment" in text and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None and canonical.get("payments") is not None:
+        canonical["payment"] = None
+
+    if (
+        rate_intent
+        and canonical.get("principal") is not None
+        and canonical.get("payment") is not None
+        and canonical.get("payments") is not None
+    ):
+        canonical["clarification"] = None
+    if (
+        "payment" in text
+        and canonical.get("principal") is not None
+        and canonical.get("periodic_rate") is not None
+        and canonical.get("payments") is not None
+    ):
+        canonical["clarification"] = None
+    return canonical
 
 
 class MockLLMAdapter:
@@ -154,10 +255,26 @@ class OllamaClient:
 
     def __init__(self, host: str | None = None, model: str = "llama3.2", timeout: float = 30.0) -> None:
         self.host = (host or os.environ.get("OLLAMA_HOST", "http://localhost:11434")).rstrip("/")
+        parsed_host = urlparse(self.host)
+        if parsed_host.scheme not in {"http", "https"} or not parsed_host.netloc:
+            raise ValueError("MODEL_ERROR: Ollama host must use an http or https URL")
         self.model = model
         self.timeout = timeout
 
+    def list_models(self) -> list[str]:
+        request = Request(f"{self.host}/api/tags", method="GET")
+        metadata("ollama request endpoint={} phase=model-discovery", self.host)
+        try:
+            with urlopen(request, timeout=self.timeout) as response:  # nosemgrep: dynamic-urllib-use-detected
+                decoded = json.loads(response.read().decode("utf-8"))
+            models = decoded["models"]
+            names = [item["name"] for item in models if isinstance(item.get("name"), str)]
+        except (OSError, URLError, KeyError, TypeError, json.JSONDecodeError) as exc:
+            raise ValueError(f"MODEL_ERROR: Ollama model discovery failed: {exc}") from exc
+        return sorted(set(names))
+
     def chat(self, prompt: str) -> str:
+        metadata("ollama request model={} endpoint={} phase=chat", self.model, self.host)
         body = json.dumps({
             "model": self.model,
             "stream": False,
@@ -170,7 +287,7 @@ class OllamaClient:
             method="POST",
         )
         try:
-            with urlopen(request, timeout=self.timeout) as response:
+            with urlopen(request, timeout=self.timeout) as response:  # nosemgrep: dynamic-urllib-use-detected
                 decoded = json.loads(response.read().decode("utf-8"))
         except (OSError, URLError, json.JSONDecodeError) as exc:
             raise ValueError(f"MODEL_ERROR: Ollama request failed: {exc}") from exc
@@ -211,11 +328,20 @@ class OllamaAdapter:
             "and all primary fields null. Evidence entries contain field, source_text, normalized_value, origin.\n\n"
             f"User question: {user_text}"
         )
-        raw = self._chat(prompt)
+        metadata("ollama phase=interpret model={} prompt_chars={}", self.model, len(prompt))
+        raw("MODEL PROMPT\n{}", prompt)
+        response = self._chat(prompt)
+        metadata("ollama phase=interpret model={} response_chars={}", self.model, len(response))
+        raw("MODEL RESPONSE\n{}", response)
         try:
-            data = json.loads(raw)
+            data = _canonicalize_model_data(json.loads(_normalize_model_json(response)), user_text)
             clarification = data.get("clarification")
-            assumptions = tuple(str(item) for item in data.get("assumptions", []))
+            if isinstance(clarification, str) and clarification.strip().lower() in {"null", "none", "missing calculation", "need calculation"}:
+                clarification = None
+            assumptions = tuple(
+                str(item) for item in (data.get("assumptions") or [])
+                if str(item).strip().lower() not in {"null", "none"}
+            )
             evidence = tuple(
                 FieldEvidence(
                     field=item["field"],
@@ -223,13 +349,13 @@ class OllamaAdapter:
                     normalized_value=str(item["normalized_value"]),
                     origin=item["origin"],
                 )
-                for item in data.get("evidence", [])
+                for item in (data.get("evidence") or [])
             )
             if clarification:
                 return Interpretation(None, str(clarification), assumptions, evidence)
             def value(name: str) -> Decimal | None:
                 item = data.get(name)
-                if item is None:
+                if item is None or str(item).strip().lower() in {"null", "none", ""}:
                     return None
                 return Decimal(str(item))
             payments = data.get("payments")
@@ -240,12 +366,44 @@ class OllamaAdapter:
         except (KeyError, TypeError, ValueError, InvalidOperation, json.JSONDecodeError) as exc:
             raise ValueError(f"MODEL_ERROR: invalid structured interpretation: {exc}") from exc
 
+    @staticmethod
+    def _fallback_explanation(result: dict[str, Any]) -> str:
+        data = result["result"]
+        payment = Decimal(data["payment"])
+        missing = data["missing_quantity"]
+        if missing == "periodic_rate":
+            annual_rate = Decimal(data["annual_rate"]) * Decimal(100)
+            return f"The calculator determined an annual interest rate of {annual_rate:.4f}% for a fixed principal-and-interest payment of ${payment:,.2f} per month."
+        if missing == "principal":
+            principal = Decimal(data["principal"])
+            return f"The calculator determined a principal of ${principal:,.2f} for a fixed principal-and-interest payment of ${payment:,.2f} per month."
+        if missing == "payments":
+            return f"The calculator determined a term of {data['term_years']} years ({data['payments']} monthly payments) at a fixed principal-and-interest payment of ${payment:,.2f}."
+        return f"The calculator determined a fixed principal-and-interest payment of ${payment:,.2f} per month."
+
     def explain(self, result: dict[str, Any], assumptions: tuple[str, ...]) -> str:
         prompt = (
-            "Explain this calculator result without changing any numbers. State that it is principal and interest only. "
+            "Explain this calculator result without changing any numbers. State that it is principal and interest only, not interest-only. "
+            "The payment field is the fixed total principal-and-interest payment, never an interest-only payment. "
+            "Address the quantity identified by missing_quantity; if it is periodic_rate, report annual_rate, not payment. "
             f"Calculator result: {json.dumps(result, sort_keys=True)}\nAssumptions: {json.dumps(assumptions)}"
         )
-        return self._chat(prompt)
+        metadata("ollama phase=explain model={} prompt_chars={}", self.model, len(prompt))
+        raw("MODEL PROMPT\n{}", prompt)
+        response = self._chat(prompt).replace("\u2581", " ")
+        metadata("ollama phase=explain model={} response_chars={}", self.model, len(response))
+        raw("MODEL RESPONSE\n{}", response)
+        lower = response.lower()
+        data = result["result"]
+        payment = Decimal(data["payment"])
+        missing = data["missing_quantity"]
+        expected_payment = f"${payment:,.2f}"
+        expected_rate = f"{Decimal(data['annual_rate']) * Decimal(100):.4f}%"
+        unsafe_claims = ("interest-only", "does not account for interest", "doesn't account for interest")
+        expected = expected_rate if missing == "periodic_rate" else expected_payment
+        if any(claim in lower for claim in unsafe_claims) or expected not in response:
+            return self._fallback_explanation(result)
+        return response
 
     def ask(self, user_text: str) -> AdapterResponse:
         try:
