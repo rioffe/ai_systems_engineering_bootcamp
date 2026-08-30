@@ -1,0 +1,18 @@
+# Opengrep local ruleset for the chapter15 coding-agent harness.
+#
+# WHY THIS FILE EXISTS:
+#   With no local rule file, pi-lens runs opengrep in `auto` mode (the
+#   login-free community ruleset). That community set's "SQL injection sink"
+#   heuristic misfires on this lab: it is a pure-Python, SQL-free coding-agent
+#   harness whose `ToolController.execute(call)` dispatch is the permission-gated
+#   security boundary itself (C-03/C-04, enforced and covered by the
+#   permissions/tools test suites). A local rule file is the supported way to
+#   opt into a scoped ruleset instead of the misfiring `auto` community set
+#   (see pi-lens opengrep-config: "the rule file IS the opt-in signal").
+#
+#   This lab deliberately ships an EMPTY rules list: there is no SQL, no
+#   web surface, and no dependency supply-chain here to scan for. The real
+#   security invariants (sandbox containment I-003, permission-before-execution
+#   I-008, LLM-free core I-009) are enforced by the acceptance test suite
+#   (T-02/T-03/T-10), not by community grep heuristics.
+rules: []
