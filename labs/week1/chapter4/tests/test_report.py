@@ -20,6 +20,7 @@ def test_eval_artifact_is_canonical_and_loadable(tmp_path):
 
 def test_bad_artifact_is_rejected(tmp_path):
     path = tmp_path / "bad.json"
+    # pi-lens-ignore: python-path-traversal
     path.write_text(json.dumps({"dataset_id": "x"}))
     with pytest.raises(ValueError):
         load_artifact(path, "eval")
