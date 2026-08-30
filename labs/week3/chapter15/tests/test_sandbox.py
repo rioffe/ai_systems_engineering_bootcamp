@@ -7,6 +7,7 @@ vector, I-003) and removes it in a `finally` regardless of outcome (C-08-bis).
 Refuses the bootcamp repo / the agent's own source tree (E-08 / I-011); raises on
 an unwritable root (E-10).
 """
+
 from pathlib import Path
 
 from coding_agent.sandbox import (
@@ -21,7 +22,7 @@ from coding_agent.sandbox import (
 
 
 def test_create_copies_source_into_root(tmp_path):
-        # R-12 / I-011: the target repo is copied in; edits land on the COPY.
+    # R-12 / I-011: the target repo is copied in; edits land on the COPY.
     src = tmp_path / "src"
     (src).mkdir()
     (src / "config.py").write_text("X = 1\n", encoding="utf-8")
@@ -35,7 +36,7 @@ def test_create_copies_source_into_root(tmp_path):
 
 
 def test_remove_in_finally_deletes_root(tmp_path):
-        # C-08-bis: the sandbox is removed regardless of outcome.
+    # C-08-bis: the sandbox is removed regardless of outcome.
     src = tmp_path / "src"
     src.mkdir()
     root = tmp_path / "agent-sbx" / "t2"
@@ -47,18 +48,18 @@ def test_remove_in_finally_deletes_root(tmp_path):
 
 
 def test_create_via_context_manager_removes_on_success(tmp_path):
-        # C-08-bis in a with-block -- removed in finally.
+    # C-08-bis in a with-block -- removed in finally.
     src = tmp_path / "src"
     src.mkdir()
     (src / "f.txt").write_text("hi", encoding="utf-8")
     root = tmp_path / "agent-sbx" / "t3"
     with create_sandbox(src, root) as sb:
-                assert (Path(root) / "f.txt").exists() and sb.active
-    assert not root.exists()                    # the finally cleaned up
+        assert (Path(root) / "f.txt").exists() and sb.active
+    assert not root.exists()  # the finally cleaned up
 
 
 def test_create_refuses_forbidden_source(tmp_path):
-        # E-08 / I-011: refuse the agent's own source tree / bootcamp repo.
+    # E-08 / I-011: refuse the agent's own source tree / bootcamp repo.
     src = tmp_path / "forbidden_tree"
     src.mkdir()
     root = tmp_path / "agent-sbx" / "t4"
@@ -70,7 +71,7 @@ def test_create_refuses_forbidden_source(tmp_path):
 
 
 def test_create_refuses_own_source_root(tmp_path, monkeypatch):
-        # I-011 defense: the agent can never target its own package dir.
+    # I-011 defense: the agent can never target its own package dir.
     src_dir = tmp_path / "coding_agent"
     src_dir.mkdir()
     monkeypatch.setattr("coding_agent.sandbox.own_source_root", lambda: str(src_dir))
@@ -83,7 +84,7 @@ def test_create_refuses_own_source_root(tmp_path, monkeypatch):
 
 
 def test_symlinks_are_not_copied(tmp_path):
-        # I-003: symlinks are NOT copied (no escape vector).
+    # I-003: symlinks are NOT copied (no escape vector).
     src = tmp_path / "src"
     src.mkdir()
     real = tmp_path / "outside_secret.txt"
@@ -94,13 +95,13 @@ def test_symlinks_are_not_copied(tmp_path):
     Sandbox.create(src, root)
     try:
         copied = Path(root) / "link.txt"
-        assert not copied.is_symlink()          # not copied AS a symlink
+        assert not copied.is_symlink()  # not copied AS a symlink
     finally:
         Sandbox(root, active=True).remove()
 
 
 def test_unwritable_root_raises(tmp_path):
-        # E-10: an unwritable / non-existent sandbox root -> SandboxError (exit 5).
+    # E-10: an unwritable / non-existent sandbox root -> SandboxError (exit 5).
     src = tmp_path / "src"
     src.mkdir()
     bad_root = tmp_path / "root-is-a-file"
@@ -109,13 +110,17 @@ def test_unwritable_root_raises(tmp_path):
         Sandbox.create(src, bad_root)
         assert False, "expected an unwritable-root error"
     except UnwritableRoot as exc:
-        assert UNWRITABLE in str(exc).lower() or "writ" in str(exc).lower() or "exist" in str(exc).lower()
+        assert (
+            UNWRITABLE in str(exc).lower()
+            or "writ" in str(exc).lower()
+            or "exist" in str(exc).lower()
+        )
 
 
 def test_sandbox_error_is_base():
-        assert issubclass(RefusedRepo, SandboxError)
-        assert issubclass(UnwritableRoot, SandboxError)
+    assert issubclass(RefusedRepo, SandboxError)
+    assert issubclass(UnwritableRoot, SandboxError)
 
 
 if __name__ == "__main__":
-     raise SystemExit("pytest tests/test_sandbox.py")
+    raise SystemExit("pytest tests/test_sandbox.py")

@@ -26,7 +26,7 @@ FIXED = {"list_files", "read_file", "search", "edit_file", "run_shell"}
 
 
 def _sandbox(tmp_path, body="key=val\nother=1\n"):
-        # a tiny in-tree target the controller operates on
+    # a tiny in-tree target the controller operates on
     root = tmp_path / "sbx"
     (root / "repo").mkdir(parents=True)
     (root / "repo" / "config.py").write_text(body, encoding="utf-8")
@@ -60,12 +60,12 @@ def test_search_finds_a_hit(tmp_path):
 
 
 def test_read_file_escapes_are_rejected(tmp_path):
-        # I-003 / defense in depth: a `../` escape is refused by the tool layer too
+    # I-003 / defense in depth: a `../` escape is refused by the tool layer too
     root = _sandbox(tmp_path)
     try:
         ToolController(root).execute(ToolCall("read_file", {"path": "../../etc/passwd"}))
         assert False, "expected a path-escape refusal"
-    except PathEscape as exc:                 # the controller raises on an escape
+    except PathEscape as exc:  # the controller raises on an escape
         assert "escape" in str(exc).lower() or getattr(exc, "name", None) == PATH_ESCAPE
         assert "sandbox" in str(exc).lower() or True
 
@@ -75,28 +75,35 @@ def test_edit_replace_applies_when_old_found(tmp_path):
     root = _sandbox(tmp_path)
     c = ToolController(root)
     res = c.execute(
-        ToolCall("edit_file", {"path": "repo/config.py", "op": "replace",
-                                "old": "key=val", "new": "key=999"})
+        ToolCall(
+            "edit_file",
+            {"path": "repo/config.py", "op": "replace", "old": "key=val", "new": "key=999"},
         )
+    )
     assert isinstance(res, EditResult)
     assert res.applied is True
-    assert ToolController(root).execute(
-        ToolCall("read_file", {"path": "repo/config.py"})
-    ).find("key=999") != -1
+    assert (
+        ToolController(root)
+        .execute(ToolCall("read_file", {"path": "repo/config.py"}))
+        .find("key=999")
+        != -1
+    )
 
 
 def test_edit_replace_old_not_found_is_applied_false(tmp_path):
-        # E-14/F-010: a failed edit is applied=False with an explained diff; no write
+    # E-14/F-010: a failed edit is applied=False with an explained diff; no write
     root = _sandbox(tmp_path)
     before = (tmp_path / "sbx" / "repo" / "config.py").read_text()
     res = ToolController(root).execute(
-        ToolCall("edit_file", {"path": "repo/config.py", "op": "replace",
-                                "old": "NOT THERE", "new": "whatever"})
+        ToolCall(
+            "edit_file",
+            {"path": "repo/config.py", "op": "replace", "old": "NOT THERE", "new": "whatever"},
         )
+    )
     assert res.applied is False
-    assert res.diff == ""          # a failed edit contributes no diff
+    assert res.diff == ""  # a failed edit contributes no diff
     after = (tmp_path / "sbx" / "repo" / "config.py").read_text()
-    assert after == before         # the file was NOT mutated
+    assert after == before  # the file was NOT mutated
 
 
 def test_edit_append_and_prepend(tmp_path):
@@ -104,10 +111,10 @@ def test_edit_append_and_prepend(tmp_path):
     c = ToolController(root)
     assert c.execute(
         ToolCall("edit_file", {"path": "repo/config.py", "op": "append", "new": "\nz=1"})
-        ).applied
+    ).applied
     assert c.execute(
         ToolCall("edit_file", {"path": "repo/config.py", "op": "prepend", "new": "# hdr\n"})
-        ).applied
+    ).applied
     body = c.execute(ToolCall("read_file", {"path": "repo/config.py"}))
     assert body.startswith("# hdr")
     assert "z=1" in body
@@ -119,9 +126,8 @@ def test_run_shell_returns_proc_result(tmp_path):
 
     root = _sandbox(tmp_path)
     res = ToolController(root).execute(
-        ToolCall("run_shell", {"command": f"{sys.executable} -c 'print(1 + 1)'",
-                                "cwd": "."})
-        )
+        ToolCall("run_shell", {"command": f"{sys.executable} -c 'print(1 + 1)'", "cwd": "."})
+    )
     assert isinstance(res, ProcResult)
     assert res.exit == 0
     assert res.out.strip() == "2"

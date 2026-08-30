@@ -80,33 +80,34 @@ class Sandbox:
         forbids = [own_source_root(), *(forbidden or [])]
         for f in forbids:
             if _is_under(source, f):
-                raise RefusedRepo(
-                    f"refusing source {source!r}: {f!r} is forbidden (E-08/I-011)"
-                 )
+                raise RefusedRepo(f"refusing source {source!r}: {f!r} is forbidden (E-08/I-011)")
 
-         # E-10: the root must not be a non-directory path (a file masquerading as the
-         # root). A genuinely un-writable location surfaces as OSError during
-         # makedirs/copytree, mapped to UnwritableRoot (exit 5). A merely *absent*
-         # parent is created -- the sandbox root is ephemeral (C-08-bis).
+        # E-10: the root must not be a non-directory path (a file masquerading as the
+        # root). A genuinely un-writable location surfaces as OSError during
+        # makedirs/copytree, mapped to UnwritableRoot (exit 5). A merely *absent*
+        # parent is created -- the sandbox root is ephemeral (C-08-bis).
         if os.path.lexists(root) and not os.path.isdir(root):
             raise UnwritableRoot(f"sandbox root {root!r} exists but is not a directory (E-10)")
 
         try:
             os.makedirs(root, exist_ok=True)
-             # symlinks=False: a symlink copies its target content as a regular file, so
-             # no link can escape the tree (I-003).
+            # symlinks=False: a symlink copies its target content as a regular file, so
+            # no link can escape the tree (I-003).
             shutil.copytree(
-                source, root, symlinks=False, dirs_exist_ok=True,
+                source,
+                root,
+                symlinks=False,
+                dirs_exist_ok=True,
                 ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-              )
+            )
         except OSError as exc:
             raise UnwritableRoot(f"could not allocate sandbox root {root!r}: {exc} (E-10)") from exc
 
         return cls(root, active=True)
 
     def remove(self) -> None:
-         # C-08-bis: tear the sandbox down in the finally discipline. A `finally` must
-         # never raise, so the rmtree is itself guarded.
+        # C-08-bis: tear the sandbox down in the finally discipline. A `finally` must
+        # never raise, so the rmtree is itself guarded.
         if self.active and os.path.isdir(self.root):
             try:
                 shutil.rmtree(self.root, ignore_errors=True)
@@ -118,7 +119,7 @@ class Sandbox:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
-         # C-08-bis: ALWAYS remove, even when the body raised.
+        # C-08-bis: ALWAYS remove, even when the body raised.
         self.remove()
 
 
@@ -129,14 +130,14 @@ def create_sandbox(source: str, root: str, **kw) -> Sandbox:
 
 
 __all__ = [
-        "DEFAULT_MAX_BYTES",
-        "DEFAULT_MAX_FILES",
-        "REFUSED",
-        "UNWRITABLE",
-        "RefusedRepo",
-        "Sandbox",
-        "SandboxError",
-        "UnwritableRoot",
-        "create_sandbox",
-        "own_source_root",
-    ]
+    "DEFAULT_MAX_BYTES",
+    "DEFAULT_MAX_FILES",
+    "REFUSED",
+    "UNWRITABLE",
+    "RefusedRepo",
+    "Sandbox",
+    "SandboxError",
+    "UnwritableRoot",
+    "create_sandbox",
+    "own_source_root",
+]

@@ -24,22 +24,22 @@ from .policy import ToolCall
 # C-03: the closed tool schema (name -> {in, out}). This IS the closed space I-004 /
 # R-04 gate on -- any tool name outside this set is an unknown tool (coerced ERROR).
 TOOL_SET = {
-         "list_files":     {"in": {"path": "str", "glob": "str?"}, "out": "list[str]"},
-         "read_file":      {"in": {"path": "str"}, "out": "str"},
-         "search":         {"in": {"query": "str", "path_glob": "str?"}, "out": "list[Hit]"},
-         "edit_file":      {
-             "in": {
-                  "path": "str",
-                  "op": "enum[replace|append|prepend]",
-                  "old": "str?",
-                  "new": "str",
-             },
-             "out": "EditResult{applied: bool, diff: str}",
-          },
-         "run_shell":      {
-             "in": {"command": "str", "cwd": "str?"},
-             "out": "ProcResult{exit: int, out: str, err: str}",
-          },
+    "list_files": {"in": {"path": "str", "glob": "str?"}, "out": "list[str]"},
+    "read_file": {"in": {"path": "str"}, "out": "str"},
+    "search": {"in": {"query": "str", "path_glob": "str?"}, "out": "list[Hit]"},
+    "edit_file": {
+        "in": {
+            "path": "str",
+            "op": "enum[replace|append|prepend]",
+            "old": "str?",
+            "new": "str",
+        },
+        "out": "EditResult{applied: bool, diff: str}",
+    },
+    "run_shell": {
+        "in": {"command": "str", "cwd": "str?"},
+        "out": "ProcResult{exit: int, out: str, err: str}",
+    },
 }
 # The closed edit operations (C-03 edit_file op).
 EDIT_OPS = {"replace", "append", "prepend"}
@@ -156,7 +156,7 @@ class ToolController:
         if op == "replace":
             old = args.get("old", "")
             if old not in original:
-                 # E-14/F-010: a failed replace is surfaced, not silent.
+                # E-14/F-010: a failed replace is surfaced, not silent.
                 return EditResult(False, "", f"old not found: {old!r}")
             updated = original.replace(old, new, 1)
             diff = f"--- old\n{old}\n+++ new\n{new}"
@@ -200,13 +200,13 @@ class ToolController:
                 text=True,
                 timeout=120.0,
                 check=False,
-             )
+            )
         except FileNotFoundError:
             return ProcResult(exit=127, out="", err=f"command not found: {command!r}")
         except subprocess.TimeoutExpired:
             return ProcResult(exit=124, out="", err=f"timeout: {command!r}")
-        out = proc.stdout[-(self.max_output):]
-        err = proc.stderr[-(self.max_output):]
+        out = proc.stdout[-(self.max_output) :]
+        err = proc.stderr[-(self.max_output) :]
         return ProcResult(exit=proc.returncode, out=out, err=err)
 
 
