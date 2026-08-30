@@ -1,4 +1,5 @@
 """Deterministic Chapter 5 failure drills."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -23,13 +24,31 @@ DRILLS = {
 }
 
 
-def run_drill(name: str, budgets: dict[str, Any] | None = None, corpus_dir: str | Path | None = None) -> dict[str, Any]:
+def run_drill(
+    name: str, budgets: dict[str, Any] | None = None, corpus_dir: str | Path | None = None
+) -> dict[str, Any]:
     if name not in DRILLS:
         raise ValueError(f"unknown drill: {name}")
     budgets = budgets or load_budgets()
     corpus_dir = corpus_dir or Path(__file__).resolve().parents[2] / "corpus"
     policy_fault = DRILLS[name]["policy"]
-    trace = AgentRuntime(MockPolicy(policy_fault), build_registry(corpus_dir), budgets).run("reimbursement limit")
+    trace = AgentRuntime(MockPolicy(policy_fault), build_registry(corpus_dir), budgets).run(
+        "reimbursement limit"
+    )
     actual = trace["termination"]["reason"]
     passed = actual == DRILLS[name]["expected"]
-    return {"drill_report_version": "0.1", "drill": name, "trace_path": f"drills/{name}.trace.json", "model_behavior": f"MockPolicy proposed the configured {name} behavior.", "runtime_behavior": f"Runtime terminated with {actual}.", "expected_behavior": f"Runtime should terminate with {DRILLS[name]['expected']}.", "instrumentation": "Typed trace and loop metrics expose the decision, observation, retries, and termination.", "verdict": {"expected_termination": DRILLS[name]["expected"], "actual_termination": actual, "pass": passed}, "trace": trace}
+    return {
+        "drill_report_version": "0.1",
+        "drill": name,
+        "trace_path": f"drills/{name}.trace.json",
+        "model_behavior": f"MockPolicy proposed the configured {name} behavior.",
+        "runtime_behavior": f"Runtime terminated with {actual}.",
+        "expected_behavior": f"Runtime should terminate with {DRILLS[name]['expected']}.",
+        "instrumentation": "Typed trace and loop metrics expose the decision, observation, retries, and termination.",
+        "verdict": {
+            "expected_termination": DRILLS[name]["expected"],
+            "actual_termination": actual,
+            "pass": passed,
+        },
+        "trace": trace,
+    }

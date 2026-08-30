@@ -1,4 +1,5 @@
 """Declarative default-deny authorization."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -9,6 +10,7 @@ class AuthorizationDecision:
     allowed: bool
     reason: str
 
+
 class AuthorizationEngine:
     def __init__(self, policy: dict):
         self.rules = {rule["tool"]: rule["effect"] for rule in policy.get("rules", [])}
@@ -16,4 +18,6 @@ class AuthorizationEngine:
 
     def authorize(self, tool: str, arguments: dict) -> AuthorizationDecision:
         effect = self.rules.get(tool, self.default)
-        return AuthorizationDecision(effect == "allow", "allowed" if effect == "allow" else "permission_denied")
+        return AuthorizationDecision(
+            effect == "allow", "allowed" if effect == "allow" else "permission_denied"
+        )

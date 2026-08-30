@@ -15,6 +15,12 @@ def test_invalid_tool_and_argument_are_structured():
 
 
 def test_final_citation_and_conflict_are_checked():
-    report = {"status": "ok", "answer": "a", "citations": ["missing"], "conflicts": [], "caveats": []}
+    report = {
+        "status": "ok",
+        "answer": "a",
+        "citations": ["missing"],
+        "conflicts": [],
+        "caveats": [],
+    }
     errors = validate_final_report(report, {"known"})
     assert errors and errors[0]["field"] == "citations"

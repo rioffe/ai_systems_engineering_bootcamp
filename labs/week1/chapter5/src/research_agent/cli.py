@@ -1,4 +1,5 @@
 """research-agent command line interface."""
+
 # pyright: reportMissingImports=false
 from __future__ import annotations
 
@@ -50,8 +51,11 @@ def main(argv: list[str] | None = None) -> int:
             budgets = load_budgets(args.budgets)
             from .policy import MockPolicy, resolve_policy
             from .runtime import AgentRuntime
+
             policy, availability, banner, exit_code = resolve_policy(args.real and not args.mock)
-            artifact = AgentRuntime(policy if args.real else MockPolicy(), registry, budgets).run(args.question)
+            artifact = AgentRuntime(policy if args.real else MockPolicy(), registry, budgets).run(
+                args.question
+            )
             artifact["availability"] = availability
             if banner:
                 print(banner, file=sys.stderr)

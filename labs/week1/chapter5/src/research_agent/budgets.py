@@ -1,18 +1,31 @@
 """Runtime-owned stopping conditions."""
+
 from __future__ import annotations
 
 from typing import Any
 
 from .state import AgentState
 
-REASONS = {"goal_complete", "max_steps", "token_budget", "cost_budget", "time_budget", "repeated_state", "consecutive_tool_failures"}
+REASONS = {
+    "goal_complete",
+    "max_steps",
+    "token_budget",
+    "cost_budget",
+    "time_budget",
+    "repeated_state",
+    "consecutive_tool_failures",
+}
+
 
 class BudgetEnforcer:
     def __init__(self, budgets: dict[str, Any]):
         self.budgets = budgets
 
     def check(self, state: AgentState) -> str | None:
-        if state.seen_actions and max(state.seen_actions.values()) >= self.budgets["repeat_threshold"]:
+        if (
+            state.seen_actions
+            and max(state.seen_actions.values()) >= self.budgets["repeat_threshold"]
+        ):
             return "repeated_state"
         if state.step_count >= self.budgets["max_steps"]:
             return "max_steps"

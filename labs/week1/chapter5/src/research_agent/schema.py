@@ -1,4 +1,5 @@
 """Schema-gated artifact loading."""
+
 # pyright: reportMissingModuleSource=false
 from __future__ import annotations
 
@@ -19,11 +20,15 @@ class SchemaError(ValueError):
 def validate_document(document: Any, name: str) -> dict[str, Any]:
     try:
         schema = json.loads((SCHEMA_DIR / f"{name}.json").read_text())
-        errors = sorted(Draft202012Validator(schema).iter_errors(document), key=lambda e: list(e.path))
+        errors = sorted(
+            Draft202012Validator(schema).iter_errors(document), key=lambda e: list(e.path)
+        )
     except (OSError, json.JSONDecodeError) as exc:
         raise SchemaError(f"cannot load {name} schema: {exc}") from exc
     if errors:
-        details = "; ".join(f"{'.'.join(map(str, e.path)) or '<root>'}: {e.message}" for e in errors)
+        details = "; ".join(
+            f"{'.'.join(map(str, e.path)) or '<root>'}: {e.message}" for e in errors
+        )
         raise SchemaError(f"{name} schema violation: {details}")
     return document
 

@@ -1,4 +1,5 @@
 """Strict budgets and authorization configuration."""
+
 # pyright: reportMissingImports=false
 from __future__ import annotations
 
@@ -40,9 +41,13 @@ def load_budgets(path: str | Path | None = None) -> dict[str, Any]:
 
 
 def load_policy(path: str | Path | None = None) -> dict[str, Any]:
-    default = {"version": 1, "rules": [
-        {"tool": "search", "effect": "allow"},
-        {"tool": "retrieve", "effect": "allow"},
-        {"tool": "delete_file", "effect": "deny"},
-    ], "default": "deny"}
+    default = {
+        "version": 1,
+        "rules": [
+            {"tool": "search", "effect": "allow"},
+            {"tool": "retrieve", "effect": "allow"},
+            {"tool": "delete_file", "effect": "deny"},
+        ],
+        "default": "deny",
+    }
     return _load(path, "policy", default)

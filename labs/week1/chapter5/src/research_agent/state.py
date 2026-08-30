@@ -1,4 +1,5 @@
 """Explicit loop state and deterministic accounting."""
+
 from __future__ import annotations
 
 import hashlib
