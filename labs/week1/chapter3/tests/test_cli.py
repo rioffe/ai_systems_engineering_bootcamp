@@ -95,3 +95,43 @@ def test_unknown_command_errors_out():
         assert e.code == 2
     else:
         raise AssertionError("expected SystemExit for an unknown subcommand")
+
+
+# ---------------------------------------------------------------------------
+# --verbose / --quiet must reach logging_setup.configure (SPEC 5.1). main()
+# used to hard-code configure(verbose=False, quiet=False).
+# ---------------------------------------------------------------------------
+
+
+def _eval_configure_call(tmp_path, monkeypatch, flags):
+    _gen(str(tmp_path))
+    calls = []
+    monkeypatch.setattr(
+        "rag.app.configure",
+        lambda verbose=False, quiet=False, **kw: calls.append((verbose, quiet)),
+    )
+    rc = main(
+        [
+            "eval",
+            "--corpus", str(tmp_path / "documents"),
+            "--dataset", str(tmp_path / "questions.json"),
+            "--out", "",
+            "--mock", "on",
+            *flags,
+        ]
+    )
+    assert rc == 0
+    assert calls, "configure() was never called"
+    return calls[0]
+
+
+def test_cli_wires_verbose_flag(tmp_path, monkeypatch):
+    assert _eval_configure_call(tmp_path, monkeypatch, ["--verbose"]) == (True, False)
+
+
+def test_cli_wires_quiet_flag(tmp_path, monkeypatch):
+    assert _eval_configure_call(tmp_path, monkeypatch, ["--quiet"]) == (False, True)
+
+
+def test_cli_configure_defaults_to_info(tmp_path, monkeypatch):
+    assert _eval_configure_call(tmp_path, monkeypatch, []) == (False, False)

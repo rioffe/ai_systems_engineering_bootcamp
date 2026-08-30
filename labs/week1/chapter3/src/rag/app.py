@@ -341,9 +341,11 @@ def _build_parser():
 
 def main(argv=None):
     """Entry point for the `rag` console script. Returns the section-5.1 exit code."""
-    configure(verbose=False, quiet=False)
     parser = _build_parser()
     ns = parser.parse_args(argv)
+    # Configure AFTER parse_args: the --verbose/--quiet levels live on the
+    # namespace, so this cannot move earlier (SPEC 5.1).
+    configure(verbose=ns.verbose, quiet=ns.quiet)
     ns.use_mock = ns.mock
     # E-15: --top-n < --k is bad CLI usage -> exit 2, checked before any work.
     if ns.top_n < ns.k:
