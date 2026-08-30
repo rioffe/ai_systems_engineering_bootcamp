@@ -11,9 +11,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.6"]
+gui = ["PyQt5>=5.15", "pytest-qt>=4.4"]
 
 [project.scripts]
 rag-eval = "rag_eval.cli:main"
+rag-eval-gui = "rag_eval.ui:run_gui"
 
 [build-system]
 requires = ["hatchling"]

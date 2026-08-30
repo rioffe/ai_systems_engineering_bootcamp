@@ -62,6 +62,7 @@ def run_case(case: Any, index: Any, query_flags: dict[str, Any]) -> AoEResult:
     verdict = {key: value for key, value in vars(metrics).items() if key in {"correct", "supported", "complete", "status", "unsupported_claims"}}
     return AoEResult(
         question=case.question, retrieved_chunks=list(metrics.retrieved), raw_output="",
+        parsed_answer={} if metrics.answer_status == "COMPLETED" else None,
         verdict=verdict, failure_stage=metrics.failure_stage,
         usage_tokens=len(case.question.split()), latency_ms=latency, status=metrics.status,
         trace={"retrieve_ms": metrics.retrieve_ms, "generate_ms": metrics.generate_ms},

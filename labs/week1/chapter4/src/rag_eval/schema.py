@@ -1,4 +1,5 @@
 """Schema-gated JSON and YAML artifact loading."""
+# pyright: reportMissingModuleSource=false
 
 from __future__ import annotations
 
