@@ -76,11 +76,19 @@ class Sandbox:
         # R-12/I-011: copy `source` into `root`. Symlinks are not copied (I-003).
         # Refuse a forbidden / own-source tree (E-08/I-011), an unwritable root (E-10),
         # or an over-cap copy (K-04).
-        # E-08 / I-011: refuse the agent's own source tree + any explicit forbids.
-        forbids = [own_source_root(), *(forbidden or [])]
+        # E-08 / I-011: refuse the agent's own source tree, any EXPLICIT forbid, and
+        # any source that CONTAINS the agent's own source tree (the bootcamp repo or
+        # an ancestor of it -- I-011: the agent can never operate on its own source,
+        # and the bootcamp repo is never a valid --repo).
+        own = own_source_root()
+        forbids = [own, *(forbidden or [])]
         for f in forbids:
             if _is_under(source, f):
                 raise RefusedRepo(f"refusing source {source!r}: {f!r} is forbidden (E-08/I-011)")
+        if _is_under(own, source):
+            raise RefusedRepo(
+                f"refusing source {source!r}: it contains the agent's own source tree {own!r} (I-011)"
+            )
 
         # E-10: the root must not be a non-directory path (a file masquerading as the
         # root). A genuinely un-writable location surfaces as OSError during

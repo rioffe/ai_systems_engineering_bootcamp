@@ -124,3 +124,21 @@ def test_sandbox_error_is_base():
 
 if __name__ == "__main__":
     raise SystemExit("pytest tests/test_sandbox.py")
+
+
+def test_create_refuses_ancestor_of_own_source(tmp_path, monkeypatch):
+    # I-011 / E-08: a source that CONTAINS the agent's own source tree (the bootcamp
+    # repo or any ancestor of it) is refused -- the agent can never target a repo
+    # that includes its own source.
+    bootcamp = tmp_path / "bootcamp"
+    (bootcamp / "labs" / "coding_agent").mkdir(parents=True)
+    monkeypatch.setattr(
+        "coding_agent.sandbox.own_source_root",
+        lambda: str(bootcamp / "labs" / "coding_agent"),
+    )
+    root = tmp_path / "agent-sbx" / "t7"
+    try:
+        Sandbox.create(bootcamp, root)
+        assert False, "expected the bootcamp-repo (ancestor of own source) to be refused"
+    except RefusedRepo:
+        pass
