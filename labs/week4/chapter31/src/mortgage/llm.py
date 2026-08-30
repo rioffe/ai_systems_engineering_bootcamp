@@ -2,18 +2,27 @@
 
 from __future__ import annotations
 
+import json
+import os
 import re
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any, Callable, Protocol
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from .models import CalculationRequest, FieldEvidence, Interpretation
 from .tool import calculate_mortgage_tool
 
 
 class LLMAdapter(Protocol):
-    def interpret(self, user_text: str) -> Interpretation: ...
-    def explain(self, result: dict[str, Any], assumptions: tuple[str, ...]) -> str: ...
+    def interpret(self, user_text: str) -> Interpretation:
+        """Return a typed interpretation or a clarification request."""
+        raise RuntimeError("LLMAdapter protocol method")
+
+    def explain(self, result: dict[str, Any], assumptions: tuple[str, ...]) -> str:
+        """Explain a result produced by the deterministic calculator."""
+        raise RuntimeError("LLMAdapter protocol method")
 
 
 @dataclass(frozen=True)
@@ -138,6 +147,129 @@ class MockLLMAdapter:
             interpretation,
             self.explain(tool_result, interpretation.assumptions) if ok else None,
         )
+
+
+class OllamaClient:
+    """Minimal non-streaming client for Ollama's local /api/chat endpoint."""
+
+    def __init__(self, host: str | None = None, model: str = "llama3.2", timeout: float = 30.0) -> None:
+        self.host = (host or os.environ.get("OLLAMA_HOST", "http://localhost:11434")).rstrip("/")
+        self.model = model
+        self.timeout = timeout
+
+    def chat(self, prompt: str) -> str:
+        body = json.dumps({
+            "model": self.model,
+            "stream": False,
+            "messages": [{"role": "user", "content": prompt}],
+        }).encode("utf-8")
+        request = Request(
+            f"{self.host}/api/chat",
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urlopen(request, timeout=self.timeout) as response:
+                decoded = json.loads(response.read().decode("utf-8"))
+        except (OSError, URLError, json.JSONDecodeError) as exc:
+            raise ValueError(f"MODEL_ERROR: Ollama request failed: {exc}") from exc
+        try:
+            content = decoded["message"]["content"]
+        except (KeyError, TypeError) as exc:
+            raise ValueError("MODEL_ERROR: Ollama response lacked message.content") from exc
+        if not isinstance(content, str):
+            raise ValueError("MODEL_ERROR: Ollama message.content was not text")
+        return content
+
+
+class OllamaAdapter:
+    """Ollama-backed adapter; all numeric authority remains in the calculator tool."""
+
+    def __init__(
+        self,
+        model: str | None = None,
+        *,
+        host: str | None = None,
+        timeout: float = 30.0,
+        chat_fn: Callable[[str], str] | None = None,
+    ) -> None:
+        client = OllamaClient(host=host, model=model or os.environ.get("OLLAMA_MODEL", "llama3.2"), timeout=timeout)
+        self.model = client.model
+        self._chat = chat_fn or client.chat
+        self.tool_calls = 0
+
+    def _empty_interpretation(self) -> Interpretation:
+        return Interpretation(None, None, (), ())
+
+    def interpret(self, user_text: str) -> Interpretation:
+        prompt = (
+            "Extract a fixed-rate monthly mortgage request. Return JSON only with keys "
+            "principal, periodic_rate, payments, payment, assumptions, clarification, evidence. "
+            "Use Decimal-compatible strings; periodic_rate is a monthly decimal; payments is an integer. "
+            "Never calculate a missing value. If required information is absent or ambiguous, set clarification "
+            "and all primary fields null. Evidence entries contain field, source_text, normalized_value, origin.\n\n"
+            f"User question: {user_text}"
+        )
+        raw = self._chat(prompt)
+        try:
+            data = json.loads(raw)
+            clarification = data.get("clarification")
+            assumptions = tuple(str(item) for item in data.get("assumptions", []))
+            evidence = tuple(
+                FieldEvidence(
+                    field=item["field"],
+                    source_text=str(item["source_text"]),
+                    normalized_value=str(item["normalized_value"]),
+                    origin=item["origin"],
+                )
+                for item in data.get("evidence", [])
+            )
+            if clarification:
+                return Interpretation(None, str(clarification), assumptions, evidence)
+            def value(name: str) -> Decimal | None:
+                item = data.get(name)
+                if item is None:
+                    return None
+                return Decimal(str(item))
+            payments = data.get("payments")
+            request = CalculationRequest(
+                value("principal"), value("periodic_rate"), int(payments) if payments is not None else None, value("payment")
+            )
+            return Interpretation(request, None, assumptions, evidence)
+        except (KeyError, TypeError, ValueError, InvalidOperation, json.JSONDecodeError) as exc:
+            raise ValueError(f"MODEL_ERROR: invalid structured interpretation: {exc}") from exc
+
+    def explain(self, result: dict[str, Any], assumptions: tuple[str, ...]) -> str:
+        prompt = (
+            "Explain this calculator result without changing any numbers. State that it is principal and interest only. "
+            f"Calculator result: {json.dumps(result, sort_keys=True)}\nAssumptions: {json.dumps(assumptions)}"
+        )
+        return self._chat(prompt)
+
+    def ask(self, user_text: str) -> AdapterResponse:
+        try:
+            interpretation = self.interpret(user_text)
+            if interpretation.clarification:
+                return AdapterResponse(True, None, None, interpretation, interpretation.clarification)
+            if interpretation.request is None:
+                raise ValueError("MODEL_ERROR: structured interpretation had no request")
+            request = interpretation.request
+            self.tool_calls += 1
+            payload = {
+                "principal": None if request.principal is None else str(request.principal),
+                "periodic_rate": None if request.periodic_rate is None else str(request.periodic_rate),
+                "payments": request.payments,
+                "payment": None if request.payment is None else str(request.payment),
+            }
+            tool_result = calculate_mortgage_tool(payload)
+            if not tool_result["ok"]:
+                return AdapterResponse(False, None, tool_result["error"], interpretation)
+            explanation = self.explain(tool_result, interpretation.assumptions)
+            return AdapterResponse(True, tool_result["result"], None, interpretation, explanation)
+        except ValueError as exc:
+            error = {"code": "MODEL_ERROR", "message": str(exc)}
+            return AdapterResponse(False, None, error, self._empty_interpretation())
 
 
 class RealLLMAdapter:

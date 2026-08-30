@@ -285,6 +285,16 @@ class MockLLMAdapter:
 
 The mock MUST support deterministic examples for payment, principal, payment-count, rate, clarification, unsupported scope, and invalid-payment cases. It MUST be used by automated tests and MUST make no network calls.
 
+### C-08a Ollama adapter
+
+```python
+class OllamaAdapter:
+    def __init__(self, model: str = "llama3.2", host: str = "http://localhost:11434", timeout: float = 30.0): ...
+    def ask(self, user_text: str) -> AdapterResponse: ...
+```
+
+`OllamaAdapter` MUST POST non-streaming JSON to `${host}/api/chat` using the selected `model`. Its first prompt MUST request a JSON-only `Interpretation`; its second prompt MAY request prose explanation, but MUST include the calculator result. `OLLAMA_HOST` and `OLLAMA_MODEL` MAY supply defaults. One request attempt is permitted per phase; timeout, connection, malformed JSON, or missing `message.content` MUST become `MODEL_ERROR`. No model output may replace or alter the calculator-tool result.
+
 ### C-09 Presentation contract
 
 ```python
@@ -313,7 +323,7 @@ JSON output MUST be machine-readable and MUST include either `{ "ok": true, "res
 | Subcommand | Behavior | Exit |
 | ---------- | -------- | ---- |
 | `mortgage calculate` | Accept exactly three primary values. `--rate` is a percentage when `--rate-period annual` (default) and a decimal when `monthly`; `--term-years` maps to `payments = term_years * 12`. `--term-years` and `--payments` are mutually exclusive; conflicting aliases are usage errors. | `0` success; `2` usage/validation/clarification; `3` solver/tool failure; `4` unsupported scope. |
-| `mortgage ask TEXT` | Send text to the selected adapter (`--adapter mock \| real`), print a clarification or invoke the calculator tool and explain its validated result. | `0` success or clarification; `2` usage/validation; `3` solver/tool failure; `4` unsupported scope; `5` model failure. |
+| `mortgage ask TEXT` | Send text to the selected adapter (`--adapter mock \| real`); for `real`, use `--model` (default `llama3.2`) and `--host` (default `http://localhost:11434`); print a clarification or invoke the calculator tool and explain its validated result. | `0` success or clarification; `2` usage/validation; `3` solver/tool failure; `4` unsupported scope; `5` model failure. |
 | `mortgage amortize` | Require all four canonical values, or first calculate a missing payment and then schedule it; `--payments` and `--term-years` are mutually exclusive. | `0` success; `2` usage/validation; `3` solver/tool failure. |
 
 `--rate-period` defaults to `annual`. `--rate-period monthly` requires a decimal rate. `--term-years` MUST be a positive integer or a decimal whose multiplication by 12 is an integer; otherwise it is a usage error. The default adapter MUST be `mock`; real model use MUST be opt-in. The CLI MUST print the disclaimer from R-19 in text mode and include a `disclaimer` field in JSON mode. All commands use the same exit partition: `0` success; `2` usage, validation, or clarification; `3` solver/tool failure; `4` unsupported scope; `5` real-model failure.
@@ -348,7 +358,7 @@ monetary_tolerance = 0.01
 max_schedule_payments = 1200
 ```
 
-A real adapter endpoint MAY be configured through an environment variable, but the deterministic core MUST NOT depend on it.
+A real adapter endpoint MAY be configured through `OLLAMA_HOST` or the CLI `--host`; the default is `http://localhost:11434`. `OLLAMA_MODEL` or `--model` selects the model; the default is `llama3.2`. The deterministic core MUST NOT depend on either setting.
 
 ---
 
@@ -457,6 +467,7 @@ A real adapter endpoint MAY be configured through an environment variable, but t
 - **T-26** Replacing the mock adapter with a second adapter double does not alter calculator outputs for the same typed request.
 - **T-26a** A model timeout, malformed interpretation, or explanation failure performs one attempt, returns `MODEL_ERROR`, and never substitutes model-generated arithmetic.
 - **T-26b** Every populated interpretation field has `FieldEvidence`; derived fields have `origin="derived"` and a matching assumption.
+- **T-34** With a mocked Ollama transport, `OllamaAdapter` sends an interpretation prompt, calls the calculator tool exactly once, sends the calculator result to the explanation phase, and returns `MODEL_ERROR` for malformed interpretation output or transport failure.
 
 ### 9.6 CLI and reproducibility tests
 
@@ -560,6 +571,7 @@ E-07..E-09   --> llm.py + service.py --> T-24, T-25, T-26b
 E-10/E-11    --> tool.py + llm.py --> T-17, T-28
 E-12         --> amortization.py --> T-13, T-14
 E-13/E-14    --> cli.py + scope policy --> T-10, T-27
+C-08a        --> llm.py:OllamaClient/OllamaAdapter + cli.py flags --> T-34
 F-001..F-003 --> §4 C-04 + §5.1 + §5.3 (normalization, zero-rate, bisection) --> T-03..T-05, T-10a
 F-004..F-005 --> C-06 + C-09 (schedule payoff and Decimal JSON) --> T-14, T-18a
 F-006..F-008 --> §5.1 + §5.3 + K-05a (bounds, errors, exits) --> T-10a, T-27

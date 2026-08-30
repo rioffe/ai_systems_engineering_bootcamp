@@ -33,7 +33,15 @@ uv run mortgage ask --adapter mock \
   'What is the payment on $500,000 at 6.5% for 30 years?'
 ```
 
-The adapter interprets language and calls the same calculator tool used by direct mode. It never performs arithmetic itself. A real adapter is an opt-in extension point and is not required by the test suite.
+The adapter interprets language and calls the same calculator tool used by direct mode. It never performs arithmetic itself. A real local Ollama adapter is available as an opt-in path:
+
+```bash
+ollama pull llama3.2
+uv run mortgage ask --adapter real --model llama3.2 \
+  'What is the payment on $500,000 at 6.5% for 30 years?'
+```
+
+`OLLAMA_HOST` defaults to `http://localhost:11434` and can be overridden with `--host`; `OLLAMA_MODEL` supplies the default model when `--model` is omitted. Ollama is used only for interpretation and explanation. The deterministic calculator tool remains authoritative for every financial number. Real-model failures return exit code `5` and never fall back to model-generated arithmetic.
 
 ## Amortization
 

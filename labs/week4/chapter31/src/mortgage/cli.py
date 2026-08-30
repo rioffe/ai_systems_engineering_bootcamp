@@ -7,7 +7,7 @@ from decimal import Decimal, InvalidOperation
 import sys
 from typing import Sequence
 
-from .llm import MockLLMAdapter
+from .llm import MockLLMAdapter, OllamaAdapter
 from .models import CalculationRequest
 from .presentation import to_json, to_text
 from .service import calculate
@@ -80,6 +80,8 @@ def build_parser() -> argparse.ArgumentParser:
     _add_calculation_args(calculate_parser)
     ask_parser = subparsers.add_parser("ask")
     ask_parser.add_argument("--adapter", choices=("mock", "real"), default="mock")
+    ask_parser.add_argument("--model", default=None)
+    ask_parser.add_argument("--host", default=None)
     ask_parser.add_argument("text")
     amortize_parser = subparsers.add_parser("amortize")
     _add_calculation_args(amortize_parser)
@@ -91,10 +93,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "ask":
-            if args.adapter == "real":
-                print("Error [MODEL_ERROR]: real model adapter is not configured", file=sys.stderr)
-                return 5
-            response = MockLLMAdapter().ask(args.text)
+            adapter = (
+                OllamaAdapter(model=args.model, host=args.host)
+                if args.adapter == "real"
+                else MockLLMAdapter()
+            )
+            response = adapter.ask(args.text)
             if response.interpretation.clarification and response.result is None and response.error is None:
                 print(response.interpretation.clarification)
                 return 0
