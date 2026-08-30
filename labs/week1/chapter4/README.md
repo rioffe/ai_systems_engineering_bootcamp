@@ -251,22 +251,22 @@ must not be interpreted as production measurements.
 
 ```text
 chapter4/
-├── documents/                 # local mock corpus
-├── schemas/                   # JSON Schemas for all artifact types
-├── src/rag_eval/
-│   ├── aoe.py                 # sole Chapter 3 adapter boundary
-│   ├── dataset.py             # golden dataset types and validation
-│   ├── evaluator.py           # deterministic checks and verdict mapping
-│   ├── metrics.py             # pure evaluation-vector math
-│   ├── failure.py             # failure taxonomy and precedence
-│   ├── report.py              # canonical artifact I/O and renderers
-│   ├── compare.py             # directional regression comparison
-│   ├── gates.py               # fail-closed CI gates
-│   ├── judge_check.py         # human-label agreement
-│   ├── new_case.py            # production trace scaffolding
-│   ├── pair.py                # pairwise result calculation
-│   └── ui.py                  # optional read-only GUI entry point
-└── tests/                     # offline unit and integration tests
++-- documents/                # local mock corpus
++-- schemas/                  # JSON Schemas for all artifact types
++-- src/rag_eval/
+|   +-- aoe.py                # sole Chapter 3 adapter boundary
+|   +-- dataset.py            # golden dataset types and validation
+|   +-- evaluator.py          # deterministic checks and verdict mapping
+|   +-- metrics.py             # pure evaluation-vector math
+|   +-- failure.py             # failure taxonomy and precedence
+|   +-- report.py              # canonical artifact I/O and renderers
+|   +-- compare.py             # directional regression comparison
+|   +-- gates.py               # fail-closed CI gates
+|   +-- judge_check.py         # human-label agreement
+|   +-- new_case.py            # production trace scaffolding
+|   +-- pair.py                # pairwise result calculation
+|   +-- ui.py                  # optional read-only GUI entry point
++-- tests/                    # offline unit and integration tests
 ```
 
 ## Verification
