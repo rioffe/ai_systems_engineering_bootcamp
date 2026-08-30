@@ -40,25 +40,24 @@ packages = ["src/coding_agent"]
 # Source layout under src/ (mirrors week1/chapter1).
 package = true
 
-[tool.pyright]
-# The C-09 fixtures/parse-config/ tree is a FOREIGN target repo the agent copies
-# into its ephemeral sandbox and runs `pytest -q` inside; conftest.py puts its
-# `repo/` on sys.path at RUNTIME, so no static resolver can see `from config
-# import parse_config` (a runtime path). Type-analysis therefore scopes to the
-# OWN lab code (src/tests) plus the fixture's repo on the extra search path so
-# the foreign import resolves here too. fixtures/tools/schemas stay excluded
-# from analysis proper (I-011: the agent never analyses its own source tree).
-pythonVersion = "3.12"
-extraPaths = ["src", "fixtures/parse-config/repo"]
-include = ["src", "tests"]
-exclude = ["fixtures", "tools", "schemas", "__pycache__", ".venv", ".pytest_cache"]
-reportMissingImports = "none"
-
 [tool.pytest.ini_options]
 # The full automated suite runs offline over MockPolicy with no Ollama / no
 # sockets (R-13 / K-06 / T-02). testpaths keeps runs hermetic.
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.pyright]
+# Mirror the proven config from labs/week1/chapter3: pyright needs the venv
+# interpreter (pythonPath) to resolve the editable coding_agent install, plus
+# src on the search path. reportMissingImports off because the C-09 fixture's
+# `from config import parse_config` resolves only at runtime via conftest.py's
+# sys.path injection (I-011: a foreign target repo, not statically resolvable).
+pythonPath = ".venv/bin/python3"
+pythonVersion = "3.12"
+extraPaths = ["src"]
+include = ["src", "tests"]
+exclude = ["fixtures", "tools", "schemas", "uv.lock"]
+reportMissingImports = "error"
 
 [tool.ruff]
 line-length = 100
