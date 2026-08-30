@@ -2,7 +2,7 @@
 
 **Target:** `SPEC.md` — *Minimal Coding Agent (closed-loop control, context engineering, tool use, permission gate, verification, trajectory instrumentation, + uv)*, status **v0.1**
 **Reviewer:** `spec-review` skill (4-pass method: comprehension → local precision → cross-consistency → implementation simulation)
-**Grounding:** pure spec-quality review — no `src/` or `tests/` exist yet for this lab, so all findings are *spec defects* (not spec↔code divergence). Each finding is checked against the skill's core test: *"What would a competent implementer still have to guess?"*
+**Grounding:** pure spec-quality review — no `src/` or `tests/` exist yet for this lab, so all findings are *spec defects* (not spec<->code divergence). Each finding is checked against the skill's core test: *"What would a competent implementer still have to guess?"*
 **Maturity scale:** 0 = absent · 1 = seriously deficient · 2 = weak · 3 = adequate · 4 = strong · 5 = implementation-grade
 
 ---
@@ -66,7 +66,7 @@ After the P0/P1 set is integrated (pin the iteration base, define the consecutiv
 | **F-005** | HIGH | §0, §17, C-05, C-07, T-04, T-11 | §17 fixture repo + canonical defect unspecified, yet T-04/T-11 assert concrete reproducible numbers. |
 | **F-006** | MEDIUM | §3.3, E-05, R-16, R-18, §5.1 | `compare` invoked in prose but absent from the §5.1 subcommand table. |
 | **F-007** | MEDIUM | §5.2 | GUI "read-only" attributed to I-007 (verifier-signal) — wrong invariant; no GUI invariant exists. |
-| **F-008** | MEDIUM | §3.2, C-06 | C-06 `phase` enum ≠ §3.2 FSM state names; "repair" is a phase but not a state (terminology drift). |
+| **F-008** | MEDIUM | §3.2, C-06 | C-06 `phase` enum $\ne$ §3.2 FSM state names; "repair" is a phase but not a state (terminology drift). |
 | **F-009** | MEDIUM | C-05, K-05, K-07 | Token-budget unit undefined: K-07 uses *chars*, K-05 measures ` | C_t | ` with no char/token unit. |
 | **F-010** | MEDIUM | C-03, §8 | `edit_file` failure path (`old` not found → `applied=false`) has no loop/failure semantics. |
 | **F-011** | MEDIUM | §1, R-15, I-009 | Module name drift: actor names `loop.py`, I-009/R-15/traceability name `control_loop.py`; `sandbox.py` (traceability K-04) absent from actors. |
@@ -154,7 +154,7 @@ After the P0/P1 set is integrated (pin the iteration base, define the consecutiv
 **Observation.** §3.2's FSM states are `OBSERVE/REASON/PERMIT/ACT/VERIFY/FEEDBACK` (plus terminal set), while C-06's per-row `phase` enum is `observe|inspect|search|propose|modify|verify|repair|stop`. The two vocabularies differ (`inspect`/`search`/`propose`/`modify`/`repair`/`stop` vs `OBSERVE`/`REASON`/`ACT`/`FEEDBACK`), and `repair` is a *phase* but has no corresponding FSM state.
 **Why it matters.** The instrumented `phase` is a serialized field (T-07 asserts the full field set). If its enum is not reconciled with the FSM, the `phase` value is unvalidated and two implementers will disagree on its value space.
 **Potential consequence.** `phase` cannot be schema-validated coherently; T-07's "full field set" check under-specifies the enum.
-**Recommended resolution.** Either (a) map each `phase` to the FSM `state` it belongs to (a small mapping table) and validate `phase ∈ {…}` in `schemas/trajectory.json`, or (b) rename to a single shared vocabulary. Add `NOOP`/`stop` transitions for F-015. *(P1)*
+**Recommended resolution.** Either (a) map each `phase` to the FSM `state` it belongs to (a small mapping table) and validate `phase \in {…}` in `schemas/trajectory.json`, or (b) rename to a single shared vocabulary. Add `NOOP`/`stop` transitions for F-015. *(P1)*
 
 ### F-009 — Token-budget unit (chars vs tokens) is undefined
 
@@ -217,7 +217,7 @@ After the P0/P1 set is integrated (pin the iteration base, define the consecutiv
 **Observation.** C-02 says `NOOP(note)` "feeds STALLED detection (R-08)", but §3.2's FSM never shows an `NOOP` action routing into a `STALLED` terminal — the diagram goes `ACT → VERIFY → (VERIFIED | next OBSERVE)`, with no "policy emitted NOOP" branch.
 **Why it matters.** A reader simulating the loop has no defined transition from "policy returns `NOOP`" to "run terminates `STALLED`".
 **Potential consequence.** The stuck-loop branch of R-08/I-001 is a described-but-not-shown transition.
-**Recommended resolution.** Add a NOOP branch to §3.2's diagram: `Policy → NOOP · (consecutive count ≥ K-08-stalled?) → STALLED`, consistent with F-004's split. *(P2)*
+**Recommended resolution.** Add a NOOP branch to §3.2's diagram: `Policy → NOOP · (consecutive count >= K-08-stalled?) → STALLED`, consistent with F-004's split. *(P2)*
 
 ### F-016 — Sandbox-creation protocol and exit-code collision
 
@@ -335,14 +335,14 @@ The **P2** questions (F-012 seed field, F-014 win-rule, F-015 NOOP transition, F
 | 10 | Non-functional requirements | 4 | Sound; determinism focus; no unmeasurable claims. |
 | 11 | Security specification | 4 | Permission-outside-model + sandbox + LLM-free core (chapter thesis, made mechanical); only the copy protocol (F-016) open. |
 | 12 | Observability/provenance | 4 | Full §17 instrumentation; `--seed` field + counting rules (F-012/F-013) to add. |
-| 13 | Testability | 4 | Invariant↔test pairing exemplary; T-04/T-06 not yet writable until P0 (F-005/F-001/F-002). |
+| 13 | Testability | 4 | Invariant<->test pairing exemplary; T-04/T-06 not yet writable until P0 (F-005/F-001/F-002). |
 | 14 | Evaluation/metrics | 3 | Good metric set; populations/counting rules (F-013) + fixture (F-005) to pin. |
 | 15 | Traceability | 4 | Complete §11 matrix; module-name drift (F-011) to harmonize. |
 | 16 | Internal consistency | 3 | 6 in-document consistency defects (F-002/F-003/F-007/F-008/F-009/F-011), all one-to-three-line reconciliations. |
 | 17 | Architecture consistency | 4 | §15 architecture supports the requirements; no redesign needed. |
 | 18 | Implementation readiness | 3 | YES-with-minor-clarifications today; Level 3 after P0/P1. |
 
-**Mean ≈ 3.6 / 5** — an *implementable-to-strong* spec whose gap to Level 3 is concentrated in *convention pinning and internal consistency*, not in missing behavior or a weak architecture.
+**Mean $\approx$ 3.6 / 5** — an *implementable-to-strong* spec whose gap to Level 3 is concentrated in *convention pinning and internal consistency*, not in missing behavior or a weak architecture.
 
 ---
 
