@@ -413,6 +413,38 @@ The suite covers:
 
 The Ollama adapter tests do not open a socket. To manually exercise the real path, use a locally running Ollama daemon and an installed model.
 
+## Evaluation mode
+
+Run the bundled natural-language evaluation dataset through the deterministic offline mock adapter:
+
+```bash
+uv run mortgage eval \
+  --dataset evals/mortgage_questions.jsonl \
+  --adapter mock \
+  --out eval_report.json
+```
+
+The command prints a summary and, when cases fail, prints each failed case with its question, failure classification, failure reasons, expected values, actual values, and check results. It also writes a versioned report containing the same per-case expected/actual details plus intent and field accuracy, numeric-result accuracy, clarification accuracy, and scope accuracy. It never uses an LLM judge for financial correctness.
+
+The bundled dataset covers payment, principal, term/payment-too-low, rate, clarification, and unsupported-scope cases. A successful baseline currently reports:
+
+```text
+Evaluation: 6/6 cases passed
+```
+
+For a real-model evaluation, make the dependency explicit and label the report with the selected model:
+
+```bash
+uv run mortgage eval \
+  --dataset evals/mortgage_questions.jsonl \
+  --adapter real \
+  --model llama3.2 \
+  --out eval_report.json \
+  --verbose INFO
+```
+
+Real-model failures are recorded per case and return exit code `5`; case mismatches, invalid model requests, or tool errors return exit code `1`; malformed datasets return exit code `2`. The report distinguishes `model_error`, `tool_error`, and `invalid_request` outcomes.
+
 ## Development workflow
 
 ```bash

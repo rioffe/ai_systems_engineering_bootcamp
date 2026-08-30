@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 from decimal import Decimal, InvalidOperation
 import sys
 from typing import Sequence
 
 from .diagnostics import configure_verbosity, metadata
+from .eval import evaluate_cases, load_cases, write_report
 from .llm import MockLLMAdapter, OllamaAdapter
 from .models import CalculationRequest
 from .presentation import to_json, to_text
@@ -79,6 +81,22 @@ def _normalize_verbose_args(argv: Sequence[str]) -> list[str]:
     return normalized
 
 
+def _print_eval_failures(report: dict[str, object]) -> None:
+    for case in report["cases"]:
+        if case["status"] != "FAIL":
+            continue
+        print(f"\nFAILED CASE: {case['case_id']}")
+        print(f"Question: {case['question']}")
+        print(f"Classification: {case['failure_classification']}")
+        print(f"Reasons: {', '.join(case['failure_reasons'])}")
+        print("Expected:")
+        print(json.dumps(case["expected"], indent=2, sort_keys=True, default=str))
+        print("Actual:")
+        print(json.dumps(case["actual"], indent=2, sort_keys=True, default=str))
+        print("Checks:")
+        print(json.dumps(case["checks"], indent=2, sort_keys=True))
+
+
 def _add_calculation_args(parser: argparse.ArgumentParser) -> None:
     _add_verbose_arg(parser)
     parser.add_argument("--principal")
@@ -123,6 +141,13 @@ def build_parser() -> argparse.ArgumentParser:
     ask_parser.add_argument("text")
     amortize_parser = subparsers.add_parser("amortize")
     _add_calculation_args(amortize_parser)
+    eval_parser = subparsers.add_parser("eval")
+    _add_verbose_arg(eval_parser)
+    eval_parser.add_argument("--dataset", required=True)
+    eval_parser.add_argument("--adapter", choices=("mock", "real"), default="mock")
+    eval_parser.add_argument("--model", default=None)
+    eval_parser.add_argument("--host", default=None)
+    eval_parser.add_argument("--out", default="eval_report.json")
     return parser
 
 
@@ -133,6 +158,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     if getattr(args, "verbose", None):
         configure_verbosity(args.verbose)
     try:
+        if args.command == "eval":
+            _verbose_log(args, f"mode=eval adapter={args.adapter} dataset={args.dataset}")
+            cases = load_cases(args.dataset)
+            adapter = (
+                OllamaAdapter(model=args.model, host=args.host)
+                if args.adapter == "real"
+                else MockLLMAdapter()
+            )
+            report = evaluate_cases(
+                cases,
+                adapter,
+                adapter_name=args.adapter,
+                model_name=getattr(adapter, "model", None),
+            )
+            write_report(args.out, report)
+            print(f"Evaluation: {report['summary']['passed']}/{report['summary']['total']} cases passed")
+            _print_eval_failures(report)
+            if args.adapter == "real" and any(
+                row["actual"]["outcome"] == "model_error" for row in report["cases"]
+            ):
+                return 5
+            return 0 if report["summary"]["failed"] == 0 else 1
+
         if args.command == "ask":
             _verbose_log(args, f"mode=natural-language adapter={args.adapter}")
             adapter = (

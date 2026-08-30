@@ -156,35 +156,33 @@ class MockLLMAdapter:
         amounts = [_decimal(match) for match in _CURRENCY.finditer(user_text)]
         rates = [_decimal(match) / Decimal(100) for match in _PERCENT.finditer(user_text)]
         years = [_decimal(match) for match in _YEARS.finditer(user_text)]
-        assumptions: list[str] = []
-        evidence: list[FieldEvidence] = []
-
-        if not rates or not years:
+        rate_intent = "what rate" in text or "interest rate" in text or "effectively" in text
+        term_intent = "how long" in text or "how many years" in text or "pay off" in text
+        if (not rates and not rate_intent) or (not years and not term_intent):
             missing = []
-            if not rates:
+            if not rates and not rate_intent:
                 missing.append("interest rate")
-            if not years:
+            if not years and not term_intent:
                 missing.append("mortgage term")
             return Interpretation(None, f"Please provide the {' and '.join(missing)}.", (), ())
 
-        periodic_rate = rates[0] / Decimal(12)
-        payments = years[0] * Decimal(12)
-        if payments != payments.to_integral_value():
-            return Interpretation(None, "The mortgage term must convert to a whole number of monthly payments.", (), ())
-        try:
-            payments_int = int(payments)
-        except (ArithmeticError, TypeError, ValueError) as exc:
-            raise ValueError("MODEL_ERROR: term conversion failed") from exc
-        evidence.append(FieldEvidence("periodic_rate", str(rates[0]), str(periodic_rate), "explicit"))
-        evidence.append(FieldEvidence("payments", str(years[0]), str(payments_int), "explicit"))
+        periodic_rate = rates[0] / Decimal(12) if rates else None
+        payments_int = None
+        if years:
+            payments = years[0] * Decimal(12)
+            if payments != payments.to_integral_value():
+                return Interpretation(None, "The mortgage term must convert to a whole number of monthly payments.", (), ())
+            try:
+                payments_int = int(payments)
+            except (ArithmeticError, TypeError, ValueError) as exc:
+                raise ValueError("MODEL_ERROR: term conversion failed") from exc
 
-        if "borrow" in text or "afford" in text or "can pay" in text:
-            if not amounts:
-                return Interpretation(None, "Please provide the monthly payment you can afford.", (), ())
-            payment = amounts[-1]
-            request = CalculationRequest(None, periodic_rate, payments_int, payment)
-            evidence.append(FieldEvidence("payment", str(payment), str(payment), "explicit"))
-            return Interpretation(request, None, tuple(assumptions), tuple(evidence))
+        assumptions: list[str] = []
+        evidence: list[FieldEvidence] = []
+        if rates:
+            evidence.append(FieldEvidence("periodic_rate", str(rates[0]), str(periodic_rate), "explicit"))
+        if years:
+            evidence.append(FieldEvidence("payments", str(years[0]), str(payments_int), "explicit"))
 
         down_match = re.search(r"(\d+(?:\.\d+)?)\s*%\s*down", text)
         if down_match and amounts:
@@ -199,19 +197,26 @@ class MockLLMAdapter:
         else:
             return Interpretation(None, "Please provide the principal or monthly payment.", (), ())
 
-        if "how long" in text or "how many years" in text or "pay off" in text:
-            if len(amounts) < 2:
-                return Interpretation(None, "Please provide the payment amount.", tuple(assumptions), tuple(evidence))
-            payment = amounts[-1]
-            evidence.append(FieldEvidence("payment", str(payment), str(payment), "explicit"))
-            return Interpretation(CalculationRequest(principal, periodic_rate, None, payment), None, tuple(assumptions), tuple(evidence))
-        if "what rate" in text or "effectively" in text:
-            if len(amounts) < 2:
-                return Interpretation(None, "Please provide the payment amount.", tuple(assumptions), tuple(evidence))
+        if rate_intent:
+            if len(amounts) < 2 or payments_int is None:
+                return Interpretation(None, "Please provide the monthly payment and mortgage term.", tuple(assumptions), tuple(evidence))
             payment = amounts[-1]
             evidence.append(FieldEvidence("payment", str(payment), str(payment), "explicit"))
             return Interpretation(CalculationRequest(principal, None, payments_int, payment), None, tuple(assumptions), tuple(evidence))
-        evidence.append(FieldEvidence("principal", str(principal), str(principal), "explicit" if not down_match else "derived"))
+        if term_intent:
+            if len(amounts) < 2 or periodic_rate is None:
+                return Interpretation(None, "Please provide the payment amount and interest rate.", tuple(assumptions), tuple(evidence))
+            payment = amounts[-1]
+            evidence.append(FieldEvidence("payment", str(payment), str(payment), "explicit"))
+            return Interpretation(CalculationRequest(principal, periodic_rate, None, payment), None, tuple(assumptions), tuple(evidence))
+        if "borrow" in text or "afford" in text or "can pay" in text:
+            if not amounts or periodic_rate is None or payments_int is None:
+                return Interpretation(None, "Please provide the monthly payment you can afford.", tuple(assumptions), tuple(evidence))
+            payment = amounts[-1]
+            evidence.append(FieldEvidence("payment", str(payment), str(payment), "explicit"))
+            return Interpretation(CalculationRequest(None, periodic_rate, payments_int, payment), None, tuple(assumptions), tuple(evidence))
+        if periodic_rate is None or payments_int is None:
+            return Interpretation(None, "Please provide the interest rate and mortgage term.", tuple(assumptions), tuple(evidence))
         return Interpretation(CalculationRequest(principal, periodic_rate, payments_int, None), None, tuple(assumptions), tuple(evidence))
 
     def explain(self, result: dict[str, Any], assumptions: tuple[str, ...]) -> str:
