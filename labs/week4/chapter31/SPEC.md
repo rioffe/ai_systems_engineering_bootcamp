@@ -1,6 +1,6 @@
 # SPECIFICATION — Hybrid Mortgage Calculator MVP (deterministic finance + LLM interface, CLI, uv)
 
-> - **Status:** v0.2 — SPEC_REVIEW findings F-001..F-013 integrated
+> - **Status:** v0.3 — SPEC_REVIEW findings F-001..F-018 integrated or explicitly deferred
 > - **Language:** Python 3.12 | `uv` | deterministic calculation core | structured LLM adapter | CLI labels
 > - **Curriculum source:** `supplemental_docs/hybrid_mortgage_calculator_mvp.md` (§A.1 Purpose, §A.2 Why This Is a Hybrid AI Application, §A.3 MVP Scope, §A.4 The Four Core Calculations, §A.5 Input Model, §A.6 Calculation Engine, §A.7 Financial Validation, §A.8 Natural-Language Interface, §A.9 Tool Interface, §A.10 System Prompt, §A.11 Conversational Examples, §A.12 Amortization, §A.13 Architecture, §A.14 Model Independence, §A.15 Testing Strategy, §A.16 Property-Based Testing, §A.17 LLM Evaluation, §A.18 Error Taxonomy, §A.19 Guardrails, §A.20 Precision and Rounding, §A.21 Scope Boundaries, §A.22 Suggested Project Structure, §A.23 MVP Development Sequence, §A.24 What Makes This an AI Engineering Project?, §A.25 Extensions, §A.26 The Central Design Lesson).
 > - **Scope of this document:** The authoritative contract for a fixed-rate, monthly-payment mortgage calculator with four inverse calculations, amortization, validation, a structured calculator tool, and an optional natural-language adapter. It owns deterministic financial behavior and the model boundary; it does not specify lender underwriting or production financial advice.
@@ -70,6 +70,7 @@ The system accepts either a structured request or a natural-language question. S
 | **R-22** | The CLI and GUI MUST provide opt-in levelled diagnostics: omitted verbosity is quiet, bare `--verbose`/`INFO` emits metadata, and `DEBUG` additionally emits raw model prompts/responses; diagnostics MUST NOT alter calculation results or normal result output. CLI diagnostics MUST go to stderr and GUI diagnostics MUST appear in a dedicated status label. |
 | **R-23** | When Ollama is selected in the GUI, the application MUST query `/api/tags` off the Qt main thread and display the locally available model names in a sorted dropdown; refresh failures MUST be visible without crashing the UI. |
 | **R-24** | The CLI MUST provide an `eval` subcommand that evaluates JSONL natural-language cases against an adapter, checks numeric outputs against the deterministic calculator, and writes a versioned per-case JSON report without using an LLM judge. |
+| **R-25** | Evaluation reports MUST retain per-case diagnostic provenance: elapsed time, calculator-tool call count, failure stage/classification, and an optional bounded raw model-response excerpt enabled only by an explicit flag. |
 
 ---
 
@@ -170,9 +171,11 @@ class CalculationResult:
     total_interest: Decimal
     missing_quantity: Literal["principal", "periodic_rate", "payments", "payment"]
     schedule: tuple["AmortizationRow", ...] | None = None
+    exact_payments: Decimal | None = None   # exact fractional term before ceiling
+    exact_term_years: Decimal | None = None # exact_payments / 12
 ```
 
-`total_paid` and `total_interest` MUST be computed from unrounded internal values. Presentation MAY round them. `annual_rate` MUST equal `periodic_rate * 12`, and `term_years` MUST equal `payments / 12`.
+`total_paid` and `total_interest` MUST be computed from unrounded internal values. Presentation MAY round them. `annual_rate` MUST equal `periodic_rate * 12`. For a term calculation, `exact_payments` MUST preserve the real-valued logarithmic result, `payments` MUST equal its ceiling, and `exact_term_years` MUST equal `exact_payments / 12`; `term_years` MUST equal `exact_term_years`.
 
 ### C-03 Structured error
 
@@ -204,13 +207,14 @@ The implementation MUST expose pure functions or a stateless service for:
 ```python
 def calculate_payment(principal: Decimal, periodic_rate: Decimal, payments: int) -> Decimal: ...
 def calculate_principal(payment: Decimal, periodic_rate: Decimal, payments: int) -> Decimal: ...
+def calculate_exact_payments(principal: Decimal, periodic_rate: Decimal, payment: Decimal) -> Decimal: ...
 def calculate_payments(principal: Decimal, periodic_rate: Decimal, payment: Decimal) -> int: ...
 def calculate_rate(principal: Decimal, payment: Decimal, payments: int, *, tolerance: Decimal, max_iterations: int) -> Decimal: ...
 ```
 
-For `periodic_rate == 0`, the core MUST use `payment = principal / payments`, `principal = payment * payments`, and `payments = principal / payment`. The zero-rate payment-count result MUST be accepted only when the quotient is within `integer_tolerance = 1e-9` of an integer; otherwise it MUST return `INVALID_PAYMENTS` with `details["reason"] = "NON_INTEGRAL_TERM"`.
+For `periodic_rate == 0`, the core MUST use `payment = principal / payments`, `principal = payment * payments`, and `payments = principal / payment`. For zero rate, `calculate_exact_payments` MUST return `principal / payment`, and `calculate_payments` MUST return its ceiling. The exact value MUST remain available in `CalculationResult.exact_payments`.
 
-For `periodic_rate > 0`, `calculate_payments` MUST compute the real-valued logarithmic term, then accept it only when it is within `integer_tolerance` of an integer; otherwise it MUST return `INVALID_PAYMENTS` with `details["reason"] = "NON_INTEGRAL_TERM"`. It MUST NOT silently floor or ceil the result.
+For `periodic_rate > 0`, `calculate_exact_payments` MUST compute the real-valued logarithmic term. `calculate_payments` MUST return the ceiling of that value, never floor it. The exact value MUST remain available in `CalculationResult.exact_payments`; it MUST NOT be silently discarded. A payment at or below first-period interest still returns `PAYMENT_TOO_LOW`.
 
 `calculate_rate` MUST use bisection on `f(r) = calculate_payment(principal, r, payments) - payment` over `[0, 1]`. It MUST evaluate both endpoints, accept an endpoint whose absolute residual is at most `solver_tolerance`, require opposite signs otherwise, select the midpoint each iteration, retain the half-interval containing the sign change, and stop when either `abs(f(mid)) <= solver_tolerance` or interval width is at most `solver_tolerance`. Failure after `solver_max_iterations` MUST return `SOLVER_CONVERGENCE`.
 
@@ -261,7 +265,7 @@ The final balance MUST be zero within the configured monetary tolerance. Each re
 ```python
 @dataclass(frozen=True)
 class FieldEvidence:
-    field: Literal["principal", "periodic_rate", "payments", "payment"]
+    field: Literal["principal", "annual_rate", "periodic_rate", "payments", "payment"]
     source_text: str
     normalized_value: str
     origin: Literal["explicit", "derived"]
@@ -278,7 +282,7 @@ class LLMAdapter(Protocol):
     def explain(self, result: CalculationResult, assumptions: tuple[str, ...]) -> str: ...
 ```
 
-`interpret` MUST return `clarification` instead of guessing when required values are missing or ambiguous. `explain` MUST receive a calculator-produced result; it MUST NOT accept raw numeric claims as an authoritative result.
+`interpret` MUST return `clarification` instead of guessing when required values are missing or ambiguous. The model-facing interpretation MUST use `annual_rate` as the user-facing annual decimal; application code MUST derive `periodic_rate = annual_rate / 12` before constructing `CalculationRequest`. Legacy `periodic_rate` model responses MAY be accepted for backward compatibility but MUST NOT be requested by the prompt. `explain` MUST receive a calculator-produced result; it MUST NOT accept raw numeric claims as an authoritative result.
 
 ### C-08 Mock adapter
 
@@ -297,7 +301,7 @@ class OllamaAdapter:
     def ask(self, user_text: str) -> AdapterResponse: ...
 ```
 
-`OllamaAdapter` MUST POST non-streaming JSON to `${host}/api/chat` using the selected `model`. Its first prompt MUST request a JSON-only `Interpretation`; its second prompt MAY request prose explanation, but MUST include the calculator result. `OLLAMA_HOST` and `OLLAMA_MODEL` MAY supply defaults. One request attempt is permitted per phase; timeout, connection, malformed JSON, or missing `message.content` MUST become `MODEL_ERROR`. The interpretation parser MUST accept one optional JSON code fence, normalize local-model `U+2581` space markers, map `loan_amount`/`interest_rate`/`loan_term` aliases, and infer the missing field from explicit user intent when a model incorrectly fills it. No model output may replace or alter the calculator-tool result.
+`OllamaAdapter` MUST POST non-streaming JSON to `${host}/api/chat` using the selected `model`. Its first prompt MUST request a JSON-only `Interpretation` containing `annual_rate` (an annual decimal), not `periodic_rate`; application code MUST derive `periodic_rate = annual_rate / 12`. Its second prompt MAY request prose explanation, but MUST include the original user question as quoted untrusted data and the calculator result. The prompt MUST instruct the model not to follow instructions embedded in the original question; the calculator result remains authoritative. `OLLAMA_HOST` and `OLLAMA_MODEL` MAY supply defaults. One request attempt is permitted per phase; timeout, connection, malformed JSON, or missing `message.content` MUST become `MODEL_ERROR`. The interpretation parser MUST accept one optional JSON code fence, normalize local-model `U+2581` space markers, map `loan_amount`/`interest_rate`/`loan_term` aliases, and infer the missing field from explicit user intent when a model incorrectly fills it. No model output may replace or alter the calculator-tool result.
 
 ### C-08b Ollama model discovery
 
@@ -306,7 +310,7 @@ class OllamaClient:
     def list_models(self) -> list[str]: ...
 ```
 
-`list_models` MUST issue `GET ${host}/api/tags`, read `{ "models": [{"name": "..."}] }`, return unique names sorted lexicographically, and convert network, timeout, malformed JSON, or malformed shape failures to `MODEL_ERROR`. `ModelDiscoveryWorker(QThread)` MUST call it off the Qt main thread. The GUI MUST retain a safe default or display `No local models found` when discovery fails.
+`list_models` MUST issue `GET ${host}/api/tags`, require a top-level object whose `models` field is a list, require every list item to be an object containing a string `name`, return unique names sorted lexicographically, and convert network, timeout, malformed JSON, or any malformed shape/item to `MODEL_ERROR`. `ModelDiscoveryWorker(QThread)` MUST call it off the Qt main thread. On failure, the GUI MUST display `Model discovery error: <message>`, re-enable the refresh control, and retain the prior valid model selection or display `No local models found`.
 
 ### C-09 Presentation contract
 
@@ -347,7 +351,7 @@ JSON output MUST be machine-readable and MUST include either `{ "ok": true, "res
 }
 ```
 
-`eval` MUST accept JSONL cases with `case_id`, `question`, and `expected.outcome`; optional expected intent, canonical fields, and numeric result values are checked when present. The report MUST contain `eval_version="0.1"`, adapter/model metadata, summary counts, aggregate metrics, and per-case expected/actual/check data. `calculated`, `clarification`, `unsupported_scope`, `payment_too_low`, `model_error`, `invalid_request`, and `tool_error` are the allowed outcomes.
+`eval` MUST accept JSONL cases with `case_id`, `question`, and `expected.outcome`; optional expected intent, canonical fields, and numeric result values are checked when present. The report MUST contain `eval_version="0.1"`, adapter/model metadata, summary counts, aggregate metrics, and per-case expected/actual/check data. Each case MUST additionally contain `duration_ms`, `tool_calls`, `failure_stage`, `failure_classification`, and `failure_reasons`. `model_response_excerpt` MAY be included only when the CLI receives `--include-raw`; it MUST be bounded to 4,000 characters and MUST be omitted by default. `calculated`, `clarification`, `unsupported_scope`, `payment_too_low`, `model_error`, `invalid_request`, and `tool_error` are the allowed outcomes.
 
 ---
 
@@ -360,7 +364,7 @@ JSON output MUST be machine-readable and MUST include either `{ "ok": true, "res
 | `mortgage calculate` | Accept exactly three primary values. `--rate` is a percentage when `--rate-period annual` (default) and a decimal when `monthly`; `--term-years` maps to `payments = term_years * 12`. `--term-years` and `--payments` are mutually exclusive; conflicting aliases are usage errors. | `0` success; `2` usage/validation/clarification; `3` solver/tool failure; `4` unsupported scope. |
 | `mortgage ask TEXT` | Send text to the selected adapter (`--adapter mock \| real`); for `real`, use `--model` (default `llama3.2`) and `--host` (default `http://localhost:11434`); print a clarification or invoke the calculator tool and explain its validated result. | `0` success or clarification; `2` usage/validation; `3` solver/tool failure; `4` unsupported scope; `5` model failure. |
 | `mortgage amortize` | Require all four canonical values, or first calculate a missing payment and then schedule it; `--payments` and `--term-years` are mutually exclusive. | `0` success; `2` usage/validation; `3` solver/tool failure. |
-| `mortgage eval` | Load `--dataset` JSONL, evaluate cases through `--adapter mock \| real`, and write `--out` versioned JSON report. | `0` all cases pass; `1` case failures; `2` usage/dataset error; `5` real-model failure. |
+| `mortgage eval` | Load `--dataset` JSONL, evaluate cases through `--adapter mock \| real`, and write `--out` versioned JSON report. `--include-raw` MAY include bounded raw model-response excerpts. | `0` all cases pass; `1` case failures; `2` usage/dataset error; `5` real-model failure. |
 
 `--verbose` MAY appear before or after the subcommand. It accepts no value (equivalent to `INFO`) or the explicit levels `INFO` and `DEBUG`. `INFO` MUST emit metadata only; `DEBUG` MUST additionally emit raw model prompts and responses for model-backed operations. Diagnostics MUST go to stderr and stdout MUST be byte-equivalent to a non-verbose successful invocation. `--rate-period` defaults to `annual`. `--rate-period monthly` requires a decimal rate. `--term-years` MUST be a positive integer or a decimal whose multiplication by 12 is an integer; otherwise it is a usage error. The default adapter MUST be `mock`; real model use MUST be opt-in. The CLI MUST print the disclaimer from R-19 in text mode and include a `disclaimer` field in JSON mode. All commands use the same exit partition: `0` success; `2` usage, validation, or clarification; `3` solver/tool failure; `4` unsupported scope; `5` real-model failure.
 
@@ -451,7 +455,7 @@ A real adapter endpoint MAY be configured through `OLLAMA_HOST` or the CLI `--ho
 | **E-01** | Zero, one, two, or four primary values supplied | Return `INVALID_QUANTITY_COUNT`; do not calculate or guess the missing field. |
 | **E-02** | Principal or payment is zero/negative | Return `INVALID_PRINCIPAL` or `INVALID_PAYMENT`. |
 | **E-03** | Periodic rate is negative or non-finite | Return `INVALID_RATE`. A zero rate is valid and MUST use the explicit zero-interest formulas in C-04. |
-| **E-04** | Payment count is zero, negative, non-integer, or greater than `1200` when a schedule is requested | Return `INVALID_PAYMENTS`. A non-integral inverse term also returns `INVALID_PAYMENTS` with `NON_INTEGRAL_TERM`. |
+| **E-04** | Payment count is zero, negative, or greater than `1200` when a schedule is requested | Return `INVALID_PAYMENTS`. A fractional inverse term is valid: preserve the exact value and use the ceiling operational payment count. |
 | **E-05** | Payment is less than or equal to `P*r` while solving for payments | Return `PAYMENT_TOO_LOW`; explain that first-period interest is not covered. |
 | **E-06** | Rate solver reaches its iteration limit or has no bracketed solution | Return `SOLVER_CONVERGENCE` with bounds, endpoint values, tolerance, and iteration details. Exact endpoint roots are accepted. |
 | **E-07** | Natural-language question omits rate, term, payment, or another required quantity | Return `CLARIFICATION_REQUIRED`; list the missing fields and do not call the calculator. |
@@ -472,9 +476,10 @@ A real adapter endpoint MAY be configured through `OLLAMA_HOST` or the CLI `--ho
 
 - **T-01** Payment formula: `P=100000`, annual rate `6%`, `n=360` yields `599.550525152752` within `1e-9`; text output rounds to `$599.55`.
 - **T-02** Principal inversion: calculate payment from `(P,r,n)`, then calculate principal from `(M,r,n)`; the result matches `P` within tolerance.
-- **T-03** Payment-count inversion: calculate payment from `(P,r,n)`, then calculate payments from `(P,r,M)`; the real-valued result is accepted only within `integer_tolerance=1e-9` of `n`, with no silent floor/ceil.
+- **T-03** Payment-count inversion: calculate payment from `(P,r,n)`, then calculate `exact_payments` from `(P,r,M)`; `payments = ceil(exact_payments)` and the exact value is preserved with no silent truncation.
 - **T-04** Rate inversion: calculate payment from `(P,r,n)`, then solve for `r` using the pinned bisection algorithm; the result matches the original periodic rate within `1e-10`, or returns the specified bracket/convergence error.
-- **T-05** Zero-interest behavior: `r=0` calculates `M=P/n` and `P=M*n` without division-by-zero errors; `n=P/M` is accepted only for an integer quotient within `1e-9`.
+- **T-05** Zero-interest behavior: `r=0` calculates `M=P/n` and `P=M*n` without division-by-zero errors; `exact_payments=P/M` is preserved and `payments=ceil(P/M)`.
+- **T-50** A fractional term such as `P=500000`, `r=0.005`, `M=3000` returns `exact_payments=359.247028874306...`, `exact_term_years=29.937252406192...`, and operational `payments=360`.
 
 ### 9.2 Validation and failure tests
 
@@ -534,9 +539,11 @@ A real adapter endpoint MAY be configured through `OLLAMA_HOST` or the CLI `--ho
 - **T-37** Invalid calculator input displays an error state and does not fabricate a result.
 - **T-38** Mock natural-language mode displays the deterministic calculator result and assumptions without network access.
 - **T-39** Ollama mode executes through a worker and leaves the UI thread responsive; a mocked transport failure displays an error state and restores the Calculate button.
-- **T-44** A successful natural-language result with `Include schedule` selected displays the full validated amortization schedule, including for a rate-solving request.
+- **T-40** CLI `--verbose` is accepted before and after a subcommand, writes diagnostics only to stderr, and leaves normal stdout and exit code unchanged.
+- **T-41** GUI `Verbosity` defaults to `Off`; `INFO` displays metadata and `DEBUG` displays metadata plus raw model prompts/responses in the dedicated diagnostics label.
 - **T-42** A mocked `GET /api/tags` response returns unique lexicographically sorted names and populates the GUI dropdown without a network call.
-- **T-43** A mocked discovery failure displays a model-discovery error, leaves a safe dropdown state, and does not crash the GUI.
+- **T-43** A mocked discovery failure displays `Model discovery error: <message>`, preserves a safe dropdown state, re-enables Refresh models, and does not crash the GUI.
+- **T-44** A successful natural-language result with `Include schedule` selected displays the full validated amortization schedule, including for a rate-solving request.
 
 ### 9.9 Evaluation harness
 
@@ -544,8 +551,7 @@ A real adapter endpoint MAY be configured through `OLLAMA_HOST` or the CLI `--ho
 - **T-46** Mock evaluation of the bundled dataset emits `eval_version="0.1"`, six passing cases, and `1.0` intent/field/numeric/clarification/scope accuracy.
 - **T-47** A deliberately wrong expected intent produces a failed per-case row and CLI exit `1`.
 - **T-48** A real-adapter model failure is recorded as `model_error` and returns CLI exit `5`; no LLM judge or arithmetic fallback is used.
-- **T-40** CLI `--verbose` is accepted before and after a subcommand, writes diagnostics only to stderr, and leaves normal stdout and exit code unchanged.
-- **T-41** GUI `Verbosity` defaults to `Off`; `INFO` displays metadata and `DEBUG` displays metadata plus raw model prompts/responses in the dedicated diagnostics label.
+- **T-49** Every evaluation case records `duration_ms`, `tool_calls`, `failure_stage`, `failure_classification`, and `failure_reasons`; `model_response_excerpt` is absent by default and is included only with `--include-raw`, capped at 4,000 characters.
 
 ---
 
@@ -609,16 +615,18 @@ R-01/R-03/R-04 --> models.py + calculator.py (four inverse paths and one missing
 R-02/R-06      --> validation.py + cli.py (canonical monthly units and normalization) --> T-07, T-19
 R-05           --> models.py + tool.py (typed result/error envelope) --> T-15, T-17, T-27
 R-07/R-08      --> calculator.py (payment guard and bounded rate solver) --> T-08, T-09
+R-01/R-09      --> calculator.py + C-02 exact term fields --> T-03, T-50
 R-09           --> amortization.py (deterministic schedule) --> T-11..T-14
 R-10           --> calculator.py + presentation.py (precision boundary) --> T-14, T-30
 R-11/R-13      --> llm.py (typed interpretation and clarification) --> T-20..T-25
 R-12/R-15      --> llm.py + tool.py (calculator authority and adapter seam) --> T-15, T-26, T-26a
 R-14/R-19      --> presentation.py + llm.py (scope boundary and disclaimer) --> T-18, T-25
 R-16/R-20      --> pyproject.toml + MockLLMAdapter + tests/ --> T-16, T-28, T-29
-R-21           --> ui.py + pyproject.toml (`mortgage-gui`) --> T-35..T-39
+R-21           --> ui.py + pyproject.toml (`mortgage-gui`) --> T-35..T-44
 R-22           --> cli.py + ui.py (opt-in diagnostics) --> T-40, T-41
 R-23           --> llm.py:OllamaClient.list_models + ui.py:ModelDiscoveryWorker --> T-42, T-43
-R-24           --> eval.py + cli.py (`eval`) --> T-45..T-48
+R-24           --> eval.py + cli.py (`eval`) --> T-45..T-49
+R-25           --> eval.py report provenance and `--include-raw` policy --> T-49
 R-17           --> cli.py + service.py (direct and natural-language modes) --> T-27, T-28, T-32
 C-10           --> ui.py (PyQt5 two-mode surface and worker) --> T-35..T-39
 R-18           --> models.py + validation.py + llm.py (error taxonomy) --> T-06..T-10, T-17, T-26a
@@ -644,7 +652,8 @@ E-12         --> amortization.py --> T-13, T-14
 E-13/E-14    --> cli.py + scope policy --> T-10, T-27
 C-08a        --> llm.py:OllamaClient/OllamaAdapter + cli.py flags --> T-34
 C-08b        --> llm.py + ui.py model discovery worker --> T-42, T-43
-C-11        --> eval.py + evals/mortgage_questions.jsonl --> T-45..T-48
+C-11        --> eval.py + evals/mortgage_questions.jsonl --> T-45..T-49
+C-02         --> calculator.py exact fractional term preservation --> T-03, T-50
 F-001..F-003 --> §4 C-04 + §5.1 + §5.3 (normalization, zero-rate, bisection) --> T-03..T-05, T-10a
 F-004..F-005 --> C-06 + C-09 (schedule payoff and Decimal JSON) --> T-14, T-18a
 F-006..F-008 --> §5.1 + §5.3 + K-05a (bounds, errors, exits) --> T-10a, T-27

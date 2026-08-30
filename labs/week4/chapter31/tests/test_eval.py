@@ -65,6 +65,27 @@ def test_failed_case_contains_detailed_reasons():
     assert "numeric_result.payment" in row["failure_reasons"]
 
 
+def test_eval_rows_include_provenance_and_opt_in_raw_excerpt():
+    class RecordingAdapter:
+        tool_calls = 0
+        last_response = "raw model response"
+
+        def ask(self, question):
+            self.tool_calls += 1
+            return MockLLMAdapter().ask(question)
+
+    cases = [_case("payment", "What is the payment on a $100,000 mortgage at 5% for 30 years?", {"outcome": "calculated"})]
+    adapter = RecordingAdapter()
+    report = evaluate_cases(cases, adapter, adapter_name="real", model_name="test", include_raw=True)
+    row = report["cases"][0]
+    assert isinstance(row["duration_ms"], int)
+    assert row["tool_calls"] == 1
+    assert row["failure_stage"] == "none"
+    assert row["failure_classification"] == "none"
+    assert row["failure_reasons"] == []
+    assert row["model_response_excerpt"] == "raw model response"
+
+
 def test_write_report_is_sorted_and_versioned(tmp_path):
     path = tmp_path / "report.json"
     write_report(path, {"summary": {"total": 0, "passed": 0, "failed": 0}, "cases": []})

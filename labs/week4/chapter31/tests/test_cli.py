@@ -51,6 +51,20 @@ def test_eval_command_returns_one_for_failed_case(tmp_path):
     assert "intent" in result.stdout
 
 
+def test_eval_real_model_failure_exits_five(tmp_path):
+    dataset = tmp_path / "case.jsonl"
+    dataset.write_text(json.dumps({
+        "case_id": "model-failure", "question": "What is the payment on a $100,000 mortgage at 5% for 30 years?",
+        "expected": {"outcome": "calculated"},
+    }) + "\n")
+    result = run_cli(
+        "eval", "--adapter", "real", "--host", "http://127.0.0.1:9",
+        "--dataset", str(dataset), "--out", str(tmp_path / "report.json"),
+    )
+    assert result.returncode == 5
+    assert json.loads((tmp_path / "report.json").read_text())["cases"][0]["actual"]["outcome"] == "model_error"
+
+
 def test_mock_ask_is_offline():
     result = run_cli(
         "ask", "--adapter", "mock", "What is the payment on $500,000 at 6.5% for 30 years?"

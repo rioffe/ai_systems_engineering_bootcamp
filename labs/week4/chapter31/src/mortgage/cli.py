@@ -148,6 +148,7 @@ def build_parser() -> argparse.ArgumentParser:
     eval_parser.add_argument("--model", default=None)
     eval_parser.add_argument("--host", default=None)
     eval_parser.add_argument("--out", default="eval_report.json")
+    eval_parser.add_argument("--include-raw", action="store_true", help="include bounded raw model-response excerpts in the report")
     return parser
 
 
@@ -171,6 +172,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 adapter,
                 adapter_name=args.adapter,
                 model_name=getattr(adapter, "model", None),
+                include_raw=args.include_raw,
             )
             write_report(args.out, report)
             print(f"Evaluation: {report['summary']['passed']}/{report['summary']['total']} cases passed")

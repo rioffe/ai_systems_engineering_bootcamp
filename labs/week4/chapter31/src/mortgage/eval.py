@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
 OUTCOMES = {
@@ -89,6 +90,26 @@ def _actual_intent(response: Any) -> str | None:
     }.get(missing)
 
 
+def _safe_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (ArithmeticError, TypeError, ValueError):
+        return default
+
+
+def _failure_stage(response: Any) -> str:
+    if response.error:
+        code = response.error.get("code")
+        if code == "MODEL_ERROR":
+            return "model"
+        if code in {"TOOL_ERROR", "INVALID_QUANTITY_COUNT", "INVALID_PRINCIPAL", "INVALID_RATE", "INVALID_PAYMENTS", "INVALID_PAYMENT", "PAYMENT_TOO_LOW", "SOLVER_CONVERGENCE"}:
+            return "calculator"
+        return "adapter"
+    if response.result is None:
+        return "interpretation"
+    return "none"
+
+
 def _score_case(case: dict[str, Any], response: Any) -> dict[str, Any]:
     expected = case["expected"]
     actual_outcome = _actual_outcome(response)
@@ -155,9 +176,25 @@ def _score_case(case: dict[str, Any], response: Any) -> dict[str, Any]:
 
 
 def evaluate_cases(
-    cases: list[dict[str, Any]], adapter: Any, *, adapter_name: str, model_name: str | None
+    cases: list[dict[str, Any]], adapter: Any, *, adapter_name: str, model_name: str | None,
+    include_raw: bool = False,
 ) -> dict[str, Any]:
-    rows = [_score_case(case, adapter.ask(case["question"])) for case in cases]
+    rows = []
+    for case in cases:
+        before_calls = _safe_int(getattr(adapter, "tool_calls", 0))
+        started = perf_counter()
+        response = adapter.ask(case["question"])
+        duration_ms = _safe_int(round((perf_counter() - started) * 1000))
+        after_calls = _safe_int(getattr(adapter, "tool_calls", before_calls), before_calls)
+        row = _score_case(case, response)
+        row["duration_ms"] = duration_ms
+        row["tool_calls"] = max(0, after_calls - before_calls)
+        row["failure_stage"] = _failure_stage(response)
+        if include_raw:
+            excerpt = getattr(adapter, "last_response", None)
+            if isinstance(excerpt, str):
+                row["model_response_excerpt"] = excerpt[:4000]
+        rows.append(row)
     total = len(rows)
     passed = sum(row["status"] == "PASS" for row in rows)
     intent_rows = [row for row in rows if "intent" in row["checks"]]

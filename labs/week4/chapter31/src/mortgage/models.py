@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Literal
 
-QuantityName = Literal["principal", "periodic_rate", "payments", "payment"]
+QuantityName = Literal["principal", "annual_rate", "periodic_rate", "payments", "payment"]
 
 
 @dataclass(frozen=True)
@@ -55,6 +55,8 @@ class CalculationResult:
     total_interest: Decimal
     missing_quantity: QuantityName
     schedule: tuple[AmortizationRow, ...] | None = None
+    exact_payments: Decimal | None = None
+    exact_term_years: Decimal | None = None
 
 
 @dataclass(frozen=True)

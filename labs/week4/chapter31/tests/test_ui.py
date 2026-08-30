@@ -24,6 +24,20 @@ def test_window_exposes_calculator_controls(qtbot):
     assert window.verbosity_combo.currentText() == "Off"
 
 
+def test_discovery_failure_restores_refresh_and_safe_model(qtbot, monkeypatch):
+    def fail(self):
+        raise ValueError("MODEL_ERROR: daemon unavailable")
+
+    monkeypatch.setattr("mortgage.ui.OllamaClient.list_models", fail)
+    window = MainWindow()
+    qtbot.addWidget(window)
+    window.adapter_combo.setCurrentText("Ollama")
+    qtbot.waitUntil(lambda: window.refresh_models_button.isEnabled(), timeout=2000)
+    assert "Model discovery error" in window.status_label.text()
+    assert window.model_combo.count() == 1
+    assert window.model_combo.currentText() == "llama3.2"
+
+
 def test_model_choices_populate_dropdown(qtbot):
     window = MainWindow()
     qtbot.addWidget(window)

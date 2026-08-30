@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from decimal import Decimal, localcontext
+from decimal import Decimal, ROUND_CEILING, localcontext
 from typing import cast
 
 from .models import CalculationRequest, CalculationResult, QuantityName
@@ -36,21 +36,21 @@ def calculate_principal(payment: Decimal, periodic_rate: Decimal, payments: int)
         return payment * (growth - Decimal(1)) / (periodic_rate * growth)
 
 
-def calculate_payments(principal: Decimal, periodic_rate: Decimal, payment: Decimal) -> int:
+def calculate_exact_payments(principal: Decimal, periodic_rate: Decimal, payment: Decimal) -> Decimal:
     if periodic_rate == 0:
-        candidate = principal / payment
-    else:
-        if payment <= principal * periodic_rate:
-            raise _error("PAYMENT_TOO_LOW", "payment must exceed first-period interest")
-        with localcontext() as context:
-            context.prec = 50
-            candidate = ((payment / (payment - principal * periodic_rate)).ln() /
-                         (Decimal(1) + periodic_rate).ln())
-    nearest = candidate.to_integral_value()
-    if abs(candidate - nearest) > INTEGER_TOLERANCE:
-        raise _error("INVALID_PAYMENTS", "NON_INTEGRAL_TERM")
+        return principal / payment
+    if payment <= principal * periodic_rate:
+        raise _error("PAYMENT_TOO_LOW", "payment must exceed first-period interest")
+    with localcontext() as context:
+        context.prec = 50
+        return ((payment / (payment - principal * periodic_rate)).ln() /
+                (Decimal(1) + periodic_rate).ln())
+
+
+def calculate_payments(principal: Decimal, periodic_rate: Decimal, payment: Decimal) -> int:
+    candidate = calculate_exact_payments(principal, periodic_rate, payment)
     try:
-        return int(nearest)
+        return int(candidate.to_integral_value(rounding=ROUND_CEILING))
     except (ArithmeticError, TypeError, ValueError) as exc:
         raise _error("INVALID_PAYMENTS", "term is not representable as an integer") from exc
 
@@ -107,6 +107,7 @@ class MortgageCalculator:
         periodic_rate = request.periodic_rate
         payments = request.payments
         payment = request.payment
+        exact_payments: Decimal | None = None
 
         if missing == "payment":
             if principal is None or periodic_rate is None or payments is None:
@@ -119,6 +120,7 @@ class MortgageCalculator:
         elif missing == "payments":
             if principal is None or periodic_rate is None or payment is None:
                 raise _error("INVALID_QUANTITY_COUNT")
+            exact_payments = calculate_exact_payments(principal, periodic_rate, payment)
             payments = calculate_payments(principal, periodic_rate, payment)
         else:
             if principal is None or payment is None or payments is None:
@@ -127,6 +129,11 @@ class MortgageCalculator:
 
         if principal is None or periodic_rate is None or payments is None or payment is None:
             raise _error("INVALID_QUANTITY_COUNT")
+        if exact_payments is None:
+            exact_payments = Decimal(payments)
+        with localcontext() as context:
+            context.prec = 50
+            exact_term_years = exact_payments / Decimal(12)
         schedule = None
         if request.include_schedule:
             from .amortization import amortize
@@ -138,9 +145,11 @@ class MortgageCalculator:
             payments=payments,
             payment=payment,
             annual_rate=periodic_rate * Decimal(12),
-            term_years=Decimal(payments) / Decimal(12),
+            term_years=exact_term_years,
             total_paid=total_paid,
             total_interest=total_paid - principal,
             missing_quantity=cast("QuantityName", missing),
             schedule=schedule,
+            exact_payments=exact_payments,
+            exact_term_years=exact_term_years,
         )

@@ -172,7 +172,9 @@ The JSON response is a discriminated envelope:
     "total_paid": "1137722.442287334717682497017",
     "total_interest": "637722.442287334717682497017",
     "missing_quantity": "payment",
-    "schedule": null
+    "schedule": null,
+    "exact_payments": "360",
+    "exact_term_years": "30"
   },
   "error": null,
   "metadata": {
@@ -287,10 +289,11 @@ Defaults and overrides:
 
 The Ollama adapter makes two non-streaming `/api/chat` requests:
 
-1. Request a JSON-only structured interpretation with normalized monthly fields.
-2. Send the calculator result to the model for a natural-language explanation.
+1. Request a JSON-only structured interpretation using the user-facing `annual_rate` field, plus principal, payment, and term.
+2. Application code deterministically computes `periodic_rate = annual_rate / 12` before calling the calculator.
+3. Send the original user question as quoted, untrusted context and the calculator result to the model for a natural-language explanation. The model is instructed not to follow instructions embedded in the question; the calculator result remains authoritative.
 
-The adapter calls the calculator tool between those phases. In the GUI, selecting Ollama calls `GET /api/tags` in a background worker, deduplicates and sorts the returned model names, and fills the model dropdown. **Refresh models** repeats the query; a discovery failure leaves a safe default or displays `No local models found` with an error status. The adapter accepts one optional JSON code fence and normalizes local-model `U+2581` space markers before parsing. It also maps common aliases such as `loan_amount`, `interest_rate`, and `loan_term` to canonical fields, then infers the missing field from the user’s intent before calling the tool. A timeout, connection failure, malformed model response, or missing `message.content` returns `MODEL_ERROR` with exit code `5`. It never substitutes model-generated arithmetic.
+The adapter calls the calculator tool between those phases. In the GUI, selecting Ollama calls `GET /api/tags` in a background worker, deduplicates and sorts the returned model names, and fills the model dropdown. **Refresh models** repeats the query; a discovery failure leaves a safe default or displays `No local models found` with an error status. The adapter accepts one optional JSON code fence and normalizes local-model `U+2581` space markers before parsing. It also maps common aliases such as `loan_amount`, `interest_rate`, and `loan_term` to canonical fields, then infers the missing field from the user’s intent before calling the tool. Legacy model responses containing `periodic_rate` remain accepted for compatibility, but new prompts request `annual_rate` only. A timeout, connection failure, malformed model response, or missing `message.content` returns `MODEL_ERROR` with exit code `5`. It never substitutes model-generated arithmetic.
 
 When entering prompts in a shell, use single quotes or escape dollar signs so the shell does not expand currency amounts:
 
@@ -359,8 +362,10 @@ At zero rate, the implementation uses:
 ```text
 M = P / n
 P = M * n
-n = P / M, only when the quotient is within 1e-9 of an integer
+n = P / M, with the exact value preserved and operational payments = ceil(n)
 ```
+
+When the calculated term is fractional, the result preserves `exact_payments` and `exact_term_years`, while `payments` is rounded up to the next whole payment for operational scheduling. The final amortization row is adjusted to close the remaining balance. For example, `$500,000` at `6%` with a `$3,000` payment yields approximately `359.247` exact payments, `29.937` years, and an operational 360-payment schedule.
 
 The rate solver uses the deterministic interval `[0, 1]`, residual/interval tolerance `1e-12`, and at most 100 iterations. A payment that does not cover first-period interest is rejected when solving for the term.
 

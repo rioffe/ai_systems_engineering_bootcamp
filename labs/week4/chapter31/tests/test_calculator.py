@@ -31,11 +31,13 @@ def test_zero_rate_principal_from_payment():
     assert result.payments == 12
 
 
-def test_payment_count_rejects_non_integral_term():
-    with pytest.raises(ValueError, match="NON_INTEGRAL_TERM"):
-        MortgageCalculator().calculate(
-            CalculationRequest(Decimal("100"), Decimal("0"), None, Decimal("30"))
-        )
+def test_payment_count_ceil_preserves_exact_fractional_term():
+    result = MortgageCalculator().calculate(
+        CalculationRequest(Decimal("500000"), Decimal("0.005"), None, Decimal("3000"))
+    )
+    assert result.payments == 360
+    assert result.exact_payments == Decimal("359.24702887430622966044602613653870430753476453958")
+    assert result.exact_term_years == Decimal("29.937252406192185805037168844711558692294563711632")
 
 
 def test_rate_round_trip_uses_bisection():
