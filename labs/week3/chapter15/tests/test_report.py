@@ -7,6 +7,7 @@ a malformed artifact is a deterministic LoadError (E-05), a version mismatch is 
 VersionMismatch unless `--force` (E-06). It renders the offline inspect summary
 (T-08) and the F-006 regression-compare delta.
 """
+
 import json
 
 from coding_agent.report import (
@@ -33,26 +34,35 @@ EXPER = _load_schema("schemas/experiment.json")
 
 def _traj(final_outcome="VERIFIED", iterations=1):
     return {
-            "trajectory_version": "0.1",
-            "task_id": "parse-config",
-            "policy": "mock",
-            "availability_banner": None,
-            "sandbox_root": "/sbx",
-            "iterations": [
-                {"iteration": 1, "tool_calls": [], "tokens": {"estimated": 10, "mode": "synthetic"},
-                 "files_read": [], "files_modified": [], "tests_executed": 1,
-                 "test_results": {"passed": 1, "failed": 0}, "errors": [], "time_ms": 15,
-                 "verdict": "VERIFIED", "phase": "verify"}
-            ],
-            "final_outcome": final_outcome,
-            "iterations_used": iterations,
-            "total_tokens": {"estimated": 10, "mode": "synthetic"},
-         }
+        "trajectory_version": "0.1",
+        "task_id": "parse-config",
+        "policy": "mock",
+        "availability_banner": None,
+        "sandbox_root": "/sbx",
+        "iterations": [
+            {
+                "iteration": 1,
+                "tool_calls": [],
+                "tokens": {"estimated": 10, "mode": "synthetic"},
+                "files_read": [],
+                "files_modified": [],
+                "tests_executed": 1,
+                "test_results": {"passed": 1, "failed": 0},
+                "errors": [],
+                "time_ms": 15,
+                "verdict": "VERIFIED",
+                "phase": "verify",
+            }
+        ],
+        "final_outcome": final_outcome,
+        "iterations_used": iterations,
+        "total_tokens": {"estimated": 10, "mode": "synthetic"},
+    }
 
 
 # ---------------------------------------------------------------- R-16 / I-002 serialization
 def test_canonical_json_is_byte_deterministic():
-       # I-002: one writer, canonical form -> byte-identical for identical docs.
+    # I-002: one writer, canonical form -> byte-identical for identical docs.
     doc = {"b": 2, "a": [1, {"y": 2, "x": 1}]}
     assert canonical_json(doc) == canonical_json({"a": [1, {"x": 1, "y": 2}], "b": 2})
 
@@ -62,7 +72,7 @@ def test_write_and_read_roundtrip(tmp_path):
     path = tmp_path / "trajectory.json"
     write_json(path, doc)
     assert load_json(path) == doc
-       # the on-disk text is the canonical form (re-serializing is stable).
+    # the on-disk text is the canonical form (re-serializing is stable).
     assert path.read_text(encoding="utf-8") == canonical_json(doc)
 
 
@@ -72,7 +82,7 @@ def test_canonical_json_ends_with_newline():
 
 # ---------------------------------------------------------------- R-17 / I-012 / E-05 load gate
 def test_load_malformed_json_is_load_error(tmp_path):
-       # E-05: a malformed artifact is a deterministic load error, not a partial read.
+    # E-05: a malformed artifact is a deterministic load error, not a partial read.
     p = tmp_path / "bad.json"
     p.write_text("{ not json", encoding="utf-8")
     try:
@@ -108,7 +118,7 @@ def test_load_trajectory_validates_schema(tmp_path):
 
 
 def test_load_rejects_missing_required_field(tmp_path):
-       # T-07 / I-012: a trajectory missing any required field is a LoadError.
+    # T-07 / I-012: a trajectory missing any required field is a LoadError.
     doc = _traj()
     del doc["final_outcome"]
     p = tmp_path / "incomplete.json"
@@ -121,7 +131,7 @@ def test_load_rejects_missing_required_field(tmp_path):
 
 
 def test_load_rejects_bad_phase_value(tmp_path):
-       # I-012: an out-of-vocabulary `phase` is a schema violation -> LoadError.
+    # I-012: an out-of-vocabulary `phase` is a schema violation -> LoadError.
     doc = _traj()
     doc["iterations"][0]["phase"] = "banana"
     p = tmp_path / "badphase.json"
@@ -136,7 +146,7 @@ def test_load_rejects_bad_phase_value(tmp_path):
 # ---------------------------------------------------------------- E-06 version gate
 def test_version_mismatch_refused(tmp_path):
     doc = _traj()
-    doc["trajectory_version"] = "9.9"          # a hand-bumped version
+    doc["trajectory_version"] = "9.9"  # a hand-bumped version
     p = tmp_path / "bumped.json"
     write_json(p, doc)
     try:
@@ -156,13 +166,20 @@ def test_version_mismatch_bypassed_by_force(tmp_path):
 
 
 def test_load_experiment_version_gate(tmp_path):
-    exp = {"experiment_version": "0.1", "task_id": "parse-config",
-           "injection": {"file": "src/config.py", "symbol": "parse_config",
-                          "injected_defect": "wrong split delimiter",
-                          "pre_injection_verdict": "FAILED"},
-           "phases": [{"phase": "detect", "iteration": 1, "evidence": "test_parse_basic FAILS"}],
-           "final_outcome": "VERIFIED", "iterations_to_verified": 3,
-           "trajectory_ref": "trajectory.json"}
+    exp = {
+        "experiment_version": "0.1",
+        "task_id": "parse-config",
+        "injection": {
+            "file": "src/config.py",
+            "symbol": "parse_config",
+            "injected_defect": "wrong split delimiter",
+            "pre_injection_verdict": "FAILED",
+        },
+        "phases": [{"phase": "detect", "iteration": 1, "evidence": "test_parse_basic FAILS"}],
+        "final_outcome": "VERIFIED",
+        "iterations_to_verified": 3,
+        "trajectory_ref": "trajectory.json",
+    }
     p = tmp_path / "e.json"
     write_json(p, exp)
     assert load_experiment(p)["iterations_to_verified"] == 3
@@ -181,7 +198,7 @@ def test_render_summary_is_offline_human_readable():
     assert isinstance(s, str)
     assert "VERIFIED" in s
     assert "parse-config" in s
-    assert "1" in s                       # iterations_used
+    assert "1" in s  # iterations_used
 
 
 def test_render_summary_reports_nonverified():

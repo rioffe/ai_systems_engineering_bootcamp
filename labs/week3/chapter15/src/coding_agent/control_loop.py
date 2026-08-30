@@ -36,21 +36,21 @@ from .permissions import authorize
 from .policy import NOOP, STOP, ToolCall, UnrecognizedAction, coerce_action
 from .tools import EditResult
 from .verifier import (
-        STATUS_ERROR,
-        STATUS_FAILED,
-        STATUS_VERIFIED,
-        Verdict,
-        run_verify,
+    STATUS_ERROR,
+    STATUS_FAILED,
+    STATUS_VERIFIED,
+    Verdict,
+    run_verify,
 )
 
 # C-08 terminal -> exit code (F-003 partition).
 _OUTCOME_EXIT = {
-        "VERIFIED": 0,
-        "BUDGET_EXHAUSTED": 1,
-        "STALLED:NOOP": 1,
-        "STALLED:BUDGET": 1,
-        "DENIED_LOOP": 1,
-        "ERROR": 5,
+    "VERIFIED": 0,
+    "BUDGET_EXHAUSTED": 1,
+    "STALLED:NOOP": 1,
+    "STALLED:BUDGET": 1,
+    "DENIED_LOOP": 1,
+    "ERROR": 5,
 }
 
 
@@ -66,12 +66,12 @@ class RunResult:
 
 
 def _default_verify(task, sandbox_root) -> Verdict:
-     # The canonical verifier: run the task's VerifySpec inside the sandbox (R-06).
+    # The canonical verifier: run the task's VerifySpec inside the sandbox (R-06).
     return run_verify(task.verifier, cwd=sandbox_root)
 
 
 def _observe(sandbox_root: str) -> dict:
-     # OBSERVE: a deterministic snapshot of the sandbox repo state (O_t).
+    # OBSERVE: a deterministic snapshot of the sandbox repo state (O_t).
     files = []
     for dirpath, _dirs, fs in os.walk(sandbox_root):
         for name in sorted(fs):
@@ -81,8 +81,8 @@ def _observe(sandbox_root: str) -> dict:
 
 
 def _tally(verdict: Verdict) -> dict | None:
-     # C-06 test_results: pass/fail tallies, null when no check ran. The runner
-     # emits one check per invocation; the status is verdict-level.
+    # C-06 test_results: pass/fail tallies, null when no check ran. The runner
+    # emits one check per invocation; the status is verdict-level.
     n = len(verdict.checks)
     if n == 0:
         return None
@@ -92,7 +92,7 @@ def _tally(verdict: Verdict) -> dict | None:
 
 
 def _phase(batch: list, prev_status: str | None) -> str:
-     # F-008: the instrumentation label for this iteration's dominant FSM move.
+    # F-008: the instrumentation label for this iteration's dominant FSM move.
     if any(isinstance(a, STOP) for a in batch):
         return "stop"
     names = [a.name for a in batch if isinstance(a, ToolCall)]
@@ -114,10 +114,10 @@ def _act(
     files_modified: list,
     errors: list,
 ) -> tuple:
-     # ACT: execute one APPROVED tool call in the sandbox (R-04), folding its
-     # result into the context working set and the F-013 counters. Returns
-     # (executed, faulted): executed = a real tool side-effect ran; faulted = the
-     # call raised (recorded as an iteration error, E-02-class, counted by K-08).
+    # ACT: execute one APPROVED tool call in the sandbox (R-04), folding its
+    # result into the context working set and the F-013 counters. Returns
+    # (executed, faulted): executed = a real tool side-effect ran; faulted = the
+    # call raised (recorded as an iteration error, E-02-class, counted by K-08).
     try:
         result = controller.execute(call)
     except Exception as exc:  # noqa: BLE001 -- deliberate fault boundary: ANY tool
@@ -127,7 +127,7 @@ def _act(
         return (False, True)
     if call.name == "read_file":
         path = call.args["path"]
-        context.add_file(path, result)           # I-005: selected, not bulk
+        context.add_file(path, result)  # I-005: selected, not bulk
         files_read.append(path)
         return (True, False)
     if call.name == "edit_file":
@@ -140,11 +140,11 @@ def _act(
             except OSError:
                 pass
             return (True, False)
-        return (False, False)                   # E-14: a failed edit is not a modification
+        return (False, False)  # E-14: a failed edit is not a modification
     if call.name == "run_shell":
         context.add_feedback(f"$ {call.args.get('command', '')}\n{result.out}{result.err}")
         return (True, False)
-     # list_files / search: discovery only (F-013: no files_read increment).
+    # list_files / search: discovery only (F-013: no files_read increment).
     return (True, False)
 
 
@@ -163,7 +163,7 @@ def run(
     policy_name: str = "mock",
     verify=None,
 ) -> RunResult:
-     # Drive one bounded closed-loop run (R-01) to exactly one C-08 terminal.
+    # Drive one bounded closed-loop run (R-01) to exactly one C-08 terminal.
     if max_iterations < 1:
         raise ValueError(f"max_iterations must be a positive integer (K-03), got {max_iterations}")
     if max_consecutive_noops is None:
@@ -176,7 +176,7 @@ def run(
         policy=policy_name,
         sandbox_root=sandbox_root,
         availability_banner=availability_banner,
-       )
+    )
     consec_errors = 0
     consec_noops = 0
     consec_denies = 0
@@ -195,7 +195,7 @@ def run(
         try:
             ctx = context.compose(task, t)
         except BudgetOverflow:
-            outcome = "STALLED:BUDGET"          # E-13: --no-compact overflow
+            outcome = "STALLED:BUDGET"  # E-13: --no-compact overflow
             break
         batch_raw = policy.select(ctx, observation)
 
@@ -230,7 +230,9 @@ def run(
                     n_denied += 1
                     errors.append(f"DENY {a.name}: {decision.reason}")
                 else:
-                    _executed, _faulted = _act(a, controller, context, files_read, files_modified, errors)
+                    _executed, _faulted = _act(
+                        a, controller, context, files_read, files_modified, errors
+                    )
                     if _faulted:
                         n_tool_faults += 1
 
@@ -254,7 +256,7 @@ def run(
             errors=errors,
             verdict=verdict.status,
             phase=_phase(batch, prev_status),
-         )
+        )
         traj.add_row(row)
 
         # K-08 consecutive-failure budgets. A DENY records an error but does NOT
@@ -304,6 +306,6 @@ def run(
 
 
 __all__ = [
-        "RunResult",
-        "run",
-    ]
+    "RunResult",
+    "run",
+]

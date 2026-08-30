@@ -56,26 +56,26 @@ class ContextManager:
             raise ValueError(f"budget must be a positive char count, got {budget}")
         self.budget = budget
         self.compact = compact
-        self._files: dict[str, str] = {}     # working set: path -> latest content
-        self._feedback: list[str] = []       # recent feedback, oldest first
+        self._files: dict[str, str] = {}  # working set: path -> latest content
+        self._feedback: list[str] = []  # recent feedback, oldest first
 
     def add_file(self, path: str, content: str) -> None:
-         # Select a file into the working set. A re-add of the same path is an
-         # "open edit": the latest version wins (R-10 salient state).
+        # Select a file into the working set. A re-add of the same path is an
+        # "open edit": the latest version wins (R-10 salient state).
         self._files[path] = content
 
     def add_feedback(self, text: str) -> None:
-         # I-007: verifier output / tool feedback becomes a reasoning signal in the
-         # next iteration's C_t.
+        # I-007: verifier output / tool feedback becomes a reasoning signal in the
+        # next iteration's C_t.
         self._feedback.append(text)
 
     def manifest(self) -> list[str]:
-         # The file manifest (R-10 salient state): the selected working set.
+        # The file manifest (R-10 salient state): the selected working set.
         return list(self._files)
 
     def _raw(self, task, iteration: int) -> str:
-         # The deterministic composition: fixed section order, insertion-ordered
-         # files, oldest-first feedback.
+        # The deterministic composition: fixed section order, insertion-ordered
+        # files, oldest-first feedback.
         parts = [f"=== ITERATION {iteration} ===", "=== TASK ===", task.prompt]
         if task.acceptance_test:
             parts.append(f"acceptance: {task.acceptance_test}")
@@ -91,18 +91,20 @@ class ContextManager:
         return "\n".join(parts)
 
     def _compact(self, task, iteration: int) -> str:
-         # R-10: preserve salient state, discard redundant history.
-         #  stage 1 -- keep only the most recent feedback entries (the latest
-         #             verdict/feedback is the salient signal);
-         #  stage 2 -- if still over budget, cap each file's content (the path
-         #             + manifest are preserved, bodies truncated with a marker).
+        # R-10: preserve salient state, discard redundant history.
+        #  stage 1 -- keep only the most recent feedback entries (the latest
+        #             verdict/feedback is the salient signal);
+        #  stage 2 -- if still over budget, cap each file's content (the path
+        #             + manifest are preserved, bodies truncated with a marker).
         self._feedback = self._feedback[-_KEEP_FEEDBACK:]
         text = self._raw(task, iteration)
         if len(text) > self.budget:
             capped: dict[str, str] = {}
             for path, content in self._files.items():
                 if len(content) > _FILE_CONTENT_CAP:
-                    capped[path] = content[:_FILE_CONTENT_CAP] + f"... [truncated, {len(content)} chars total]"
+                    capped[path] = (
+                        content[:_FILE_CONTENT_CAP] + f"... [truncated, {len(content)} chars total]"
+                    )
                 else:
                     capped[path] = content
             self._files = capped
@@ -110,7 +112,7 @@ class ContextManager:
         return text
 
     def compose(self, task, iteration: int) -> Context:
-         # R-03 composition with the K-05/K-09 budget check. Units are chars.
+        # R-03 composition with the K-05/K-09 budget check. Units are chars.
         raw = self._raw(task, iteration)
         if len(raw) <= self.budget:
             return Context(raw, len(raw), False, self.budget)
@@ -118,17 +120,15 @@ class ContextManager:
             raise BudgetOverflow(
                 f"C_t is {len(raw)} chars > budget {self.budget} with compaction off (E-13)"
             )
-         # K-05: compaction fires rather than overflowing; the post-compaction
-         # size is what the loop records in the trajectory.
+        # K-05: compaction fires rather than overflowing; the post-compaction
+        # size is what the loop records in the trajectory.
         text = self._compact(task, iteration)
         return Context(text, len(text), True, self.budget)
 
 
-
-
 __all__ = [
-        "DEFAULT_BUDGET",
-        "BudgetOverflow",
-        "Context",
-        "ContextManager",
-    ]
+    "DEFAULT_BUDGET",
+    "BudgetOverflow",
+    "Context",
+    "ContextManager",
+]

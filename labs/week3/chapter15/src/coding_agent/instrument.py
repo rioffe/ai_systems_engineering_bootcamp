@@ -23,16 +23,16 @@ PHASES = ("observe", "inspect", "search", "propose", "modify", "verify", "repair
 
 # C-08: the terminal-stopping outcomes `final_outcome` may take (F-014 win-rule).
 TERMINAL_OUTCOMES = (
-      "VERIFIED",
-      "BUDGET_EXHAUSTED",
-      "STALLED:NOOP",
-      "STALLED:BUDGET",
-      "DENIED_LOOP",
-      "ERROR",
+    "VERIFIED",
+    "BUDGET_EXHAUSTED",
+    "STALLED:NOOP",
+    "STALLED:BUDGET",
+    "DENIED_LOOP",
+    "ERROR",
 )
 
-SYNTHETIC = "synthetic"   # K-07 label for mock surrogate counters (E-04).
-MEASURED = "measured"     # the real-Ollama path labels real counters this way.
+SYNTHETIC = "synthetic"  # K-07 label for mock surrogate counters (E-04).
+MEASURED = "measured"  # the real-Ollama path labels real counters this way.
 
 
 # K-07: tokens.estimated = len(C_t chars) + 4 * len(tool_calls) (normative).
@@ -46,7 +46,7 @@ def surrogate_time_ms(iteration: int, n_calls: int) -> int:
 
 
 def _distinct(paths: list[str]) -> list[str]:
-     # F-013: distinct paths, first-seen order preserved.
+    # F-013: distinct paths, first-seen order preserved.
     seen: list[str] = []
     for p in paths:
         if p not in seen:
@@ -79,18 +79,18 @@ def build_row(
         raise ValueError(f"verdict {verdict!r} not in {{PENDING, VERIFIED, FAILED, ERROR}}")
     n_calls = len(tool_calls)
     return {
-            "iteration": iteration,
-            "tool_calls": list(tool_calls),
-            "tokens": {"estimated": surrogate_tokens(context_chars, n_calls), "mode": mode},
-            "files_read": _distinct(list(files_read or [])),
-            "files_modified": _distinct(list(files_modified or [])),
-            "tests_executed": tests_executed,
-            "test_results": test_results,
-            "errors": list(errors or []),
-            "time_ms": surrogate_time_ms(iteration, n_calls) if time_ms is None else time_ms,
-            "verdict": verdict,
-            "phase": phase,
-         }
+        "iteration": iteration,
+        "tool_calls": list(tool_calls),
+        "tokens": {"estimated": surrogate_tokens(context_chars, n_calls), "mode": mode},
+        "files_read": _distinct(list(files_read or [])),
+        "files_modified": _distinct(list(files_modified or [])),
+        "tests_executed": tests_executed,
+        "test_results": test_results,
+        "errors": list(errors or []),
+        "time_ms": surrogate_time_ms(iteration, n_calls) if time_ms is None else time_ms,
+        "verdict": verdict,
+        "phase": phase,
+    }
 
 
 # Accumulates iteration rows and finalizes the C-06 envelope.
@@ -102,7 +102,7 @@ class Trajectory:
         policy: str,
         sandbox_root: str,
         availability_banner: str | None = None,
-       ) -> None:
+    ) -> None:
         self.task_id = task_id
         self.policy = policy
         self.sandbox_root = sandbox_root
@@ -113,33 +113,31 @@ class Trajectory:
         self.rows.append(row)
 
     def finalize(self, final_outcome: str) -> dict:
-         # F-014: final_outcome is the terminal-stopping label, not the last verdict.
+        # F-014: final_outcome is the terminal-stopping label, not the last verdict.
         if final_outcome not in TERMINAL_OUTCOMES:
-            raise ValueError(
-                f"final_outcome {final_outcome!r} not in {TERMINAL_OUTCOMES} (C-08)"
-              )
+            raise ValueError(f"final_outcome {final_outcome!r} not in {TERMINAL_OUTCOMES} (C-08)")
         mode = self.rows[0]["tokens"]["mode"] if self.rows else SYNTHETIC
         total = sum(r["tokens"]["estimated"] for r in self.rows)
         return {
-                "trajectory_version": "0.1",
-                "task_id": self.task_id,
-                "policy": self.policy,
-                "availability_banner": self.availability_banner,
-                "sandbox_root": self.sandbox_root,
-                "iterations": list(self.rows),
-                "final_outcome": final_outcome,
-                "iterations_used": len(self.rows),
-                "total_tokens": {"estimated": total, "mode": mode},
-             }
+            "trajectory_version": "0.1",
+            "task_id": self.task_id,
+            "policy": self.policy,
+            "availability_banner": self.availability_banner,
+            "sandbox_root": self.sandbox_root,
+            "iterations": list(self.rows),
+            "final_outcome": final_outcome,
+            "iterations_used": len(self.rows),
+            "total_tokens": {"estimated": total, "mode": mode},
+        }
 
 
 __all__ = [
-       "MEASURED",
-       "PHASES",
-       "SYNTHETIC",
-       "TERMINAL_OUTCOMES",
-       "Trajectory",
-       "build_row",
-       "surrogate_time_ms",
-       "surrogate_tokens",
+    "MEASURED",
+    "PHASES",
+    "SYNTHETIC",
+    "TERMINAL_OUTCOMES",
+    "Trajectory",
+    "build_row",
+    "surrogate_time_ms",
+    "surrogate_tokens",
 ]

@@ -40,11 +40,11 @@ PHASE_REPAIR = "repair"
 # line is skipped -> `test_parse_basic` FAILS.
 @dataclass(frozen=True)
 class DefectSpec:
-    file: str                 # path to corrupt, relative to the sandbox root
-    symbol: str               # the symbol under test (for the C-07 record)
-    injected_defect: str      # human description of the injected defect
-    old: str                  # the correct token (replaced by `new` on injection)
-    new: str                  # the buggy token (injected; reversed on repair)
+    file: str  # path to corrupt, relative to the sandbox root
+    symbol: str  # the symbol under test (for the C-07 record)
+    injected_defect: str  # human description of the injected defect
+    old: str  # the correct token (replaced by `new` on injection)
+    new: str  # the buggy token (injected; reversed on repair)
     pre_injection_verdict: str = "FAILED"
 
 
@@ -77,14 +77,17 @@ class ExperimentResult:
 
 
 def inject_defect(controller, defect: DefectSpec) -> EditResult:
-     # Corrupt the pinned token: replace `defect.old` (correct) with `defect.new`
-     # (buggy). A missing `old` token is a deterministic InjectionError, never a
-     # silent no-op.
+    # Corrupt the pinned token: replace `defect.old` (correct) with `defect.new`
+    # (buggy). A missing `old` token is a deterministic InjectionError, never a
+    # silent no-op.
     # opengrep `auto` SQL-injection heuristic misfires on `controller.execute(...)`:
     # this is the permission-gated ToolController dispatcher (C-03/C-04); no SQL.
+    # pi-lens-ignore: python-sql-injection
     result = controller.execute(  # nosemgrep
-        ToolCall("edit_file", {"path": defect.file, "op": "replace",
-                               "old": defect.old, "new": defect.new})
+        ToolCall(
+            "edit_file",
+            {"path": defect.file, "op": "replace", "old": defect.old, "new": defect.new},
+        )
     )
     if not (isinstance(result, EditResult) and result.applied):
         raise InjectionError(f"defect injection failed for {defect.file}: {result.detail}")
@@ -97,12 +100,15 @@ def inject_defect(controller, defect: DefectSpec) -> EditResult:
 # repairs (the edit_file that reverses the defect).
 def repair_arc_policy(defect: DefectSpec, *, probe_file: str, probe_query: str) -> MockPolicy:
     script = [
-            [NOOP()],
-            [ToolCall("read_file", {"path": probe_file}),
-             ToolCall("search", {"query": probe_query})],
-            [ToolCall("edit_file", {"path": defect.file, "op": "replace",
-                                    "old": defect.new, "new": defect.old})],
-         ]
+        [NOOP()],
+        [ToolCall("read_file", {"path": probe_file}), ToolCall("search", {"query": probe_query})],
+        [
+            ToolCall(
+                "edit_file",
+                {"path": defect.file, "op": "replace", "old": defect.new, "new": defect.old},
+            )
+        ],
+    ]
     return MockPolicy(script)
 
 
@@ -118,8 +124,12 @@ def derive_phases(trajectory: dict) -> list[dict]:
         verdict = row["verdict"]
         if detect is None and verdict == STATUS_FAILED:
             detect = it
-        if (diagnose is None and detect is not None and repair is None
-                and any(n in ("read_file", "search", "list_files") for n in names)):
+        if (
+            diagnose is None
+            and detect is not None
+            and repair is None
+            and any(n in ("read_file", "search", "list_files") for n in names)
+        ):
             diagnose = it
         if repair is None and "edit_file" in names and row["files_modified"]:
             repair = it
@@ -127,27 +137,36 @@ def derive_phases(trajectory: dict) -> list[dict]:
     if detect is not None:
         r = next(x for x in trajectory["iterations"] if x["iteration"] == detect)
         tr = r["test_results"] or {}
-        phases.append({
-            "phase": PHASE_DETECT, "iteration": detect,
-            "evidence": f"verdict {verdict if False else r['verdict']}: "
-                        f"{tr.get('failed', 0)} of {tr.get('passed', 0) + tr.get('failed', 0)} check(s) failed",
-         })
+        phases.append(
+            {
+                "phase": PHASE_DETECT,
+                "iteration": detect,
+                "evidence": f"verdict {verdict if False else r['verdict']}: "
+                f"{tr.get('failed', 0)} of {tr.get('passed', 0) + tr.get('failed', 0)} check(s) failed",
+            }
+        )
     if diagnose is not None:
-        phases.append({
-            "phase": PHASE_DIAGNOSE, "iteration": diagnose,
-            "evidence": "read_file + search over the failing module",
-         })
+        phases.append(
+            {
+                "phase": PHASE_DIAGNOSE,
+                "iteration": diagnose,
+                "evidence": "read_file + search over the failing module",
+            }
+        )
     if repair is not None:
         r = next(x for x in trajectory["iterations"] if x["iteration"] == repair)
-        phases.append({
-            "phase": PHASE_REPAIR, "iteration": repair,
-            "evidence": f"edit_file applied to {r['files_modified'][0]}",
-         })
+        phases.append(
+            {
+                "phase": PHASE_REPAIR,
+                "iteration": repair,
+                "evidence": f"edit_file applied to {r['files_modified'][0]}",
+            }
+        )
     return phases
 
 
 def _iterations_to_verified(trajectory: dict) -> int:
-     # The 1-based iteration whose verdict first reached VERIFIED (0 if never).
+    # The 1-based iteration whose verdict first reached VERIFIED (0 if never).
     for row in trajectory["iterations"]:
         if row["verdict"] == STATUS_VERIFIED:
             return row["iteration"]
@@ -156,28 +175,34 @@ def _iterations_to_verified(trajectory: dict) -> int:
 
 # Build the C-07 experiment.json document (versioned). Pure over its inputs ->
 # byte-identical across runs (I-013).
-def build_experiment_doc(*, task, defect: DefectSpec, phases: list, final_outcome: str,
-                         iterations_to_verified: int,
-                         trajectory_ref: str = "trajectory.json") -> dict:
+def build_experiment_doc(
+    *,
+    task,
+    defect: DefectSpec,
+    phases: list,
+    final_outcome: str,
+    iterations_to_verified: int,
+    trajectory_ref: str = "trajectory.json",
+) -> dict:
     return {
-            "experiment_version": EXPERIMENT_VERSION,
-            "task_id": task.task_id,
-            "injection": {
-                "file": defect.file,
-                "symbol": defect.symbol,
-                "injected_defect": defect.injected_defect,
-                "pre_injection_verdict": defect.pre_injection_verdict,
-            },
-            "phases": phases,
-            "final_outcome": final_outcome,
-            "iterations_to_verified": iterations_to_verified,
-            "trajectory_ref": trajectory_ref,
-         }
+        "experiment_version": EXPERIMENT_VERSION,
+        "task_id": task.task_id,
+        "injection": {
+            "file": defect.file,
+            "symbol": defect.symbol,
+            "injected_defect": defect.injected_defect,
+            "pre_injection_verdict": defect.pre_injection_verdict,
+        },
+        "phases": phases,
+        "final_outcome": final_outcome,
+        "iterations_to_verified": iterations_to_verified,
+        "trajectory_ref": trajectory_ref,
+    }
 
 
 def _experiment_exit(final_outcome: str) -> int:
-     # experiment exit partition: 0 VERIFIED / 1 did-not-reach-VERIFIED /
-     # 5 core-ERROR (4 PULL_REQUIRED and 2 usage are resolved at the CLI layer).
+    # experiment exit partition: 0 VERIFIED / 1 did-not-reach-VERIFIED /
+    # 5 core-ERROR (4 PULL_REQUIRED and 2 usage are resolved at the CLI layer).
     if final_outcome == "VERIFIED":
         return 0
     if final_outcome == "ERROR":
@@ -201,8 +226,8 @@ def run_experiment(
     policy_name: str = "mock",
     availability_banner: str | None = None,
 ) -> ExperimentResult:
-     # The section-17 arc: inject the defect, run the bounded loop, and derive
-     # the C-07 record from the trajectory.
+    # The section-17 arc: inject the defect, run the bounded loop, and derive
+    # the C-07 record from the trajectory.
     inject_defect(controller, defect)
     result = run(
         task=task,
@@ -216,7 +241,7 @@ def run_experiment(
         max_consecutive_errors=max_consecutive_errors,
         policy_name=policy_name,
         availability_banner=availability_banner,
-       )
+    )
     phases = derive_phases(result.trajectory)
     itv = _iterations_to_verified(result.trajectory)
     doc = build_experiment_doc(
@@ -226,7 +251,7 @@ def run_experiment(
         final_outcome=result.final_outcome,
         iterations_to_verified=itv,
         trajectory_ref=trajectory_ref,
-       )
+    )
     return ExperimentResult(
         final_outcome=result.final_outcome,
         exit_code=_experiment_exit(result.final_outcome),

@@ -39,7 +39,7 @@ def canonical_json(doc) -> str:
 
 
 def write_json(path, doc) -> None:
-     # R-16: the ONLY writer of durable artifacts.
+    # R-16: the ONLY writer of durable artifacts.
     Path(path).write_text(canonical_json(doc), encoding="utf-8")
 
 
@@ -71,7 +71,7 @@ def load_json(path) -> dict:
 
 
 def _check_version(doc: dict, field: str, expected: str, *, force: bool) -> None:
-     # E-06: refuse a mismatched `*_version` unless force (R-17).
+    # E-06: refuse a mismatched `*_version` unless force (R-17).
     if force:
         return
     actual = doc.get(field)
@@ -82,7 +82,7 @@ def _check_version(doc: dict, field: str, expected: str, *, force: bool) -> None
 
 
 def _validate(doc: dict, schema: dict, path) -> None:
-     # I-012: the "0.1" schema gate on every read.
+    # I-012: the "0.1" schema gate on every read.
     try:
         jsonschema.validate(doc, schema)
     except jsonschema.ValidationError as exc:
@@ -120,18 +120,18 @@ def render_summary(doc: dict) -> str:
         calls = ", ".join(c["name"] for c in row["tool_calls"]) or "-"
         lines.append(
             f"  iter {row['iteration']}: {calls}  verdict={row['verdict']}  phase={row['phase']}"
-          )
+        )
     return "\n".join(lines)
 
 
 # F-006: outcome ranks -- lower is better. VERIFIED is the only success.
 _OUTCOME_RANK = {
-        "VERIFIED": 0,
-        "BUDGET_EXHAUSTED": 1,
-        "STALLED:NOOP": 2,
-        "STALLED:BUDGET": 3,
-        "DENIED_LOOP": 4,
-        "ERROR": 5,
+    "VERIFIED": 0,
+    "BUDGET_EXHAUSTED": 1,
+    "STALLED:NOOP": 2,
+    "STALLED:BUDGET": 3,
+    "DENIED_LOOP": 4,
+    "ERROR": 5,
 }
 
 
@@ -140,10 +140,11 @@ _OUTCOME_RANK = {
 def compare(baseline: dict, current: dict) -> dict:
     def pick(doc: dict) -> dict:
         return {
-                "final_outcome": doc["final_outcome"],
-                "iterations_used": doc["iterations_used"],
-                "total_tokens": doc["total_tokens"]["estimated"],
-             }
+            "final_outcome": doc["final_outcome"],
+            "iterations_used": doc["iterations_used"],
+            "total_tokens": doc["total_tokens"]["estimated"],
+        }
+
     b, c = pick(baseline), pick(current)
     worse_outcome = _OUTCOME_RANK[c["final_outcome"]] > _OUTCOME_RANK[b["final_outcome"]]
     more_work = (
@@ -152,26 +153,26 @@ def compare(baseline: dict, current: dict) -> dict:
         and c["iterations_used"] > b["iterations_used"]
     )
     return {
-            "compare_version": "0.1",
-            "baseline": b,
-            "current": c,
-            "delta": {
-                "iterations_used": c["iterations_used"] - b["iterations_used"],
-                "total_tokens": c["total_tokens"] - b["total_tokens"],
-                "final_outcome": c["final_outcome"],
-            },
-            "regression": worse_outcome or more_work,
-         }
+        "compare_version": "0.1",
+        "baseline": b,
+        "current": c,
+        "delta": {
+            "iterations_used": c["iterations_used"] - b["iterations_used"],
+            "total_tokens": c["total_tokens"] - b["total_tokens"],
+            "final_outcome": c["final_outcome"],
+        },
+        "regression": worse_outcome or more_work,
+    }
 
 
 __all__ = [
-        "LoadError",
-        "VersionMismatch",
-        "canonical_json",
-        "compare",
-        "load_experiment",
-        "load_json",
-        "load_trajectory",
-        "render_summary",
-        "write_json",
-    ]
+    "LoadError",
+    "VersionMismatch",
+    "canonical_json",
+    "compare",
+    "load_experiment",
+    "load_json",
+    "load_trajectory",
+    "render_summary",
+    "write_json",
+]
