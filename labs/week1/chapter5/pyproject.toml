@@ -1,0 +1,35 @@
+[project]
+name = "research-agent"
+version = "0.1.0"
+description = "Bounded research-agent runtime for Chapter 5"
+requires-python = ">=3.12,<3.13"
+dependencies = ["jsonschema>=4.20", "pyyaml>=6.0", "httpx>=0.27", "loguru>=0.7"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+gui = ["PyQt5>=5.15", "pytest-qt>=4.4"]
+
+[project.scripts]
+research-agent = "research_agent.cli:main"
+research-agent-gui = "research_agent.ui:run_gui"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/research_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pyright]
+pythonPath = ".venv/bin/python3"
+extraPaths = ["src"]
+include = ["src", "tests"]
+reportMissingImports = "none"

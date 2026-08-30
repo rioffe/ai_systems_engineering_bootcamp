@@ -1,0 +1,5 @@
+{"doc_id":"policy-primary","title":"Travel Policy","text":"The standard reimbursement limit is $5000.","quality":"primary","published":"2025-01-01"}
+{"doc_id":"policy-secondary","title":"Travel Summary","text":"The reimbursement limit is $5000 according to the policy.","quality":"secondary","published":"2025-01-02"}
+{"doc_id":"marketing","title":"Travel Plus","text":"Our premium plan offers the best travel value.","quality":"marketing","published":"2025-01-03"}
+{"doc_id":"conflict-a","title":"Old Policy","text":"The performance limit is 100 units.","quality":"primary","published":"2024-01-01","conflict_marker":{"quantity":"performance","with":"conflict-b","values":["100","200"]}}
+{"doc_id":"conflict-b","title":"New Policy","text":"The performance limit is 200 units.","quality":"primary","published":"2025-01-01","conflict_marker":{"quantity":"performance","with":"conflict-a","values":["100","200"]}}
