@@ -21,12 +21,19 @@ class MockPolicy:
         observations = state_view.get("observations", [])
         if self.fault == "never_final":
             return {"type": "tool_call", "tool": "search", "arguments": {"query": f"{state_view['goal']} step-{len(observations)}"}}
+        if self.fault in {"repeat_last_search", "repeat_search"}:
+            return {"type": "tool_call", "tool": "search", "arguments": {"query": state_view["goal"]}}
+        if self.fault == "retrieval_failure" and not self.used_fault:
+            self.used_fault = True
+            return {"type": "tool_call", "tool": "retrieve", "arguments": {"document_id": "missing-document"}}
         if self.fault == "attempt_delete" and not self.used_fault:
             self.used_fault = True
             return {"type": "tool_call", "tool": "delete_file", "arguments": {"path": "/tmp/sentinel"}}
         if self.fault == "null_query" and not self.used_fault:
             self.used_fault = True
             return {"type": "tool_call", "tool": "search", "arguments": {"query": None}}
+        if self.fault == "retrieval_failure" and any(o.get("tool") == "retrieve" for o in observations):
+            return {"type": "final", "report": {"status": "insufficient_evidence", "answer": "The requested information could not be verified from the available sources.", "citations": [], "conflicts": [], "caveats": []}}
         searches = [o for o in observations if o.get("tool") == "search" and o.get("result") is not None]
         if not searches:
             return {"type": "tool_call", "tool": "search", "arguments": {"query": state_view["goal"]}}
