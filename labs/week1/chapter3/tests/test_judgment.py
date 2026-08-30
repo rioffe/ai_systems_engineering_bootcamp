@@ -6,7 +6,7 @@ Implements T-08, T-08a, R-10, R-12, R-17, R-18, I-010, I-014 from SPEC.md C-10.
 from __future__ import annotations
 
 from rag.judgment import MockJudge, OllamaJudge
-
+from rag.model import OllamaClient
 from rag.types import Answer, Citation, Question, Usage, Verdict
 
 # -- MockJudge determinism / faithfulness / completeness ---------------------
@@ -158,3 +158,74 @@ def test_mockjudge_deterministic():
 def test_ollamajudge_exists_with_model_id():
     judge = OllamaJudge(model="qwen3.8:27b-mlx")
     assert judge.model_id == "qwen3.8:27b-mlx"
+
+
+class _ScriptedChat:
+    def __init__(self, responses):
+        self.responses = iter(responses)
+        self.questions = []
+
+    def chat(self, *, system, context, question, max_tokens, temperature, seed):
+        self.questions.append(question)
+        return next(self.responses), Usage(prompt_tokens=1, completion_tokens=1, total_tokens=2)
+
+
+def _valid_ollama_verdict(**overrides):
+    verdict = {
+        "correct": True,
+        "supported": True,
+        "complete": True,
+        "unsupported_claims": [],
+        "total_factual_claims": 1,
+        "faithfulness": 1.0,
+        "completeness": 1.0,
+        "citation_quality": 1.0,
+        "rationale": "supported",
+    }
+    verdict.update(overrides)
+    import json
+
+    return json.dumps(verdict)
+
+
+def test_ollamajudge_rejects_percentage_scores_and_retries(monkeypatch):
+    judge = OllamaJudge(model="phi4-mini:latest")
+    client = _ScriptedChat(
+        [
+            _valid_ollama_verdict(faithfulness=100.0, completeness=100.0, citation_quality=100.0),
+            _valid_ollama_verdict(),
+        ]
+    )
+    monkeypatch.setattr(OllamaClient, "chat", lambda self, **kwargs: client.chat(**kwargs))
+
+    verdict = judge.judge(
+        question=_question(),
+        context="[c1#0] refund limit is $5000",
+        answer=_answer("q1", "The refund limit is $5000."),
+        claims=["refund limit is $5000"],
+        gold_facts=["refund limit is $5000"],
+        max_retries=1,
+    )
+
+    assert verdict.status == "JUDGED"
+    assert verdict.faithfulness == 1.0
+    assert len(client.questions) == 2
+    assert "between 0 and 1" in client.questions[1]
+
+
+def test_ollamajudge_exhausted_invalid_output_is_error(monkeypatch):
+    judge = OllamaJudge(model="phi4-mini:latest")
+    client = _ScriptedChat([_valid_ollama_verdict(faithfulness="accurate")] * 2)
+    monkeypatch.setattr(OllamaClient, "chat", lambda self, **kwargs: client.chat(**kwargs))
+
+    verdict = judge.judge(
+        question=_question(),
+        context="[c1#0] refund limit is $5000",
+        answer=_answer("q1", "The refund limit is $5000."),
+        claims=["refund limit is $5000"],
+        gold_facts=["refund limit is $5000"],
+        max_retries=1,
+    )
+
+    assert verdict.status == "ERROR"
+    assert "accurate" in verdict.rationale

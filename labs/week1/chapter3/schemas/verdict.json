@@ -17,9 +17,9 @@
        "items": { "type": "string" }
      },
      "total_factual_claims": { "type": "integer", "minimum": 0 },
-     "faithfulness": { "type": ["number", "null"] },
-     "completeness": { "type": ["number", "null"] },
-     "citation_quality": { "type": ["number", "null"] },
+     "faithfulness": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+     "completeness": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+     "citation_quality": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
      "injection_warning": { "type": "boolean" },
      "grounding_violation": { "type": "boolean" },
      "which_field_decided": {

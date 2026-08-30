@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from loguru import logger
 
 from rag.model import OllamaClient
+from rag.schemas import validate_verdict
 from rag.types import Answer, Question, Verdict
 
 # -- helpers ----------------------------------------------------------------
@@ -191,8 +192,11 @@ class OllamaJudge(Judge):
         system = (
             "You are a precise judge. Given a question, context, "
             "an answer, a claims list, and the gold_facts list, "
-            "return a verdict with faithfulness, completeness, "
-            "citation_quality, and rationale."
+            "return JSON matching the verdict schema. Include boolean "
+            "correct/supported/complete fields, string-array unsupported_claims, "
+            "integer total_factual_claims, and decimal faithfulness, completeness, "
+            "and citation_quality scores between 0 and 1 (use 1.0, not 100). "
+            "Include a string rationale. Return JSON only."
         )
         user = (
             f"Question: {question.question}\n"
@@ -204,10 +208,18 @@ class OllamaJudge(Judge):
         last_error: str | None = None
         for attempt in range(max_retries + 1):
             try:
+                retry_user = user
+                if last_error is not None:
+                    retry_user += (
+                        "\nPrevious output was invalid: "
+                        + last_error
+                        + "\nReturn JSON only. Scores must be decimal numbers between 0 and 1; "
+                        "use 1.0, not 100."
+                    )
                 raw_text, _ = self._client.chat(
                     system=system,
                     context=context,
-                    question=user,
+                    question=retry_user,
                     max_tokens=512,
                     temperature=0.0,
                     seed=42,
@@ -221,18 +233,33 @@ class OllamaJudge(Judge):
                         flags=re.MULTILINE,
                     ).strip()
                 data = json.loads(text)
+                candidate = {
+                    "q_id": question.q_id,
+                    "correct": data.get("correct", False),
+                    "supported": data.get("supported", False),
+                    "complete": data.get("complete", False),
+                    "unsupported_claims": data.get("unsupported_claims", []),
+                    "total_factual_claims": data.get("total_factual_claims", len(claims)),
+                    "faithfulness": data.get("faithfulness", 0.0),
+                    "completeness": data.get("completeness", 0.0),
+                    "citation_quality": data.get("citation_quality", 0.0),
+                    "injection_warning": _is_injection(claims),
+                    "rationale": data.get("rationale", ""),
+                    "status": "JUDGED",
+                }
+                validate_verdict(candidate)
                 verdict = Verdict(
                     q_id=question.q_id,
-                    correct=bool(data.get("correct", False)),
-                    supported=bool(data.get("supported", False)),
-                    complete=bool(data.get("complete", False)),
-                    unsupported_claims=data.get("unsupported_claims", []),
-                    total_factual_claims=data.get("total_factual_claims", len(claims)),
-                    faithfulness=float(data.get("faithfulness", 0.0)),
-                    completeness=float(data.get("completeness", 0.0)),
-                    citation_quality=float(data.get("citation_quality", 0.0)),
-                    injection_warning=_is_injection(claims),
-                    rationale=data.get("rationale", ""),
+                    correct=candidate["correct"],
+                    supported=candidate["supported"],
+                    complete=candidate["complete"],
+                    unsupported_claims=candidate["unsupported_claims"],
+                    total_factual_claims=candidate["total_factual_claims"],
+                    faithfulness=float(candidate["faithfulness"]),
+                    completeness=float(candidate["completeness"]),
+                    citation_quality=float(candidate["citation_quality"]),
+                    injection_warning=candidate["injection_warning"],
+                    rationale=candidate["rationale"],
                     status="JUDGED",
                 )
                 return verdict

@@ -112,3 +112,10 @@ def test_schemas_have_required_shape():
 def test_jsonschema_or_structural_both_enforce():
     with pytest.raises(SchemaError):
         validate_answer({**_valid_answer(), "confidence": 5.0})
+
+
+def test_verdict_metric_out_of_range_rejected():
+    bad = _valid_verdict()
+    bad["faithfulness"] = 100.0
+    with pytest.raises(SchemaError):
+        validate_verdict(bad)
