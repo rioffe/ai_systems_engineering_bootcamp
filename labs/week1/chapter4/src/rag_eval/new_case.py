@@ -1,4 +1,5 @@
 """Production trace to incomplete golden-case scaffold."""
+
 from __future__ import annotations
 
 

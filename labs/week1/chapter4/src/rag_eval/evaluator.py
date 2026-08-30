@@ -48,7 +48,9 @@ class EvaluationRow:
     trace: dict[str, Any] = field(default_factory=dict)
 
 
-def evaluate_case(case: Any, aoe_result: Any, labels: dict[str, Any] | None = None) -> EvaluationRow:
+def evaluate_case(
+    case: Any, aoe_result: Any, labels: dict[str, Any] | None = None
+) -> EvaluationRow:
     checks = DeterministicChecks().check(aoe_result)
     parsed = _value(aoe_result, "parsed_answer")
     blocked = not all(check["passed"] for check in checks[:1])
@@ -57,9 +59,36 @@ def evaluate_case(case: Any, aoe_result: Any, labels: dict[str, Any] | None = No
     disagreements: set[str] = set()
     if labels and case_id in labels:
         label = labels[case_id]
-        if any(label.get(key) != verdict.get(key) for key in ("correct", "supported", "complete") if key in label):
+        if any(
+            label.get(key) != verdict.get(key)
+            for key in ("correct", "supported", "complete")
+            if key in label
+        ):
             disagreements.add(case_id)
-    classification = classify_failure(verdict["status"], _value(aoe_result, "failure_stage"), case_id, disagreements)
-    metrics = case_metrics(case, {"verdict": verdict, "parsed_answer": parsed, **(vars(aoe_result) if hasattr(aoe_result, "__dict__") else aoe_result)})
-    trace = {key: _value(aoe_result, key) for key in ("retrieved_chunks", "scores", "raw_output", "parsed_answer", "failure_stage", "usage_tokens", "latency_ms", "cost_usd")}
-    return EvaluationRow(case_id, _value(case, "category", ""), verdict, checks, classification, metrics, trace)
+    classification = classify_failure(
+        verdict["status"], _value(aoe_result, "failure_stage"), case_id, disagreements
+    )
+    metrics = case_metrics(
+        case,
+        {
+            "verdict": verdict,
+            "parsed_answer": parsed,
+            **(vars(aoe_result) if hasattr(aoe_result, "__dict__") else aoe_result),
+        },
+    )
+    trace = {
+        key: _value(aoe_result, key)
+        for key in (
+            "retrieved_chunks",
+            "scores",
+            "raw_output",
+            "parsed_answer",
+            "failure_stage",
+            "usage_tokens",
+            "latency_ms",
+            "cost_usd",
+        )
+    }
+    return EvaluationRow(
+        case_id, _value(case, "category", ""), verdict, checks, classification, metrics, trace
+    )

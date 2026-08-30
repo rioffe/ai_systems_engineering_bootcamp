@@ -1,13 +1,22 @@
 """Deterministic Chapter 4 failure attribution."""
+
 from __future__ import annotations
 
 FAILURE_CLASSES = {
-    "RETRIEVAL_FAILURE", "CONTEXT_FAILURE", "GENERATION_FAILURE",
-    "PARSING_FAILURE", "EVALUATION_FAILURE",
+    "RETRIEVAL_FAILURE",
+    "CONTEXT_FAILURE",
+    "GENERATION_FAILURE",
+    "PARSING_FAILURE",
+    "EVALUATION_FAILURE",
 }
 
 
-def classify_failure(status: str, failure_stage: str | None, case_id: str, label_disagreements: set[str] | None = None) -> str | None:
+def classify_failure(
+    status: str,
+    failure_stage: str | None,
+    case_id: str,
+    label_disagreements: set[str] | None = None,
+) -> str | None:
     if status == "PASS":
         return None
     if status == "PARSE_BLOCKED":

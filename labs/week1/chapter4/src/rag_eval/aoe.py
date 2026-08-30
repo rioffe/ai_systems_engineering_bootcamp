@@ -1,4 +1,5 @@
 """Chapter 3 adapter; this is the only module crossing the AoE boundary."""
+
 from __future__ import annotations
 
 import json
@@ -22,8 +23,14 @@ def _ch3_symbols() -> tuple[Any, Any, Any, Any, Any, Any]:
     model = import_module("rag.model")
     pipeline = import_module("rag.pipeline")
     types = import_module("rag.types")
-    return (corpus.load_corpus, embedding.MockEmbedder, judgment.MockJudge,
-            model.MockLLM, pipeline, types.Question)
+    return (
+        corpus.load_corpus,
+        embedding.MockEmbedder,
+        judgment.MockJudge,
+        model.MockLLM,
+        pipeline,
+        types.Question,
+    )
 
 
 @dataclass
@@ -53,18 +60,32 @@ def build_index(corpus_dir: str, index_flags: dict[str, Any]) -> tuple[Any, list
 def run_case(case: Any, index: Any, query_flags: dict[str, Any]) -> AoEResult:
     _load_corpus, _mock_embedder, mock_judge, mock_llm, pipeline, question_type = _ch3_symbols()
     question = question_type(
-        q_id=case.case_id, question=case.question, gold_answer=case.reference_answer,
-        gold_facts=[], relevant_chunks=[], relevant_docs=[], tier=case.category,
+        q_id=case.case_id,
+        question=case.question,
+        gold_answer=case.reference_answer,
+        gold_facts=[],
+        relevant_chunks=[],
+        relevant_docs=[],
+        tier=case.category,
     )
     start = time.perf_counter()
     metrics = pipeline.run_case(question, index, judge=mock_judge(), llm=mock_llm(), **query_flags)
     latency = round((time.perf_counter() - start) * 1000, 4)
-    verdict = {key: value for key, value in vars(metrics).items() if key in {"correct", "supported", "complete", "status", "unsupported_claims"}}
+    verdict = {
+        key: value
+        for key, value in vars(metrics).items()
+        if key in {"correct", "supported", "complete", "status", "unsupported_claims"}
+    }
     return AoEResult(
-        question=case.question, retrieved_chunks=list(metrics.retrieved), raw_output="",
+        question=case.question,
+        retrieved_chunks=list(metrics.retrieved),
+        raw_output="",
         parsed_answer={} if metrics.answer_status == "COMPLETED" else None,
-        verdict=verdict, failure_stage=metrics.failure_stage,
-        usage_tokens=len(case.question.split()), latency_ms=latency, status=metrics.status,
+        verdict=verdict,
+        failure_stage=metrics.failure_stage,
+        usage_tokens=len(case.question.split()),
+        latency_ms=latency,
+        status=metrics.status,
         trace={"retrieve_ms": metrics.retrieve_ms, "generate_ms": metrics.generate_ms},
     )
 

@@ -8,8 +8,16 @@ from pathlib import Path
 from typing import Any
 
 CATEGORY_SET = {
-    "easy", "multi", "chunking", "distractor", "conflict", "recency", "injection",
-    "adversarial", "boundary", "regression",
+    "easy",
+    "multi",
+    "chunking",
+    "distractor",
+    "conflict",
+    "recency",
+    "injection",
+    "adversarial",
+    "boundary",
+    "regression",
 }
 
 
@@ -32,7 +40,14 @@ class Dataset:
 
 
 def _case(raw: dict[str, Any], index: int) -> EvalCase:
-    required = ("case_id", "question", "reference_answer", "relevant_chunks", "category", "gold_facts")
+    required = (
+        "case_id",
+        "question",
+        "reference_answer",
+        "relevant_chunks",
+        "category",
+        "gold_facts",
+    )
     missing = [key for key in required if key not in raw]
     if missing:
         raise ValueError(f"case {index}: missing required fields: {', '.join(missing)}")
@@ -87,7 +102,9 @@ def validate_dataset(
 ) -> list[str]:
     violations: list[str] = []
     if strict and len(dataset.cases) < 50:
-        violations.append(f"strict dataset floor requires at least 50 cases, got {len(dataset.cases)}")
+        violations.append(
+            f"strict dataset floor requires at least 50 cases, got {len(dataset.cases)}"
+        )
     seen: set[str] = set()
     for index, item in enumerate(dataset.cases):
         if item.case_id in seen:

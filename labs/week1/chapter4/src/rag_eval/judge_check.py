@@ -1,4 +1,5 @@
 """Validate judge verdicts against human labels."""
+
 from __future__ import annotations
 
 FIELDS = ("correct", "supported", "complete")
@@ -18,5 +19,18 @@ def judge_check(eval_artifact: dict, labels: dict) -> dict:
                 if verdict.get(field) == label[field]:
                     counts[field][0] += 1
                 else:
-                    disagreements.append({"case_id": case_id, "field": field, "judge": verdict.get(field), "human": label[field]})
-    return {"status": "OK", "agreement": {field: (good / total if total else None) for field, (good, total) in counts.items()}, "disagreements": disagreements}
+                    disagreements.append(
+                        {
+                            "case_id": case_id,
+                            "field": field,
+                            "judge": verdict.get(field),
+                            "human": label[field],
+                        }
+                    )
+    return {
+        "status": "OK",
+        "agreement": {
+            field: (good / total if total else None) for field, (good, total) in counts.items()
+        },
+        "disagreements": disagreements,
+    }

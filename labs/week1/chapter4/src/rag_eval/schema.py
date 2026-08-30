@@ -27,11 +27,15 @@ def _schema_path(name: str) -> Path:
 def validate_document(document: Any, schema_name: str) -> Any:
     try:
         schema = json.loads(_schema_path(schema_name).read_text())
-        errors = sorted(Draft202012Validator(schema).iter_errors(document), key=lambda error: list(error.path))
+        errors = sorted(
+            Draft202012Validator(schema).iter_errors(document), key=lambda error: list(error.path)
+        )
     except (OSError, json.JSONDecodeError) as exc:
         raise SchemaError(f"cannot load schema {schema_name}: {exc}") from exc
     if errors:
-        details = "; ".join(f"{'.'.join(map(str, error.path)) or '<root>'}: {error.message}" for error in errors)
+        details = "; ".join(
+            f"{'.'.join(map(str, error.path)) or '<root>'}: {error.message}" for error in errors
+        )
         raise SchemaError(f"{schema_name} schema violation: {details}")
     return document
 

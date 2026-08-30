@@ -15,7 +15,12 @@ from rag_eval.metrics import (
 
 
 def result(**kwargs):
-    values = {"retrieved_chunks": ["a", "x", "b"], "parsed_answer": {}, "latency_ms": 1.0, "cost_usd": 0.2}
+    values = {
+        "retrieved_chunks": ["a", "x", "b"],
+        "parsed_answer": {},
+        "latency_ms": 1.0,
+        "cost_usd": 0.2,
+    }
     values.update(kwargs)
     return SimpleNamespace(**values)
 
@@ -42,8 +47,36 @@ def test_zero_rules_and_case_metrics():
 
 def test_aggregate_has_sorted_categories_and_difficulty():
     rows = [
-        {"category": "z", "difficulty": "hard", "accuracy": 1, "precision_at_k": 1, "recall_at_k": 1, "mrr_at_k": 1, "map": 1, "ndcg_at_k": 1, "groundedness": 1, "completeness": 1, "hallucination_rate": 0, "latency_ms": 2, "cost_usd": 1},
-        {"category": "a", "difficulty": "easy", "accuracy": 0, "precision_at_k": 0, "recall_at_k": 0, "mrr_at_k": 0, "map": 0, "ndcg_at_k": 0, "groundedness": 0, "completeness": 0, "hallucination_rate": 1, "latency_ms": 4, "cost_usd": None},
+        {
+            "category": "z",
+            "difficulty": "hard",
+            "accuracy": 1,
+            "precision_at_k": 1,
+            "recall_at_k": 1,
+            "mrr_at_k": 1,
+            "map": 1,
+            "ndcg_at_k": 1,
+            "groundedness": 1,
+            "completeness": 1,
+            "hallucination_rate": 0,
+            "latency_ms": 2,
+            "cost_usd": 1,
+        },
+        {
+            "category": "a",
+            "difficulty": "easy",
+            "accuracy": 0,
+            "precision_at_k": 0,
+            "recall_at_k": 0,
+            "mrr_at_k": 0,
+            "map": 0,
+            "ndcg_at_k": 0,
+            "groundedness": 0,
+            "completeness": 0,
+            "hallucination_rate": 1,
+            "latency_ms": 4,
+            "cost_usd": None,
+        },
     ]
     aggregate = aggregate_metrics(rows, categories=["z", "a"], difficulties=["hard", "easy"])
     assert list(aggregate["by_category"]) == ["a", "z"]

@@ -43,10 +43,17 @@ def test_validation_enumerates_duplicate_category_reference_and_sentinel(tmp_pat
         tmp_path,
         [
             case("same"),
-            case("same", category="not-a-category", relevant_chunks=["missing"], reference_answer="REPLACE_ME"),
+            case(
+                "same",
+                category="not-a-category",
+                relevant_chunks=["missing"],
+                reference_answer="REPLACE_ME",
+            ),
         ],
     )
-    report = validate_dataset(load_dataset(path, corpus_ids={"doc#0"}, validate=False), corpus_ids={"doc#0"})
+    report = validate_dataset(
+        load_dataset(path, corpus_ids={"doc#0"}, validate=False), corpus_ids={"doc#0"}
+    )
     messages = " ".join(report)
     assert "duplicate case_id" in messages
     assert "category" in messages

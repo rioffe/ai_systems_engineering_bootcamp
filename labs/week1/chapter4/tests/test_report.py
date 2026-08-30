@@ -8,7 +8,13 @@ from rag_eval.report import load_artifact, render_compare_table, write_eval_arti
 
 
 def artifact():
-    return {"eval_report_version": "0.1", "dataset_id": "x", "usage_kind": "synthetic", "cases": [], "aggregate": {"by_category": {}, "accuracy": 0.5}}
+    return {
+        "eval_report_version": "0.1",
+        "dataset_id": "x",
+        "usage_kind": "synthetic",
+        "cases": [],
+        "aggregate": {"by_category": {}, "accuracy": 0.5},
+    }
 
 
 def test_eval_artifact_is_canonical_and_loadable(tmp_path):
@@ -27,4 +33,6 @@ def test_bad_artifact_is_rejected(tmp_path):
 
 
 def test_compare_table_renders_missing_marker():
-    assert "n/m" in render_compare_table({"metrics": {"accuracy": {"baseline": "n/m", "current": "n/m", "delta": "n/m"}}})
+    assert "n/m" in render_compare_table(
+        {"metrics": {"accuracy": {"baseline": "n/m", "current": "n/m", "delta": "n/m"}}}
+    )

@@ -1,4 +1,5 @@
 """Pure evaluation-vector metric calculations."""
+
 from __future__ import annotations
 
 import math
@@ -6,9 +7,20 @@ from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
 METRIC_KEYS = [
-    "accuracy", "precision_at_k", "recall_at_k", "mrr_at_k", "map", "ndcg_at_k",
-    "groundedness", "completeness", "hallucination_rate", "latency_p50", "latency_p90",
-    "latency_p95", "latency_p99", "cost_per_success",
+    "accuracy",
+    "precision_at_k",
+    "recall_at_k",
+    "mrr_at_k",
+    "map",
+    "ndcg_at_k",
+    "groundedness",
+    "completeness",
+    "hallucination_rate",
+    "latency_p50",
+    "latency_p90",
+    "latency_p95",
+    "latency_p99",
+    "cost_per_success",
 ]
 
 
@@ -89,10 +101,24 @@ def case_metrics(case: Any, result: Any, k: int = 5) -> dict[str, float | None]:
     parsed = _get(result, "parsed_answer")
     blocked = _get(result, "status") == "PARSE_BLOCKED" or parsed is None
     correct = False if blocked else bool(_get(verdict, "correct", _get(result, "correct", False)))
-    supported = False if blocked else bool(_get(verdict, "supported", _get(result, "supported", False)))
-    complete = False if blocked else bool(_get(verdict, "complete", _get(result, "complete", False)))
-    claims = 0 if blocked else _as_int(_get(verdict, "total_factual_claims", _get(result, "total_factual_claims", 0)) or 0)
-    unsupported = 0 if blocked else len(_get(verdict, "unsupported_claims", _get(result, "unsupported_claims", [])) or [])
+    supported = (
+        False if blocked else bool(_get(verdict, "supported", _get(result, "supported", False)))
+    )
+    complete = (
+        False if blocked else bool(_get(verdict, "complete", _get(result, "complete", False)))
+    )
+    claims = (
+        0
+        if blocked
+        else _as_int(
+            _get(verdict, "total_factual_claims", _get(result, "total_factual_claims", 0)) or 0
+        )
+    )
+    unsupported = (
+        0
+        if blocked
+        else len(_get(verdict, "unsupported_claims", _get(result, "unsupported_claims", [])) or [])
+    )
     gold_facts = list(_get(case, "gold_facts", []) or [])
     reflected = _get(result, "reflected_gold_facts", []) or []
     retrieved = _get(result, "retrieved_chunks", []) or []
@@ -106,15 +132,29 @@ def case_metrics(case: Any, result: Any, k: int = 5) -> dict[str, float | None]:
         "mrr_at_k": mrr_at_k(relevant, retrieved, k),
         "map": average_precision(relevant, retrieved, k),
         "ndcg_at_k": ndcg_at_k(relevant, retrieved, k),
-        "groundedness": 1.0 if claims == 0 else _as_float(supported) if claims == 1 else (claims - unsupported) / claims,
-        "completeness": 1.0 if not gold_facts else (len(set(reflected) & set(gold_facts)) / len(gold_facts) if reflected else _as_float(complete)),
+        "groundedness": 1.0
+        if claims == 0
+        else _as_float(supported)
+        if claims == 1
+        else (claims - unsupported) / claims,
+        "completeness": 1.0
+        if not gold_facts
+        else (
+            len(set(reflected) & set(gold_facts)) / len(gold_facts)
+            if reflected
+            else _as_float(complete)
+        ),
         "hallucination_rate": 0.0 if claims == 0 else unsupported / claims,
         "latency_ms": latency,
         "cost_usd": None if cost is None else _as_float(cost),
     }
 
 
-def aggregate_metrics(rows: Sequence[Mapping[str, Any]], categories: Sequence[str] | None = None, difficulties: Sequence[str] | None = None) -> dict[str, Any]:
+def aggregate_metrics(
+    rows: Sequence[Mapping[str, Any]],
+    categories: Sequence[str] | None = None,
+    difficulties: Sequence[str] | None = None,
+) -> dict[str, Any]:
     def mean(key: str, values: Sequence[Mapping[str, Any]]) -> float | None:
         nums = [_as_float(row[key]) for row in values if row.get(key) is not None]
         return sum(nums) / len(nums) if nums else (None if key == "cost_per_success" else 0.0)
@@ -123,20 +163,32 @@ def aggregate_metrics(rows: Sequence[Mapping[str, Any]], categories: Sequence[st
     for key in METRIC_KEYS:
         if key.startswith("latency_"):
             pct = _as_int(key.rsplit("_", 1)[1][1:])
-            output[key] = near_rank_percentile([_as_float(row.get("latency_ms", 0)) for row in rows], pct)
+            output[key] = near_rank_percentile(
+                [_as_float(row.get("latency_ms", 0)) for row in rows], pct
+            )
         elif key == "cost_per_success":
-            costs = [_as_float(row["cost_usd"]) for row in rows if row.get("cost_usd") is not None and row.get("accuracy")]
+            costs = [
+                _as_float(row["cost_usd"])
+                for row in rows
+                if row.get("cost_usd") is not None and row.get("accuracy")
+            ]
             output[key] = sum(costs) / len(costs) if costs else None
         else:
             output[key] = mean(key, rows)
     by_category: dict[str, Any] = {}
     for category in sorted(set(categories or [str(row.get("category", "")) for row in rows])):
         subset = [row for row in rows if row.get("category") == category]
-        by_category[category] = {key: mean(key, subset) for key in METRIC_KEYS if not key.startswith("latency_")}
+        by_category[category] = {
+            key: mean(key, subset) for key in METRIC_KEYS if not key.startswith("latency_")
+        }
     output["by_category"] = by_category
     if difficulties is not None:
         output["by_difficulty"] = {
-            difficulty: {key: mean(key, [row for row in rows if row.get("difficulty") == difficulty]) for key in METRIC_KEYS if not key.startswith("latency_")}
+            difficulty: {
+                key: mean(key, [row for row in rows if row.get("difficulty") == difficulty])
+                for key in METRIC_KEYS
+                if not key.startswith("latency_")
+            }
             for difficulty in sorted(set(difficulties))
         }
     return output

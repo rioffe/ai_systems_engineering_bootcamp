@@ -4,7 +4,16 @@ from rag_eval.compare import compare_artifacts
 
 
 def make(accuracy, latency=10):
-    return {"eval_report_version": "0.1", "dataset_id": "x", "usage_kind": "synthetic", "aggregate": {"accuracy": accuracy, "latency_p95": latency, "by_category": {"easy": {"accuracy": accuracy}}}}
+    return {
+        "eval_report_version": "0.1",
+        "dataset_id": "x",
+        "usage_kind": "synthetic",
+        "aggregate": {
+            "accuracy": accuracy,
+            "latency_p95": latency,
+            "by_category": {"easy": {"accuracy": accuracy}},
+        },
+    }
 
 
 def test_directional_delta_and_dataset_guard():

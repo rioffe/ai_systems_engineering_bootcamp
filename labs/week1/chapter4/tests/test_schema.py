@@ -20,7 +20,9 @@ def test_load_json_validates_document(tmp_path):
 
 def test_load_yaml_validates_gates(tmp_path):
     path = tmp_path / "gates.yml"
-    path.write_text("version: 1\ngates:\n  - metric: accuracy\n    constraint: drop\n    max_pct_points: 1.0\n")
+    path.write_text(
+        "version: 1\ngates:\n  - metric: accuracy\n    constraint: drop\n    max_pct_points: 1.0\n"
+    )
     assert load_yaml(path, "gates")["version"] == 1
 
 

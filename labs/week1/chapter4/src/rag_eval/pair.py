@@ -1,4 +1,5 @@
 """Optional pairwise model/config evaluation."""
+
 from __future__ import annotations
 
 
@@ -12,4 +13,9 @@ def run_pair(rows_a: list[dict], rows_b: list[dict]) -> dict:
         wins += winner == "A"
         cases.append({"case_id": left.get("case_id"), "winner": winner})
     comparisons = len(cases)
-    return {"comparisons": comparisons, "a_wins": wins, "win_rate_a": wins / comparisons if comparisons else 0.0, "cases": cases}
+    return {
+        "comparisons": comparisons,
+        "a_wins": wins,
+        "win_rate_a": wins / comparisons if comparisons else 0.0,
+        "cases": cases,
+    }

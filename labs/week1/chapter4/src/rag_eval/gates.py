@@ -1,4 +1,5 @@
 """Fail-closed directional regression gates."""
+
 from __future__ import annotations
 
 # pyright: reportMissingImports=false
@@ -20,7 +21,9 @@ def validate_config(config: dict[str, Any]) -> None:
         metric = gate.get("metric")
         if metric not in METRIC_KEYS:
             raise ValueError(f"unknown metric: {metric}")
-        bounds = [key for key in ("max_pct_points", "max_pct", "min_value", "max_value") if key in gate]
+        bounds = [
+            key for key in ("max_pct_points", "max_pct", "min_value", "max_value") if key in gate
+        ]
         if len(bounds) != 1:
             raise ValueError("each gate requires exactly one bound")
         if "max_pct" in bounds and metric in HIGHER_BETTER:
@@ -45,9 +48,17 @@ def evaluate_gates(compare_report: dict[str, Any], config: dict[str, Any]) -> di
             elif "max_value" in gate:
                 passed = _number(cell["current"]) <= _number(gate["max_value"])
             elif gate["constraint"] == "drop":
-                passed = delta >= -_number(bound) if "max_pct_points" in gate else delta >= -_number(bound) / 100 * _number(cell["baseline"])
+                passed = (
+                    delta >= -_number(bound)
+                    if "max_pct_points" in gate
+                    else delta >= -_number(bound) / 100 * _number(cell["baseline"])
+                )
             else:
-                passed = delta >= -_number(bound) if "max_pct_points" in gate else delta >= -_number(bound) / 100 * _number(cell["baseline"])
+                passed = (
+                    delta >= -_number(bound)
+                    if "max_pct_points" in gate
+                    else delta >= -_number(bound) / 100 * _number(cell["baseline"])
+                )
             reason = "passed" if passed else "constraint-failed"
         outcomes.append({"metric": metric, "passed": passed, "reason": reason})
     return {"gates": outcomes, "passed": all(item["passed"] for item in outcomes)}

@@ -28,7 +28,11 @@ def write_json_artifact(path: str | Path, artifact: dict[str, Any], schema_name:
 
 def load_artifact(path: str | Path, schema_name: str, force: bool = False) -> dict[str, Any]:
     artifact = load_json(path, schema_name)
-    if schema_name in {"eval", "compare"} and artifact.get("eval_report_version") != "0.1" and not force:
+    if (
+        schema_name in {"eval", "compare"}
+        and artifact.get("eval_report_version") != "0.1"
+        and not force
+    ):
         raise ValueError("eval report version mismatch")
     return artifact
 
@@ -46,7 +50,9 @@ def write_compare_report(path: str | Path, report: dict[str, Any]) -> None:
 
 
 def write_gate_report(path: str | Path, report: dict[str, Any]) -> None:
-    Path(path).write_text(json.dumps(_canonical(report), sort_keys=True, separators=(",", ":")) + "\n")
+    Path(path).write_text(
+        json.dumps(_canonical(report), sort_keys=True, separators=(",", ":")) + "\n"
+    )
 
 
 def write_judge_check_report(path: str | Path, report: dict[str, Any]) -> None:
@@ -60,7 +66,9 @@ def write_pair_report(path: str | Path, report: dict[str, Any]) -> None:
 def render_compare_table(report: dict[str, Any]) -> str:
     lines = ["metric | baseline | current | delta", "--- | ---: | ---: | ---:"]
     for metric, values in report.get("metrics", {}).items():
-        lines.append(f"{metric} | {values.get('baseline', 'n/m')} | {values.get('current', 'n/m')} | {values.get('delta', 'n/m')}")
+        lines.append(
+            f"{metric} | {values.get('baseline', 'n/m')} | {values.get('current', 'n/m')} | {values.get('delta', 'n/m')}"
+        )
     return "\n".join(lines)
 
 
