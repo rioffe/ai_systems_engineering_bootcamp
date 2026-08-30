@@ -198,6 +198,10 @@ Launch the PyQt5 desktop application with:
 uv run mortgage-gui
 ```
 
+![Hybrid Mortgage Calculator GUI](assets/mortgage-calculator-gui.png)
+
+*Example GUI run using Ollama natural-language mode with an included amortization schedule.*
+
 The window has two modes:
 
 - **Calculator:** enter principal, rate, term/payments, and optionally a payment; the UI calculates the missing quantity through the deterministic service.
