@@ -120,7 +120,18 @@ def _score_case(case: dict[str, Any], response: Any) -> dict[str, Any]:
     if expected_intent is not None:
         checks["intent"] = actual_intent == expected_intent
 
-    actual_result = response.result or {}
+    if response.result:
+        actual_result = response.result
+    elif response.interpretation.request is not None:
+        request = response.interpretation.request
+        actual_result = {
+            "principal": request.principal,
+            "periodic_rate": request.periodic_rate,
+            "payments": request.payments,
+            "payment": request.payment,
+        }
+    else:
+        actual_result = {}
     field_checks: dict[str, bool] = {}
     for field, expected_value in (expected.get("fields") or {}).items():
         field_checks[field] = _decimal_equal(actual_result.get(field), expected_value, Decimal("1e-9"))

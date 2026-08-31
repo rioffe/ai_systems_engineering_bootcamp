@@ -86,6 +86,16 @@ def test_eval_rows_include_provenance_and_opt_in_raw_excerpt():
     assert row["model_response_excerpt"] == "raw model response"
 
 
+def test_error_case_scores_expected_canonical_fields_from_interpretation():
+    cases = [_case("term-error", "How long will it take to pay off $500,000 at 6% if I pay $2,000?", {
+        "intent": "term", "outcome": "payment_too_low",
+        "fields": {"principal": "500000", "payment": "2000"},
+    })]
+    report = evaluate_cases(cases, MockLLMAdapter(), adapter_name="mock", model_name=None)
+    assert report["cases"][0]["status"] == "PASS"
+    assert report["cases"][0]["field_checks"] == {"principal": True, "payment": True}
+
+
 def test_write_report_is_sorted_and_versioned(tmp_path):
     path = tmp_path / "report.json"
     write_report(path, {"summary": {"total": 0, "passed": 0, "failed": 0}, "cases": []})
