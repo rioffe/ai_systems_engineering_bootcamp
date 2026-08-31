@@ -147,6 +147,7 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
         or "effectively" in text
     )
     principal_intent = "loan amount" in text or "how much can i borrow" in text or "what principal" in text
+    payment_intent = "payment" in text or "pay monthly" in text or "what would i pay" in text
     if rate_intent and canonical.get("principal") is not None:
         canonical["periodic_rate"] = None
         if user_monthly_payments:
@@ -177,7 +178,7 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
             canonical["payment"] = str(user_monthly_payments[0])
         elif len(user_amounts) >= 2:
             canonical["payment"] = str(user_amounts[-1])
-    elif "payment" in text and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None and canonical.get("payments") is not None:
+    elif payment_intent and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None and canonical.get("payments") is not None:
         canonical["payment"] = None
 
     if (
@@ -209,7 +210,7 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
             canonical["assumptions"] = assumptions
         canonical["clarification"] = None
     if (
-        "payment" in text
+        payment_intent
         and canonical.get("principal") is not None
         and canonical.get("periodic_rate") is not None
         and canonical.get("payments") is not None
@@ -244,6 +245,7 @@ class MockLLMAdapter:
         rates = [_decimal(match) / Decimal(100) for match in _PERCENT.finditer(user_text)]
         years = [_decimal(match) for match in _YEARS.finditer(user_text)]
         rate_intent = "what rate" in text or "interest rate" in text or "effectively" in text
+        zero_interest = any(term in text for term in ("zero interest", "zero-interest", "no interest", "interest-free"))
         term_intent = "how long" in text or "how many years" in text or "how many months" in text or "pay off" in text
         zero_interest = any(term in text for term in ("zero interest", "zero-interest", "no interest", "interest-free"))
         if (not rates and not rate_intent and not zero_interest) or (not years and not term_intent):
@@ -254,7 +256,7 @@ class MockLLMAdapter:
                 missing.append("mortgage term")
             return Interpretation(None, f"Please provide the {' and '.join(missing)}.", (), ())
 
-        periodic_rate = rates[0] / Decimal(12) if rates else None
+        periodic_rate = rates[0] / Decimal(12) if rates else Decimal(0) if zero_interest else None
         payments_int = None
         if years:
             payments = years[0] * Decimal(12)
@@ -474,6 +476,10 @@ class OllamaAdapter:
             request = CalculationRequest(principal, periodic_rate, payments, payment)
             return Interpretation(request, None, assumptions, evidence)
         except (KeyError, TypeError, ValueError, InvalidOperation, json.JSONDecodeError) as exc:
+            fallback = MockLLMAdapter().interpret(user_text)
+            if fallback.request is not None:
+                metadata("ollama interpretation fallback=deterministic-user-text reason={}", type(exc).__name__)
+                return fallback
             raise ValueError(f"MODEL_ERROR: invalid structured interpretation: {exc}") from exc
 
     @staticmethod

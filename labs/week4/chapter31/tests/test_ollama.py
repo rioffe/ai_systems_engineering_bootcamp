@@ -498,6 +498,26 @@ def test_ollama_adapter_recognizes_zero_interest_month_term():
     assert interpretation.request.payment == Decimal("1000")
 
 
+def test_ollama_adapter_recovers_payment_intent_from_model_clarification():
+    response_text = json.dumps({
+        "principal": "250000", "annual_rate": "0.045", "payments": None, "payment": None,
+        "assumptions": None, "clarification": "Monthly payment calculation is not requested.", "evidence": [],
+    })
+    adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: response_text)
+    response = adapter.ask("What would I pay monthly for $250,000 at 4.5% over 15 years?")
+    assert response.ok is True
+    assert response.result["payments"] == 180
+    assert Decimal(response.result["principal"]) == Decimal("250000")
+
+
+def test_ollama_adapter_uses_text_fallback_when_model_json_is_malformed():
+    adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: "malformed response")
+    response = adapter.ask("What is the payment on a $120,000 zero-interest loan for 10 years?")
+    assert response.ok is True
+    assert response.result["payment"] == "1000"
+    assert response.result["payments"] == 120
+
+
 def test_ollama_adapter_converts_malformed_model_output_to_model_error():
     response = OllamaAdapter(model="llama3.2", chat_fn=lambda _: "not json").ask("calculate this")
     assert response.ok is False
