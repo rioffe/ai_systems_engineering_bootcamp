@@ -196,6 +196,19 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
     ):
         canonical["clarification"] = None
     if (
+        principal_intent
+        and canonical.get("principal") is None
+        and canonical.get("periodic_rate") is not None
+        and canonical.get("payments") is not None
+        and canonical.get("payment") is not None
+    ):
+        clarification = canonical.get("clarification")
+        if clarification and str(clarification).strip().lower() not in {"null", "none"}:
+            assumptions = list(canonical.get("assumptions") or [])
+            assumptions.append(str(clarification))
+            canonical["assumptions"] = assumptions
+        canonical["clarification"] = None
+    if (
         "payment" in text
         and canonical.get("principal") is not None
         and canonical.get("periodic_rate") is not None
