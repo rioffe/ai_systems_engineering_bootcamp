@@ -862,12 +862,10 @@ Mortgage mathematics is particularly well suited to property-based testing.
 
 For randomly generated valid loans:
 
-```text
-(P, r, n)
-        ↓
-calculate M
-        ↓
-calculate P'
+```mermaid
+  flowchart LR
+      A(["(P, r, n)"]) --> B(["calculate M"])
+      B --> C(["calculate P'"])
 ```
 
 The resulting:
@@ -880,12 +878,10 @@ should hold within a defined numerical tolerance.
 
 Similarly:
 
-```text
-(P, r, n)
-        ↓
-M
-        ↓
-solve for r
+```mermaid
+  flowchart LR
+      A(["(P, r, n)"]) --> B(["M"])
+      B --> C(["solve for r"])
 ```
 
 should return approximately the original $r$.
