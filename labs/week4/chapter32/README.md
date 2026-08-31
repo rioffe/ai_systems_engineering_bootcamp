@@ -422,7 +422,7 @@ Launch the optional PyQt5 entry point with:
 uv run synthgen-gui
 ```
 
-The GUI boundary is intentionally thin and shares the generator service rather than duplicating scenario, calculator, validation, or reporting logic. It provides the bounded preview surface and diagnostics selector (`Off`, `INFO`, `DEBUG`). Construction does not generate data. Use the CLI for scripted artifact paths and complete batch workflows.
+The GUI boundary is intentionally thin and shares the generator service rather than duplicating scenario, calculator, validation, or reporting logic. It provides the bounded preview surface and diagnostics selector (`Off`, `INFO`, `DEBUG`). When `ollama` realization is selected, the GUI shows model and host fields defaulting to `llama3.2` and `http://127.0.0.1:11434`; those values are passed to `OllamaRealizer` for Preview. Construction does not generate data. Use the CLI for scripted artifact paths and complete batch workflows.
 
 For headless environments:
 

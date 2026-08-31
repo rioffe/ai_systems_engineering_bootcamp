@@ -481,7 +481,7 @@ Required options:
 
 ### 5.2 GUI (`synthgen-gui`), optional bounded surface
 
-The GUI is out of v0.1 acceptance. If implemented, it MUST provide specification selection, size/seed/method controls, preview, generate, validate, stats, and inspect actions. It MUST use the contracts in §4 and MUST not duplicate scenario, truth, constraint, or validation logic. It MUST provide `Off`, `INFO`, and `DEBUG` diagnostics, default `Off`; raw model prompts/responses MAY appear only at DEBUG in a dedicated diagnostics view.
+The GUI is out of v0.1 acceptance. If implemented, it MUST provide specification selection, size/seed/method controls, preview, generate, validate, stats, and inspect actions. It MUST use the contracts in §4 and MUST not duplicate scenario, truth, constraint, or validation logic. It MUST provide `Off`, `INFO`, and `DEBUG` diagnostics, default `Off`; raw model prompts/responses MAY appear only at DEBUG in a dedicated diagnostics view. When realization method `ollama` is selected, the GUI MUST reveal model and host controls defaulting to `llama3.2` and `http://127.0.0.1:11434`; Preview MUST pass those values to the shared service and then to `OllamaRealizer`. Template mode MUST pass no Ollama override.
 
 ### 5.3 Output rules
 

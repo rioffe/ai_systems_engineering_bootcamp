@@ -13,7 +13,7 @@ from .errors import CalculatorError, ConstraintError, ExhaustedError, ModelError
 from .metrics import build_report
 from .models import GenerationResult
 from .scenarios import ScenarioGenerator
-from .spec import DatasetSpecification, validate_spec
+from .spec import DatasetSpecification, load_spec, validate_spec
 from .templates import TemplateRealizer
 from .truth import default_registry
 from .validators import validate_candidate
@@ -23,6 +23,30 @@ from .writers import stable_json, write_artifacts
 def _candidate_seed(seed: int, scenario_id: str, attempt: int, method: str) -> int:
     value = f"{seed}:{scenario_id}:{attempt}:{method}".encode()
     return int.from_bytes(hashlib.sha256(value).digest()[:8], "big")
+
+
+def preview_dataset(
+    spec_path: Path,
+    *,
+    size: int = 1,
+    seed: int | None = None,
+    method: str | None = None,
+    model: str | None = None,
+    host: str | None = None,
+) -> GenerationResult:
+    """Generate bounded records without publishing dataset artifacts."""
+    if size < 1 or size > 100:
+        raise ValueError("preview size must be between 1 and 100")
+    spec = load_spec(Path(spec_path))
+    realizer = None
+    if method == "ollama":
+        from .llm import OllamaRealizer
+
+        realizer = OllamaRealizer(
+            model or str(spec.realization.get("model", "llama3.2")),
+            host or str(spec.realization.get("host", "http://127.0.0.1:11434")),
+        )
+    return generate_dataset(spec, size=size, seed=seed, method=method, realizer=realizer)
 
 
 def generate_dataset(spec: DatasetSpecification, *, size: int | None = None, seed: int | None = None, method: str | None = None, max_attempts: int | None = None, registry: Any = None, realizer: Any = None, allow_partial: bool = False, output: Path | None = None, report_path: Path | None = None, manifest_path: Path | None = None, spec_path: Path | None = None) -> GenerationResult:
@@ -38,7 +62,7 @@ def generate_dataset(spec: DatasetSpecification, *, size: int | None = None, see
         raise ValueError("size and max_attempts must be positive")
     if method == "ollama" and realizer is None:
         from .llm import OllamaRealizer
-        realizer = OllamaRealizer(str(spec.realization.get("model", "llama3")), str(spec.realization.get("host", "http://127.0.0.1:11434")))
+        realizer = OllamaRealizer(str(spec.realization.get("model", "llama3.2")), str(spec.realization.get("host", "http://127.0.0.1:11434")))
     realizer = realizer or TemplateRealizer()
     rng = random.Random(seed)
     scenarios = ScenarioGenerator(spec)
