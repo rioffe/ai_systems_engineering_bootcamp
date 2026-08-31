@@ -134,7 +134,7 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
         canonical["periodic_rate"] = str(user_rates[0] / Decimal(12))
     if user_monthly_rates:
         canonical["periodic_rate"] = str(user_monthly_rates[0])
-    if user_years and canonical.get("payments") is None:
+    if user_years:
         monthly_term = user_years[0] * Decimal(12)
         if monthly_term != monthly_term.to_integral_value():
             raise ValueError("MODEL_ERROR: user term is not a whole number of monthly payments")

@@ -215,7 +215,7 @@ def test_ollama_adapter_uses_explicit_user_units_when_model_omits_term():
         {
             "principal": "100000",
             "periodic_rate": "0.041667",
-            "payments": None,
+            "payments": "15",
             "payment": None,
             "assumptions": None,
             "clarification": "Missing information",
