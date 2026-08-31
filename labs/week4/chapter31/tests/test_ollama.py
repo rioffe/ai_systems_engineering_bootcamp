@@ -442,6 +442,50 @@ def test_ollama_adapter_classifies_unsupported_scope_before_model():
     assert called is False
 
 
+def test_ollama_adapter_recovers_zero_interest_affordability_request():
+    response_text = json.dumps({
+        "principal": None, "annual_rate": None, "payments": None, "payment": None,
+        "assumptions": None, "clarification": "The interest rate is missing.", "evidence": [],
+    })
+    adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: response_text)
+    response = adapter.ask("If there is no interest and I can pay $1,000 each month for 10 years, what principal can I borrow?")
+    assert response.ok is True
+    assert response.result["principal"] == "120000"
+    assert response.result["periodic_rate"] == "0"
+
+
+def test_ollama_adapter_derives_principal_without_treating_down_payment_as_rate():
+    response_text = json.dumps({
+        "principal": None, "annual_rate": None, "payments": None, "payment": None,
+        "assumptions": None, "clarification": None, "evidence": [],
+    })
+    adapter = OllamaAdapter(model="gemma3n:e4b", chat_fn=lambda _: response_text)
+    response = adapter.ask("I want a $600,000 house with 20% down at 6.25% for 30 years. What is my payment?")
+    assert response.ok is True
+    assert Decimal(response.result["principal"]) == Decimal("480000")
+    assert response.result["payments"] == 360
+
+
+def test_ollama_adapter_recognizes_loan_amount_intent():
+    adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: "{}")
+    interpretation = adapter.interpret("At 4% for 15 years, what loan amount corresponds to a $2,000 monthly payment?")
+    assert interpretation.request is not None
+    assert interpretation.request.principal is None
+    assert interpretation.request.periodic_rate == Decimal("0.04") / Decimal(12)
+    assert interpretation.request.payments == 180
+    assert interpretation.request.payment == Decimal("2000")
+
+
+def test_ollama_adapter_recognizes_zero_interest_month_term():
+    adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: "{}")
+    interpretation = adapter.interpret("How many months to repay $12,000 with zero interest and $1,000 monthly payments?")
+    assert interpretation.request is not None
+    assert interpretation.request.principal == Decimal("12000")
+    assert interpretation.request.periodic_rate == Decimal("0")
+    assert interpretation.request.payments is None
+    assert interpretation.request.payment == Decimal("1000")
+
+
 def test_ollama_adapter_converts_malformed_model_output_to_model_error():
     response = OllamaAdapter(model="llama3.2", chat_fn=lambda _: "not json").ask("calculate this")
     assert response.ok is False

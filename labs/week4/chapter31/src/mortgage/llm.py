@@ -44,12 +44,13 @@ class AdapterResponse:
 _CURRENCY = re.compile(r"\$\s*([\d,]+(?:\.\d+)?)")
 _PERCENT = re.compile(r"(\d+(?:\.\d+)?)\s*%")
 _YEARS = re.compile(r"(\d+(?:\.\d+)?)\s*-?\s*(?:years?|yr)")
-_MONTHLY_PAYMENT = re.compile(r"\$\s*([\d,]+(?:\.\d+)?)(?=\s*(?:per\s+month|a\s+month|monthly))", re.IGNORECASE)
+_MONTHLY_PAYMENT = re.compile(r"\$\s*([\d,]+(?:\.\d+)?)(?=\s*(?:per\s+month|a\s+month|each\s+month|monthly))", re.IGNORECASE)
 _PAYMENT_COUNT = re.compile(r"(\d[\d,]*)\s+payments?", re.IGNORECASE)
+_MONTHLY_RATE = re.compile(r"(?:monthly rate|monthly interest rate)(?:\s+of|\s+is)?\s*([0-9]*\.?[0-9]+)", re.IGNORECASE)
 
 
 def _unsupported_scope(text: str) -> bool:
-    return any(term in text.lower() for term in ("tax", "insurance", "hoa", "adjustable-rate", "lender quote"))
+    return any(term in text.lower() for term in ("tax", "insurance", "hoa", "adjustable-rate", "lender quote", "lender-specific"))
 
 
 def _normalize_model_json(response: str) -> str:
@@ -72,6 +73,8 @@ def _decimal(match: re.Match[str]) -> Decimal:
 def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, Any]:
     """Map common model aliases and enforce the missing field implied by the question."""
     canonical = dict(data)
+    user_lower = user_text.lower()
+    zero_interest = any(term in user_lower for term in ("zero interest", "zero-interest", "no interest", "interest-free"))
     if canonical.get("annual_rate") is not None:
         canonical["periodic_rate"] = Decimal(str(canonical["annual_rate"])) / Decimal(12)
     if canonical.get("principal") is None and canonical.get("loan_amount") is not None:
@@ -88,13 +91,16 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
         except (ArithmeticError, TypeError, ValueError, InvalidOperation) as exc:
             raise ValueError(f"MODEL_ERROR: invalid loan term: {exc}") from exc
 
-    user_lower = user_text.lower()
     user_amounts = [_decimal(match) for match in _CURRENCY.finditer(user_text)]
-    user_rates = [_decimal(match) / Decimal(100) for match in _PERCENT.finditer(user_text)]
+    user_rates = [
+        _decimal(match) / Decimal(100)
+        for match in _PERCENT.finditer(user_text)
+        if not re.match(r"\s*down", user_text[match.end():], re.IGNORECASE)
+    ]
     user_years = [_decimal(match) for match in _YEARS.finditer(user_text)]
     user_payment_counts = [Decimal(match.group(1).replace(",", "")) for match in _PAYMENT_COUNT.finditer(user_text)]
+    user_monthly_rates = [Decimal(match.group(1)) for match in _MONTHLY_RATE.finditer(user_text)]
     user_monthly_payments = [_decimal(match) for match in _MONTHLY_PAYMENT.finditer(user_text)]
-    zero_interest = any(term in user_lower for term in ("zero interest", "zero-interest", "no interest", "interest-free"))
     if zero_interest and canonical.get("periodic_rate") is None:
         canonical["periodic_rate"] = "0"
     if user_payment_counts and canonical.get("payments") is None:
@@ -102,12 +108,19 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
             canonical["payments"] = int(user_payment_counts[0])
         except (ArithmeticError, TypeError, ValueError) as exc:
             raise ValueError("MODEL_ERROR: payment-count conversion failed") from exc
-    if user_amounts and canonical.get("principal") is None:
+    down_match = re.search(r"(\d+(?:\.\d+)?)\s*%\s*down", user_lower)
+    if down_match and user_amounts:
+        price = user_amounts[0]
+        down = Decimal(down_match.group(1)) / Decimal(100)
+        canonical["principal"] = str(price * (Decimal(1) - down))
+    elif user_amounts and canonical.get("principal") is None:
         canonical["principal"] = str(user_amounts[0])
     monthly_rate_wording = any(marker in user_lower for marker in ("monthly rate", "monthly interest", "interest rate per month", "rate per month"))
     annual_rate_wording = any(marker in user_lower for marker in ("a year", "annual", "per annum"))
     if user_rates and (annual_rate_wording or ("interest rate" in user_lower and not monthly_rate_wording) or not monthly_rate_wording):
         canonical["periodic_rate"] = str(user_rates[0] / Decimal(12))
+    if user_monthly_rates:
+        canonical["periodic_rate"] = str(user_monthly_rates[0])
     if user_years and canonical.get("payments") is None:
         monthly_term = user_years[0] * Decimal(12)
         if monthly_term != monthly_term.to_integral_value():
@@ -129,6 +142,7 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
     rate_intent = (
         ("interest rate" in text and ("what" in text or "yearly" in text or "annual" in text))
         or "annual rate" in text
+        or "yearly rate" in text
         or "what rate" in text
         or "effectively" in text
     )
@@ -157,8 +171,12 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
             canonical["payment"] = str(user_monthly_payments[0])
         elif len(user_amounts) >= 2:
             canonical["payment"] = str(user_amounts[-1])
-    elif ("how long" in text or "how many years" in text or "pay off" in text) and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None:
+    elif ("how long" in text or "how many years" in text or "how many months" in text or "pay off" in text) and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None:
         canonical["payments"] = None
+        if user_monthly_payments:
+            canonical["payment"] = str(user_monthly_payments[0])
+        elif len(user_amounts) >= 2:
+            canonical["payment"] = str(user_amounts[-1])
     elif "payment" in text and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None and canonical.get("payments") is not None:
         canonical["payment"] = None
 
@@ -185,7 +203,7 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
     ):
         canonical["clarification"] = None
     if (
-        ("how long" in text or "how many years" in text or "pay off" in text)
+        ("how long" in text or "how many years" in text or "how many months" in text or "pay off" in text)
         and canonical.get("principal") is not None
         and canonical.get("periodic_rate") is not None
         and canonical.get("payment") is not None
@@ -213,8 +231,9 @@ class MockLLMAdapter:
         rates = [_decimal(match) / Decimal(100) for match in _PERCENT.finditer(user_text)]
         years = [_decimal(match) for match in _YEARS.finditer(user_text)]
         rate_intent = "what rate" in text or "interest rate" in text or "effectively" in text
-        term_intent = "how long" in text or "how many years" in text or "pay off" in text
-        if (not rates and not rate_intent) or (not years and not term_intent):
+        term_intent = "how long" in text or "how many years" in text or "how many months" in text or "pay off" in text
+        zero_interest = any(term in text for term in ("zero interest", "zero-interest", "no interest", "interest-free"))
+        if (not rates and not rate_intent and not zero_interest) or (not years and not term_intent):
             missing = []
             if not rates and not rate_intent:
                 missing.append("interest rate")
@@ -418,17 +437,28 @@ class OllamaAdapter:
                 )
                 for item in (data.get("evidence") or [])
             )
-            if clarification:
-                return Interpretation(None, str(clarification), assumptions, evidence)
             def value(name: str) -> Decimal | None:
                 item = data.get(name)
                 if item is None or str(item).strip().lower() in {"null", "none", ""}:
                     return None
                 return Decimal(str(item))
-            payments = data.get("payments")
-            request = CalculationRequest(
-                value("principal"), value("periodic_rate"), int(payments) if payments is not None else None, value("payment")
-            )
+            principal = value("principal")
+            periodic_rate = value("periodic_rate")
+            payment = value("payment")
+            raw_payments = data.get("payments")
+            if raw_payments is None or str(raw_payments).strip().lower() in {"null", "none", ""}:
+                payments = None
+            else:
+                try:
+                    payments = int(raw_payments)
+                except (ArithmeticError, TypeError, ValueError) as exc:
+                    raise ValueError("MODEL_ERROR: payments must be an integer") from exc
+            missing_count = sum(value is None for value in (principal, periodic_rate, payments, payment))
+            if clarification and missing_count == 1:
+                return Interpretation(None, str(clarification), assumptions, evidence)
+            if missing_count != 1:
+                return Interpretation(None, "Please provide exactly three mortgage quantities.", assumptions, evidence)
+            request = CalculationRequest(principal, periodic_rate, payments, payment)
             return Interpretation(request, None, assumptions, evidence)
         except (KeyError, TypeError, ValueError, InvalidOperation, json.JSONDecodeError) as exc:
             raise ValueError(f"MODEL_ERROR: invalid structured interpretation: {exc}") from exc
