@@ -6,7 +6,7 @@ description: Author a Level-3 (implementation-grade) SPEC.md for a labs/weekNN/c
 # spec-writing
 
 Write a `SPEC.md` for a `labs/weekNN/chapterNN/` lab exactly as the known-good prior art
-(chapter1–chapter4) does, and no longer — every part below is observable, executable, and
+(chapter1–chapter4) does — every part below is observable, executable, and
 threaded to the `spec-review` pass.
 
 ## When to use
@@ -51,7 +51,7 @@ disclaimer where applicable |
 | -- | --------- |
 | **R-01** | Observable behavior |
 
-Requirements are **observable-behavior**-form, numbered R-01..R-NN. Map each to a curriculum §.
+Requirements are **observable-behavior**-form, numbered R-01..R-NN. Map each to a curriculum §. At least one requirement MUST cover the universal verbosity contract in §5.3, including quiet defaults, CLI `INFO`/`DEBUG`, GUI `Off`/`INFO`/`DEBUG`, and stdout/stderr separation.
 
 ## 3. Behavior and state model
 
@@ -71,9 +71,36 @@ module/gated-list; note the in-scope inversions (`(F-OOO)`. Never paste the whol
 ### 5.1 CLI (`<cmd>`), primary surface
 ### 5.2 GUI, optional (`<cmd>-gui`)
 
+### 5.3 Universal verbosity and diagnostics contract (mandatory)
+
+Every project specification MUST define the same opt-in diagnostics behavior for both its CLI
+and GUI, even when the GUI itself is optional:
+
+- **Quiet by default:** omitted verbosity produces no diagnostic logs in normal user-facing output.
+- **CLI syntax:** `--verbose` is accepted with no value and is equivalent to `--verbose INFO`;
+  `--verbose INFO` and `--verbose DEBUG` MUST also be accepted. Invalid verbosity values are
+  usage errors (exit `2`).
+- **CLI INFO:** metadata only — command/mode, component/model, phase, timing, payload sizes,
+  normalized-input summary, and status/error classification. INFO MUST NOT emit raw prompts,
+  raw model responses, secrets, or full user payloads.
+- **CLI DEBUG:** includes INFO metadata plus raw model prompts and raw model responses for
+  model-backed operations. DEBUG raw content MUST be clearly labeled and MUST be written to
+  stderr; normal result output on stdout MUST remain unchanged.
+- **GUI control:** provide a verbosity selector with exactly `Off`, `INFO`, and `DEBUG`,
+  defaulting to `Off`. INFO shows metadata; DEBUG additionally shows raw model prompts/responses
+  in a dedicated diagnostics view/label. GUI diagnostics MUST NOT replace the primary result.
+- The logging implementation MAY use any library, but the spec MUST name the selected logging
+  mechanism and MUST define sink/stream, privacy, level, and formatting behavior.
+- Allocate a requirement, contract, invariant, edge-case, and acceptance-test ID for this
+  contract and include all of them in the traceability matrix.
+
 CLI subcommand table columns: `Subcommand / Behavior / Exit` (usage errors exit `2`).
 
 ## 6. Invariants (must hold in every valid implementation)
+
+The invariant set MUST include a verbosity invariant: omitted verbosity is quiet; INFO excludes
+raw payloads; DEBUG is the only level that exposes raw model prompts/responses; and diagnostics
+cannot alter primary results.
 
 | ID | Invariant |
 | -- | --------- |
@@ -92,6 +119,13 @@ CLI subcommand table columns: `Subcommand / Behavior / Exit` (usage errors exit 
 | **E-01** | <input defect> | <deterministic outcome> |
 
 ## 9. Acceptance criteria, tests, and evals
+
+The acceptance suite MUST include dedicated verbosity tests for:
+
+- CLI bare `--verbose`, explicit `INFO`, explicit `DEBUG`, and invalid values;
+- INFO metadata-only behavior and stdout preservation;
+- DEBUG raw model-prompt/response visibility on stderr;
+- GUI default `Off`, INFO metadata, and DEBUG raw-diagnostics behavior.
 
 ### 9.N {group}
 - **T-NN** description (ASCII text; KEEP `T-NN` unique — never collide ids)
@@ -181,3 +215,9 @@ commit `docs(chN): bump SPEC.md v0.1->v0.2 (P0/P1 …; P2 hygiene deferred)`. Or
 - **12-S template order** preserved (Intent→Actors→Requirements→Behavior→Contracts→
   Interfaces→Invariants→Constraints→Edges→Tests→Deps→Traceability).
 - **Traceability rows** mention literal module/behavior/test ids.
+- **Universal verbosity contract** is present in §5.3 and is traced to requirement, contract,
+  invariant, edge-case, and acceptance-test IDs.
+- CLI accepts `--verbose`, `--verbose INFO`, and `--verbose DEBUG`; omission is quiet.
+- GUI defines `Off`, `INFO`, and `DEBUG`; default is `Off`.
+- INFO excludes raw payloads; DEBUG is the only raw-payload level.
+- CLI diagnostics go to stderr and do not alter stdout; GUI diagnostics use a dedicated view.
