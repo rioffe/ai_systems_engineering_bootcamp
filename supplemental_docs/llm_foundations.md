@@ -1328,12 +1328,12 @@ Rather than choosing one model for everything, route requests.
 
 For example:
 
-```text
-                   +-- simple --> small/fast model
-                   |
-request -- router -+-- normal --> general model
-                   |
-                   +-- difficult --> reasoning model
+```mermaid
+flowchart TD
+  Req[request] --> R{router}
+  R -- simple      --> M[small/fast model]
+  R -- normal      --> G[general model]
+  R -- difficult   --> D[reasoning model]
 ```
 
 The router itself can be:
@@ -1829,29 +1829,15 @@ Instead, it assigns each problem to the layer best suited to solve it.
 
 For example:
 
-```text
-                    +---------------------+
-                    |      User           |
-                    +----------+----------+
-                               |
-                               v
-                    +---------------------+
-                    | Application Logic   |
-                    +----------+----------+
-                               |
-                 +-------------+--------------+
-                 |             |              |
-                 v             v              v
-             Retrieval       Tools        LLM
-                 |             |              |
-                 v             v              v
-             Database        APIs       Generation
-                 |             |              |
-                 +-------------+--------------+
-                               v
-                    +---------------------+
-                    | Validation / Policy |
-                    +---------------------+
+```mermaid
+flowchart TD
+  U[User] --> AL[Application Logic]
+  AL --> R[Retrieval] --> D[Database]
+  AL --> T[Tools]      --> A[APIs]
+  AL --> L[LLM]        --> G[Generation]
+  D --> V[Validation / Policy]
+  A --> V
+  G --> V
 ```
 
 The LLM supplies what it is uniquely good at:
