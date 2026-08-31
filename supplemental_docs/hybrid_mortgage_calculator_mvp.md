@@ -12,10 +12,10 @@ The application combines a conventional mortgage calculator with a natural-langu
 
 At its core, the calculator behaves like a regular financial calculator. Given any three of the following four quantities:
 
-1. **Principal** — \(P\)
-2. **Periodic interest rate** — \(r\)
-3. **Total number of payments** — \(n\)
-4. **Fixed periodic payment** — \(M\)
+1. **Principal** — $P$
+2. **Periodic interest rate** — $r$
+3. **Total number of payments** — $n$
+4. **Fixed periodic payment** — $M$
 
 the system calculates the fourth.
 
@@ -28,10 +28,10 @@ $$
 
 where:
 
-* \(P\) is the initial principal
-* \(r\) is the monthly interest rate expressed as a decimal
-* \(n\) is the total number of monthly payments
-* \(M\) is the fixed monthly payment
+* $P$ is the initial principal
+* $r$ is the monthly interest rate expressed as a decimal
+* $n$ is the total number of monthly payments
+* $M$ is the fixed monthly payment
 
 The application also accepts natural-language questions such as:
 
@@ -150,10 +150,10 @@ The four primary variables are:
 
 | Variable              | Symbol |   Example |
 | --------------------- | -----: | --------: |
-| Principal             |  \(P\) |  $500,000 |
-| Monthly interest rate |  \(r\) |     0.005 |
-| Number of payments    |  \(n\) |       360 |
-| Monthly payment       |  \(M\) | $3,160.34 |
+| Principal             |  $P$ |  $500,000 |
+| Monthly interest rate |  $r$ |     0.005 |
+| Number of payments    |  $n$ |       360 |
+| Monthly payment       |  $M$ | $3,160.34 |
 
 The user supplies any three.
 
@@ -263,7 +263,7 @@ $$
 M > Pr
 $$
 
-because \(Pr\) is the interest charged during the first period.
+because $Pr$ is the interest charged during the first period.
 
 If:
 
@@ -295,9 +295,9 @@ $$
 P,\ M,\ n
 $$
 
-calculate \(r\).
+calculate $r$.
 
-Unlike the other three calculations, there is generally no simple closed-form solution for \(r\).
+Unlike the other three calculations, there is generally no simple closed-form solution for $r$.
 
 The application therefore solves:
 
@@ -618,7 +618,7 @@ annual rate = 0.065
 n = 360
 ```
 
-The tool calculates \(M\).
+The tool calculates $M$.
 
 The response might be:
 
@@ -640,7 +640,7 @@ annual rate = 0.06
 n = 360
 ```
 
-The missing quantity is \(P\).
+The missing quantity is $P$.
 
 The tool calculates it.
 
@@ -706,7 +706,7 @@ $$
 I_t = B_{t-1}r
 $$
 
-where \(I_t\) is the interest portion and \(B_{t-1}\) is the previous balance.
+where $I_t$ is the interest portion and $B_{t-1}$ is the previous balance.
 
 The principal portion is:
 
@@ -888,7 +888,7 @@ M
 solve for r
 ```
 
-should return approximately the original \(r\).
+should return approximately the original $r$.
 
 These tests validate the relationships between the four inverse calculations rather than merely testing a collection of fixed examples.
 
