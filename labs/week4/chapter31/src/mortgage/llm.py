@@ -45,6 +45,11 @@ _CURRENCY = re.compile(r"\$\s*([\d,]+(?:\.\d+)?)")
 _PERCENT = re.compile(r"(\d+(?:\.\d+)?)\s*%")
 _YEARS = re.compile(r"(\d+(?:\.\d+)?)\s*-?\s*(?:years?|yr)")
 _MONTHLY_PAYMENT = re.compile(r"\$\s*([\d,]+(?:\.\d+)?)(?=\s*(?:per\s+month|a\s+month|monthly))", re.IGNORECASE)
+_PAYMENT_COUNT = re.compile(r"(\d[\d,]*)\s+payments?", re.IGNORECASE)
+
+
+def _unsupported_scope(text: str) -> bool:
+    return any(term in text.lower() for term in ("tax", "insurance", "hoa", "adjustable-rate", "lender quote"))
 
 
 def _normalize_model_json(response: str) -> str:
@@ -87,7 +92,16 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
     user_amounts = [_decimal(match) for match in _CURRENCY.finditer(user_text)]
     user_rates = [_decimal(match) / Decimal(100) for match in _PERCENT.finditer(user_text)]
     user_years = [_decimal(match) for match in _YEARS.finditer(user_text)]
+    user_payment_counts = [Decimal(match.group(1).replace(",", "")) for match in _PAYMENT_COUNT.finditer(user_text)]
     user_monthly_payments = [_decimal(match) for match in _MONTHLY_PAYMENT.finditer(user_text)]
+    zero_interest = any(term in user_lower for term in ("zero interest", "zero-interest", "no interest", "interest-free"))
+    if zero_interest and canonical.get("periodic_rate") is None:
+        canonical["periodic_rate"] = "0"
+    if user_payment_counts and canonical.get("payments") is None:
+        try:
+            canonical["payments"] = int(user_payment_counts[0])
+        except (ArithmeticError, TypeError, ValueError) as exc:
+            raise ValueError("MODEL_ERROR: payment-count conversion failed") from exc
     if user_amounts and canonical.get("principal") is None:
         canonical["principal"] = str(user_amounts[0])
     monthly_rate_wording = any(marker in user_lower for marker in ("monthly rate", "monthly interest", "interest rate per month", "rate per month"))
@@ -114,13 +128,17 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
     text = user_text.lower()
     rate_intent = (
         ("interest rate" in text and ("what" in text or "yearly" in text or "annual" in text))
+        or "annual rate" in text
         or "what rate" in text
         or "effectively" in text
     )
+    principal_intent = "loan amount" in text or "how much can i borrow" in text or "what principal" in text
     if rate_intent and canonical.get("principal") is not None:
         canonical["periodic_rate"] = None
         if user_monthly_payments:
             canonical["payment"] = str(user_monthly_payments[0])
+        elif len(user_amounts) >= 2:
+            canonical["payment"] = str(user_amounts[-1])
         if user_years:
             monthly_term = user_years[0] * Decimal(12)
             if monthly_term != monthly_term.to_integral_value():
@@ -133,6 +151,12 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
         canonical["principal"] = None
         if user_monthly_payments:
             canonical["payment"] = str(user_monthly_payments[0])
+    elif principal_intent and canonical.get("periodic_rate") is not None and canonical.get("payments") is not None:
+        canonical["principal"] = None
+        if user_monthly_payments:
+            canonical["payment"] = str(user_monthly_payments[0])
+        elif len(user_amounts) >= 2:
+            canonical["payment"] = str(user_amounts[-1])
     elif ("how long" in text or "how many years" in text or "pay off" in text) and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None:
         canonical["payments"] = None
     elif "payment" in text and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None and canonical.get("payments") is not None:
@@ -182,7 +206,7 @@ class MockLLMAdapter:
 
     def interpret(self, user_text: str) -> Interpretation:
         text = user_text.lower()
-        if any(term in text for term in ("tax", "insurance", "hoa", "adjustable-rate", "lender quote")):
+        if _unsupported_scope(text):
             return Interpretation(None, "This calculator supports principal and interest only.", (), ())
 
         amounts = [_decimal(match) for match in _CURRENCY.finditer(user_text)]
@@ -456,6 +480,14 @@ class OllamaAdapter:
         return response
 
     def ask(self, user_text: str) -> AdapterResponse:
+        if _unsupported_scope(user_text):
+            interpretation = Interpretation(None, "This calculator supports principal and interest only.", (), ())
+            return AdapterResponse(
+                False,
+                None,
+                {"code": "UNSUPPORTED_SCOPE", "message": interpretation.clarification},
+                interpretation,
+            )
         try:
             interpretation = self.interpret(user_text)
             if interpretation.clarification:

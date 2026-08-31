@@ -390,6 +390,58 @@ def test_ollama_adapter_routes_term_request_to_payment_too_low_validation():
     assert any("compounded monthly" in assumption for assumption in response.interpretation.assumptions)
 
 
+def test_ollama_adapter_recovers_zero_interest_payment_request():
+    response_text = json.dumps({
+        "principal": None, "annual_rate": None, "payments": None, "payment": None,
+        "assumptions": None, "clarification": "No interest rate provided.", "evidence": [],
+    })
+    adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: response_text)
+    response = adapter.ask("What is the payment on a $120,000 zero-interest loan for 10 years?")
+    assert response.ok is True
+    assert response.result["payment"] == "1000"
+    assert response.result["payments"] == 120
+
+
+def test_ollama_adapter_recovers_rate_request_without_model_rate_or_term():
+    response_text = json.dumps({
+        "principal": "120000", "annual_rate": None, "payments": None, "payment": None,
+        "assumptions": None, "clarification": "The rate is missing.", "evidence": [],
+    })
+    adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: response_text)
+    response = adapter.ask("What interest rate would make a $120,000 loan paid off in 120 payments at $1,000 each?")
+    assert response.ok is True
+    assert response.result["payments"] == 120
+    assert response.result["payment"] == "1000"
+
+
+def test_ollama_adapter_recovers_annual_rate_for_monthly_payment_phrase():
+    response_text = json.dumps({
+        "principal": "200000", "annual_rate": None, "payments": "20", "payment": None,
+        "assumptions": None, "clarification": "The annual rate is missing.", "evidence": [],
+    })
+    adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: response_text)
+    response = adapter.ask("What annual rate corresponds to $1,500 monthly payments on a $200,000 20-year loan?")
+    assert response.ok is True
+    assert response.result["payments"] == 240
+    assert response.result["payment"] == "1500"
+
+
+def test_ollama_adapter_classifies_unsupported_scope_before_model():
+    called = False
+
+    def fake_chat(prompt):
+        nonlocal called
+        called = True
+        return "{}"
+
+    response = OllamaAdapter(model="phi4-mini:latest", chat_fn=fake_chat).ask(
+        "What will property taxes and homeowners insurance add?"
+    )
+    assert response.ok is False
+    assert response.error["code"] == "UNSUPPORTED_SCOPE"
+    assert called is False
+
+
 def test_ollama_adapter_converts_malformed_model_output_to_model_error():
     response = OllamaAdapter(model="llama3.2", chat_fn=lambda _: "not json").ask("calculate this")
     assert response.ok is False
