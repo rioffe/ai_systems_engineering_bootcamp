@@ -91,7 +91,18 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
         except (ArithmeticError, TypeError, ValueError, InvalidOperation) as exc:
             raise ValueError(f"MODEL_ERROR: invalid loan term: {exc}") from exc
 
-    user_amounts = [_decimal(match) for match in _CURRENCY.finditer(user_text)]
+    amount_matches = list(_CURRENCY.finditer(user_text))
+    user_amounts = [_decimal(match) for match in amount_matches]
+    principal_amounts = [
+        _decimal(match)
+        for match in amount_matches
+        if re.search(r"(?:loan|principal|mortgage|borrow|owe)", user_text[max(0, match.start() - 18):match.end() + 35], re.IGNORECASE)
+    ]
+    payment_amounts = [
+        _decimal(match)
+        for match in amount_matches
+        if re.search(r"(?:payment|pay|monthly|per\s+month|a\s+month|each\s+month)", user_text[max(0, match.start() - 18):match.end() + 35], re.IGNORECASE)
+    ]
     user_rates = [
         _decimal(match) / Decimal(100)
         for match in _PERCENT.finditer(user_text)
@@ -113,6 +124,8 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
         price = user_amounts[0]
         down = Decimal(down_match.group(1)) / Decimal(100)
         canonical["principal"] = str(price * (Decimal(1) - down))
+    elif principal_amounts and canonical.get("principal") is None:
+        canonical["principal"] = str(principal_amounts[0])
     elif user_amounts and canonical.get("principal") is None:
         canonical["principal"] = str(user_amounts[0])
     monthly_rate_wording = any(marker in user_lower for marker in ("monthly rate", "monthly interest", "interest rate per month", "rate per month"))
@@ -152,6 +165,8 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
         canonical["periodic_rate"] = None
         if user_monthly_payments:
             canonical["payment"] = str(user_monthly_payments[0])
+        elif payment_amounts:
+            canonical["payment"] = str(payment_amounts[-1])
         elif len(user_amounts) >= 2:
             canonical["payment"] = str(user_amounts[-1])
         if user_years:
@@ -176,6 +191,8 @@ def _canonicalize_model_data(data: dict[str, Any], user_text: str) -> dict[str, 
         canonical["payments"] = None
         if user_monthly_payments:
             canonical["payment"] = str(user_monthly_payments[0])
+        elif payment_amounts:
+            canonical["payment"] = str(payment_amounts[-1])
         elif len(user_amounts) >= 2:
             canonical["payment"] = str(user_amounts[-1])
     elif payment_intent and canonical.get("principal") is not None and canonical.get("periodic_rate") is not None and canonical.get("payments") is not None:

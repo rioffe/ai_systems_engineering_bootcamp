@@ -488,6 +488,15 @@ def test_ollama_adapter_clears_principal_intent_clarification_after_recovery():
     assert Decimal(response.result["payment"]) == Decimal("2000")
 
 
+def test_ollama_adapter_uses_loan_amount_context_for_rate_request():
+    adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: "{}")
+    response = adapter.ask("What annual rate corresponds to $1,500 monthly payments on a $200,000 20-year loan?")
+    assert response.ok is True
+    assert Decimal(response.result["principal"]) == Decimal("200000")
+    assert response.result["payments"] == 240
+    assert Decimal(response.result["payment"]) == Decimal("1500")
+
+
 def test_ollama_adapter_recognizes_zero_interest_month_term():
     adapter = OllamaAdapter(model="phi4-mini:latest", chat_fn=lambda _: "{}")
     interpretation = adapter.interpret("How many months to repay $12,000 with zero interest and $1,000 monthly payments?")
