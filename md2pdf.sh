@@ -153,12 +153,12 @@ sed -e 's/^[[:space:]]*\[[[:space:]]*$/$$\n/' \
 
 echo "Converting to PDF via pandoc (using xelatex) with ${TOC_FLAG[*]} ${MERMAID_FLAG[*]} ${GEOMETRY_FLAG[*]}..."
 
-if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" --pdf-engine=xelatex -o "$OUTPUT_FILE"; then
+if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" --pdf-engine=xelatex -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue ; then
   echo "Success! Created '$OUTPUT_FILE'."
 else
   # Fallback to default engine if xelatex fails
   echo "xelatex failed or not found. Retrying with default engine..."
-  if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" -o "$OUTPUT_FILE"; then
+  if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue ; then
     echo "Success! Created '$OUTPUT_FILE' (using default engine)."
   else
     echo "Error: Conversion failed."
