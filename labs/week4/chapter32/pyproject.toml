@@ -1,0 +1,36 @@
+[project]
+name = "synthgen"
+version = "0.1.0"
+description = "Deterministic-first synthetic dataset generator"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "loguru>=0.7,<1",
+    "pyyaml>=6,<7",
+    "hybrid-mortgage-calculator",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9", "hypothesis>=6.100,<7"]
+gui = ["PyQt5>=5.15,<6", "pytest-qt>=4.4,<5"]
+
+[project.scripts]
+synthgen = "synthgen.cli:main"
+synthgen-gui = "synthgen.ui:run_gui"
+
+[tool.uv.sources]
+hybrid-mortgage-calculator = { path = "../chapter31" }
+
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/synthgen"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.pyright]
+include = ["src", "tests"]
+extraPaths = ["src", "../chapter31/src"]

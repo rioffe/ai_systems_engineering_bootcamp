@@ -1,0 +1,1 @@
+{"type":"object","required":["case_id","category","question","expected","metadata"],"properties":{"case_id":{"type":"string"},"category":{"type":"string"},"question":{"type":"string","minLength":1},"expected":{"type":"object","required":["outcome"]},"metadata":{"type":"object"}},"additionalProperties":false}

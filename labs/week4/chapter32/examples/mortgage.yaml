@@ -1,0 +1,78 @@
+dataset:
+  name: mortgage_questions
+  domain: mortgage
+  size: 30
+  seed: 42
+  max_attempts: 300
+  output: evals/generated.jsonl
+  report: evals/report.json
+  manifest: evals/manifest.json
+schema:
+  fields:
+    - { name: question, type: string, required: true, nullable: false }
+    - {
+        name: intent,
+        type: enum,
+        values: [payment, principal, term, rate],
+        required: true,
+        nullable: false,
+      }
+    - {
+        name: principal,
+        type: decimal,
+        required: false,
+        nullable: true,
+        minimum: 1,
+      }
+    - {
+        name: annual_rate,
+        type: decimal,
+        required: false,
+        nullable: true,
+        minimum: 0,
+      }
+    - {
+        name: term_years,
+        type: decimal,
+        required: false,
+        nullable: true,
+        minimum: 1,
+      }
+    - {
+        name: payment,
+        type: decimal,
+        required: false,
+        nullable: true,
+        minimum: 0,
+      }
+    - {
+        name: expected_outcome,
+        type: enum,
+        values: [calculated, clarification, unsupported_scope, payment_too_low],
+        required: true,
+        nullable: false,
+      }
+categories:
+  payment:
+    weight: 0.25
+    principal: { distribution: values, values: [100000, 250000, 500000] }
+    annual_rate: { distribution: values, values: [3.5, 5.0, 6.5] }
+    term_years: { distribution: values, values: [15, 30] }
+  principal:
+    weight: 0.25
+    payment: { distribution: values, values: [1500, 2500, 3000] }
+    annual_rate: { distribution: values, values: [3.5, 5.0, 6.5] }
+    term_years: { distribution: values, values: [15, 30] }
+  term:
+    weight: 0.25
+    principal: { distribution: values, values: [100000, 250000, 500000] }
+    annual_rate: { distribution: values, values: [3.5, 5.0, 6.5] }
+    payment: { distribution: values, values: [1000, 2000, 3000] }
+  rate:
+    weight: 0.25
+    principal: { distribution: values, values: [100000, 250000, 500000] }
+    payment: { distribution: values, values: [1000, 2000, 3000] }
+    term_years: { distribution: values, values: [15, 30] }
+realization:
+  method: template
+  max_regenerations: 3
