@@ -128,7 +128,9 @@ The acceptance suite MUST include dedicated verbosity tests for:
 - GUI default `Off`, INFO metadata, and DEBUG raw-diagnostics behavior.
 
 ### 9.N {group}
-- **T-NN** description (ASCII text; KEEP `T-NN` unique — never collide ids)
+| ID | Constraint |
+| -- | ---------- |
+| **T-NN** | description (ASCII text; KEEP `T-NN` unique — never collide ids) |
 
 ## 10. Dependencies and environment
 
@@ -136,7 +138,7 @@ The acceptance suite MUST include dedicated verbosity tests for:
 
 ## 11. Traceability matrix (id → where realized)
 
-ASCII text block — `ID --> module (behavior) --> test` — one row per R/C/I/E/K/T id from above.
+Block `- ID --> module (behavior) --> test` — one row per R/C/I/E/K/T id from above.
 ```
 
 ## The ID taxonomy (fixed alphabet)
