@@ -674,32 +674,32 @@ uv run rag-gui                  # optional GUI over the same pipeline (Ollama if
 
 ## 11. Traceability matrix (id → where realized)
 
-```
-§15 core / R-01     --> pipeline.py (run_case/run_dataset)      --> T-01, §9.5
-R-02 / I-002        --> C-02 BM25Retriever, O-1b tie-break      --> T-04
-R-03 / I-004/006    --> C-03 build_context + est_tokens          --> T-06, T-06a
-R-04 / I-003        --> pipeline.py grounding gate               --> T-08c, E-08
-R-05 / I-010        --> C-05 LLM.generate, schemas.py/answer.json --> T-08
-R-06 / I-010        --> C-06 Judge + schemas/verdict.json        --> T-08, T-08a
-R-07 / I-001/007    --> C-07 retrieval_pr, §18 worked example     --> T-05a, T-05b
-R-08                --> C-07 aggregate (answer_accuracy)          --> T-08b
-R-09 / I-007        --> C-07 aggregate (hallucination_rate)      --> T-08a, T-08b
-R-10                --> gen_corpus_and_questions (4 tiers)        --> T-01b, E-09
-R-11                --> cli.py eval (report + per-tier)           --> §9.5
-R-12 / I-008        --> RunMetrics.failure_stage + --judge off    --> T-10, E-10
-R-13                --> ui.py (offscreen, ch1 analog)             --> T-16
-R-14 / I-011        --> MockLLM+MockJudge + pyproject             --> T-14
-R-15 / I-002        --> seed threading (corpus + mock paths)      --> T-01, T-07, T-08a
-R-16                --> model.py list_models + fallback banner     --> E-11, E-12
-R-17 / I-009        --> no-LLM layers scan                        --> T-02
-I-013 / E-15        --> load_questions integrity check             --> T-15
-§3 context resource --> est_tokens O-2 + token budget             --> T-06, K-03
-§6/§7 pollution     --> distractor tier + E-03/E-09              --> T-01b, §9.5 smoke
-§18 "retrieve vs reason" --> --judge off ablation + failure_stage  --> R-12, T-10
-K-01 / I-011        --> offline full suite (no Ollama)            --> T-14
-K-04 / I-009        --> deterministic boundary network-free        --> T-02
-§12 deterministic-pipeline  --> BM25+context+metrics pure          --> I-002, T-04, T-06
-```
+| Spec id / requirement | Where realized (component / module) | Verified by (tests / evidence) |
+| -- | ----- | -- |
+| §15 core / R-01 | pipeline.py (run_case/run_dataset) | T-01, §9.5 |
+| R-02 / I-002 | C-02 BM25Retriever, O-1b tie-break | T-04 |
+| R-03 / I-004/006 | C-03 build_context + est_tokens | T-06, T-06a |
+| R-04 / I-003 | pipeline.py grounding gate | T-08c, E-08 |
+| R-05 / I-010 | C-05 LLM.generate, schemas.py/answer.json | T-08 |
+| R-06 / I-010 | C-06 Judge + schemas/verdict.json | T-08, T-08a |
+| R-07 / I-001/007 | C-07 retrieval_pr, §18 worked example | T-05a, T-05b |
+| R-08 | C-07 aggregate (answer_accuracy) | T-08b |
+| R-09 / I-007 | C-07 aggregate (hallucination_rate) | T-08a, T-08b |
+| R-10 | gen_corpus_and_questions (4 tiers) | T-01b, E-09 |
+| R-11 | cli.py eval (report + per-tier) | §9.5 |
+| R-12 / I-008 | RunMetrics.failure_stage + --judge off | T-10, E-10 |
+| R-13 | ui.py (offscreen, ch1 analog) | T-16 |
+| R-14 / I-011 | MockLLM+MockJudge + pyproject | T-14 |
+| R-15 / I-002 | seed threading (corpus + mock paths) | T-01, T-07, T-08a |
+| R-16 | model.py list_models + fallback banner | E-11, E-12 |
+| R-17 / I-009 | no-LLM layers scan | T-02 |
+| I-013 / E-15 | load_questions integrity check | T-15 |
+| §3 context resource | est_tokens O-2 + token budget | T-06, K-03 |
+| §6/§7 pollution | distractor tier + E-03/E-09 | T-01b, §9.5 smoke |
+| §18 "retrieve vs reason" | --judge off ablation + failure_stage | R-12, T-10 |
+| K-01 / I-011 | offline full suite (no Ollama) | T-14 |
+| K-04 / I-009 | deterministic boundary network-free | T-02 |
+| §12 deterministic-pipeline | BM25+context+metrics pure | I-002, T-04, T-06 |
 
 **Open questions / ambiguities flagged for the human (spec elicitation):**
 
