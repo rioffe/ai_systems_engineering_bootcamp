@@ -16,7 +16,12 @@ relative to its CWD).
 Options:
   --toc            Add a table of contents.
   --mermaid        Render ```mermaid diagrams (needs Chrome/Chromium).
-  --margin MARGIN  Set page margins on all sides (e.g. 0.5in, 1cm, 0.3in).
+   --margin MARGIN  Set page margins on all sides (e.g. 0.5in, 1cm, 0.3in).
+   --click          Make requirement-id mentions (R-/C-/I-/K-/E-/T-) into
+                    clickable PDF jump-links (resolved by section anchor; C-xx
+                    sub-headings jump exactly).  Implies --toc and runs xelatex a
+                    3rd pass so forward links + the TOC resolve.  Links are blue.
+                    Default (no --click) behaviour is unchanged.
   -h, --help       Show this help and exit.
 
 Environment variables (all optional; mermaid only):
@@ -31,6 +36,7 @@ Examples:
   md2pdf.sh chapter3.md                 # plain
   md2pdf.sh --toc chapter3.md           # with a table of contents
   md2pdf.sh --toc --mermaid chapter1.md # + mermaid diagrams (needs Chrome)
+  md2pdf.sh --toc --click chapter3.md        # clickable requirement-id links
 EOF
 }
 
@@ -38,6 +44,7 @@ TOC_FLAG=()
 MERMAID_FLAG=()
 GEOMETRY_FLAG=()
 MARGIN_HEADER_FILE=""
+CLICK=0
 
 while [[ $# -gt 0 ]]; do
   echo "Arg: $1"
@@ -65,7 +72,11 @@ while [[ $# -gt 0 ]]; do
     MARGIN_HEADER_FILE=$(mktemp /tmp/md2pdf_geometry_$$_XXXXXX)
     echo "\usepackage[margin=${MARGIN_VAL}]{geometry}" >"$MARGIN_HEADER_FILE"
     GEOMETRY_FLAG=(--include-in-header="$MARGIN_HEADER_FILE")
-    ;;
+     ;;
+   --click)
+    CLICK=1
+    shift
+     ;;
   *)
     INPUT_FILE="$1"
     shift
@@ -140,31 +151,82 @@ if [ "${#MERMAID_FLAG[@]}" -gt 0 ]; then
   fi
 fi
 
+SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)/scripts"      # CWD-independent repo /scripts
 OUTPUT_FILE="${INPUT_FILE%.md}.pdf"
 TEMP_FILE=$(mktemp /tmp/md2pdf.XXXXXX).md
+LINKED_FILE=""
+WORK_DIR=""
+
+# --click implies --toc: the clickable table of contents is the point of it.
+if [[ "$CLICK" -eq 1 ]]; then
+  TOC_FLAG=(--toc)
+fi
 
 echo "Processing '$INPUT_FILE'..."
 
-# Pre-process to convert [ ... ] math blocks to $$ ... $$
-# We use a more robust regex to handle potential whitespace
-sed -e 's/^[[:space:]]*\[[[:space:]]*$/$$\n/' \
-  -e 's/^[[:space:]]*\][[:space:]]*$/\n$$/' \
-  "$INPUT_FILE" >"$TEMP_FILE"
-
-echo "Converting to PDF via pandoc (using xelatex) with ${TOC_FLAG[*]} ${MERMAID_FLAG[*]} ${GEOMETRY_FLAG[*]}..."
-
-if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" --pdf-engine=xelatex -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue ; then
-  echo "Success! Created '$OUTPUT_FILE'."
-else
-  # Fallback to default engine if xelatex fails
-  echo "xelatex failed or not found. Retrying with default engine..."
-  if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue ; then
-    echo "Success! Created '$OUTPUT_FILE' (using default engine)."
-  else
-    echo "Error: Conversion failed."
-    rm -f "$TEMP_FILE" "$MARGIN_HEADER_FILE"
+# When --click, first rewrite requirement-id mentions into [ID](#anchor) links +
+# add anchors; leave code/Math/inline-code verbatim.  Default mode skips this, so
+# its behavior is unchanged.
+if [[ "$CLICK" -eq 1 ]]; then
+  echo "Clickable cross-links: generating jump-links + anchors..."
+  LINKED_FILE=$(mktemp /tmp/md2pdf.XXXXXX).md
+  if ! python3 "$SCRIPTS_DIR/xref_preprocess.py" "$INPUT_FILE" "$LINKED_FILE" 1>&2; then
+    echo "Error: cross-reference pre-processing failed." >&2
+    rm -f "$LINKED_FILE" "$MARGIN_HEADER_FILE"
     exit 1
   fi
 fi
 
-rm -f "$TEMP_FILE" "$MARGIN_HEADER_FILE"
+# Pre-process [ ... ] math blocks to $$ ... $$ (identical for both modes).
+SOURCE_MD="$INPUT_FILE"
+[[ -n "$LINKED_FILE" ]] && SOURCE_MD="$LINKED_FILE"
+sed -e 's/^[[:space:]]*\[[[:space:]]*$/$$\n/' \
+   -e 's/^[[:space:]]*\][[:space:]]*$/\n$$/' \
+   "$SOURCE_MD" >"$TEMP_FILE"
+
+if [[ "$CLICK" -eq 1 ]]; then
+    # Standalone .tex (so hyperref / anchors / TOC are emitted) + 3 xelatex passes
+    # so the forward links and the TOC resolve.  Blue links come from the -V ops.
+  WORK_DIR=$(mktemp -d /tmp/md2pdf.XXXXXX)
+  COLOR_OPS=(-V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue)
+  if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" \
+       "${COLOR_OPS[@]}" --to=latex -s -o "$WORK_DIR/doc.tex"; then
+          # 3 passes so forward refs + TOC resolve (each pass sees the prior .aux).
+    xelatex -interaction=nonstopmode -output-directory="$WORK_DIR" doc.tex >/dev/null 2>&1
+    xelatex -interaction=nonstopmode -output-directory="$WORK_DIR" doc.tex >/dev/null 2>&1
+    xelatex -interaction=nonstopmode -output-directory="$WORK_DIR" doc.tex >/dev/null 2>&1
+    if [[ -f "$WORK_DIR/doc.pdf" ]]; then
+      cp "$WORK_DIR/doc.pdf" "$OUTPUT_FILE"
+      echo "Success! Created '$OUTPUT_FILE' (clickable cross-references)."
+    else
+      echo "Error: xelatex did not produce a PDF." >&2
+      rm -f "$TEMP_FILE" "$LINKED_FILE" "$MARGIN_HEADER_FILE"
+      rm -rf "$WORK_DIR"
+      exit 1
+    fi
+  else
+    echo "Error: pandoc failed." >&2
+    rm -f "$TEMP_FILE" "$LINKED_FILE" "$MARGIN_HEADER_FILE"
+    rm -rf "$WORK_DIR"
+    exit 1
+  fi
+else
+  echo "Converting to PDF via pandoc (using xelatex) with ${TOC_FLAG[*]} ${MERMAID_FLAG[*]} ${GEOMETRY_FLAG[*]}..."
+
+  if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" --pdf-engine=xelatex -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue ; then
+    echo "Success! Created '$OUTPUT_FILE'."
+      # Fallback to default engine if xelatex fails
+  else
+    echo "xelatex failed or not found. Retrying with default engine..."
+    if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue ; then
+      echo "Success! Created '$OUTPUT_FILE' (using default engine)."
+    else
+      echo "Error: Conversion failed."
+      rm -f "$TEMP_FILE" "$MARGIN_HEADER_FILE"
+      exit 1
+    fi
+  fi
+fi
+
+rm -f "$TEMP_FILE" "$LINKED_FILE" "$MARGIN_HEADER_FILE"
+[[ -n "$WORK_DIR" ]] && rm -rf "$WORK_DIR"
