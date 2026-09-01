@@ -138,7 +138,9 @@ The acceptance suite MUST include dedicated verbosity tests for:
 
 ## 11. Traceability matrix (id → where realized)
 
-Block `- ID --> module (behavior) --> test` — one row per R/C/I/E/K/T id from above.
+| Spec id / requirement | Where realized (component / module) | Verified by (tests / evidence) |
+| -- | ----- | -- |
+Block `| ID | module (behavior) | test |` — one row per R/C/I/E/K/T id from above.
 ```
 
 ## The ID taxonomy (fixed alphabet)
