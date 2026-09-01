@@ -72,11 +72,11 @@ while [[ $# -gt 0 ]]; do
     MARGIN_HEADER_FILE=$(mktemp /tmp/md2pdf_geometry_$$_XXXXXX)
     echo "\usepackage[margin=${MARGIN_VAL}]{geometry}" >"$MARGIN_HEADER_FILE"
     GEOMETRY_FLAG=(--include-in-header="$MARGIN_HEADER_FILE")
-     ;;
-   --click)
+    ;;
+  --click)
     CLICK=1
     shift
-     ;;
+    ;;
   *)
     INPUT_FILE="$1"
     shift
@@ -151,7 +151,7 @@ if [ "${#MERMAID_FLAG[@]}" -gt 0 ]; then
   fi
 fi
 
-SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)/scripts"      # CWD-independent repo /scripts
+SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)/scripts" # CWD-independent repo /scripts
 OUTPUT_FILE="${INPUT_FILE%.md}.pdf"
 TEMP_FILE=$(mktemp /tmp/md2pdf.XXXXXX).md
 LINKED_FILE=""
@@ -181,17 +181,17 @@ fi
 SOURCE_MD="$INPUT_FILE"
 [[ -n "$LINKED_FILE" ]] && SOURCE_MD="$LINKED_FILE"
 sed -e 's/^[[:space:]]*\[[[:space:]]*$/$$\n/' \
-   -e 's/^[[:space:]]*\][[:space:]]*$/\n$$/' \
-   "$SOURCE_MD" >"$TEMP_FILE"
+  -e 's/^[[:space:]]*\][[:space:]]*$/\n$$/' \
+  "$SOURCE_MD" >"$TEMP_FILE"
 
 if [[ "$CLICK" -eq 1 ]]; then
-    # Standalone .tex (so hyperref / anchors / TOC are emitted) + 3 xelatex passes
-    # so the forward links and the TOC resolve.  Blue links come from the -V ops.
+  # Standalone .tex (so hyperref / anchors / TOC are emitted) + 3 xelatex passes
+  # so the forward links and the TOC resolve.  Blue links come from the -V ops.
   WORK_DIR=$(mktemp -d /tmp/md2pdf.XXXXXX)
   COLOR_OPS=(-V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue)
   if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" \
-       "${COLOR_OPS[@]}" --to=latex -s -o "$WORK_DIR/doc.tex"; then
-          # 3 passes so forward refs + TOC resolve (each pass sees the prior .aux).
+    "${COLOR_OPS[@]}" --to=latex -s -o "$WORK_DIR/doc.tex"; then
+    # 3 passes so forward refs + TOC resolve (each pass sees the prior .aux).
     xelatex -interaction=nonstopmode -output-directory="$WORK_DIR" doc.tex >/dev/null 2>&1
     xelatex -interaction=nonstopmode -output-directory="$WORK_DIR" doc.tex >/dev/null 2>&1
     xelatex -interaction=nonstopmode -output-directory="$WORK_DIR" doc.tex >/dev/null 2>&1
@@ -213,12 +213,12 @@ if [[ "$CLICK" -eq 1 ]]; then
 else
   echo "Converting to PDF via pandoc (using xelatex) with ${TOC_FLAG[*]} ${MERMAID_FLAG[*]} ${GEOMETRY_FLAG[*]}..."
 
-  if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" --pdf-engine=xelatex -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue ; then
+  if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" --pdf-engine=xelatex -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue; then
     echo "Success! Created '$OUTPUT_FILE'."
-      # Fallback to default engine if xelatex fails
+    # Fallback to default engine if xelatex fails
   else
     echo "xelatex failed or not found. Retrying with default engine..."
-    if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue ; then
+    if pandoc "$TEMP_FILE" "${TOC_FLAG[@]}" "${MERMAID_FLAG[@]}" "${GEOMETRY_FLAG[@]}" -o "$OUTPUT_FILE" -V colorlinks=true -V linkcolor=blue -V urlcolor=red -V toccolor=blue; then
       echo "Success! Created '$OUTPUT_FILE' (using default engine)."
     else
       echo "Error: Conversion failed."
