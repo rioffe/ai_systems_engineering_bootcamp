@@ -609,30 +609,28 @@ uv run model-playground       # launch GUI (Ollama if reachable, else mock model
 
 ## 11. Traceability matrix (id -> where realized)
 
-```
-R-01          --> C-02(Model), C-03(Registry)            --> T-02
-R-02          --> C-01(GenerationParams), C-08 controls     --> T-15
-R-03          --> C-06(token signal), C-07 panel          --> T-11
-R-04          --> C-04(RunMetrics)                       --> T-04
-R-05          --> C-01(Usage), I-001                      --> T-01
-R-06          --> C-03(cost_usd), I-003/006               --> T-03, T-05
-R-07          --> §5.1 grid, C-06 N workers               --> T-10, T-13
-R-08          --> C-04(ttft/tps), §3.4                    --> T-04
-R-09/10       --> C-05(parse,validate), I-009             --> T-08
-R-11          --> §8 E-03, C-05 retry                     --> T-08
-R-14          --> §10, pyproject, K-04                    --> T-02
-R-15          --> C-01(seed), MockModel                   --> T-07
-I-007 / §13   --> C-04 cost-per-task                      --> T-06
-I-010 / E-12  --> C-06(cancel), §3.2                       --> T-09
-I-011 / K-01  --> §3.3 worker threads                      --> T-11
-E-02 / K-02   --> §3.2 per-model terminal                  --> T-10
-R-05 / R-15    --> C-01(Usage: Ollama eval_count / prompt_eval_count), I-001/008/012 --> T-01, T-07
-R-16 / E-13    --> C-03b(list_models), C-03 discovery, §8  --> (smoke, E-13)
-R-17 / E-14    --> C-03b(chat 404 -> ERROR)                 --> T-10-style
-C-03b / I-002  --> OllamaClient (only provider-aware module) --> T-02
-C-03 / I-003   --> local default price 0.0                  --> T-05
-E-15           --> C-03b(NDJSON parse: keep partial + best-effort usage) --> (smoke)
-```
+- R-01          --> C-02(Model), C-03(Registry)            --> T-02
+- R-02          --> C-01(GenerationParams), C-08 controls     --> T-15
+- R-03          --> C-06(token signal), C-07 panel          --> T-11
+- R-04          --> C-04(RunMetrics)                       --> T-04
+- R-05          --> C-01(Usage), I-001                      --> T-01
+- R-06          --> C-03(cost_usd), I-003/006               --> T-03, T-05
+- R-07          --> §5.1 grid, C-06 N workers               --> T-10, T-13
+- R-08          --> C-04(ttft/tps), §3.4                    --> T-04
+- R-09/10       --> C-05(parse,validate), I-009             --> T-08
+- R-11          --> §8 E-03, C-05 retry                     --> T-08
+- R-14          --> §10, pyproject, K-04                    --> T-02
+- R-15          --> C-01(seed), MockModel                   --> T-07
+- I-007 / §13   --> C-04 cost-per-task                      --> T-06
+- I-010 / E-12  --> C-06(cancel), §3.2                       --> T-09
+- I-011 / K-01  --> §3.3 worker threads                      --> T-11
+- E-02 / K-02   --> §3.2 per-model terminal                  --> T-10
+- R-05 / R-15    --> C-01(Usage: Ollama eval_count / prompt_eval_count), I-001/008/012 --> T-01, T-07
+- R-16 / E-13    --> C-03b(list_models), C-03 discovery, §8  --> (smoke, E-13)
+- R-17 / E-14    --> C-03b(chat 404 -> ERROR)                 --> T-10-style
+- C-03b / I-002  --> OllamaClient (only provider-aware module) --> T-02
+- C-03 / I-003   --> local default price 0.0                  --> T-05
+- E-15           --> C-03b(NDJSON parse: keep partial + best-effort usage) --> (smoke)
 
 **Open questions / ambiguities flagged for the human (spec elicitation):**
 
