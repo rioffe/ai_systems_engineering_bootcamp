@@ -178,11 +178,22 @@ if [[ "$CLICK" -eq 1 ]]; then
 fi
 
 # Pre-process [ ... ] math blocks to $$ ... $$ (identical for both modes).
+# This is FENCE-AWARE: the [ / ] math-fence convention must not fire on a lone
+# '[' or ']' line that lives inside a fenced code block (e.g. 'pyproject.toml'
+# has 'authors = [ ... ]', and a bare ']' there used to become a stray '$$').
+# A line that is only '[ ' opens a math fence; only ']' closes it. We toggle a
+# state on any ``` / ~~~ fence and skip substitution inside code fence spans.
 SOURCE_MD="$INPUT_FILE"
 [[ -n "$LINKED_FILE" ]] && SOURCE_MD="$LINKED_FILE"
-sed -e 's/^[[:space:]]*\[[[:space:]]*$/$$\n/' \
-  -e 's/^[[:space:]]*\][[:space:]]*$/\n$$/' \
-  "$SOURCE_MD" >"$TEMP_FILE"
+awk '
+  BEGIN { fence = 0 }
+  /^[[:space:]]*(\x60\x60\x60|~~~)/ { fence = !fence; print; next }
+  !fence {
+    if ($0 ~ /^[[:space:]]*\[[[:space:]]*$/) { print "$$"; print ""; next }
+    if ($0 ~ /^[[:space:]]*\][[:space:]]*$/) { print ""; print "$$"; next }
+  }
+  { print }
+' "$SOURCE_MD" >"$TEMP_FILE"
 
 if [[ "$CLICK" -eq 1 ]]; then
   # Standalone .tex (so hyperref / anchors / TOC are emitted) + 3 xelatex passes
