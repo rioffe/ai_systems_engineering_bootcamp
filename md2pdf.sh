@@ -63,7 +63,7 @@ while [[ $# -gt 0 ]]; do
     ;;
   --margin)
     shift
-    if [[ $# -eq 0 ]]; then
+    if [[ $# -eq 0 || "$1" == -* ]]; then
       echo "Error: --margin requires a value (e.g. 0.5in, 1cm, 0.3in)." >&2
       exit 1
     fi
