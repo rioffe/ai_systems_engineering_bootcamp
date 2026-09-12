@@ -94,8 +94,20 @@ def make_anchor_for(c_sub, fam):
     return anchor_for
 
 
+STRIKE = re.compile(r"(~~.*?~~)")                            # ~~retired~~ span: never linked
+
+
 def linkify(line, anchors, anchor_for, skip_leading=False):
-    """Rewrite KNOWN-id tokens in `line` to [ID](#anchor)."""
+    """Rewrite KNOWN-id tokens in `line` to [ID](#anchor).
+
+    Tokens inside a ~~strikethrough~~ span are left alone: a struck-through id
+    is a RETIRED declaration, not a reference, and pandoc renders the span with
+    soul's \\st{}, which cannot contain a \\hyperref (xelatex: "Package soul
+    Error: Reconstruction failed")."""
+    if "~~" in line:
+        pieces = STRIKE.split(line)
+        return "".join(seg if i % 2 else linkify(seg, anchors, anchor_for, skip_leading and i == 0)
+                       for i, seg in enumerate(pieces))
     parts = TOKEN.split(line)
     if len(parts) == 1:
         return line
