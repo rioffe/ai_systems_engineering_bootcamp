@@ -104,8 +104,9 @@ def linkify(line, anchors, anchor_for, skip_leading=False):
     is a RETIRED declaration, not a reference, and pandoc renders the span with
     soul's \\st{}, which cannot contain a \\hyperref (xelatex: "Package soul
     Error: Reconstruction failed")."""
-    if "~~" in line:
-        pieces = STRIKE.split(line)
+    if "~~" in line and len(pieces := STRIKE.split(line)) > 1:
+        # len == 1 means no closed ~~span~~ on this line (e.g. a literal `~~~` fence
+        # marker); fall through, or the recursion below never terminates.
         return "".join(seg if i % 2 else linkify(seg, anchors, anchor_for, skip_leading and i == 0)
                        for i, seg in enumerate(pieces))
     parts = TOKEN.split(line)
